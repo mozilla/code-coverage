@@ -118,20 +118,27 @@ def main():
     parser.add_argument("branch", action="store", nargs='?', help="Branch on which jobs ran")
     parser.add_argument("commit", action="store", nargs='?', help="Commit hash for push")
     parser.add_argument("--grcov", action="store", nargs='?', default="grcov", help="Path to grcov")
+    parser.add_argument("--no-download", action="store_true", help="Use already downloaded coverage files")
+    parser.add_argument("--no-grcov", action="store_true", help="Use already generated grcov output (implies --no-download)")
     args = parser.parse_args()
 
-    if (args.branch is None and args.commit is not None) or (args.branch is not None and args.commit is None):
+    if args.no_grcov:
+        args.no_download = True
+
+    if (args.branch is None) != (args.commit is None) and not args.no_download:
         parser.print_help()
         return
 
-    if args.branch is None and args.commit is None:
-        task_id = get_last_task()
-    else:
-        task_id = get_task(args.branch, args.commit)
+    if not args.no_download:
+        if args.branch is None and args.commit is None:
+            task_id = get_last_task()
+        else:
+            task_id = get_task(args.branch, args.commit)
 
-    download_coverage_artifacts(task_id)
+            download_coverage_artifacts(task_id)
 
-    generate_info(args.grcov)
+    if not args.no_grcov:
+        generate_info(args.grcov)
 
     generate_report(os.path.abspath(args.src_dir))
 
