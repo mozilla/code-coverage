@@ -103,7 +103,7 @@ def generate_info(grcov_path):
         raise Exception("Error while running grcov:\n" + proc.stderr.read())
 
 
-def generate_report(src_dir, auto_use_gecko_dev, revision):
+def generate_report(src_dir):
     cwd = os.getcwd()
     os.chdir(src_dir)
     ret = subprocess.call(["genhtml", "-o", os.path.join(cwd, "report"), "--show-details", "--highlight", "--ignore-errors", "source", "--legend", os.path.join(cwd, "output.info"), "--prefix", src_dir])
