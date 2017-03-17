@@ -77,12 +77,6 @@ def download_coverage_artifacts(build_task_id):
                 download_artifact(test_task['status']['taskId'], artifact)
 
 
-def get_github_commit(mercurial_commit):
-    r = requests.get("https://api.pub.build.mozilla.org/mapper/gecko-dev/rev/hg/" + mercurial_commit)
-
-    return r.text.split(" ")[0]
-
-
 def generate_info(grcov_path):
     files = os.listdir("ccov-artifacts")
     ordered_files = []
@@ -97,33 +91,19 @@ def generate_info(grcov_path):
 
     fout = open("output.info", 'w')
     cmd = [grcov_path, '-z', '-t', 'lcov', '-s', '/home/worker/workspace/build/src/']
-    cmd.extend(ordered_files[:3])
+    cmd.extend(ordered_files)
     proc = subprocess.Popen(cmd, stdout=fout, stderr=subprocess.PIPE)
     i = 0
     while proc.poll() is None:
         print('Running grcov... ' + str(i))
         i += 1
-        time.sleep(1)
+        time.sleep(60)
 
     if proc.poll() != 0:
         raise Exception("Error while running grcov:\n" + proc.stderr.read())
 
 
 def generate_report(src_dir, auto_use_gecko_dev, revision):
-    if auto_use_gecko_dev:
-        if not os.path.isdir("gecko-dev"):
-            subprocess.call(["git", "clone", "https://github.com/mozilla/gecko-dev.git"])
-
-        os.chdir("gecko-dev")
-
-        subprocess.call(["git", "pull"])
-
-        git_commit = get_github_commit(revision)
-
-        subprocess.call(["git", "checkout", git_commit])
-
-        os.chdir("..")
-
     cwd = os.getcwd()
     os.chdir(src_dir)
     ret = subprocess.call(["genhtml", "-o", os.path.join(cwd, "report"), "--show-details", "--highlight", "--ignore-errors", "source", "--legend", os.path.join(cwd, "output.info"), "--prefix", src_dir])
@@ -131,21 +111,13 @@ def generate_report(src_dir, auto_use_gecko_dev, revision):
         raise Exception("Error while running genhtml.")
     os.chdir(cwd)
 
-    if auto_use_gecko_dev:
-        os.chdir("gecko-dev")
-        subprocess.call(["git", "checkout", "master"])
-        os.chdir("..")
-
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("src_dir", action="store", help="Path to the source directory")
     parser.add_argument("branch", action="store", nargs='?', help="Branch on which jobs ran")
     parser.add_argument("commit", action="store", nargs='?', help="Commit hash for push")
-    parser.add_argument("--grcov", action="store", nargs='?', default="grcov", help="path to grcov")
-    parser.add_argument('--gecko-dev', dest='gecko_dev', action='store_true')
-    parser.add_argument('--no-gecko-dev', dest='gecko_dev', action='store_false')
-    parser.set_defaults(gecko_dev=False)
+    parser.add_argument("--grcov", action="store", nargs='?', default="grcov", help="Path to grcov")
     args = parser.parse_args()
 
     if (args.branch is None and args.commit is not None) or (args.branch is not None and args.commit is None):
@@ -154,17 +126,14 @@ def main():
 
     if args.branch is None and args.commit is None:
         task_id = get_last_task()
-        task_data = get_task_details(task_id)
-        revision = task_data["payload"]["env"]["GECKO_HEAD_REV"]
     else:
         task_id = get_task(args.branch, args.commit)
-        revision = args.commit
 
     download_coverage_artifacts(task_id)
 
     generate_info(args.grcov)
 
-    generate_report(os.path.abspath(args.src_dir), args.gecko_dev, revision)
+    generate_report(os.path.abspath(args.src_dir))
 
 
 if __name__ == "__main__":
