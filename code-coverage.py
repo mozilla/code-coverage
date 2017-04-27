@@ -135,7 +135,7 @@ def main():
         else:
             task_id = get_task(args.branch, args.commit)
 
-            download_coverage_artifacts(task_id)
+        download_coverage_artifacts(task_id)
 
     if not args.no_grcov:
         generate_info(args.grcov)
