@@ -30,6 +30,12 @@ class Test(unittest.TestCase):
         tasks = codecoverage.get_tasks_in_group(task_data['taskGroupId'])
         self.assertIsInstance(tasks, list)
 
+        try:
+            os.mkdir('ccov-artifacts')
+        except OSError as e:
+            if e.errno != errno.EEXIST:
+                raise e
+
         codecoverage.download_artifact(task_id, chosen_artifact)
         self.assertTrue(os.path.exists('ccov-artifacts/%s_target.txt' % task_id))
 
