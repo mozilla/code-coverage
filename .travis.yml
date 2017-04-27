@@ -8,3 +8,4 @@ install:
 script:
   - flake8 .
   - python -m unittest discover tests
+cache: pip
