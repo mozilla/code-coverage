@@ -7,6 +7,7 @@ import os
 
 import codecoverage
 
+
 class Test(unittest.TestCase):
     def test(self):
         task_id = codecoverage.get_last_task()
@@ -35,4 +36,3 @@ class Test(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
-
