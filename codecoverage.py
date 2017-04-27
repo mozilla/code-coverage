@@ -132,10 +132,12 @@ def main():
         return
 
     if not args.no_download:
-        if args.branch is None and args.commit is None:
-            task_id = get_last_task()
-        else:
+        if args.branch and args.commit:
             task_id = get_task(args.branch, args.commit)
+        elif 'MH_BRANCH' in os.environ and 'GECKO_HEAD_REV' in os.environ:
+            task_id = get_task(os.environ['MH_BRANCH'], os.environ['GECKO_HEAD_REV'])
+        else:
+            task_id = get_last_task()
 
         download_coverage_artifacts(task_id)
 
