@@ -91,10 +91,15 @@ def generate_info(grcov_path):
         else:
             ordered_files.append("ccov-artifacts/" + fname)
 
+    # Assume we're on a one-click loaner.
+    mod_env = os.environ.copy()
+    if os.path.isdir('/home/worker/workspace/build/src/gcc/bin'):
+        mod_env['PATH'] = '/home/worker/workspace/build/src/gcc/bin:' + mod_env['PATH']
+
     fout = open("output.info", 'w')
     cmd = [grcov_path, '-z', '-t', 'lcov', '-s', '/home/worker/workspace/build/src/']
     cmd.extend(ordered_files)
-    proc = subprocess.Popen(cmd, stdout=fout, stderr=subprocess.PIPE)
+    proc = subprocess.Popen(cmd, stdout=fout, stderr=subprocess.PIPE, env=mod_env)
     i = 0
     while proc.poll() is None:
         print('Running grcov... ' + str(i))
