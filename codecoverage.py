@@ -58,9 +58,10 @@ def download_coverage_artifacts(build_task_id):
         pass
 
     try:
-        os.mkdir("ccov-artifacts")
-    except:
-        pass
+        os.mkdir('ccov-artifacts')
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise e
 
     task_data = get_task_details(build_task_id)
 
