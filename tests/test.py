@@ -50,7 +50,7 @@ class Test(unittest.TestCase):
             ('test-linux64-ccov/opt-mochitest-5', 'mochitest'),
         ]
         for c in cases:
-            self.assertEqual(c[0], c[1])
+            self.assertEqual(codecoverage.suite_name_from_task_name(c[0]), c[1])
 
 
 if __name__ == '__main__':
