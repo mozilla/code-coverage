@@ -4,7 +4,10 @@ python:
   - "3.5"
 install:
   - pip install -r test-requirements.txt
+  - mkdir -p symlinks
+  - git clone https://github.com/linux-test-project/lcov.git && cd lcov && make install DESTDIR=../symlinks && cd ..
 script:
+  - export PATH=$HOME/.local/bin:$PWD/symlinks:$PWD/symlinks/usr/local/bin:$PATH
   - flake8 .
   - python -m unittest discover tests
 cache: pip
