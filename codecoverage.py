@@ -179,7 +179,7 @@ def main():
     parser.add_argument("src_dir", action="store", help="Path to the source directory")
     parser.add_argument("branch", action="store", nargs='?', help="Branch on which jobs ran")
     parser.add_argument("commit", action="store", nargs='?', help="Commit hash for push")
-    parser.add_argument("--grcov", action="store", nargs='?', default="grcov", help="Path to grcov")
+    parser.add_argument("--grcov", action="store", nargs='?', help="Path to grcov")
     parser.add_argument("--no-download", action="store_true", help="Use already downloaded coverage files")
     parser.add_argument("--no-grcov", action="store_true", help="Use already generated grcov output (implies --no-download)")
     parser.add_argument("--suite", action="store", nargs='+', help="List of test suites to include (by default they are all included). E.g. 'mochitest', 'mochitest-chrome', 'gtest', etc.")
