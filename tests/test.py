@@ -52,5 +52,6 @@ class Test(unittest.TestCase):
         for c in cases:
             self.assertEqual(c[0], c[1])
 
+
 if __name__ == '__main__':
     unittest.main()
