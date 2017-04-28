@@ -4,6 +4,7 @@ import json
 import os
 import shutil
 import subprocess
+import tarfile
 import time
 try:
     from urllib.parse import urlencode
@@ -140,6 +141,29 @@ def generate_report(src_dir):
     os.chdir(cwd)
 
 
+def download_grcov():
+    r = get_json('https://api.github.com/repos/marco-c/grcov/releases/latest')
+    latest_tag = r['tag_name']
+
+    if os.path.exists('grcov') and os.path.exists('grcov_ver'):
+        with open('grcov_ver', 'r') as f:
+            installed_ver = f.read()
+
+        if installed_ver == latest_tag:
+            return
+
+    urlretrieve('https://github.com/marco-c/grcov/releases/download/%s/grcov-linux-standalone-x86_64.tar.bz2' % latest_tag, 'grcov.tar.bz2')
+
+    tar = tarfile.open('grcov.tar.bz2', 'r:bz2')
+    tar.extractall()
+    tar.close()
+
+    os.remove('grcov.tar.bz2')
+
+    with open('grcov_ver', 'w') as f:
+        f.write(latest_tag)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("src_dir", action="store", help="Path to the source directory")
@@ -169,7 +193,13 @@ def main():
         download_coverage_artifacts(task_id, args.suite)
 
     if not args.no_grcov:
-        generate_info(args.grcov)
+        if args.grcov:
+            grcov_path = args.grcov
+        else:
+            download_grcov()
+            grcov_path = './grcov'
+
+        generate_info(grcov_path)
 
     generate_report(os.path.abspath(args.src_dir))
 

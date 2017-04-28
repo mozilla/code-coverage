@@ -52,6 +52,39 @@ class Test(unittest.TestCase):
         for c in cases:
             self.assertEqual(codecoverage.suite_name_from_task_name(c[0]), c[1])
 
+    def test_download_grcov(self):
+        codecoverage.download_grcov()
+        self.assertTrue(os.path.exists('grcov'))
+        self.assertTrue(os.path.exists('grcov_ver'))
+
+        with open('grcov_ver', 'r') as f:
+            ver = f.read()
+
+        # grcov is downloaded again if the executable doesn't exist.
+        os.remove('grcov')
+        codecoverage.download_grcov()
+        self.assertTrue(os.path.exists('grcov'))
+        self.assertTrue(os.path.exists('grcov_ver'))
+
+        # grcov isn't downloaded again if the executable exists and the version is the same.
+        with open('grcov', 'w') as f:
+            f.write('prova')
+
+        codecoverage.download_grcov()
+
+        with open('grcov', 'r') as f:
+            self.assertEqual('prova', f.read())
+
+        # grcov is overwritten if the version changes.
+        with open('grcov_ver', 'w') as f:
+            f.write('v0.0.0')
+
+        codecoverage.download_grcov()
+
+        self.assertTrue(os.path.getsize('grcov') > 5)
+        with open('grcov_ver', 'r') as f:
+            self.assertEqual(ver, f.read())
+
 
 if __name__ == '__main__':
     unittest.main()
