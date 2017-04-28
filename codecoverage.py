@@ -59,10 +59,7 @@ def suite_name_from_task_name(name):
 
 
 def download_coverage_artifacts(build_task_id, suites):
-    try:
-        shutil.rmtree("ccov-artifacts")
-    except:
-        pass
+    shutil.rmtree('ccov-artifacts', ignore_errors=True)
 
     try:
         os.mkdir('ccov-artifacts')
