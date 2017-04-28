@@ -52,7 +52,7 @@ class Test(unittest.TestCase):
         codecoverage.download_artifact(task_id, chosen_artifact)
         self.assertTrue(os.path.exists('ccov-artifacts/%s_target.txt' % task_id))
 
-        codecoverage.download_coverage_artifacts(task_id, 'gtest')
+        codecoverage.download_coverage_artifacts(task_id, 'cppunit')
         self.assertTrue(len(os.listdir('ccov-artifacts')) == 2)
 
         codecoverage.download_grcov()
