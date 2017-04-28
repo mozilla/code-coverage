@@ -52,7 +52,13 @@ def download_artifact(task_id, artifact):
         shutil.copyfileobj(r.raw, f)
 
 
-def download_coverage_artifacts(build_task_id):
+def suite_name_from_task_name(name):
+    name = name[len('test-linux64-ccov/opt-'):]
+    parts = [p for p in name.split('-') if p != 'e10s' and not p.isdigit()]
+    return '-'.join(parts)
+
+
+def download_coverage_artifacts(build_task_id, suites):
     try:
         shutil.rmtree("ccov-artifacts")
     except:
@@ -71,7 +77,8 @@ def download_coverage_artifacts(build_task_id):
         if 'target.code-coverage-gcno.zip' in artifact['name']:
             download_artifact(build_task_id, artifact)
 
-    test_tasks = [t for t in get_tasks_in_group(task_data['taskGroupId']) if t['task']['metadata']['name'].startswith('test-linux64-ccov')]
+    test_tasks = [t for t in get_tasks_in_group(task_data['taskGroupId']) if t['task']['metadata']['name'].startswith('test-linux64-ccov') and (suites is None or suite_name_from_task_name(t['task']['metadata']['name']) in suites)]
+
     for test_task in test_tasks:
         artifacts = get_task_artifacts(test_task['status']['taskId'])
         for artifact in artifacts:
@@ -122,6 +129,7 @@ def main():
     parser.add_argument("--grcov", action="store", nargs='?', default="grcov", help="Path to grcov")
     parser.add_argument("--no-download", action="store_true", help="Use already downloaded coverage files")
     parser.add_argument("--no-grcov", action="store_true", help="Use already generated grcov output (implies --no-download)")
+    parser.add_argument("--suite", action="store", nargs='+', help="List of test suites to include (by default they are all included). E.g. 'mochitest', 'mochitest-chrome', 'gtest', etc.")
     args = parser.parse_args()
 
     if args.no_grcov:
@@ -137,7 +145,7 @@ def main():
         else:
             task_id = get_task(args.branch, args.commit)
 
-        download_coverage_artifacts(task_id)
+        download_coverage_artifacts(task_id, args.suite)
 
     if not args.no_grcov:
         generate_info(args.grcov)
