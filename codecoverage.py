@@ -1,62 +1,76 @@
+import argparse
 import errno
+import json
 import os
 import shutil
 import subprocess
+import tarfile
 import time
-import argparse
-import requests
+try:
+    from urllib.parse import urlencode
+    from urllib.request import urlopen, urlretrieve
+except ImportError:
+    from urllib import urlencode, urlretrieve
+    from urllib2 import urlopen
+import warnings
+
+
+def get_json(url, params=None):
+    if params is not None:
+        url += '?' + urlencode(params)
+
+    r = urlopen(url).read().decode('utf-8')
+
+    return json.loads(r)
 
 
 def get_last_task():
-    r = requests.get('https://index.taskcluster.net/v1/task/gecko.v2.mozilla-central.latest.firefox.linux64-ccov-opt')
-    last_task = r.json()
+    last_task = get_json('https://index.taskcluster.net/v1/task/gecko.v2.mozilla-central.latest.firefox.linux64-ccov-opt')
     return last_task['taskId']
 
 
 def get_task(branch, revision):
-    r = requests.get('https://index.taskcluster.net/v1/task/gecko.v2.%s.revision.%s.firefox.linux64-ccov-opt' % (branch, revision))
-    task = r.json()
+    task = get_json('https://index.taskcluster.net/v1/task/gecko.v2.%s.revision.%s.firefox.linux64-ccov-opt' % (branch, revision))
     return task['taskId']
 
 
 def get_task_details(task_id):
-    r = requests.get('https://queue.taskcluster.net/v1/task/' + task_id)
-    return r.json()
+    task_details = get_json('https://queue.taskcluster.net/v1/task/' + task_id)
+    return task_details
 
 
 def get_task_artifacts(task_id):
-    r = requests.get('https://queue.taskcluster.net/v1/task/' + task_id + '/artifacts')
-    return r.json()['artifacts']
+    artifacts = get_json('https://queue.taskcluster.net/v1/task/' + task_id + '/artifacts')
+    return artifacts['artifacts']
 
 
 def get_tasks_in_group(group_id):
-    r = requests.get('https://queue.taskcluster.net/v1/task-group/' + group_id + '/list', params={
-        'limit': 200
+    reply = get_json('https://queue.taskcluster.net/v1/task-group/' + group_id + '/list', {
+        'limit': '200',
     })
-    reply = r.json()
     tasks = reply['tasks']
     while 'continuationToken' in reply:
-        r = requests.get('https://queue.taskcluster.net/v1/task-group/' + group_id + '/list', params={
-            'limit': 200,
-            'continuationToken': reply['continuationToken']
+        reply = get_json('https://queue.taskcluster.net/v1/task-group/' + group_id + '/list', {
+            'limit': '200',
+            'continuationToken': reply['continuationToken'],
         })
-        reply = r.json()
         tasks += reply['tasks']
     return tasks
 
 
 def download_artifact(task_id, artifact):
-    r = requests.get('https://queue.taskcluster.net/v1/task/' + task_id + '/artifacts/' + artifact['name'], stream=True)
-    with open(os.path.join('ccov-artifacts', task_id + '_' + os.path.basename(artifact['name'])), 'wb') as f:
-        r.raw.decode_content = True
-        shutil.copyfileobj(r.raw, f)
+    fname = os.path.join('ccov-artifacts', task_id + '_' + os.path.basename(artifact['name']))
+    urlretrieve('https://queue.taskcluster.net/v1/task/' + task_id + '/artifacts/' + artifact['name'], fname)
 
 
-def download_coverage_artifacts(build_task_id):
-    try:
-        shutil.rmtree("ccov-artifacts")
-    except:
-        pass
+def suite_name_from_task_name(name):
+    name = name[len('test-linux64-ccov/opt-'):]
+    parts = [p for p in name.split('-') if p != 'e10s' and not p.isdigit()]
+    return '-'.join(parts)
+
+
+def download_coverage_artifacts(build_task_id, suites):
+    shutil.rmtree('ccov-artifacts', ignore_errors=True)
 
     try:
         os.mkdir('ccov-artifacts')
@@ -71,7 +85,20 @@ def download_coverage_artifacts(build_task_id):
         if 'target.code-coverage-gcno.zip' in artifact['name']:
             download_artifact(build_task_id, artifact)
 
-    test_tasks = [t for t in get_tasks_in_group(task_data['taskGroupId']) if t['task']['metadata']['name'].startswith('test-linux64-ccov')]
+    # Returns True if the task is a test-related task.
+    def _is_test_task(t):
+        return t['task']['metadata']['name'].startswith('test-linux64-ccov')
+
+    # Returns True if the task is part of one of the suites chosen by the user.
+    def _is_chosen_task(t):
+        return suites is None or suite_name_from_task_name(t['task']['metadata']['name']) in suites
+
+    test_tasks = [t for t in get_tasks_in_group(task_data['taskGroupId']) if _is_test_task(t) and _is_chosen_task(t)]
+
+    for suite in suites:
+        if not any(suite in t['task']['metadata']['name'] for t in test_tasks):
+            warnings.warn('Suite %s not found' % suite)
+
     for test_task in test_tasks:
         artifacts = get_task_artifacts(test_task['status']['taskId'])
         for artifact in artifacts:
@@ -119,6 +146,29 @@ def generate_report(src_dir):
     os.chdir(cwd)
 
 
+def download_grcov():
+    r = get_json('https://api.github.com/repos/marco-c/grcov/releases/latest')
+    latest_tag = r['tag_name']
+
+    if os.path.exists('grcov') and os.path.exists('grcov_ver'):
+        with open('grcov_ver', 'r') as f:
+            installed_ver = f.read()
+
+        if installed_ver == latest_tag:
+            return
+
+    urlretrieve('https://github.com/marco-c/grcov/releases/download/%s/grcov-linux-standalone-x86_64.tar.bz2' % latest_tag, 'grcov.tar.bz2')
+
+    tar = tarfile.open('grcov.tar.bz2', 'r:bz2')
+    tar.extractall()
+    tar.close()
+
+    os.remove('grcov.tar.bz2')
+
+    with open('grcov_ver', 'w') as f:
+        f.write(latest_tag)
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("src_dir", action="store", help="Path to the source directory")
@@ -127,6 +177,7 @@ def main():
     parser.add_argument("--grcov", action="store", nargs='?', default="grcov", help="Path to grcov")
     parser.add_argument("--no-download", action="store_true", help="Use already downloaded coverage files")
     parser.add_argument("--no-grcov", action="store_true", help="Use already generated grcov output (implies --no-download)")
+    parser.add_argument("--suite", action="store", nargs='+', help="List of test suites to include (by default they are all included). E.g. 'mochitest', 'mochitest-chrome', 'gtest', etc.")
     args = parser.parse_args()
 
     if args.no_grcov:
@@ -137,15 +188,23 @@ def main():
         return
 
     if not args.no_download:
-        if args.branch is None and args.commit is None:
-            task_id = get_last_task()
-        else:
+        if args.branch and args.commit:
             task_id = get_task(args.branch, args.commit)
+        elif 'MH_BRANCH' in os.environ and 'GECKO_HEAD_REV' in os.environ:
+            task_id = get_task(os.environ['MH_BRANCH'], os.environ['GECKO_HEAD_REV'])
+        else:
+            task_id = get_last_task()
 
-        download_coverage_artifacts(task_id)
+        download_coverage_artifacts(task_id, args.suite)
 
     if not args.no_grcov:
-        generate_info(args.grcov)
+        if args.grcov:
+            grcov_path = args.grcov
+        else:
+            download_grcov()
+            grcov_path = './grcov'
+
+        generate_info(grcov_path)
 
     generate_report(os.path.abspath(args.src_dir))
 

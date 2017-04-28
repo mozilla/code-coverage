@@ -40,6 +40,51 @@ class Test(unittest.TestCase):
         codecoverage.download_artifact(task_id, chosen_artifact)
         self.assertTrue(os.path.exists('ccov-artifacts/%s_target.txt' % task_id))
 
+    def test_suite_name_from_task_name(self):
+        cases = [
+            ('test-linux64-ccov/opt-gtest', 'gtest'),
+            ('test-linux64-ccov/opt-jsreftest-1', 'jsreftest'),
+            ('test-linux64-ccov/opt-mochitest-devtools-chrome-e10s-10', 'mochitest-devtools-chrome'),
+            ('test-linux64-ccov/opt-mochitest-clipboard', 'mochitest-clipboard'),
+            ('test-linux64-ccov/opt-reftest-no-accel-e10s-5', 'reftest-no-accel'),
+            ('test-linux64-ccov/opt-mochitest-5', 'mochitest'),
+        ]
+        for c in cases:
+            self.assertEqual(codecoverage.suite_name_from_task_name(c[0]), c[1])
+
+    def test_download_grcov(self):
+        codecoverage.download_grcov()
+        self.assertTrue(os.path.exists('grcov'))
+        self.assertTrue(os.path.exists('grcov_ver'))
+
+        with open('grcov_ver', 'r') as f:
+            ver = f.read()
+
+        # grcov is downloaded again if the executable doesn't exist.
+        os.remove('grcov')
+        codecoverage.download_grcov()
+        self.assertTrue(os.path.exists('grcov'))
+        self.assertTrue(os.path.exists('grcov_ver'))
+
+        # grcov isn't downloaded again if the executable exists and the version is the same.
+        with open('grcov', 'w') as f:
+            f.write('prova')
+
+        codecoverage.download_grcov()
+
+        with open('grcov', 'r') as f:
+            self.assertEqual('prova', f.read())
+
+        # grcov is overwritten if the version changes.
+        with open('grcov_ver', 'w') as f:
+            f.write('v0.0.0')
+
+        codecoverage.download_grcov()
+
+        self.assertTrue(os.path.getsize('grcov') > 5)
+        with open('grcov_ver', 'r') as f:
+            self.assertEqual(ver, f.read())
+
 
 if __name__ == '__main__':
     unittest.main()
