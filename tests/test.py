@@ -5,11 +5,23 @@
 import unittest
 import errno
 import os
+import shutil
 
 import codecoverage
 
 
 class Test(unittest.TestCase):
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree('report', ignore_errors=True)
+        shutil.rmtree('ccov-artifacts', ignore_errors=True)
+        for f in ['grcov', 'grcov_ver', 'output.info']:
+            try:
+                os.remove(f)
+            except OSError as e:
+                if e.errno != errno.ENOENT:
+                    raise e
+
     def test(self):
         task_id = codecoverage.get_last_task()
         self.assertTrue(task_id)
@@ -47,7 +59,7 @@ class Test(unittest.TestCase):
         codecoverage.generate_info('./grcov')
         self.assertTrue(os.path.exists('output.info'))
 
-        codecoverage.generate_report('gecko-dev')
+        codecoverage.generate_report('tests')
         self.assertTrue(os.path.isdir('report'))
 
     def test_suite_name_from_task_name(self):
