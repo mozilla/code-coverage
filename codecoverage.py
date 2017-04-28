@@ -11,6 +11,7 @@ try:
 except ImportError:
     from urllib import urlencode, urlretrieve
     from urllib2 import urlopen
+import warnings
 
 
 def get_json(url, params=None):
@@ -61,11 +62,14 @@ def download_artifact(task_id, artifact):
     urlretrieve('https://queue.taskcluster.net/v1/task/' + task_id + '/artifacts/' + artifact['name'], fname)
 
 
-def download_coverage_artifacts(build_task_id):
-    try:
-        shutil.rmtree("ccov-artifacts")
-    except:
-        pass
+def suite_name_from_task_name(name):
+    name = name[len('test-linux64-ccov/opt-'):]
+    parts = [p for p in name.split('-') if p != 'e10s' and not p.isdigit()]
+    return '-'.join(parts)
+
+
+def download_coverage_artifacts(build_task_id, suites):
+    shutil.rmtree('ccov-artifacts', ignore_errors=True)
 
     try:
         os.mkdir('ccov-artifacts')
@@ -80,7 +84,20 @@ def download_coverage_artifacts(build_task_id):
         if 'target.code-coverage-gcno.zip' in artifact['name']:
             download_artifact(build_task_id, artifact)
 
-    test_tasks = [t for t in get_tasks_in_group(task_data['taskGroupId']) if t['task']['metadata']['name'].startswith('test-linux64-ccov')]
+    # Returns True if the task is a test-related task.
+    def _is_test_task(t):
+        return t['task']['metadata']['name'].startswith('test-linux64-ccov')
+
+    # Returns True if the task is part of one of the suites chosen by the user.
+    def _is_chosen_task(t):
+        return suites is None or suite_name_from_task_name(t['task']['metadata']['name']) in suites
+
+    test_tasks = [t for t in get_tasks_in_group(task_data['taskGroupId']) if _is_test_task(t) and _is_chosen_task(t)]
+
+    for suite in suites:
+        if not any(suite in t['task']['metadata']['name'] for t in test_tasks):
+            warnings.warn('Suite %s not found' % suite)
+
     for test_task in test_tasks:
         artifacts = get_task_artifacts(test_task['status']['taskId'])
         for artifact in artifacts:
@@ -131,6 +148,7 @@ def main():
     parser.add_argument("--grcov", action="store", nargs='?', default="grcov", help="Path to grcov")
     parser.add_argument("--no-download", action="store_true", help="Use already downloaded coverage files")
     parser.add_argument("--no-grcov", action="store_true", help="Use already generated grcov output (implies --no-download)")
+    parser.add_argument("--suite", action="store", nargs='+', help="List of test suites to include (by default they are all included). E.g. 'mochitest', 'mochitest-chrome', 'gtest', etc.")
     args = parser.parse_args()
 
     if args.no_grcov:
@@ -148,7 +166,7 @@ def main():
         else:
             task_id = get_last_task()
 
-        download_coverage_artifacts(task_id)
+        download_coverage_artifacts(task_id, args.suite)
 
     if not args.no_grcov:
         generate_info(args.grcov)
