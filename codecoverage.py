@@ -118,9 +118,14 @@ def generate_info(grcov_path):
         else:
             ordered_files.append("ccov-artifacts/" + fname)
 
-    one_click_loaner_gcc = '/home/worker/workspace/build/src/gcc/bin'
     mod_env = os.environ.copy()
-    if os.path.isdir(one_click_loaner_gcc):
+    if 'TASKCLUSTER_INTERACTIVE' in os.environ: # We're on a one-click loaner.
+        one_click_loaner_gcc = '/home/worker/workspace/build/src/gcc/bin'
+        i = 0
+        while not os.path.isdir(one_click_loaner_gcc) or len(os.listdir(one_click_loaner_gcc)) == 0:
+            print('Waiting one-click loaner to be ready... ' + str(i))
+            i += 1
+            time.sleep(60)
         mod_env['PATH'] = one_click_loaner_gcc + ':' + mod_env['PATH']
 
     fout = open("output.info", 'w')
