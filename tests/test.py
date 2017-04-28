@@ -40,6 +40,18 @@ class Test(unittest.TestCase):
         codecoverage.download_artifact(task_id, chosen_artifact)
         self.assertTrue(os.path.exists('ccov-artifacts/%s_target.txt' % task_id))
 
+    def test_suite_name_from_task_name(self):
+        cases = [
+            ('test-linux64-ccov/opt-gtest', 'gtest'),
+            ('test-linux64-ccov/opt-jsreftest-1', 'jsreftest'),
+            ('test-linux64-ccov/opt-mochitest-devtools-chrome-e10s-10', 'mochitest-devtools-chrome'),
+            ('test-linux64-ccov/opt-mochitest-clipboard', 'mochitest-clipboard'),
+            ('test-linux64-ccov/opt-reftest-no-accel-e10s-5', 'reftest-no-accel'),
+            ('test-linux64-ccov/opt-mochitest-5', 'mochitest'),
+        ]
+        for c in cases:
+            self.assertEqual(codecoverage.suite_name_from_task_name(c[0]), c[1])
+
     def test_download_grcov(self):
         codecoverage.download_grcov()
         self.assertTrue(os.path.exists('grcov'))
