@@ -118,10 +118,10 @@ def generate_info(grcov_path):
         else:
             ordered_files.append("ccov-artifacts/" + fname)
 
-    # Assume we're on a one-click loaner.
+    one_click_loaner_gcc = '/home/worker/workspace/build/src/gcc/bin'
     mod_env = os.environ.copy()
-    if os.path.isdir('/home/worker/workspace/build/src/gcc/bin'):
-        mod_env['PATH'] = '/home/worker/workspace/build/src/gcc/bin:' + mod_env['PATH']
+    if os.path.isdir(one_click_loaner_gcc):
+        mod_env['PATH'] = one_click_loaner_gcc + ':' + mod_env['PATH']
 
     fout = open("output.info", 'w')
     cmd = [grcov_path, '-z', '-t', 'lcov', '-s', '/home/worker/workspace/build/src/']
