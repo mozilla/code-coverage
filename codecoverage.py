@@ -74,7 +74,15 @@ def download_coverage_artifacts(build_task_id, suites):
         if 'target.code-coverage-gcno.zip' in artifact['name']:
             download_artifact(build_task_id, artifact)
 
-    test_tasks = [t for t in get_tasks_in_group(task_data['taskGroupId']) if t['task']['metadata']['name'].startswith('test-linux64-ccov') and (suites is None or suite_name_from_task_name(t['task']['metadata']['name']) in suites)]
+    # Returns True if the task is a test-related task.
+    def _is_test_task(t):
+        return t['task']['metadata']['name'].startswith('test-linux64-ccov')
+
+    # Returns True if the task is part of one of the suites chosen by the user.
+    def _is_chosen_task(t):
+        return suites is None or suite_name_from_task_name(t['task']['metadata']['name']) in suites
+
+    test_tasks = [t for t in get_tasks_in_group(task_data['taskGroupId']) if _is_test_task(t) and _is_chosen_task(t)]
 
     for test_task in test_tasks:
         artifacts = get_task_artifacts(test_task['status']['taskId'])
