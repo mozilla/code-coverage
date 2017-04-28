@@ -40,6 +40,16 @@ class Test(unittest.TestCase):
         codecoverage.download_artifact(task_id, chosen_artifact)
         self.assertTrue(os.path.exists('ccov-artifacts/%s_target.txt' % task_id))
 
+        codecoverage.download_coverage_artifacts(task_id, 'gtest')
+        self.assertTrue(len(os.listdir('ccov-artifacts')) == 2)
+
+        codecoverage.download_grcov()
+        codecoverage.generate_info('./grcov')
+        self.assertTrue(os.path.exists('output.info'))
+
+        codecoverage.generate_report('gecko-dev')
+        self.assertTrue(os.path.isdir('report'))
+
     def test_suite_name_from_task_name(self):
         cases = [
             ('test-linux64-ccov/opt-gtest', 'gtest'),
