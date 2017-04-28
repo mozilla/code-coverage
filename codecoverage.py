@@ -1,55 +1,64 @@
+import argparse
 import errno
+import json
 import os
 import shutil
 import subprocess
 import time
-import argparse
-import requests
+try:
+    from urllib.parse import urlencode
+    from urllib.request import urlopen, urlretrieve
+except ImportError:
+    from urllib import urlencode, urlretrieve
+    from urllib2 import urlopen
+
+
+def get_json(url, params=None):
+    if params is not None:
+        url += '?' + urlencode(params)
+
+    r = urlopen(url).read().decode('utf-8')
+
+    return json.loads(r)
 
 
 def get_last_task():
-    r = requests.get('https://index.taskcluster.net/v1/task/gecko.v2.mozilla-central.latest.firefox.linux64-ccov-opt')
-    last_task = r.json()
+    last_task = get_json('https://index.taskcluster.net/v1/task/gecko.v2.mozilla-central.latest.firefox.linux64-ccov-opt')
     return last_task['taskId']
 
 
 def get_task(branch, revision):
-    r = requests.get('https://index.taskcluster.net/v1/task/gecko.v2.%s.revision.%s.firefox.linux64-ccov-opt' % (branch, revision))
-    task = r.json()
+    task = get_json('https://index.taskcluster.net/v1/task/gecko.v2.%s.revision.%s.firefox.linux64-ccov-opt' % (branch, revision))
     return task['taskId']
 
 
 def get_task_details(task_id):
-    r = requests.get('https://queue.taskcluster.net/v1/task/' + task_id)
-    return r.json()
+    task_details = get_json('https://queue.taskcluster.net/v1/task/' + task_id)
+    return task_details
 
 
 def get_task_artifacts(task_id):
-    r = requests.get('https://queue.taskcluster.net/v1/task/' + task_id + '/artifacts')
-    return r.json()['artifacts']
+    artifacts = get_json('https://queue.taskcluster.net/v1/task/' + task_id + '/artifacts')
+    return artifacts['artifacts']
 
 
 def get_tasks_in_group(group_id):
-    r = requests.get('https://queue.taskcluster.net/v1/task-group/' + group_id + '/list', params={
-        'limit': 200
+    reply = get_json('https://queue.taskcluster.net/v1/task-group/' + group_id + '/list', {
+        'limit': '200',
     })
-    reply = r.json()
     tasks = reply['tasks']
     while 'continuationToken' in reply:
-        r = requests.get('https://queue.taskcluster.net/v1/task-group/' + group_id + '/list', params={
-            'limit': 200,
-            'continuationToken': reply['continuationToken']
+        reply = get_json('https://queue.taskcluster.net/v1/task-group/' + group_id + '/list', {
+            'limit': '200',
+            'continuationToken': reply['continuationToken'],
         })
-        reply = r.json()
         tasks += reply['tasks']
     return tasks
 
 
 def download_artifact(task_id, artifact):
-    r = requests.get('https://queue.taskcluster.net/v1/task/' + task_id + '/artifacts/' + artifact['name'], stream=True)
-    with open(os.path.join('ccov-artifacts', task_id + '_' + os.path.basename(artifact['name'])), 'wb') as f:
-        r.raw.decode_content = True
-        shutil.copyfileobj(r.raw, f)
+    fname = os.path.join('ccov-artifacts', task_id + '_' + os.path.basename(artifact['name']))
+    urlretrieve('https://queue.taskcluster.net/v1/task/' + task_id + '/artifacts/' + artifact['name'], fname)
 
 
 def suite_name_from_task_name(name):
@@ -145,10 +154,12 @@ def main():
         return
 
     if not args.no_download:
-        if args.branch is None and args.commit is None:
-            task_id = get_last_task()
-        else:
+        if args.branch and args.commit:
             task_id = get_task(args.branch, args.commit)
+        elif 'MH_BRANCH' in os.environ and 'GECKO_HEAD_REV' in os.environ:
+            task_id = get_task(os.environ['MH_BRANCH'], os.environ['GECKO_HEAD_REV'])
+        else:
+            task_id = get_last_task()
 
         download_coverage_artifacts(task_id, args.suite)
 
