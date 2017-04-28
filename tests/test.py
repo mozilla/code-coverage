@@ -40,6 +40,11 @@ class Test(unittest.TestCase):
         codecoverage.download_artifact(task_id, chosen_artifact)
         self.assertTrue(os.path.exists('ccov-artifacts/%s_target.txt' % task_id))
 
+    def test_download_grcov(self):
+        codecoverage.download_grcov()
+        self.assertTrue(os.path.exists('grcov'))
+        self.assertTrue(os.path.exists('grcov_ver'))
+
 
 if __name__ == '__main__':
     unittest.main()
