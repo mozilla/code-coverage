@@ -11,6 +11,7 @@ try:
 except ImportError:
     from urllib import urlencode, urlretrieve
     from urllib2 import urlopen
+import warnings
 
 
 def get_json(url, params=None):
@@ -92,6 +93,10 @@ def download_coverage_artifacts(build_task_id, suites):
         return suites is None or suite_name_from_task_name(t['task']['metadata']['name']) in suites
 
     test_tasks = [t for t in get_tasks_in_group(task_data['taskGroupId']) if _is_test_task(t) and _is_chosen_task(t)]
+
+    for suite in suites:
+        if not any(suite in t['task']['metadata']['name'] for t in test_tasks):
+            warnings.warn('Suite %s not found' % suite)
 
     for test_task in test_tasks:
         artifacts = get_task_artifacts(test_task['status']['taskId'])
