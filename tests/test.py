@@ -5,11 +5,23 @@
 import unittest
 import errno
 import os
+import shutil
 
 import codecoverage
 
 
 class Test(unittest.TestCase):
+    @classmethod
+    def tearDownClass(cls):
+        shutil.rmtree('report', ignore_errors=True)
+        shutil.rmtree('ccov-artifacts', ignore_errors=True)
+        for f in ['grcov', 'grcov_ver', 'output.info']:
+            try:
+                os.remove(f)
+            except OSError as e:
+                if e.errno != errno.ENOENT:
+                    raise e
+
     def test(self):
         task_id = codecoverage.get_last_task()
         self.assertTrue(task_id)
@@ -39,6 +51,16 @@ class Test(unittest.TestCase):
 
         codecoverage.download_artifact(task_id, chosen_artifact)
         self.assertTrue(os.path.exists('ccov-artifacts/%s_target.txt' % task_id))
+
+        codecoverage.download_coverage_artifacts(task_id, 'cppunit')
+        self.assertTrue(len(os.listdir('ccov-artifacts')) == 2)
+
+        codecoverage.download_grcov()
+        codecoverage.generate_info('./grcov')
+        self.assertTrue(os.path.exists('output.info'))
+
+        codecoverage.generate_report('tests')
+        self.assertTrue(os.path.isdir('report'))
 
     def test_suite_name_from_task_name(self):
         cases = [
