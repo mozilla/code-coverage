@@ -9,7 +9,7 @@ install:
   - ln -s /usr/bin/gcov-6 symlinks/gcov
   - git clone https://github.com/linux-test-project/lcov.git && cd lcov && make install DESTDIR=../symlinks && cd ..
 script:
-  - export PATH=$HOME/.local/bin:$PWD/symlinks:$PWD/symlinks/usr/local/bin:$PATH
+  - export PATH=$PWD/symlinks:$PWD/symlinks/usr/local/bin:$PATH
   - flake8 .
   - python -m unittest discover tests
 cache: pip
