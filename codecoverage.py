@@ -95,9 +95,10 @@ def download_coverage_artifacts(build_task_id, suites):
 
     test_tasks = [t for t in get_tasks_in_group(task_data['taskGroupId']) if _is_test_task(t) and _is_chosen_task(t)]
 
-    for suite in suites:
-        if not any(suite in t['task']['metadata']['name'] for t in test_tasks):
-            warnings.warn('Suite %s not found' % suite)
+    if suites is not None:
+        for suite in suites:
+            if not any(suite in t['task']['metadata']['name'] for t in test_tasks):
+                warnings.warn('Suite %s not found' % suite)
 
     for test_task in test_tasks:
         artifacts = get_task_artifacts(test_task['status']['taskId'])
