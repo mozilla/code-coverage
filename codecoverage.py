@@ -146,7 +146,7 @@ def generate_info(grcov_path):
 def generate_report(src_dir):
     cwd = os.getcwd()
     os.chdir(src_dir)
-    ret = subprocess.call(["genhtml", "-o", os.path.join(cwd, "report"), "--show-details", "--highlight", "--ignore-errors", "source", "--legend", os.path.join(cwd, "output.info"), "--prefix", src_dir])
+    ret = subprocess.call([os.path.join(cwd, "lcov-bin/usr/local/bin/genhtml"), "-o", os.path.join(cwd, "report"), "--show-details", "--highlight", "--ignore-errors", "source", "--legend", os.path.join(cwd, "output.info"), "--prefix", src_dir])
     if ret != 0:
         raise Exception("Error while running genhtml.")
     os.chdir(cwd)
@@ -173,6 +173,25 @@ def download_grcov():
 
     with open('grcov_ver', 'w') as f:
         f.write(latest_tag)
+
+
+def download_genhtml():
+    try:
+        os.mkdir('lcov-bin')
+    except OSError as e:
+        if e.errno != errno.EEXIST:
+            raise e
+
+    if os.path.isdir('lcov'):
+        os.chdir('lcov')
+        subprocess.check_call(['git', 'pull'])
+    else:
+        subprocess.check_call(['git', 'clone', 'https://github.com/linux-test-project/lcov.git'])
+        os.chdir('lcov')
+
+    subprocess.check_call(['make', 'install', 'DESTDIR=../lcov-bin'])
+
+    os.chdir('..')
 
 
 def main():
@@ -212,6 +231,7 @@ def main():
 
         generate_info(grcov_path)
 
+    download_genhtml()
     generate_report(os.path.abspath(args.src_dir))
 
 
