@@ -60,6 +60,7 @@ class Test(unittest.TestCase):
         codecoverage.generate_info('./grcov')
         self.assertTrue(os.path.exists('output.info'))
 
+        codecoverage.download_genhtml()
         codecoverage.generate_report('tests')
         self.assertTrue(os.path.isdir('report'))
 
