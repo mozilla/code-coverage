@@ -24,6 +24,10 @@ def get_json(url, params=None):
     return json.loads(r)
 
 
+def is_taskcluster_loaner():
+    return 'TASKCLUSTER_INTERACTIVE' in os.environ
+
+
 def get_last_task():
     last_task = get_json('https://index.taskcluster.net/v1/task/gecko.v2.mozilla-central.latest.firefox.linux64-ccov-opt')
     return last_task['taskId']
@@ -120,7 +124,7 @@ def generate_info(grcov_path):
             ordered_files.append("ccov-artifacts/" + fname)
 
     mod_env = os.environ.copy()
-    if 'TASKCLUSTER_INTERACTIVE' in os.environ:  # We're on a one-click loaner.
+    if is_taskcluster_loaner():
         one_click_loaner_gcc = '/home/worker/workspace/build/src/gcc/bin'
         i = 0
         while not os.path.isdir(one_click_loaner_gcc) or len(os.listdir(one_click_loaner_gcc)) == 0:
@@ -177,9 +181,21 @@ def download_grcov():
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("src_dir", action="store", help="Path to the source directory")
-    parser.add_argument("branch", action="store", nargs='?', help="Branch on which jobs ran")
-    parser.add_argument("commit", action="store", nargs='?', help="Commit hash for push")
+
+    if is_taskcluster_loaner():
+        nargs = '?'
+        default_src_dir = '/home/worker/workspace/build/src/'
+        default_branch = os.environ['MH_BRANCH']
+        default_commit = os.environ['GECKO_HEAD_REV']
+    else:
+        nargs = None
+        default_src_dir = None
+        default_branch = None
+        default_commit = None
+
+    parser.add_argument("src_dir", action="store", nargs=nargs, default=default_src_dir, help="Path to the source directory")
+    parser.add_argument("branch", action="store", nargs='?', default=default_branch, help="Branch on which jobs ran")
+    parser.add_argument("commit", action="store", nargs='?', default=default_commit, help="Commit hash for push")
     parser.add_argument("--grcov", action="store", nargs='?', help="Path to grcov")
     parser.add_argument("--no-download", action="store_true", help="Use already downloaded coverage files")
     parser.add_argument("--no-grcov", action="store_true", help="Use already generated grcov output (implies --no-download)")
@@ -196,8 +212,6 @@ def main():
     if not args.no_download:
         if args.branch and args.commit:
             task_id = get_task(args.branch, args.commit)
-        elif 'MH_BRANCH' in os.environ and 'GECKO_HEAD_REV' in os.environ:
-            task_id = get_task(os.environ['MH_BRANCH'], os.environ['GECKO_HEAD_REV'])
         else:
             task_id = get_last_task()
 
