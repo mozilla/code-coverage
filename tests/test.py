@@ -13,8 +13,9 @@ import codecoverage
 class Test(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
-        shutil.rmtree('report', ignore_errors=True)
-        shutil.rmtree('ccov-artifacts', ignore_errors=True)
+        for d in ['report', 'ccov-artifacts', 'lcov', 'lcov-bin']:
+            shutil.rmtree(d, ignore_errors=True)
+
         for f in ['grcov', 'grcov_ver', 'output.info']:
             try:
                 os.remove(f)
@@ -106,6 +107,13 @@ class Test(unittest.TestCase):
         self.assertTrue(os.path.getsize('grcov') > 5)
         with open('grcov_ver', 'r') as f:
             self.assertEqual(ver, f.read())
+
+    def test_download_genhtml(self):
+        codecoverage.download_genhtml()
+        self.assertTrue(os.path.exists('./lcov-bin/usr/local/bin/genhtml'))
+
+        codecoverage.download_genhtml()
+        self.assertTrue(os.path.exists('./lcov-bin/usr/local/bin/genhtml'))
 
 
 if __name__ == '__main__':
