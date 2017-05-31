@@ -134,7 +134,7 @@ def generate_info(grcov_path):
         mod_env['PATH'] = one_click_loaner_gcc + ':' + mod_env['PATH']
 
     fout = open("output.info", 'w')
-    cmd = [grcov_path, '-z', '-t', 'lcov', '-s', '/home/worker/workspace/build/src/']
+    cmd = [grcov_path, '-z', '-t', 'lcov', '-p', '/home/worker/workspace/build/src/']
     cmd.extend(ordered_files)
     proc = subprocess.Popen(cmd, stdout=fout, stderr=subprocess.PIPE, env=mod_env)
     i = 0
