@@ -114,7 +114,11 @@ async function doit(dir='') {
       entryElem.appendChild(a);
       entryElem.appendChild(document.createTextNode(' with ' + len + ' files.'));
     } else {
-      entryElem.textContent += entry;
+      let a = document.createElement('a');
+      a.target = '_blank';
+      a.textContent = entry;
+      a.href = 'https://codecov.io/gh/marco-c/gecko-dev/src/master/' + dir + entry;
+      entryElem.appendChild(a);
     }
     output.appendChild(entryElem);
     output.appendChild(document.createElement('br'));
