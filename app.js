@@ -88,7 +88,9 @@ async function doit(dir='') {
       }
       map.set(rest, num);
     } else {
-      assert(!map.has(rest), rest + ' is already in map.');
+      if (map.has(rest)) {
+        console.warn(rest + ' is already in map.');
+      }
       map.set(rest, 0);
     }
   }
