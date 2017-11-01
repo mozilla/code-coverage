@@ -42,13 +42,13 @@ function sort_entries(entries) {
   });
 }
 
-function is_third_party_enabled() {
-  let third_party = document.getElementById('third_party');
-  return third_party.checked;
+function is_enabled(opt) {
+  let elem = document.getElementById(opt);
+  return elem.checked;
 }
 
 async function filter_third_party(files) {
-  if (is_third_party_enabled()) {
+  if (is_enabled('third_party')) {
     return files;
   }
 
@@ -65,6 +65,14 @@ async function filter_third_party(files) {
   });
 }
 
+function filter_headers(files) {
+  if (is_enabled('headers')) {
+    return files;
+  }
+
+  return files.filter(file => !file.endsWith('.h'));
+}
+
 async function doit(dir='') {
   while (dir.endsWith('/')) dir = dir.substring(0, dir.length - 1);
   dir += '/';
@@ -74,6 +82,7 @@ async function doit(dir='') {
 
   let files = (await get_files()).filter(file => file.startsWith(dir));
   files = await filter_third_party(files);
+  files = filter_headers(files);
 
   let map = new Map();
 
@@ -136,8 +145,11 @@ function go() {
 async function main() {
   await onLoad;
 
-  let third_party = document.getElementById('third_party');
-  third_party.onchange = go;
+  let opts = ['third_party', 'headers'];
+  for (let opt of opts) {
+    let elem = document.getElementById(opt);
+    elem.onchange = go;
+  }
 
   window.onhashchange = go;
 
