@@ -4,10 +4,6 @@ function assert(condition, message) {
   }
 }
 
-let onLoad = new Promise(function(resolve, reject) {
-  window.onload = resolve;
-});
-
 let get_files = function() {
   let files = null;
   return async function() {
@@ -73,7 +69,7 @@ function filter_headers(files) {
   return files.filter(file => !file.endsWith('.h'));
 }
 
-async function doit(dir='') {
+async function generate(dir='') {
   while (dir.endsWith('/')) dir = dir.substring(0, dir.length - 1);
   dir += '/';
   if (dir == '/') {
@@ -138,12 +134,12 @@ async function doit(dir='') {
   document.getElementById('output').replaceWith(output);
 }
 
-function go() {
-  doit(window.location.hash.substring(1));
-}
-
 async function main() {
-  await onLoad;
+  await new Promise(resolve => window.onload = resolve);
+
+  function go() {
+    generate(window.location.hash.substring(1));
+  }
 
   let opts = ['third_party', 'headers'];
   for (let opt of opts) {
