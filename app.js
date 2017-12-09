@@ -69,6 +69,24 @@ function filter_headers(files) {
   return files.filter(file => !file.endsWith('.h'));
 }
 
+function filter_languages(files) {
+  let cpp = is_enabled('cpp');
+  let cpp_extensions = ['c', 'cpp', 'cxx', 'cc', 'h', 'hh', 'hxx', 'hpp', 'inl', 'inc'];
+  let js = is_enabled('js');
+  let js_extensions = ['js', 'jsm', 'xml', 'xul', 'xhtml', 'html'];
+
+  return files.filter(file => {
+      if (cpp_extensions.find(ext => file.endsWith('.' + ext))) {
+        return cpp;
+      } else if (js_extensions.find(ext => file.endsWith('.' + ext))) {
+        return js;
+      } else {
+        console.warn('Unknown language for ' + file);
+        return false;
+      }
+  });
+}
+
 async function generate(dir='') {
   while (dir.endsWith('/')) dir = dir.substring(0, dir.length - 1);
   dir += '/';
@@ -78,6 +96,7 @@ async function generate(dir='') {
 
   let files = (await get_files()).filter(file => file.startsWith(dir));
   files = await filter_third_party(files);
+  files = filter_languages(files);
   files = filter_headers(files);
 
   let map = new Map();
@@ -141,7 +160,7 @@ async function main() {
     generate(window.location.hash.substring(1));
   }
 
-  let opts = ['third_party', 'headers'];
+  let opts = ['third_party', 'headers', 'cpp', 'js'];
   for (let opt of opts) {
     let elem = document.getElementById(opt);
     elem.onchange = go;
