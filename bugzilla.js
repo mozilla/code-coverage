@@ -59,6 +59,10 @@ if (container) {
       covered += result.commit_covered;
     }
 
+    if (added == 0) {
+      return;
+    }
+
     const mainDiv = document.createElement('div');
     mainDiv.setAttribute('class', 'field');
     const nameDiv = document.createElement('div');
