@@ -1,0 +1,27 @@
+{
+  "author": "Marco Castelluccio",
+  "manifest_version": 2,
+  "name": "Firefox Code Coverage",
+  "version": "0.1",
+  "icons": {
+    "96": "coverage.jpg"
+  },
+  "description": "Extensions that augments several Mozilla websites (Bugzilla, DXR) with code coverage information.",
+  "content_scripts": [
+    {
+      "matches": ["*://dxr.mozilla.org/mozilla-central/source/*"],
+      "js": ["dxr.js"],
+      "run_at": "document_end"
+    },
+    {
+      "matches": ["https://bugzilla.mozilla.org/show_bug.cgi?id=*"],
+      "js": ["bugzilla.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "permissions": [
+    "https://uplift.shipit.staging.mozilla-releng.net/coverage/*",
+    "https://api.pub.build.mozilla.org/mapper/gecko-dev/rev/git/*"
+  ],
+  "homepage_url": "https://github.com/marco-c/code-coverage-addon"
+}
