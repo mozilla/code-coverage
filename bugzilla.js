@@ -73,7 +73,7 @@ if (container) {
     valueDiv.setAttribute('class', 'value');
     const span = document.createElement('span');
     span.style.color = 'green';
-    span.textContent = `${covered} out of ${added} covered`;
+    span.textContent = `${covered} lines covered out of ${added} lines added`;
     valueDiv.appendChild(span);
     valueDiv.appendChild(document.createTextNode(' ('));
     let aElems = results.filter(result => result.commit_added > 0).map(result => {
