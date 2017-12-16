@@ -4,6 +4,26 @@
 
 "use strict";
 
+function wait(time) {
+  return new Promise(resolve => setTimeout(resolve, time));
+}
+
+async function retrieveData(rev) {
+  let ready = false;
+  do {
+    let response = await fetch(`https://uplift.shipit.staging.mozilla-releng.net/coverage/changeset_summary/${rev}`);
+
+    if (response.status == 202) {
+      await wait(5000);
+      continue;
+    }
+
+    let result = await response.json();
+    result['rev'] = rev;
+    return result;
+  } while (!ready);
+}
+
 (function() {
 const container = document.getElementById("module-details-content");
 if (container) {
@@ -41,14 +61,7 @@ if (container) {
     return;
   }
 
-  let promises = revs.map(rev =>
-    fetch(`https://uplift.shipit.staging.mozilla-releng.net/coverage/changeset_summary/${rev}`)
-    .then(response => response.json())
-    .then(result => {
-      result['rev'] = rev;
-      return result;
-    })
-  );
+  let promises = revs.map(retrieveData);
 
   Promise.all(promises)
   .then(results => {
