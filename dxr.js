@@ -62,19 +62,30 @@ function removeOverlay() {
   const m = navigation.innerHTML.match(revPattern);
   const rev = m[1];
 
+  let button = document.createElement('button');
+  button.type = 'button';
+  button.textContent = 'Code Coverage';
+  button.style.backgroundColor = 'white';
+  button.style.marginBottom = '.2rem';
+  button.style.padding = '.3rem';
+  button.style.border = '1px solid #999';
+  button.style.width = 'auto';
+  button.style.minWidth = '100px';
+  button.style.borderRadius = '.2rem';
+  button.style.cursor = 'pointer';
+
   let enabled = false;
   function toggle() {
     enabled = !enabled;
     if (enabled) {
       applyOverlay(rev, path);
+      button.style.backgroundColor = 'lightgrey';
     } else {
       removeOverlay();
+      button.style.backgroundColor = 'white';
     }
   }
 
-  let button = document.createElement('button');
-  button.type = 'button';
-  button.textContent = 'Code Coverage';
   button.onclick = toggle;
   let treeSelector = document.getElementById('tree-selector');
   treeSelector.appendChild(button);
