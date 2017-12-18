@@ -63,17 +63,17 @@ if (container) {
 
   let styleEl = document.createElement('style');
   document.head.appendChild(styleEl);
-  styleEl.sheet.insertRule(`@keyframes spin {
+  styleEl.sheet.insertRule(`@keyframes gecko_coverage_loader_spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }`, 0);
-  styleEl.sheet.insertRule(`.loader {
+  styleEl.sheet.insertRule(`.gecko_coverage_loader {
   border: 3px solid #f3f3f3;
   border-radius: 50%;
   border-top: 3px solid green;
   width: 13px;
   height: 13px;
-  animation: spin 2s linear infinite;
+  animation: gecko_coverage_loader_spin 2s linear infinite;
 }`, 1);
 
   const mainDiv = document.createElement('div');
@@ -83,7 +83,7 @@ if (container) {
   nameDiv.textContent = 'Code Coverage:';
   mainDiv.appendChild(nameDiv);
   const valueDiv = document.createElement('div');
-  valueDiv.classList.add('loader');
+  valueDiv.className = 'gecko_coverage_loader';
   mainDiv.appendChild(valueDiv);
   container.appendChild(mainDiv);
 
@@ -98,7 +98,6 @@ if (container) {
       covered += result.commit_covered;
     }
 
-    valueDiv.classList.remove('loader');
     const span = document.createElement('span');
     if (added > 0) {
       if (covered > 0.7 * added) {
@@ -112,6 +111,7 @@ if (container) {
     } else {
       span.textContent = 'No instrumented lines added.'
     }
+    valueDiv.className = 'value';
     valueDiv.appendChild(span);
     valueDiv.appendChild(document.createTextNode(' ('));
     let aElems = results.filter(result => result.commit_added > 0).map(result => {

@@ -65,9 +65,27 @@ function removeOverlay() {
   const m = navigation.innerHTML.match(revPattern);
   const rev = m[1];
 
+  let styleEl = document.createElement('style');
+  document.head.appendChild(styleEl);
+  styleEl.sheet.insertRule(`@keyframes gecko_coverage_loader_spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}`, 0);
+  styleEl.sheet.insertRule(`.gecko_coverage_loader {
+  display: inline-block;
+  border: 3px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 3px solid black;
+  width: 13px;
+  height: 13px;
+  animation: gecko_coverage_loader_spin 2s linear infinite;
+}`, 1);
+  const spinner = document.createElement('div');
+  spinner.className = 'gecko_coverage_loader';
+
   let button = document.createElement('button');
   button.type = 'button';
-  button.textContent = 'Code Coverage';
+  button.textContent = 'Code Coverage ';
   button.style.backgroundColor = 'white';
   button.style.marginBottom = '.2rem';
   button.style.padding = '.3rem';
@@ -78,10 +96,12 @@ function removeOverlay() {
   button.style.cursor = 'pointer';
 
   let enabled = false;
-  function toggle() {
+  async function toggle() {
     enabled = !enabled;
     if (enabled) {
-      applyOverlay(rev, path);
+      button.appendChild(spinner);
+      await applyOverlay(rev, path);
+      button.removeChild(spinner);
       button.style.backgroundColor = 'lightgrey';
     } else {
       removeOverlay();
