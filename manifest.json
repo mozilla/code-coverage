@@ -1,7 +1,7 @@
 {
   "author": "Marco Castelluccio",
   "manifest_version": 2,
-  "name": "Firefox Code Coverage",
+  "name": "Gecko Code Coverage",
   "version": "0.2.0",
   "icons": {
     "270": "coverage.jpg"
