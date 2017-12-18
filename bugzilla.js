@@ -101,7 +101,13 @@ if (container) {
     valueDiv.classList.remove('loader');
     const span = document.createElement('span');
     if (added > 0) {
-      span.style.color = 'green';
+      if (covered > 0.7 * added) {
+        span.style.color = 'green';
+      } else if (covered > 0.2 * added) {
+        span.style.color = 'goldenrod';
+      } else {
+        span.style.color = 'red';
+      }
       span.textContent = `${covered} lines covered out of ${added} lines added`;
     } else {
       span.textContent = 'No instrumented lines added.'
