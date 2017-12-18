@@ -64,23 +64,8 @@ function removeOverlay() {
   const m = navigation.innerHTML.match(revPattern);
   const rev = m[1];
 
-  let styleEl = document.createElement('style');
-  document.head.appendChild(styleEl);
-  styleEl.sheet.insertRule(`@keyframes gecko_coverage_loader_spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}`, 0);
-  styleEl.sheet.insertRule(`.gecko_coverage_loader {
-  display: inline-block;
-  border: 3px solid #f3f3f3;
-  border-radius: 50%;
-  border-top: 3px solid black;
-  width: 13px;
-  height: 13px;
-  animation: gecko_coverage_loader_spin 2s linear infinite;
-}`, 1);
   const spinner = document.createElement('div');
-  spinner.className = 'gecko_coverage_loader';
+  spinner.classList.add('gecko_coverage_loader', 'gecko_coverage_loader_dxr');
 
   let button = document.createElement('button');
   button.type = 'button';

@@ -41,21 +41,6 @@ if (container) {
     return;
   }
 
-  let styleEl = document.createElement('style');
-  document.head.appendChild(styleEl);
-  styleEl.sheet.insertRule(`@keyframes gecko_coverage_loader_spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}`, 0);
-  styleEl.sheet.insertRule(`.gecko_coverage_loader {
-  border: 3px solid #f3f3f3;
-  border-radius: 50%;
-  border-top: 3px solid green;
-  width: 13px;
-  height: 13px;
-  animation: gecko_coverage_loader_spin 2s linear infinite;
-}`, 1);
-
   const mainDiv = document.createElement('div');
   mainDiv.className = 'field';
   const nameDiv = document.createElement('div');
@@ -63,7 +48,7 @@ if (container) {
   nameDiv.textContent = 'Code Coverage:';
   mainDiv.appendChild(nameDiv);
   const valueDiv = document.createElement('div');
-  valueDiv.className = 'gecko_coverage_loader';
+  valueDiv.classList.add('gecko_coverage_loader', 'gecko_coverage_loader_bugzilla');
   mainDiv.appendChild(valueDiv);
   container.appendChild(mainDiv);
 

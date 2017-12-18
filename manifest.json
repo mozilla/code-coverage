@@ -11,16 +11,19 @@
     {
       "matches": ["*://dxr.mozilla.org/mozilla-central/source/*"],
       "js": ["coverage.js", "dxr.js"],
+      "css": ["spinner.css"],
       "run_at": "document_end"
     },
     {
       "matches": ["*://searchfox.org/mozilla-central/source/*"],
       "js": ["coverage.js", "searchfox.js"],
+      "css": ["spinner.css"],
       "run_at": "document_end"
     },
     {
       "matches": ["*://bugzilla.mozilla.org/show_bug.cgi?id=*"],
       "js": ["coverage.js", "bugzilla.js"],
+      "css": ["spinner.css"],
       "run_at": "document_end"
     }
   ],
