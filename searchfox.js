@@ -48,7 +48,7 @@ function removeOverlay() {
   }
 
   // Don't do anything if this isn't a file.
-  const panel = document.querySelector('#panel-content');
+  const panel = document.getElementById('panel-content');
   if (!panel) {
     return;
   }

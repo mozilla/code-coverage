@@ -47,7 +47,7 @@ function removeOverlay() {
   }
 
   // Don't do anything if this isn't a file.
-  const panel = document.querySelector('#panel-content');
+  const panel = document.getElementById('panel-content');
   if (!panel) {
     return;
   }
@@ -57,11 +57,7 @@ function removeOverlay() {
 
   // Get the current revision.
   const revPattern = new RegExp('Mercurial \\(([0-9a-f]+)\\)');
-  const navigation = document.getElementById('panel-content');
-  if (!navigation) {
-    return;
-  }
-  const m = navigation.innerHTML.match(revPattern);
+  const m = panel.innerHTML.match(revPattern);
   const rev = m[1];
 
   const spinner = document.createElement('div');
