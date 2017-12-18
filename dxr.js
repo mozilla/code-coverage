@@ -14,7 +14,7 @@ async function applyOverlay(rev, path) {
 
   for (let [l, c] of Object.entries(result)) {
     const line_no = document.getElementById(l);
-    const line = document.getElementById('line-' + l);
+    const line = document.getElementById(`line-${l}`);
     if (c > 0) {
       line_no.style.backgroundColor = 'greenyellow';
       line.style.backgroundColor = 'greenyellow';

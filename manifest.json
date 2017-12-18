@@ -2,15 +2,20 @@
   "author": "Marco Castelluccio",
   "manifest_version": 2,
   "name": "Firefox Code Coverage",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "icons": {
     "270": "coverage.jpg"
   },
-  "description": "Extensions that augments several Mozilla websites (Bugzilla, DXR) with code coverage information.",
+  "description": "Extensions that augments several Mozilla websites (Bugzilla, DXR, Searchfox) with code coverage information.",
   "content_scripts": [
     {
       "matches": ["*://dxr.mozilla.org/mozilla-central/source/*"],
       "js": ["dxr.js"],
+      "run_at": "document_end"
+    },
+    {
+      "matches": ["*://searchfox.org/mozilla-central/source/*"],
+      "js": ["searchfox.js"],
       "run_at": "document_end"
     },
     {
