@@ -4,22 +4,25 @@
 
 "use strict";
 
-function applyOverlay(rev, path) {
-  fetch(`https://uplift.shipit.staging.mozilla-releng.net/coverage/file?changeset=${rev}&path=${path}`)
-  .then(response => response.json())
-  .then(result => {
-    for (let [l, c] of Object.entries(result)) {
-      const line_no = document.getElementById(l);
-      const line = document.getElementById('line-' + l);
-      if (c > 0) {
-        line_no.style.backgroundColor = 'greenyellow';
-        line.style.backgroundColor = 'greenyellow';
-      } else {
-        line_no.style.backgroundColor = 'tomato';
-        line.style.backgroundColor = 'tomato';
-      }
+let result;
+
+async function applyOverlay(rev, path) {
+  if (!result) {
+    let response = await fetch(`https://uplift.shipit.staging.mozilla-releng.net/coverage/file?changeset=${rev}&path=${path}`);
+    result = await response.json();
+  }
+
+  for (let [l, c] of Object.entries(result)) {
+    const line_no = document.getElementById(l);
+    const line = document.getElementById('line-' + l);
+    if (c > 0) {
+      line_no.style.backgroundColor = 'greenyellow';
+      line.style.backgroundColor = 'greenyellow';
+    } else {
+      line_no.style.backgroundColor = 'tomato';
+      line.style.backgroundColor = 'tomato';
     }
-  });
+  }
 }
 
 function removeOverlay() {
