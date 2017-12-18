@@ -8,8 +8,7 @@ let result;
 
 async function applyOverlay(rev, path) {
   if (!result) {
-    let response = await fetch(`https://uplift.shipit.staging.mozilla-releng.net/coverage/file?changeset=${rev}&path=${path}`);
-    result = await response.json();
+    result = await fetchCoverage(rev, path);
   }
 
   for (let [l, c] of Object.entries(result)) {

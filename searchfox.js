@@ -6,13 +6,10 @@
 
 let result;
 
-async function applyOverlay(gitrev, path) {
+async function applyOverlay(gitRev, path) {
   if (!result) {
-    let response = await fetch(`https://api.pub.build.mozilla.org/mapper/gecko-dev/rev/git/${gitrev}`);
-    let rev = (await response.text()).split(' ')[1];
-
-    response = await fetch(`https://uplift.shipit.staging.mozilla-releng.net/coverage/file?changeset=${rev}&path=${path}`);
-    result = await response.json();
+    let rev = await gitToHg(gitRev);
+    result = await fetchCoverage(rev, path);
   }
 
   for (let [l, c] of Object.entries(result)) {

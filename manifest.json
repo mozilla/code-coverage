@@ -10,17 +10,17 @@
   "content_scripts": [
     {
       "matches": ["*://dxr.mozilla.org/mozilla-central/source/*"],
-      "js": ["dxr.js"],
+      "js": ["coverage.js", "dxr.js"],
       "run_at": "document_end"
     },
     {
       "matches": ["*://searchfox.org/mozilla-central/source/*"],
-      "js": ["searchfox.js"],
+      "js": ["coverage.js", "searchfox.js"],
       "run_at": "document_end"
     },
     {
       "matches": ["*://bugzilla.mozilla.org/show_bug.cgi?id=*"],
-      "js": ["bugzilla.js"],
+      "js": ["coverage.js", "bugzilla.js"],
       "run_at": "document_end"
     }
   ],

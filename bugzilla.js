@@ -4,26 +4,6 @@
 
 "use strict";
 
-function wait(time) {
-  return new Promise(resolve => setTimeout(resolve, time));
-}
-
-async function retrieveData(rev) {
-  let ready = false;
-  do {
-    let response = await fetch(`https://uplift.shipit.staging.mozilla-releng.net/coverage/changeset_summary/${rev}`);
-
-    if (response.status == 202) {
-      await wait(5000);
-      continue;
-    }
-
-    let result = await response.json();
-    result['rev'] = rev;
-    return result;
-  } while (!ready);
-}
-
 (function() {
 const container = document.getElementById("module-details-content");
 if (container) {
@@ -87,7 +67,7 @@ if (container) {
   mainDiv.appendChild(valueDiv);
   container.appendChild(mainDiv);
 
-  let promises = revs.map(retrieveData);
+  let promises = revs.map(fetchChangesetCoverage);
 
   Promise.all(promises)
   .then(results => {
