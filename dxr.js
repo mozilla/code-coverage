@@ -4,98 +4,23 @@
 
 "use strict";
 
-let result;
-
-async function applyOverlay(rev, path) {
-  if (!result) {
-    result = await fetchCoverage(rev, path);
-  }
-
-  for (let [l, c] of Object.entries(result)) {
-    const line_no = document.getElementById(l);
-    const line = document.getElementById(`line-${l}`);
-    if (c > 0) {
-      line_no.style.backgroundColor = 'greenyellow';
-      line.style.backgroundColor = 'greenyellow';
-    } else {
-      line_no.style.backgroundColor = 'tomato';
-      line.style.backgroundColor = 'tomato';
-    }
-  }
-}
-
-function removeOverlay() {
-  let l = 1;
-  while (true) {
-    const line_no = document.getElementById(l);
-    if (!line_no) {
-      break;
-    }
-    const line = document.getElementById(`line-${l}`);
-
-    line_no.style.backgroundColor = '';
-    line.style.backgroundColor = '';
-
-    l += 1;
-  }
-}
-
 (function() {
-  const breadcrumbs = document.querySelector('.breadcrumbs');
-  if (!breadcrumbs) {
-    return;
-  }
-
   // Don't do anything if this isn't a file.
-  const panel = document.getElementById('panel-content');
+  const panel = getNavigationPanel();
   if (!panel) {
     return;
   }
-
-  // Get the currently open file path.
-  const path = breadcrumbs.lastElementChild.href.split('/mozilla-central/source/')[1];
 
   // Get the current revision.
   const revPattern = new RegExp('Mercurial \\(([0-9a-f]+)\\)');
   const m = panel.innerHTML.match(revPattern);
   const rev = m[1];
 
-  const spinner = document.createElement('div');
-  spinner.classList.add('gecko_coverage_loader', 'gecko_coverage_loader_dxr');
-
-  let button = document.createElement('button');
-  button.type = 'button';
-  button.textContent = 'Code Coverage ';
-  button.style.backgroundColor = 'white';
-  button.style.marginBottom = '.2rem';
-  button.style.padding = '.3rem';
-  button.style.border = '1px solid #999';
-  button.style.width = 'auto';
-  button.style.minWidth = '100px';
-  button.style.borderRadius = '.2rem';
-  button.style.cursor = 'pointer';
-
-  let enabled = false;
-  async function toggle() {
-    enabled = !enabled;
-    if (enabled) {
-      button.appendChild(spinner);
-      await applyOverlay(rev, path);
-      button.removeChild(spinner);
-      button.style.backgroundColor = 'lightgrey';
-    } else {
-      removeOverlay();
-      button.style.backgroundColor = 'white';
-    }
+  let button = injectToggle(rev);
+  if (!button) {
+    return;
   }
 
-  button.onclick = toggle;
   let treeSelector = document.getElementById('tree-selector');
   treeSelector.appendChild(button);
-
-  document.onkeyup = function(e) {
-    if (e.key == 'c') {
-      toggle();
-    }
-  };
 })();
