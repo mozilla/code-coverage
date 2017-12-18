@@ -14,14 +14,14 @@
       "run_at": "document_end"
     },
     {
-      "matches": ["https://bugzilla.mozilla.org/show_bug.cgi?id=*"],
+      "matches": ["*://bugzilla.mozilla.org/show_bug.cgi?id=*"],
       "js": ["bugzilla.js"],
       "run_at": "document_end"
     }
   ],
   "permissions": [
-    "https://uplift.shipit.staging.mozilla-releng.net/coverage/*",
-    "https://api.pub.build.mozilla.org/mapper/gecko-dev/rev/git/*"
+    "*://uplift.shipit.staging.mozilla-releng.net/coverage/*",
+    "*://api.pub.build.mozilla.org/mapper/gecko-dev/rev/git/*"
   ],
   "homepage_url": "https://github.com/marco-c/code-coverage-addon"
 }
