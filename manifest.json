@@ -11,13 +11,13 @@
     {
       "matches": ["*://dxr.mozilla.org/mozilla-central/source/*"],
       "js": ["coverage.js", "dxr-common.js", "dxr.js"],
-      "css": ["spinner.css"],
+      "css": ["dxr.css", "spinner.css"],
       "run_at": "document_end"
     },
     {
       "matches": ["*://searchfox.org/mozilla-central/source/*"],
       "js": ["coverage.js", "dxr-common.js", "searchfox.js"],
-      "css": ["spinner.css"],
+      "css": ["dxr.css", "spinner.css"],
       "run_at": "document_end"
     },
     {

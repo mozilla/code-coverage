@@ -73,15 +73,7 @@ function injectToggle(rev) {
   let button = document.createElement('button');
   button.type = 'button';
   button.textContent = 'Code Coverage ';
-  button.style.backgroundColor = 'white';
-  button.style.marginBottom = '.2rem';
-  button.style.marginRight = '.2rem';
-  button.style.padding = '.3rem';
-  button.style.border = '1px solid #999';
-  button.style.width = 'auto';
-  button.style.minWidth = '100px';
-  button.style.borderRadius = '.2rem';
-  button.style.cursor = 'pointer';
+  button.className = 'gecko_code_coverage_toggle_button'
 
   let enabled = false;
   async function toggle() {
