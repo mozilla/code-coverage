@@ -61,6 +61,32 @@ if (container) {
     return;
   }
 
+  let styleEl = document.createElement('style');
+  document.head.appendChild(styleEl);
+  styleEl.sheet.insertRule(`@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}`, 0);
+  styleEl.sheet.insertRule(`.loader {
+  border: 3px solid #f3f3f3;
+  border-radius: 50%;
+  border-top: 3px solid green;
+  width: 13px;
+  height: 13px;
+  animation: spin 2s linear infinite;
+}`, 1);
+
+  const mainDiv = document.createElement('div');
+  mainDiv.className = 'field';
+  const nameDiv = document.createElement('div');
+  nameDiv.className = 'name';
+  nameDiv.textContent = 'Code Coverage:';
+  mainDiv.appendChild(nameDiv);
+  const valueDiv = document.createElement('div');
+  valueDiv.classList.add('loader');
+  mainDiv.appendChild(valueDiv);
+  container.appendChild(mainDiv);
+
   let promises = revs.map(retrieveData);
 
   Promise.all(promises)
@@ -72,21 +98,14 @@ if (container) {
       covered += result.commit_covered;
     }
 
-    if (added == 0) {
-      return;
-    }
-
-    const mainDiv = document.createElement('div');
-    mainDiv.setAttribute('class', 'field');
-    const nameDiv = document.createElement('div');
-    nameDiv.setAttribute('class', 'name');
-    nameDiv.textContent = 'Code Coverage:';
-    mainDiv.appendChild(nameDiv);
-    const valueDiv = document.createElement('div');
-    valueDiv.setAttribute('class', 'value');
+    valueDiv.classList.remove('loader');
     const span = document.createElement('span');
-    span.style.color = 'green';
-    span.textContent = `${covered} lines covered out of ${added} lines added`;
+    if (added > 0) {
+      span.style.color = 'green';
+      span.textContent = `${covered} lines covered out of ${added} lines added`;
+    } else {
+      span.textContent = 'No instrumented lines added.'
+    }
     valueDiv.appendChild(span);
     valueDiv.appendChild(document.createTextNode(' ('));
     let aElems = results.filter(result => result.commit_added > 0).map(result => {
@@ -104,8 +123,6 @@ if (container) {
     }
 
     valueDiv.appendChild(document.createTextNode(')'));
-    mainDiv.appendChild(valueDiv);
-    container.appendChild(mainDiv);
   });
 }
 })();
