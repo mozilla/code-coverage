@@ -106,21 +106,23 @@ Promise.all(promises)
   }
   valueDiv.className = 'value';
   valueDiv.appendChild(span);
-  valueDiv.appendChild(document.createTextNode(' ('));
-  let aElems = results.filter(result => result.commit_added > 0).map(result => {
-    let a = document.createElement('a');
-    a.href = `https://firefox-code-coverage.herokuapp.com/#/changeset/${result.rev}`;
-    a.textContent = result.rev;
-    return a;
-  });
+  if (added > 0) {
+    valueDiv.appendChild(document.createTextNode(' ('));
+    let aElems = results.filter(result => result.commit_added > 0).map(result => {
+      let a = document.createElement('a');
+      a.href = `https://firefox-code-coverage.herokuapp.com/#/changeset/${result.rev}`;
+      a.textContent = result.rev;
+      return a;
+    });
 
-  for (let i = 0; i < aElems.length; i++) {
-    valueDiv.appendChild(aElems[i]);
-    if (i != aElems.length - 1) {
-      valueDiv.appendChild(document.createTextNode(', '));
+    for (let i = 0; i < aElems.length; i++) {
+      valueDiv.appendChild(aElems[i]);
+      if (i != aElems.length - 1) {
+        valueDiv.appendChild(document.createTextNode(', '));
+      }
     }
-  }
 
-  valueDiv.appendChild(document.createTextNode(')'));
+    valueDiv.appendChild(document.createTextNode(')'));
+  }
 });
 })();
