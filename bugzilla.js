@@ -53,7 +53,11 @@ if (bugzilla_modal_ui) {
   mainDiv.className = 'field';
   const nameDiv = document.createElement('div');
   nameDiv.className = 'name';
-  nameDiv.textContent = 'Code Coverage:';
+  const a = document.createElement('a');
+  a.className = 'help';
+  a.textContent = 'Code Coverage:';
+  a.href = 'https://addons.mozilla.org/firefox/addon/gecko-code-coverage/';
+  nameDiv.append(a);
   mainDiv.appendChild(nameDiv);
   mainDiv.appendChild(valueDiv);
   container.appendChild(mainDiv);
@@ -63,10 +67,10 @@ if (bugzilla_modal_ui) {
   th.setAttribute('class', 'field_label');
   tr.append(th);
   const a = document.createElement('a');
-  a.setAttribute('class', 'field_help_link');
-  a.setAttribute('title', 'Code coverage for landed patches');
-  a.setAttribute('href', 'https://addons.mozilla.org/firefox/addon/gecko-code-coverage/');
-  a.innerText = 'Code Coverage:';
+  a.className = 'field_help_link';
+  a.title = 'Code coverage for landed patches';
+  a.href = 'https://addons.mozilla.org/firefox/addon/gecko-code-coverage/';
+  a.textContent = 'Code Coverage:';
   th.append(a);
   const td = document.createElement('td');
   td.setAttribute('class', 'field_value');
