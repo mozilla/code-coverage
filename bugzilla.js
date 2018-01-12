@@ -91,8 +91,25 @@ Promise.all(promises)
     covered += result.commit_covered;
   }
 
+  let errored = false;
+  let missing = false;
+  for (let result of results) {
+    if (result.error) {
+      errored = true;
+      if (result.error.includes('Couldn\'t find a build')) {
+        missing = true;
+      }
+    }
+  }
+
   const span = document.createElement('span');
-  if (added > 0) {
+  if (errored) {
+    if (missing) {
+      span.textContent = 'The tests for the build containing the patches aren\'t finished running yet.'
+    } else {
+      span.textContent = 'Error while retrieving coverage information.'
+    }
+  } else if (added > 0) {
     if (covered > 0.7 * added) {
       span.style.color = 'green';
     } else if (covered > 0.2 * added) {
