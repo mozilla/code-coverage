@@ -16,6 +16,18 @@ let get_files = function() {
   };
 }();
 
+let get_functions_stats = function() {
+  let files = null;
+  return async function() {
+    if (!files) {
+      let response = await fetch('https://raw.githubusercontent.com/marco-c/code-coverage-reports/master/zero_coverage_functions.json');
+      files = await response.json();
+    }
+
+    return files;
+  };
+}();
+
 let get_third_party_paths = function() {
   let paths = null;
   return async function() {
@@ -29,9 +41,9 @@ let get_third_party_paths = function() {
 }();
 
 function sort_entries(entries) {
-  return entries.sort(([dir1, len1], [dir2, len2]) => {
-    if (len1 != len2) {
-      return len1 < len2;
+  return entries.sort(([dir1, stats1], [dir2, stats2]) => {
+    if (stats1.children != stats2.children) {
+      return stats1.children < stats2.children;
     }
 
     return dir1 > dir2;
@@ -52,7 +64,7 @@ async function filter_third_party(files) {
 
   return files.filter(file => {
     for (let path of paths) {
-      if (file.startsWith(path)) {
+      if (file.name.startsWith(path)) {
         return false;
       }
     }
@@ -66,7 +78,7 @@ function filter_headers(files) {
     return files;
   }
 
-  return files.filter(file => !file.endsWith('.h'));
+  return files.filter(file => !file.name.endsWith('.h'));
 }
 
 function filter_languages(files) {
@@ -76,12 +88,12 @@ function filter_languages(files) {
   let js_extensions = ['js', 'jsm', 'xml', 'xul', 'xhtml', 'html'];
 
   return files.filter(file => {
-      if (cpp_extensions.find(ext => file.endsWith('.' + ext))) {
+      if (cpp_extensions.find(ext => file.name.endsWith('.' + ext))) {
         return cpp;
-      } else if (js_extensions.find(ext => file.endsWith('.' + ext))) {
+      } else if (js_extensions.find(ext => file.name.endsWith('.' + ext))) {
         return js;
       } else {
-        console.warn('Unknown language for ' + file);
+        console.warn('Unknown language for ' + file.name);
         return false;
       }
   });
@@ -94,7 +106,15 @@ async function generate(dir='') {
     dir = '';
   }
 
-  let files = (await get_files()).filter(file => file.startsWith(dir));
+  let uncovered_files = (await get_files()).filter(file => file.startsWith(dir));
+  let files = (await get_functions_stats()).filter(file => file.name.startsWith(dir));
+  let uncovered_files_set = new Set();
+  for (let file of uncovered_files) {
+      uncovered_files_set.add(file);
+  }
+  for (let obj of files) {
+      obj.uncovered = uncovered_files_set.has(obj.name);
+  }
   files = await filter_third_party(files);
   files = filter_languages(files);
   files = filter_headers(files);
@@ -102,20 +122,22 @@ async function generate(dir='') {
   let map = new Map();
 
   for (let file of files) {
-    let rest = file.substring(dir.lastIndexOf('/') + 1);
+    let rest = file.name.substring(dir.lastIndexOf('/') + 1);
 
     if (rest.includes('/')) {
       rest = rest.substring(0, rest.indexOf('/'));
-      let num = 1;
       if (map.has(rest)) {
-        num = map.get(rest) + 1;
+        existing_num = map.get(rest);
+        existing_num.children += 1;
+        existing_num.funcs += file.funcs;
+      } else {
+        map.set(rest, {'children': 1, 'funcs': file.funcs});
       }
-      map.set(rest, num);
     } else {
       if (map.has(rest)) {
         console.warn(rest + ' is already in map.');
       }
-      map.set(rest, 0);
+      map.set(rest, {'children': 0, 'funcs': file.funcs});
     }
   }
 
@@ -128,23 +150,18 @@ async function generate(dir='') {
   output.appendChild(document.createElement('br'));
   output.appendChild(document.createElement('br'));
 
-  let arr = [];
-  for (let entry of map) arr.push(entry);
-
-  for (let [entry, len] of sort_entries(arr)) {
+  for (let [entry, stats] of sort_entries(Array.from(map.entries()))) {
     let entryElem = document.createElement('span');
-    if (len != 0) {
-      let a = document.createElement('a');
-      a.textContent = entry;
+    let a = document.createElement('a');
+    a.textContent = entry;
+    entryElem.appendChild(a);
+    if (stats.children != 0) {
       a.href = '#' + dir + entry;
-      entryElem.appendChild(a);
-      entryElem.appendChild(document.createTextNode(' with ' + len + ' files.'));
+      entryElem.appendChild(document.createTextNode(` - ${stats.children} files and ${stats.funcs} functions`));
     } else {
-      let a = document.createElement('a');
       a.target = '_blank';
-      a.textContent = entry;
       a.href = 'https://codecov.io/gh/marco-c/gecko-dev/src/master/' + dir + entry;
-      entryElem.appendChild(a);
+      entryElem.appendChild(document.createTextNode(` - ${stats.funcs} functions`));
     }
     output.appendChild(entryElem);
     output.appendChild(document.createElement('br'));
