@@ -46,6 +46,10 @@ function sort_entries(entries) {
       return stats1.children < stats2.children;
     }
 
+    if (stats1.funcs != stats2.funcs) {
+      return stats1.funcs < stats2.funcs;
+    }
+
     return dir1 > dir2;
   });
 }
