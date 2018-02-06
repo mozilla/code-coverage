@@ -25,11 +25,18 @@
       "js": ["coverage.js", "bugzilla.js"],
       "css": ["spinner.css"],
       "run_at": "document_end"
+    },
+    {
+      "matches": ["*://reviewboard.mozilla.org/r/*/diff/*"],
+      "js": ["coverage.js", "mozreview.js"],
+      "css": ["spinner.css"],
+      "run_at": "document_end"
     }
   ],
   "permissions": [
-    "*://uplift.shipit.staging.mozilla-releng.net/coverage/*",
-    "*://api.pub.build.mozilla.org/mapper/gecko-dev/rev/git/*"
+    "https://uplift.shipit.staging.mozilla-releng.net/coverage/*",
+    "https://api.pub.build.mozilla.org/mapper/gecko-dev/rev/git/*",
+    "https://reviewboard-hg.mozilla.org/gecko/*"
   ],
   "homepage_url": "https://github.com/marco-c/code-coverage-addon"
 }
