@@ -103,6 +103,14 @@ function filter_languages(files) {
   });
 }
 
+function filter_completely_uncovered(files) {
+  if (!is_enabled('completely_uncovered')) {
+    return files;
+  }
+
+  return files.filter(file => file.uncovered);
+}
+
 async function generate(dir='') {
   while (dir.endsWith('/')) dir = dir.substring(0, dir.length - 1);
   dir += '/';
@@ -122,6 +130,7 @@ async function generate(dir='') {
   files = await filter_third_party(files);
   files = filter_languages(files);
   files = filter_headers(files);
+  files = filter_completely_uncovered(files);
 
   let map = new Map();
 
@@ -181,7 +190,7 @@ async function main() {
     generate(window.location.hash.substring(1));
   }
 
-  let opts = ['third_party', 'headers', 'cpp', 'js'];
+  let opts = ['third_party', 'headers', 'completely_uncovered', 'cpp', 'js'];
   for (let opt of opts) {
     let elem = document.getElementById(opt);
     elem.onchange = go;
