@@ -36,28 +36,36 @@ async function applyOverlay(diff, path) {
   const middleRevs = allRevs.slice(1, allRevs.length - 1)
 
   if (!results[path]) {
-    const coverage = await fetchCoverage(publicRev, path);
-    const annotate = await fetchAnnotate(curRev, path);
+    try {
+      const coverage = await fetchCoverage(publicRev, path);
+      const annotate = await fetchAnnotate(curRev, path);
 
-    results[path] = {}
+      results[path] = {}
 
-    for (let data of annotate['annotate']) {
-      // Skip lines that were modified by a patch in the queue between a mozilla-central patch and the current
-      // shown patch.
-      if (middleRevs.includes(data['node'])) {
-        continue;
+      for (let data of annotate['annotate']) {
+        // Skip lines that were modified by a patch in the queue between a mozilla-central patch and the current
+        // shown patch.
+        if (middleRevs.includes(data['node'])) {
+          continue;
+        }
+
+        const line = data['lineno']
+
+        if (!coverage.hasOwnProperty(line)) {
+          continue;
+        }
+
+        results[path][line] = coverage[line];
       }
-
-      const line = data['lineno']
-
-      if (!coverage.hasOwnProperty(line)) {
-        continue;
-      }
-
-      results[path][line] = coverage[line];
+    } catch (ex) {
+      results[path] = 'error';
+      throw new Error('Error retrieving code coverage');
     }
   }
   let result = results[path];
+  if (result === 'error') {
+    throw new Error('Error retrieving code coverage');
+  }
 
   let lines = diff.querySelectorAll('td.l');
 
@@ -93,13 +101,18 @@ async function addButton(diff, rightPos, isLatestRev) {
   }
 
   const coverageButton = document.createElement('button');
+
+  function disableButton(text) {
+    coverageButton.setAttribute('disabled', 'disabled');
+    coverageButton.style['cursor'] = 'not-allowed';
+    coverageButton.title += '- ' + text;
+  }
+
   coverageButton.className = 'diff-file-btn';
   coverageButton.title = coverageButton.textContent = 'Code Coverage ';
   coverageButton.style['right'] = rightPos + 'px';
   if (!isLatestRev) {
-    coverageButton.setAttribute('disabled', 'disabled');
-    coverageButton.style['cursor'] = 'not-allowed';
-    coverageButton.title += '- Only available on the latest revision'
+    disableButton('Only available on the latest revision');
   }
   diff.appendChild(coverageButton);
 
@@ -111,9 +124,13 @@ async function addButton(diff, rightPos, isLatestRev) {
   async function maybeApply() {
     if (enabled) {
       coverageButton.appendChild(spinner);
-      await applyOverlay(diff, fileName);
+      try {
+        await applyOverlay(diff, fileName);
+        coverageButton.classList.add('reviewed');
+      } catch (ex) {
+        disableButton('Error retrieving coverage information for this file');
+      }
       coverageButton.removeChild(spinner);
-      coverageButton.classList.add('reviewed');
     } else {
       removeOverlay(diff);
       coverageButton.classList.remove('reviewed');
