@@ -4,6 +4,7 @@
 
 "use strict";
 
+// TODO: Can we use codecov.io directly?
 async function fetchCoverage(rev, path) {
   let response = await fetch(`https://uplift.shipit.staging.mozilla-releng.net/coverage/file?changeset=${rev}&path=${path}`);
   return await response.json();
@@ -33,4 +34,9 @@ async function gitToHg(gitrev) {
   let response = await fetch(`https://api.pub.build.mozilla.org/mapper/gecko-dev/rev/git/${gitrev}`);
   let text = await response.text();
   return text.split(' ')[1];
+}
+
+async function fetchAnnotate(rev, path) {
+  let response = await fetch(`https://reviewboard-hg.mozilla.org/gecko/json-annotate/${rev}/${path}`);
+  return await response.json();
 }

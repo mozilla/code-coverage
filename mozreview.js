@@ -14,7 +14,7 @@ async function waitExists(elemFinder) {
       return elem;
     }
 
-    await(50);
+    await(200);
   }
 }
 
@@ -25,13 +25,37 @@ async function waitHidden(elem) {
       return;
     }
 
-    await wait(50);
+    await wait(200);
   }
 }
 
-async function applyOverlay(diff, rev, path) {
+async function applyOverlay(diff, path) {
+  const curRev = allRevs[0]['node'];
+  const publicRev = allRevs[allRevs.length - 1]['node'];
+
+  const middleRevs = allRevs.slice(1, allRevs.length - 1)
+
   if (!results[path]) {
-    results[path] = await fetchCoverage(rev, path);
+    const coverage = await fetchCoverage(publicRev, path);
+    const annotate = await fetchAnnotate(curRev, path);
+
+    results[path] = {}
+
+    for (let data of annotate['annotate']) {
+      // Skip lines that were modified by a patch in the queue between a mozilla-central patch and the current
+      // shown patch.
+      if (middleRevs.includes(data['node'])) {
+        continue;
+      }
+
+      const line = data['lineno']
+
+      if (!coverage.hasOwnProperty(line)) {
+        continue;
+      }
+
+      results[path][line] = coverage[line];
+    }
   }
   let result = results[path];
 
@@ -72,11 +96,6 @@ async function addButton(diff) {
     return;
   }
 
-  let curRev = allRevs[0]['node'];
-  let publicRev = allRevs[allRevs.length - 1]['node'];
-  // TODO: If one of the patches in allRevs except allRevs[0] (which is the current patch under review) modifies
-  //       this file, then the button should be disabled like when we're not on the latest revision.
-
   const reviewButton = await waitExists(() => diff.querySelector('.diff-file-btn'));
   const reviewButtonStyle = window.getComputedStyle(reviewButton);
   const reviewButtonPaddingLeft = parseInt(reviewButtonStyle['padding-left'], 10);
@@ -102,7 +121,7 @@ async function addButton(diff) {
   async function maybeApply() {
     if (enabled) {
       coverageButton.appendChild(spinner);
-      await applyOverlay(diff, publicRev, fileName);
+      await applyOverlay(diff, fileName);
       coverageButton.removeChild(spinner);
       coverageButton.classList.add('reviewed');
     } else {
@@ -147,6 +166,8 @@ async function addButton(diff) {
 }
 
 async function getParents(rev) {
+  const hgurlPattern = new RegExp('https://reviewboard-hg.mozilla.org/gecko/rev/([0-9a-f]+)$');
+
   let revisions = [];
 
   let isPublic = false;
@@ -157,12 +178,6 @@ async function getParents(rev) {
 
     isPublic = data['phase'] == 'public';
 
-    // We don't need this for the current shown patch and the mozilla-central patch.
-    if (revisions.length != 0 && !isPublic) {
-      response = await fetch(`https://reviewboard-hg.mozilla.org/gecko/raw-rev/${rev}`);
-      let patch = await response.text();
-      // TODO: Add files modified by the patch.
-    }
     revisions.push(data);
 
     rev = data['parents'][0];
