@@ -14,7 +14,7 @@ async function waitExists(elemFinder) {
       return elem;
     }
 
-    await(200);
+    await waitIdle(50);
   }
 }
 
@@ -25,7 +25,7 @@ async function waitHidden(elem) {
       return;
     }
 
-    await wait(200);
+    await waitIdle(50);
   }
 }
 
@@ -86,27 +86,17 @@ function removeOverlay(diff) {
   }
 }
 
-async function addButton(diff) {
-  if (diff.className != 'diff-container') {
-    return;
-  }
-
+async function addButton(diff, rightPos, isLatestRev) {
   const fileName = diff.querySelector('.filename-row').innerText;
   if (fileName.startsWith('commit-message')) {
     return;
   }
 
-  const reviewButton = await waitExists(() => diff.querySelector('.diff-file-btn'));
-  const reviewButtonStyle = window.getComputedStyle(reviewButton);
-  const reviewButtonPaddingLeft = parseInt(reviewButtonStyle['padding-left'], 10);
-  const reviewButtonRight = parseInt(reviewButtonStyle['right'], 10);
-  const reviewButtonWidth = reviewButton.offsetWidth;
-
   const coverageButton = document.createElement('button');
   coverageButton.className = 'diff-file-btn';
   coverageButton.title = coverageButton.textContent = 'Code Coverage ';
-  coverageButton.style['right'] = reviewButtonRight + reviewButtonWidth + reviewButtonPaddingLeft + 'px';
-  if (!isLatestRevision()) {
+  coverageButton.style['right'] = rightPos + 'px';
+  if (!isLatestRev) {
     coverageButton.setAttribute('disabled', 'disabled');
     coverageButton.style['cursor'] = 'not-allowed';
     coverageButton.title += '- Only available on the latest revision'
@@ -165,6 +155,36 @@ async function addButton(diff) {
   return coverageButton;
 }
 
+let buttons = [];
+async function injectButtons() {
+  while (buttons.length) {
+    buttons.pop().remove();
+  }
+
+  let coverageButtonRightPos;
+  const isLatestRev = isLatestRevision();
+  const diffs = document.getElementById('diffs');
+  for (const diff of diffs.children) {
+    if (diff.className != 'diff-container') {
+      continue;
+    }
+
+    if (typeof coverageButtonRightPos === 'undefined') {
+      const reviewButton = await waitExists(() => diff.querySelector('.diff-file-btn'));
+      const reviewButtonStyle = window.getComputedStyle(reviewButton);
+      const reviewButtonPaddingLeft = parseInt(reviewButtonStyle['padding-left'], 10);
+      const reviewButtonRight = parseInt(reviewButtonStyle['right'], 10);
+      const reviewButtonWidth = reviewButton.offsetWidth;
+      coverageButtonRightPos = reviewButtonRight + reviewButtonWidth + reviewButtonPaddingLeft;
+    }
+
+    let button = await addButton(diff, coverageButtonRightPos, isLatestRev);
+    if (button) {
+      buttons.push(button);
+    }
+  }
+}
+
 async function getParents(rev) {
   const hgurlPattern = new RegExp('https://reviewboard-hg.mozilla.org/gecko/rev/([0-9a-f]+)$');
 
@@ -184,21 +204,6 @@ async function getParents(rev) {
   } while (!isPublic);
 
   return revisions;
-}
-
-let buttons = [];
-async function injectButtons() {
-  while (buttons.length) {
-    buttons.pop().remove();
-  }
-
-  const diffs = document.getElementById('diffs');
-  for (const diff of diffs.children) {
-    let button = await addButton(diff);
-    if (button) {
-      buttons.push(button);
-    }
-  }
 }
 
 function getRevisionLabel() {

@@ -14,6 +14,11 @@ function wait(time) {
   return new Promise(resolve => setTimeout(resolve, time));
 }
 
+async function waitIdle(time) {
+  await wait(time);
+  return new Promise(resolve => requestIdleCallback(resolve));
+}
+
 async function fetchChangesetCoverage(rev) {
   let ready = false;
   do {
