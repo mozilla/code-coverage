@@ -2,11 +2,11 @@
   "author": "Marco Castelluccio",
   "manifest_version": 2,
   "name": "Gecko Code Coverage",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "icons": {
     "270": "coverage.jpg"
   },
-  "description": "Extensions that augments several Mozilla websites (Bugzilla, DXR, Searchfox) with code coverage information.",
+  "description": "Extensions that augments several Mozilla websites (Bugzilla, DXR, Searchfox, MozReview) with code coverage information.",
   "content_scripts": [
     {
       "matches": ["*://dxr.mozilla.org/mozilla-central/source/*"],
