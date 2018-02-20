@@ -36,6 +36,9 @@ async function fetchChangesetCoverage(rev) {
 
 async function gitToHg(gitrev) {
   let response = await fetch(`https://api.pub.build.mozilla.org/mapper/gecko-dev/rev/git/${gitrev}`);
+  if (!response.ok) {
+    throw new Error(`Error retrieving git to mercurial mapping for ${gitrev}.`)
+  }
   let text = await response.text();
   return text.split(' ')[1];
 }
