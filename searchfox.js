@@ -15,9 +15,9 @@
   const revSpan = document.getElementById('rev-id');
   const m = revSpan.innerHTML.match(revPattern);
   const gitRev = m[1];
-  const rev = await gitToHg(gitRev);
+  const revPromise = gitToHg(gitRev);
 
-  let button = injectToggle(rev);
+  let button = injectToggle(revPromise);
   if (!button) {
     return;
   }

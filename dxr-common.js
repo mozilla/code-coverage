@@ -13,16 +13,19 @@ if (document.getElementById('l1')) {
   lineNoMap = l => l;
 }
 
-async function getCoverage(rev, path) {
+async function getCoverage(revPromise, path) {
   if (!resultPromise) {
-    resultPromise = fetchCoverage(rev, path);
+    resultPromise = (async function() {
+      const rev = await revPromise;
+      return fetchCoverage(rev, path);
+    })();
   }
 
   return resultPromise;
 }
 
-async function applyOverlay(rev, path) {
-  let result = await getCoverage(rev, path);
+async function applyOverlay(revPromise, path) {
+  let result = await getCoverage(revPromise, path);
 
   for (let [l, c] of Object.entries(result)) {
     const line_no = document.getElementById(lineNoMap(l));
@@ -67,14 +70,14 @@ function getNavigationPanel() {
   return document.getElementById('panel-content');
 }
 
-function injectToggle(rev) {
+function injectToggle(revPromise) {
   const path = getPath();
   if (!path) {
     return;
   }
 
   // Preload coverage data.
-  getCoverage(rev, path);
+  getCoverage(revPromise, path);
 
   const spinner = document.createElement('div');
   spinner.classList.add('gecko_coverage_loader', 'gecko_coverage_loader_dxr');
@@ -89,7 +92,7 @@ function injectToggle(rev) {
     enabled = !enabled;
     if (enabled) {
       button.appendChild(spinner);
-      await applyOverlay(rev, path, lineNoMap);
+      await applyOverlay(revPromise, path, lineNoMap);
       button.removeChild(spinner);
       button.style.backgroundColor = 'lightgrey';
     } else {
