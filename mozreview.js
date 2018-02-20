@@ -4,7 +4,7 @@
 
 "use strict";
 
-let allRevs;
+let allRevsPromise;
 
 async function waitExists(elemFinder) {
   while (true) {
@@ -30,6 +30,8 @@ async function waitHidden(elem) {
 
 let results = {}
 async function getChangesetData(path) {
+  const allRevs = await allRevsPromise;
+
   const curRev = allRevs[0]['node'];
   const publicRev = allRevs[allRevs.length - 1]['node'];
 
@@ -256,7 +258,7 @@ function checkRevisionChange(cb) {
     }
   }
 
-  allRevs = await getParents(mozreviewRevision);
+  allRevsPromise = getParents(mozreviewRevision);
 
   if (document.readyState === 'complete') {
     injectButtons();
