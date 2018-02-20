@@ -4,7 +4,7 @@
 
 "use strict";
 
-let result;
+let resultPromise;
 
 let lineNoMap;
 if (document.getElementById('l1')) {
@@ -13,10 +13,16 @@ if (document.getElementById('l1')) {
   lineNoMap = l => l;
 }
 
-async function applyOverlay(rev, path) {
-  if (!result) {
-    result = await fetchCoverage(rev, path);
+async function getCoverage(rev, path) {
+  if (!resultPromise) {
+    resultPromise = fetchCoverage(rev, path);
   }
+
+  return resultPromise;
+}
+
+async function applyOverlay(rev, path) {
+  let result = await getCoverage(rev, path);
 
   for (let [l, c] of Object.entries(result)) {
     const line_no = document.getElementById(lineNoMap(l));
@@ -66,6 +72,9 @@ function injectToggle(rev) {
   if (!path) {
     return;
   }
+
+  // Preload coverage data.
+  getCoverage(rev, path);
 
   const spinner = document.createElement('div');
   spinner.classList.add('gecko_coverage_loader', 'gecko_coverage_loader_dxr');
