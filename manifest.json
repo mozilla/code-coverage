@@ -2,7 +2,7 @@
   "author": "Marco Castelluccio",
   "manifest_version": 2,
   "name": "Gecko Code Coverage",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "icons": {
     "270": "coverage.jpg"
   },
