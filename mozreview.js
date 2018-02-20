@@ -28,46 +28,50 @@ async function waitHidden(elem) {
   }
 }
 
-let results = {}
+let resultPromises = {}
 async function getChangesetData(path) {
-  const allRevs = await allRevsPromise;
+  if (!resultPromises[path]) {
+    resultPromises[path] = (async function() {
+      const allRevs = await allRevsPromise;
 
-  const curRev = allRevs[0]['node'];
-  const publicRev = allRevs[allRevs.length - 1]['node'];
+      const curRev = allRevs[0]['node'];
+      const publicRev = allRevs[allRevs.length - 1]['node'];
 
-  const middleRevs = allRevs.slice(1, allRevs.length - 1)
+      const middleRevs = allRevs.slice(1, allRevs.length - 1)
 
-  if (!results[path]) {
-    try {
-      const coveragePromise = fetchCoverage(publicRev, path);
-      const annotatePromise = fetchAnnotate(curRev, path);
+      try {
+          const coveragePromise = fetchCoverage(publicRev, path);
+          const annotatePromise = fetchAnnotate(curRev, path);
 
-      const coverage = await coveragePromise;
-      const annotate = await annotatePromise;
+          const coverage = await coveragePromise;
+          const annotate = await annotatePromise;
 
-      results[path] = {}
+          let result = {}
 
-      for (let data of annotate['annotate']) {
-        // Skip lines that were modified by a patch in the queue between a mozilla-central patch and the current
-        // shown patch.
-        if (middleRevs.includes(data['node'])) {
-          continue;
+          for (const data of annotate['annotate']) {
+            // Skip lines that were modified by a patch in the queue between a mozilla-central patch and the current
+            // shown patch.
+            if (middleRevs.includes(data['node'])) {
+              continue;
+            }
+
+            const line = data['lineno']
+
+            if (!coverage.hasOwnProperty(line)) {
+              continue;
+            }
+
+            result[line] = coverage[line];
+          }
+
+          return result;
+        } catch (ex) {
+          return 'error';
         }
-
-        const line = data['lineno']
-
-        if (!coverage.hasOwnProperty(line)) {
-          continue;
-        }
-
-        results[path][line] = coverage[line];
-      }
-    } catch (ex) {
-      results[path] = 'error';
-    }
+      })();
   }
 
-  return results[path];
+  return resultPromises[path];
 }
 
 async function applyOverlay(diff, path) {
@@ -108,6 +112,9 @@ async function addButton(diff, rightPos, isLatestRev) {
   if (fileName.startsWith('commit-message')) {
     return;
   }
+
+  // Preload coverage data.
+  getChangesetData(fileName);
 
   const coverageButton = document.createElement('button');
 
