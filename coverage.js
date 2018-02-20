@@ -4,7 +4,6 @@
 
 "use strict";
 
-// TODO: Can we use codecov.io directly?
 async function fetchCoverage(rev, path) {
   let response = await fetch(`https://uplift.shipit.staging.mozilla-releng.net/coverage/file?changeset=${rev}&path=${path}`);
   return await response.json();
