@@ -5,7 +5,6 @@
 "use strict";
 
 let allRevs;
-let results = {};
 
 async function waitExists(elemFinder) {
   while (true) {
@@ -29,7 +28,8 @@ async function waitHidden(elem) {
   }
 }
 
-async function applyOverlay(diff, path) {
+let results = {}
+async function getChangesetData(path) {
   const curRev = allRevs[0]['node'];
   const publicRev = allRevs[allRevs.length - 1]['node'];
 
@@ -37,8 +37,11 @@ async function applyOverlay(diff, path) {
 
   if (!results[path]) {
     try {
-      const coverage = await fetchCoverage(publicRev, path);
-      const annotate = await fetchAnnotate(curRev, path);
+      const coveragePromise = fetchCoverage(publicRev, path);
+      const annotatePromise = fetchAnnotate(curRev, path);
+
+      const coverage = await coveragePromise;
+      const annotate = await annotatePromise;
 
       results[path] = {}
 
@@ -59,10 +62,14 @@ async function applyOverlay(diff, path) {
       }
     } catch (ex) {
       results[path] = 'error';
-      throw new Error('Error retrieving code coverage');
     }
   }
-  let result = results[path];
+
+  return results[path];
+}
+
+async function applyOverlay(diff, path) {
+  let result = await getChangesetData(path);
   if (result === 'error') {
     throw new Error('Error retrieving code coverage');
   }
