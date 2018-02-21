@@ -1,0 +1,23 @@
+{
+  "name": "gecko-code-coverage",
+  "version": "0.5.1",
+  "description": "Extensions that augments several Mozilla websites (Bugzilla, DXR, Searchfox, MozReview) with code coverage information.",
+  "main": "bugzilla.js",
+  "dependencies": {
+    "web-ext": "^2.4.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "web-ext lint"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/marco-c/code-coverage-addon.git"
+  },
+  "author": "Marco Castelluccio",
+  "license": "MPL-2.0",
+  "bugs": {
+    "url": "https://github.com/marco-c/code-coverage-addon/issues"
+  },
+  "homepage": "https://github.com/marco-c/code-coverage-addon#readme"
+}
