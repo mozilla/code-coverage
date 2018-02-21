@@ -2,7 +2,7 @@ language: node_js
 node_js: node
 install:
     - npm install
-    - pip install -r  requirements.txt
+    - pip3 install -r  requirements.txt
 script:
     - npm test
     - python3 build.py
