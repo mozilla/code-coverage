@@ -10,6 +10,11 @@
     return;
   }
 
+  const path = getPath();
+  if (!path || !isCoverageSupported(path)) {
+    return;
+  }
+
   // Get the current revision.
   const revPattern = new RegExp('/mozilla-central/commit/([0-9a-f]+)"');
   const revSpan = document.getElementById('rev-id');
@@ -17,7 +22,7 @@
   const gitRev = m[1];
   const revPromise = gitToHg(gitRev);
 
-  let button = injectToggle(revPromise);
+  const button = injectToggle(revPromise, path);
   if (!button) {
     return;
   }

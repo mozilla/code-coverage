@@ -70,12 +70,7 @@ function getNavigationPanel() {
   return document.getElementById('panel-content');
 }
 
-function injectToggle(revPromise) {
-  const path = getPath();
-  if (!path) {
-    return;
-  }
-
+function injectToggle(revPromise, path) {
   // Preload coverage data.
   getCoverage(revPromise, path);
 

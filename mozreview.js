@@ -113,6 +113,10 @@ async function addButton(diff, rightPos, isLatestRev) {
     return;
   }
 
+  if (!isCoverageSupported(fileName)) {
+    return;
+  }
+
   // Preload coverage data.
   getChangesetData(fileName);
 

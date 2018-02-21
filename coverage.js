@@ -47,3 +47,7 @@ async function fetchAnnotate(rev, path) {
   let response = await fetch(`https://reviewboard-hg.mozilla.org/gecko/json-annotate/${rev}/${path}`);
   return await response.json();
 }
+
+function isCoverageSupported(path) {
+    return SUPPORTED_EXTENSIONS.findIndex(ext => path.endsWith(`.${ext}`)) != -1;
+}

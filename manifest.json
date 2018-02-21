@@ -10,13 +10,13 @@
   "content_scripts": [
     {
       "matches": ["*://dxr.mozilla.org/mozilla-central/source/*"],
-      "js": ["coverage.js", "dxr-common.js", "dxr.js"],
+      "js": ["supported_extensions.js", "coverage.js", "dxr-common.js", "dxr.js"],
       "css": ["dxr.css", "spinner.css"],
       "run_at": "document_end"
     },
     {
       "matches": ["*://searchfox.org/mozilla-central/source/*"],
-      "js": ["coverage.js", "dxr-common.js", "searchfox.js"],
+      "js": ["supported_extensions.js", "coverage.js", "dxr-common.js", "searchfox.js"],
       "css": ["dxr.css", "spinner.css"],
       "run_at": "document_end"
     },
@@ -28,7 +28,7 @@
     },
     {
       "matches": ["*://reviewboard.mozilla.org/r/*/diff/*"],
-      "js": ["coverage.js", "mozreview.js"],
+      "js": ["supported_extensions.js", "coverage.js", "mozreview.js"],
       "css": ["spinner.css"],
       "run_at": "document_end"
     }
