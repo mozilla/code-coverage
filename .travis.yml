@@ -5,7 +5,7 @@ install:
     - export PATH=$HOME/.local/bin:$PATH
     - pip install -r requirements.txt --user `whoami`
 script:
-    - npm test
     - flake8
     - python build.py
+    - npm test
     - test -f gecko-code-coverage.zip
