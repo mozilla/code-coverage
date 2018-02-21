@@ -1,9 +1,5 @@
 language: node_js
 node_js: node
-addons:
-  apt:
-    packages:
-      - python3
 script:
     - npm test
     - python3 build.py
