@@ -2,10 +2,7 @@ language: node_js
 node_js: node
 install:
     - npm install
-    - export PATH=$HOME/.local/bin:$PATH
-    - pip install -r requirements.txt --user `whoami`
 script:
-    - flake8
-    - python build.py
+    - npm run build
     - npm test
     - test -f gecko-code-coverage.zip

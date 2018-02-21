@@ -1,2 +1,0 @@
-requests[security]==2.15.1
-flake8
