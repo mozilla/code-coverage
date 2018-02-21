@@ -2,7 +2,8 @@ language: node_js
 node_js: node
 install:
     - npm install
-    - pip install -r  requirements.txt
+    - export PATH=$HOME/.local/bin:$PATH
+    - pip install -r requirements.txt --user `whoami`
 script:
     - npm test
     - flake8
