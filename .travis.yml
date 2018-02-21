@@ -2,9 +2,9 @@ language: node_js
 node_js: node
 install:
     - npm install
-    - pip3 install -r  requirements.txt
+    - pip install -r  requirements.txt
 script:
     - npm test
     - flake8
-    - python3 build.py
+    - python build.py
     - test -f gecko-code-coverage.zip
