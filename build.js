@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 
 const fs = require('fs');
 const https = require('https');
@@ -25,7 +25,7 @@ https.get('https://uplift.shipit.staging.mozilla-releng.net/coverage/supported_e
         return;
       }
 
-      fs.readdir(".", (e, files) => {
+      fs.readdir('.', (e, files) => {
         if (e) {
           console.error(e.message);
           return;
@@ -36,14 +36,14 @@ https.get('https://uplift.shipit.staging.mozilla-releng.net/coverage/supported_e
         makeZip(resultFiles);
       });
     });
- });
+  });
 }).on('error', e => console.error(e.message));
 
 function makeZip(list){
   const output = fs.createWriteStream(zipName);
 
   let archive = archiver('zip', {
-      zlib: { level: 9 }
+    zlib: { level: 9 }
   });
 
   archive.on('error', e => console.error(e.message));

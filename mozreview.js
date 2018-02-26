@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-"use strict";
+'use strict';
 
 let allRevsPromise;
 
@@ -28,7 +28,7 @@ async function waitHidden(elem) {
   }
 }
 
-let resultPromises = {}
+let resultPromises = {};
 async function getChangesetData(path) {
   if (!resultPromises[path]) {
     resultPromises[path] = (async function() {
@@ -37,38 +37,38 @@ async function getChangesetData(path) {
       const curRev = allRevs[0]['node'];
       const publicRev = allRevs[allRevs.length - 1]['node'];
 
-      const middleRevs = allRevs.slice(1, allRevs.length - 1)
+      const middleRevs = allRevs.slice(1, allRevs.length - 1);
 
       try {
-          const coveragePromise = fetchCoverage(publicRev, path);
-          const annotatePromise = fetchAnnotate(curRev, path);
+        const coveragePromise = fetchCoverage(publicRev, path);
+        const annotatePromise = fetchAnnotate(curRev, path);
 
-          const coverage = await coveragePromise;
-          const annotate = await annotatePromise;
+        const coverage = await coveragePromise;
+        const annotate = await annotatePromise;
 
-          let result = {}
+        let result = {};
 
-          for (const data of annotate['annotate']) {
-            // Skip lines that were modified by a patch in the queue between a mozilla-central patch and the current
-            // shown patch.
-            if (middleRevs.includes(data['node'])) {
-              continue;
-            }
-
-            const line = data['lineno']
-
-            if (!coverage.hasOwnProperty(line)) {
-              continue;
-            }
-
-            result[line] = coverage[line];
+        for (const data of annotate['annotate']) {
+          // Skip lines that were modified by a patch in the queue between a mozilla-central patch and the current
+          // shown patch.
+          if (middleRevs.includes(data['node'])) {
+            continue;
           }
 
-          return result;
-        } catch (ex) {
-          return 'error';
+          const line = data['lineno'];
+
+          if (!coverage.hasOwnProperty(line)) {
+            continue;
+          }
+
+          result[line] = coverage[line];
         }
-      })();
+
+        return result;
+      } catch (ex) {
+        return 'error';
+      }
+    })();
   }
 
   return resultPromises[path];
@@ -275,7 +275,7 @@ function checkRevisionChange(cb) {
     injectButtons();
   } else {
     document.onreadystatechange = function () {
-      if (document.readyState !== "complete") {
+      if (document.readyState !== 'complete') {
         return;
       }
 

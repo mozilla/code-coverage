@@ -2,7 +2,7 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-"use strict";
+'use strict';
 
 async function fetchCoverage(rev, path) {
   let response = await fetch(`https://uplift.shipit.staging.mozilla-releng.net/coverage/file?changeset=${rev}&path=${path}`);
@@ -37,7 +37,7 @@ async function fetchChangesetCoverage(rev) {
 async function gitToHg(gitrev) {
   let response = await fetch(`https://api.pub.build.mozilla.org/mapper/gecko-dev/rev/git/${gitrev}`);
   if (!response.ok) {
-    throw new Error(`Error retrieving git to mercurial mapping for ${gitrev}.`)
+    throw new Error(`Error retrieving git to mercurial mapping for ${gitrev}.`);
   }
   let text = await response.text();
   return text.split(' ')[1];
@@ -49,5 +49,5 @@ async function fetchAnnotate(rev, path) {
 }
 
 function isCoverageSupported(path) {
-    return SUPPORTED_EXTENSIONS.findIndex(ext => path.endsWith(`.${ext}`)) != -1;
+  return SUPPORTED_EXTENSIONS.findIndex(ext => path.endsWith(`.${ext}`)) != -1;
 }
