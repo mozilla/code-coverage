@@ -2,7 +2,6 @@ module.exports = {
     "globals": {
         "waitIdle": true,
         "wait": true,
-        "fetch": true,
         "fetchCoverage": true,
         "fetchAnnotate": true,
         "fetchChangesetCoverage": true,
