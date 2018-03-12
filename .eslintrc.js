@@ -36,22 +36,11 @@ module.exports = {
             "error",
             2
         ],
-        "linebreak-style": [
+        "no-console": [
             "error",
-            "windows"
-        ],
-        "quotes": [
-            "warn",
-            "single"
-        ],
-        "no-unused-vars": [
-            "warn",
-            "all"
-        ],
-        "no-constant-condition": [
-            "warn"
-        ],
-        "no-console": "off"
-        
+            {
+                "allow": ["error"]
+            }
+        ]    
     }
 };
