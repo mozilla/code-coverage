@@ -11,6 +11,17 @@ const includeFiles = [
   'spinner.css', 'supported_extensions.js',
 ];
 const zipName = './gecko-code-coverage.zip';
+fs.readFile('manifest.json', 'utf8', function(err, data) {
+  if (err) throw err;
+  let manObj = JSON.parse(data);
+  fs.readFile('package.json', 'utf8', function(err, data) {
+      if (err) throw err;
+      let packObj = JSON.parse(data);
+      if (manObj["version"] != packObj["version"]) {
+          throw "Different versions of manifest.json and package.json";
+      }
+  });
+});
 
 https.get('https://uplift.shipit.staging.mozilla-releng.net/coverage/supported_extensions', res => {
   let data = '';
