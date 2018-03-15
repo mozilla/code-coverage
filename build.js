@@ -32,14 +32,12 @@ https.get('https://uplift.shipit.staging.mozilla-releng.net/coverage/supported_e
 
     fs.writeFile('supported_extensions.js', content, e => {
       if (e) {
-        console.error(e.message);
-        return;
+        throw e;
       }
 
       fs.readdir('.', (e, files) => {
         if (e) {
-          console.error(e.message);
-          return;
+          throw e;
         }
 
         const resultFiles = files.filter(file => includeFiles.includes(file));
@@ -48,7 +46,7 @@ https.get('https://uplift.shipit.staging.mozilla-releng.net/coverage/supported_e
       });
     });
   });
-}).on('error', e => console.error(e.message));
+}).on('error', e => { throw e; });
 
 function makeZip(list){
   const output = fs.createWriteStream(zipName);
@@ -57,7 +55,7 @@ function makeZip(list){
     zlib: { level: 9 }
   });
 
-  archive.on('error', e => console.error(e.message));
+  archive.on('error', e => { throw e; });
 
   archive.pipe(output);
 
