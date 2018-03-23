@@ -1,0 +1,49 @@
+body {
+  font-family: sans-serif;
+  background-color:aliceblue;
+  color: #151515;
+  line-height: 1.3em;
+  margin: 1em 0;
+  text-align: center;
+}
+a {
+  text-decoration: none;
+}
+
+label {
+  padding-right: 2em;
+}
+
+#output {
+  background-color: white;
+  border-top: 1px solid darkgray;
+  border-bottom: 1px solid darkgray;
+  padding: 1em 20%;
+  text-align: left;
+
+  margin: auto;
+}
+
+#output span {
+  display:table-row;
+  height: 1.5em;
+}
+#output span:hover {
+  background-color: aliceblue;
+}
+
+#output span:first-child {
+  color: orangered;
+  font-weight: bold;
+  margin-bottom: 1em;
+  display: inline-block;
+}
+
+#output a {
+  display: table-cell;
+  padding-right: 1em;
+}
+
+#output br {
+  display:none;
+}
