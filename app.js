@@ -158,7 +158,7 @@ async function generate(dir='') {
   output.id = 'output';
 
   let global = document.createElement('span');
-  global.textContent = files.length + ' files.';
+  global.textContent = files.length + ' files';
   output.appendChild(global);
   output.appendChild(document.createElement('br'));
   output.appendChild(document.createElement('br'));
@@ -170,11 +170,11 @@ async function generate(dir='') {
     entryElem.appendChild(a);
     if (stats.children != 0) {
       a.href = '#' + dir + entry;
-      entryElem.appendChild(document.createTextNode(` - ${stats.children} files and ${stats.funcs} functions`));
+      entryElem.appendChild(document.createTextNode(` ${stats.children} files and ${stats.funcs} functions`));
     } else {
       a.target = '_blank';
       a.href = 'https://codecov.io/gh/marco-c/gecko-dev/src/master/' + dir + entry;
-      entryElem.appendChild(document.createTextNode(` - ${stats.funcs} functions`));
+      entryElem.appendChild(document.createTextNode(` ${stats.funcs} functions`));
     }
     output.appendChild(entryElem);
     output.appendChild(document.createElement('br'));

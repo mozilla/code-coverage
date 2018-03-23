@@ -1,15 +1,20 @@
 body {
   font-family: sans-serif;
-  background-color:aliceblue;
-  color: #151515;
+  background-color:#eff7fc;
+  color: #262626;
   line-height: 1.3em;
   margin: 1em 0;
   text-align: center;
 }
+
 a {
   text-decoration: none;
+  color: #0081ad;
 }
 
+a:hover {
+  color: #00a7e0;
+}
 label {
   padding-right: 2em;
 }
@@ -20,30 +25,37 @@ label {
   border-bottom: 1px solid darkgray;
   padding: 1em 20%;
   text-align: left;
-
   margin: auto;
+  display: table;
+  width: 60%;
 }
 
 #output span {
-  display:table-row;
+  display: table-row;
   height: 1.5em;
 }
+
+#output span:nth-child(4n) {
+    background: #eff7fc;
+}
+
 #output span:hover {
   background-color: aliceblue;
 }
 
 #output span:first-child {
-  color: orangered;
+  color: #cc0000;
   font-weight: bold;
   margin-bottom: 1em;
+  margin-left: 1em;
   display: inline-block;
 }
 
 #output a {
   display: table-cell;
-  padding-right: 1em;
+  padding: 0 1em;
 }
 
 #output br {
-  display:none;
+  display: none;
 }
