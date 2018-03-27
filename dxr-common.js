@@ -97,11 +97,11 @@ function injectToggle(revPromise, path) {
     enabled = !enabled;
     if (enabled) {
       button.appendChild(spinner);
-      await applyOverlay(revPromise, path, lineNoMap);
+      await applyOverlay(revPromise, path);
       button.removeChild(spinner);
       button.style.backgroundColor = 'lightgrey';
     } else {
-      removeOverlay(lineNoMap);
+      removeOverlay();
       button.style.backgroundColor = 'white';
     }
   }
