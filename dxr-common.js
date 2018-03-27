@@ -4,15 +4,25 @@
 
 'use strict';
 
+let lineNoMap = (function() {
+  let mapper;
+
+  return function(l) {
+    if (!mapper) {
+      if (document.getElementById('l1')) {
+        mapper = l => `l${l}`;
+      } else if (document.getElementById('1')) {
+        mapper = l => l;
+      } else {
+        throw new Error('Unknown line number element.');
+      }
+    }
+
+    return mapper(l);
+  };
+})();
+
 let resultPromise;
-
-let lineNoMap;
-if (document.getElementById('l1')) {
-  lineNoMap = l => `l${l}`;
-} else if (document.getElementById('1')) {
-  lineNoMap = l => l;
-}
-
 async function getCoverage(revPromise, path) {
   if (!resultPromise) {
     resultPromise = (async function() {
