@@ -4,12 +4,11 @@
 
 'use strict';
 
-(function() {
-  const container = document.getElementById('module-details-content');
-  const field_has_str = document.getElementById('field_label_cf_has_str');
+const container = document.getElementById('module-details-content');
 
-  const bugzilla_modal_ui = !!container;
+const bugzilla_modal_ui = !!container;
 
+function getLandings() {
   const hgurlPattern = new RegExp('^http[s]?://hg\\.mozilla\\.org/mozilla-central/rev/([0-9a-f]+)$');
   const revs = [];
   let isFirst = false;
@@ -40,6 +39,12 @@
       }
     }
   });
+
+  return revs;
+}
+
+(function() {
+  const revs = getLandings();
 
   if (revs.length == 0) {
     return;
@@ -77,6 +82,7 @@
     td.setAttribute('colspan', 2);
     td.append(valueDiv);
     tr.append(td);
+    const field_has_str = document.getElementById('field_label_cf_has_str');
     field_has_str.parentNode.parentNode.insertBefore(tr, field_has_str.parentNode.nextSibling);
   }
 
