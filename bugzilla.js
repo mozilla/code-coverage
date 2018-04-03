@@ -43,6 +43,30 @@ function getLandings() {
   return revs;
 }
 
+function findUpliftRequestActivities() {
+  const upliftRequestPattern = new RegExp('Flags: approval-mozilla-(release|beta)\\?');
+
+  let activities = [];
+
+  let i = 0;
+  let comment = document.getElementById(`c${i}`)
+  while (comment) {
+    const activity = comment.querySelector('.activity');
+    if (activity) {
+      for (const change of activity.children) {
+        if (change.textContent.match(upliftRequestPattern)) {
+          activities.push(activity);
+        }
+      }
+    }
+
+    i += 1;
+    comment = document.getElementById(`c${i}`);
+  }
+
+  return activities;
+}
+
 function showResults(targetDiv, results) {
   let added = 0;
   let covered = 0;
@@ -114,8 +138,11 @@ function showResults(targetDiv, results) {
     return;
   }
 
+  let targetDivs = [];
+
   const valueDiv = document.createElement('div');
   valueDiv.classList.add('gecko_coverage_loader', 'gecko_coverage_loader_bugzilla');
+  targetDivs.push(valueDiv);
 
   if (bugzilla_modal_ui) {
     const mainDiv = document.createElement('div');
@@ -150,7 +177,23 @@ function showResults(targetDiv, results) {
     field_has_str.parentNode.parentNode.insertBefore(tr, field_has_str.parentNode.nextSibling);
   }
 
+  for (const activity of findUpliftRequestActivities()) {
+    const commentDiv = document.createElement('div');
+    commentDiv.classList.add('gecko_coverage_loader', 'gecko_coverage_loader_bugzilla');
+    commentDiv.style.display = 'inline-block';
+    targetDivs.push(commentDiv);
+
+    const changeDiv = document.createElement('div');
+    changeDiv.className = 'change';
+    changeDiv.appendChild(document.createTextNode('Code Coverage: '))
+    changeDiv.appendChild(commentDiv);
+
+    activity.appendChild(changeDiv);
+  }
+
   let results = await Promise.all(revs.map(fetchChangesetCoverage));
 
-  showResults(valueDiv, results);
+  for (const targetDiv of targetDivs) {
+    showResults(targetDiv, results);
+  }
 })();

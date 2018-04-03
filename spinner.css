@@ -13,10 +13,10 @@
   width: 13px;
   height: 13px;
   animation: gecko_coverage_loader_spin 2s linear infinite;
+  display: inline-block;
 }
 
 .gecko_coverage_loader_dxr {
-  display: inline-block;
   border-top: 3px solid black;
 }
 
