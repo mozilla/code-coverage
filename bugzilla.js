@@ -89,63 +89,63 @@ function getLandings() {
   let promises = revs.map(fetchChangesetCoverage);
 
   Promise.all(promises)
-    .then(results => {
-      let added = 0;
-      let covered = 0;
-      for (let result of results) {
-        added += result.commit_added;
-        covered += result.commit_covered;
-      }
+  .then(results => {
+    let added = 0;
+    let covered = 0;
+    for (let result of results) {
+      added += result.commit_added;
+      covered += result.commit_covered;
+    }
 
-      let errored = false;
-      let missing = false;
-      for (let result of results) {
-        if (result.error) {
-          errored = true;
-          if (result.error.includes('Couldn\'t find a build')) {
-            missing = true;
-          }
+    let errored = false;
+    let missing = false;
+    for (let result of results) {
+      if (result.error) {
+        errored = true;
+        if (result.error.includes('Couldn\'t find a build')) {
+          missing = true;
         }
       }
+    }
 
-      const span = document.createElement('span');
-      if (errored) {
-        if (missing) {
-          span.textContent = 'The tests for the build containing the patches aren\'t finished running yet.';
-        } else {
-          span.textContent = 'Error while retrieving coverage information.';
-        }
-      } else if (added > 0) {
-        if (covered > 0.7 * added) {
-          span.style.color = 'green';
-        } else if (covered > 0.2 * added) {
-          span.style.color = 'goldenrod';
-        } else {
-          span.style.color = 'red';
-        }
-        span.textContent = `${covered} lines covered out of ${added} lines added`;
+    const span = document.createElement('span');
+    if (errored) {
+      if (missing) {
+        span.textContent = 'The tests for the build containing the patches aren\'t finished running yet.';
       } else {
-        span.textContent = 'No instrumented lines added.';
+        span.textContent = 'Error while retrieving coverage information.';
       }
-      valueDiv.className = 'value';
-      valueDiv.appendChild(span);
-      if (added > 0) {
-        valueDiv.appendChild(document.createTextNode(' ('));
-        let aElems = results.filter(result => result.commit_added > 0).map(result => {
-          let a = document.createElement('a');
-          a.href = `https://firefox-code-coverage.herokuapp.com/#/changeset/${result.rev}`;
-          a.textContent = result.rev;
-          return a;
-        });
+    } else if (added > 0) {
+      if (covered > 0.7 * added) {
+        span.style.color = 'green';
+      } else if (covered > 0.2 * added) {
+        span.style.color = 'goldenrod';
+      } else {
+        span.style.color = 'red';
+      }
+      span.textContent = `${covered} lines covered out of ${added} lines added`;
+    } else {
+      span.textContent = 'No instrumented lines added.';
+    }
+    valueDiv.className = 'value';
+    valueDiv.appendChild(span);
+    if (added > 0) {
+      valueDiv.appendChild(document.createTextNode(' ('));
+      let aElems = results.filter(result => result.commit_added > 0).map(result => {
+        let a = document.createElement('a');
+        a.href = `https://firefox-code-coverage.herokuapp.com/#/changeset/${result.rev}`;
+        a.textContent = result.rev;
+        return a;
+      });
 
-        for (let i = 0; i < aElems.length; i++) {
-          valueDiv.appendChild(aElems[i]);
-          if (i != aElems.length - 1) {
-            valueDiv.appendChild(document.createTextNode(', '));
-          }
+      for (let i = 0; i < aElems.length; i++) {
+        valueDiv.appendChild(aElems[i]);
+        if (i != aElems.length - 1) {
+          valueDiv.appendChild(document.createTextNode(', '));
         }
-
-        valueDiv.appendChild(document.createTextNode(')'));
       }
-    });
+
+      valueDiv.appendChild(document.createTextNode(')'));
+    }
+  });
 })();
