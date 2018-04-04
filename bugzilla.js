@@ -48,20 +48,17 @@ function findUpliftRequestActivities() {
 
   let activities = [];
 
-  let i = 0;
-  let comment = document.getElementById(`c${i}`)
-  while (comment) {
-    const activity = comment.querySelector('.activity');
+  let change_sets = document.querySelectorAll('.change-set');
+  for (let change_set of change_sets) {
+    const activity = change_set.querySelector('.activity');
     if (activity) {
       for (const change of activity.children) {
         if (change.textContent.match(upliftRequestPattern)) {
           activities.push(activity);
+          break;
         }
       }
     }
-
-    i += 1;
-    comment = document.getElementById(`c${i}`);
   }
 
   return activities;
