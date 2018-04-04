@@ -1,6 +1,6 @@
 {
   "name": "gecko-code-coverage",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "Extensions that augments several Mozilla websites (Bugzilla, DXR, Searchfox, MozReview) with code coverage information.",
   "dependencies": {
     "web-ext": "^2.4.0"
