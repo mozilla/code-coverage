@@ -4,23 +4,11 @@ function assert(condition, message) {
   }
 }
 
-let get_files = function() {
+let get_data = function() {
   let files = null;
   return async function() {
     if (!files) {
-      let response = await fetch('https://raw.githubusercontent.com/marco-c/code-coverage-reports/master/zero_coverage_files.json');
-      files = await response.json();
-    }
-
-    return files;
-  };
-}();
-
-let get_functions_stats = function() {
-  let files = null;
-  return async function() {
-    if (!files) {
-      let response = await fetch('https://raw.githubusercontent.com/marco-c/code-coverage-reports/master/zero_coverage_functions.json');
+      let response = await fetch('https://raw.githubusercontent.com/marco-c/code-coverage-reports/master/zero_coverage_report.json');
       files = await response.json();
     }
 
@@ -118,15 +106,7 @@ async function generate(dir='') {
     dir = '';
   }
 
-  let uncovered_files = (await get_files()).filter(file => file.startsWith(dir));
-  let files = (await get_functions_stats()).filter(file => file.name.startsWith(dir));
-  let uncovered_files_set = new Set();
-  for (let file of uncovered_files) {
-      uncovered_files_set.add(file);
-  }
-  for (let obj of files) {
-      obj.uncovered = uncovered_files_set.has(obj.name);
-  }
+  let files = (await get_data()).filter(file => file.name.startsWith(dir));
   files = await filter_third_party(files);
   files = filter_languages(files);
   files = filter_headers(files);
