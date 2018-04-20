@@ -6,7 +6,7 @@
   "icons": {
     "270": "coverage.jpg"
   },
-  "description": "Extensions that augments several Mozilla websites (Bugzilla, DXR, Searchfox, MozReview) with code coverage information.",
+  "description": "Extensions that augments several Mozilla websites (Bugzilla, DXR, Searchfox, MozReview, Crash-Stats) with code coverage information.",
   "content_scripts": [
     {
       "matches": ["*://dxr.mozilla.org/mozilla-central/source/*"],
@@ -29,6 +29,12 @@
     {
       "matches": ["*://reviewboard.mozilla.org/r/*/diff/*"],
       "js": ["supported_extensions.js", "coverage.js", "mozreview.js"],
+      "css": ["spinner.css"],
+      "run_at": "document_end"
+    },
+    {
+      "matches": ["*://crash-stats.mozilla.com/report/index/*"],
+      "js": ["supported_extensions.js", "coverage.js", "socorro.js"],
       "css": ["spinner.css"],
       "run_at": "document_end"
     }
