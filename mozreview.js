@@ -46,6 +46,11 @@ async function getChangesetData(path) {
         const coverage = await coveragePromise;
         const annotate = await annotatePromise;
 
+	if (!coverage.hasOwnProperty('data')) {
+	  return 'error'
+	}
+	const coverage_data = coverage['data'];
+
         let result = {};
 
         for (const data of annotate['annotate']) {
@@ -57,11 +62,11 @@ async function getChangesetData(path) {
 
           const line = data['lineno'];
 
-          if (!coverage.hasOwnProperty(line)) {
+          if (!coverage_data.hasOwnProperty(line)) {
             continue;
           }
 
-          result[line] = coverage[line];
+          result[line] = coverage_data[line];
         }
 
         return result;

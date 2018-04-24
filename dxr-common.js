@@ -37,7 +37,10 @@ async function getCoverage(revPromise, path) {
 async function applyOverlay(revPromise, path) {
   let result = await getCoverage(revPromise, path);
 
-  for (let [l, c] of Object.entries(result)) {
+  if (!result.hasOwnProperty('data')) {
+    throw new Error('No \'data\' field');
+  }
+  for (let [l, c] of Object.entries(result['data'])) {
     const line_no = document.getElementById(lineNoMap(l));
     const line = document.getElementById(`line-${l}`);
     if (c > 0) {
