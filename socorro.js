@@ -43,6 +43,12 @@ if (Object.keys(fileinfo).length != 0) {
   spinnerDiv.classList.add("gecko_coverage_loader", "gecko_coverage_loader_socorro");
   spinnerDiv.style.display = "inline-block";
 
+  const linkToCodecov = document.createElement("a");
+  linkToCodecov.setAttribute("target", "_blank");
+  const icon = document.createElement("div");
+  icon.setAttribute("class", "codecov-icon");
+  linkToCodecov.append(icon);
+
   for (const [filename, info] of Object.entries(fileinfo)) {
     for (const [revision, lineElements] of Object.entries(info)) {
       // Add the spinners
@@ -62,12 +68,17 @@ if (Object.keys(fileinfo).length != 0) {
             if (line in covData) {
               // line is covered or uncovered
               le.element.parentNode.style.backgroundColor = covData[line] == 0 ? "tomato" : "greenyellow";
+              const gitBuildChangeset = data['git_build_changeset'];
+              const codecovUrl = `https://codecov.io/gh/marco-c/gecko-dev/src/${gitBuildChangeset}/${filename}#L${line}`;
+              const a = linkToCodecov.cloneNode(true);
+              a.setAttribute("href", codecovUrl);
+              le.element.parentNode.append(a);
             }
           }
         }
         // Remove all the spinners
         for (const le of lineElements) {
-          le.element.className = "";
+          le.element.parentNode.removeChild(le.element);
         }
       });
     }

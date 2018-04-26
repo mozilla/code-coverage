@@ -8,7 +8,7 @@ const includeFiles = [
   'bugzilla.js', 'coverage.jpg', 'coverage.js',
   'dxr.css', 'dxr.js', 'dxr-common.js',
   'manifest.json', 'mozreview.js', 'searchfox.js',
-  'socorro.js',
+  'socorro.js', 'socorro.css', 'codecov.png',
   'spinner.css', 'supported_extensions.js',
 ];
 const zipName = './gecko-code-coverage.zip';

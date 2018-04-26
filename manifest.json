@@ -35,7 +35,7 @@
     {
       "matches": ["*://crash-stats.mozilla.com/report/index/*"],
       "js": ["supported_extensions.js", "coverage.js", "socorro.js"],
-      "css": ["spinner.css"],
+      "css": ["spinner.css", "socorro.css"],
       "run_at": "document_end"
     }
   ],
