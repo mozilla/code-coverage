@@ -5,7 +5,7 @@
 'use strict';
 
 async function fetchCoverage(rev, path) {
-  let response = await fetch(`https://uplift.shipit.staging.mozilla-releng.net/coverage/file?changeset=${rev}&path=${path}`);
+  let response = await fetch(`https://uplift.shipit.mozilla-releng.net/coverage/file?changeset=${rev}&path=${path}`);
   return await response.json();
 }
 
@@ -21,7 +21,7 @@ async function waitIdle(time) {
 async function fetchChangesetCoverage(rev) {
   let ready = false;
   do {
-    let response = await fetch(`https://uplift.shipit.staging.mozilla-releng.net/coverage/changeset_summary/${rev}`);
+    let response = await fetch(`https://uplift.shipit.mozilla-releng.net/coverage/changeset_summary/${rev}`);
 
     if (response.status == 202) {
       await wait(5000);
