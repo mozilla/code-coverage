@@ -3,7 +3,7 @@
   "version": "0.8.1",
   "description": "Extensions that augments several Mozilla websites (Bugzilla, DXR, Searchfox, MozReview, Crash-Stats) with code coverage information.",
   "dependencies": {
-    "web-ext": "^2.4.0"
+    "web-ext": "^2.6.0"
   },
   "peerDependencies": {
     "eslint": ">=0.8.0"
