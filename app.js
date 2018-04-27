@@ -153,7 +153,7 @@ async function generate(dir='') {
       entryElem.appendChild(document.createTextNode(` ${stats.children} files and ${stats.funcs} functions`));
     } else {
       a.target = '_blank';
-      a.href = 'https://codecov.io/gh/marco-c/gecko-dev/src/master/' + dir + entry;
+      a.href = 'https://codecov.io/gh/mozilla/gecko-dev/src/master/' + dir + entry;
       entryElem.appendChild(document.createTextNode(` ${stats.funcs} functions`));
     }
     output.appendChild(entryElem);
