@@ -37,6 +37,13 @@
       "js": ["supported_extensions.js", "coverage.js", "socorro.js"],
       "css": ["spinner.css", "socorro.css"],
       "run_at": "document_end"
+    },
+    {
+      "matches": ["*://hg.mozilla.org/mozilla-central/file/*",
+                  "*://hg.mozilla.org/mozilla-central/annotate/*"],
+      "js": ["supported_extensions.js", "coverage.js", "dxr-common.js", "hgmo.js"],
+      "css": ["spinner.css", "dxr.css"],
+      "run_at": "document_end"
     }
   ],
   "permissions": [
