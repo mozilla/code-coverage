@@ -6,6 +6,7 @@ const archiver = require('archiver');
 
 const includeFiles = [
   'bugzilla.js', 'coverage.jpg', 'coverage.js',
+  'button.js',
   'dxr.css', 'dxr.js', 'dxr-common.js',
   'manifest.json', 'mozreview.js', 'searchfox.js',
   'socorro.js', 'socorro.css', 'codecov.png',
