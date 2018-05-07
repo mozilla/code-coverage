@@ -25,7 +25,7 @@ fs.readFile('manifest.json', 'utf8', function(err, data) {
   });
 });
 
-https.get('https://uplift.shipit.mozilla-releng.net/coverage/supported_extensions', res => {
+https.get('https://coverage.moz.tools/coverage/supported_extensions', res => {
   let data = '';
     
   res.on('data', chunk => data += chunk);

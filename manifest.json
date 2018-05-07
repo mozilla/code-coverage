@@ -47,7 +47,7 @@
     }
   ],
   "permissions": [
-    "https://uplift.shipit.mozilla-releng.net/coverage/*",
+    "https://coverage.moz.tools/coverage/*",
     "https://api.pub.build.mozilla.org/mapper/gecko-dev/rev/git/*",
     "https://reviewboard-hg.mozilla.org/gecko/*"
   ],
