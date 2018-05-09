@@ -68,7 +68,7 @@ if (Object.keys(fileinfo).length != 0) {
             if (line in covData) {
               // line is covered or uncovered
               le.element.parentNode.style.backgroundColor = covData[line] == 0 ? "tomato" : "greenyellow";
-              const gitBuildChangeset = data['git_build_changeset'];
+              const gitBuildChangeset = data["git_build_changeset"];
               const codecovUrl = `https://codecov.io/gh/mozilla/gecko-dev/src/${gitBuildChangeset}/${filename}#L${line}`;
               const a = linkToCodecov.cloneNode(true);
               a.setAttribute("href", codecovUrl);
@@ -76,7 +76,8 @@ if (Object.keys(fileinfo).length != 0) {
             }
           }
         }
-        // Remove all the spinners
+      }).finally(() => {
+        // Remove the spinners
         for (const le of lineElements) {
           le.element.parentNode.removeChild(le.element);
         }
