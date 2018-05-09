@@ -30,20 +30,26 @@ label {
   width: 60%;
 }
 
-#output span {
+#output div {
   display: table-row;
   height: 1.5em;
 }
 
-#output span:nth-child(4n) {
-    background: #eff7fc;
+#output span {
+  display: table-cell;
+  text-align: center;
+  height: 1.5em;
 }
 
-#output span:hover {
-  background-color: aliceblue;
+#output .row:nth-child(2n+5) {
+  background: AliceBlue;
 }
 
-#output span:first-child {
+#output .row:hover {
+  background-color: #d8dfe5;
+}
+
+#output div:first-child {
   color: #cc0000;
   font-weight: bold;
   margin-bottom: 1em;
@@ -51,11 +57,10 @@ label {
   display: inline-block;
 }
 
-#output a {
-  display: table-cell;
-  padding: 0 1em;
-}
-
 #output br {
   display: none;
+}
+
+#output .filename {
+  text-align: left;
 }

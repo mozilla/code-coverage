@@ -80,14 +80,14 @@ function filter_languages(files) {
   let js_extensions = ['js', 'jsm', 'xml', 'xul', 'xhtml', 'html'];
 
   return files.filter(file => {
-      if (cpp_extensions.find(ext => file.name.endsWith('.' + ext))) {
-        return cpp;
-      } else if (js_extensions.find(ext => file.name.endsWith('.' + ext))) {
-        return js;
-      } else {
-        console.warn('Unknown language for ' + file.name);
-        return false;
-      }
+    if (cpp_extensions.find(ext => file.name.endsWith('.' + ext))) {
+      return cpp;
+    } else if (js_extensions.find(ext => file.name.endsWith('.' + ext))) {
+      return js;
+    } else {
+      console.warn('Unknown language for ' + file.name);
+      return false;
+    }
   });
 }
 
@@ -97,6 +97,66 @@ function filter_completely_uncovered(files) {
   }
 
   return files.filter(file => file.uncovered);
+}
+
+function get_min_date(oldDate, newDate) {
+  if (!oldDate) {
+    return newDate;
+  }
+  if (Date.parse(newDate) < Date.parse(oldDate)) {
+    return newDate;
+  }
+
+  return oldDate;
+}
+
+function getBaseStats(file, children) {
+  return {'children': children,
+          'funcs': file.funcs,
+          'first_push_date': file.first_push_date,
+          'last_push_date': file.last_push_date,
+          'size': file.size,
+          'commits': file.commits};
+}
+
+function cumStats(prevStats, newStats) {
+  prevStats.children += 1;
+  prevStats.funcs += newStats.funcs;
+  prevStats.size += newStats.size;
+  prevStats.commits += newStats.commits;
+  prevStats.first_push_date = get_min_date(prevStats.first_push_date, newStats.first_push_date);
+  prevStats.last_push_date = get_min_date(prevStats.last_push_date, newStats.last_push_date);
+}
+
+function getSpanForValue(value) {
+  const span = document.createElement('span');
+  span.innerText = value == 0 ? '' : value;
+  return span;
+}
+
+function getSpanForFile(data, dir, entry) {
+  const span = document.createElement('span');
+  span.className = 'filename';
+  const a = document.createElement('a');
+  a.textContent = entry;
+  const path = dir + entry;
+  if (data.children != 0) {
+    a.href = '#' + path;
+  } else {
+    a.target = '_blank';
+    a.href = 'https://codecov.io/gh/mozilla/gecko-dev/src/master/' + path;
+  }
+  span.appendChild(a);
+  return span;
+}
+
+function getFileSize(size) {
+  if (size >= 1e6) {
+    return (size / 1e6).toFixed(2) + 'M';
+  } else if (size >= 1e3) {
+    return (size / 1e3).toFixed(1) + 'K';
+  }
+  return size;
 }
 
 async function generate(dir='') {
@@ -120,46 +180,53 @@ async function generate(dir='') {
     if (rest.includes('/')) {
       rest = rest.substring(0, rest.indexOf('/'));
       if (map.has(rest)) {
-        existing_num = map.get(rest);
-        existing_num.children += 1;
-        existing_num.funcs += file.funcs;
+        cumStats(map.get(rest), file);
       } else {
-        map.set(rest, {'children': 1, 'funcs': file.funcs});
+        map.set(rest, getBaseStats(file, 1));
       }
     } else {
       if (map.has(rest)) {
         console.warn(rest + ' is already in map.');
       }
-      map.set(rest, {'children': 0, 'funcs': file.funcs});
+      map.set(rest, getBaseStats(file, 0));
     }
   }
 
-  let output = document.createElement('div');
+  const columns = [['File name', (x, dir, entry) => getSpanForFile(x, dir, entry)],
+                   ['Children', (x) => getSpanForValue(x.children)],
+                   ['Functions', (x) => getSpanForValue(x.funcs)],
+                   ['First push', (x) => getSpanForValue(x.first_push_date)],
+                   ['Last push', (x) => getSpanForValue(x.last_push_date)],
+                   ['Size', (x) => getSpanForValue(getFileSize(x.size))],
+                   ['Commits', (x) => getSpanForValue(x.commits)]];
+
+  const output = document.createElement('div');
   output.id = 'output';
 
-  let global = document.createElement('span');
+  const global = document.createElement('div');
   global.textContent = files.length + ' files';
   output.appendChild(global);
   output.appendChild(document.createElement('br'));
   output.appendChild(document.createElement('br'));
 
-  for (let [entry, stats] of sort_entries(Array.from(map.entries()))) {
-    let entryElem = document.createElement('span');
-    let a = document.createElement('a');
-    a.textContent = entry;
-    entryElem.appendChild(a);
-    if (stats.children != 0) {
-      a.href = '#' + dir + entry;
-      entryElem.appendChild(document.createTextNode(` ${stats.children} files and ${stats.funcs} functions`));
-    } else {
-      a.target = '_blank';
-      a.href = 'https://codecov.io/gh/mozilla/gecko-dev/src/master/' + dir + entry;
-      entryElem.appendChild(document.createTextNode(` ${stats.funcs} functions`));
+  const header = document.createElement('div');
+  columns.forEach(([name, ]) => {
+    const span = getSpanForValue(name);
+    if (name === 'File name') {
+      span.className = 'filename';
     }
-    output.appendChild(entryElem);
-    output.appendChild(document.createElement('br'));
-  }
+    header.append(span);
+  });
+  output.append(header);
 
+  for (const [entry, stats] of sort_entries(Array.from(map.entries()))) {
+    const entryElem = document.createElement('div');
+    entryElem.className = 'row';
+    columns.forEach(([, func]) => {
+      entryElem.append(func(stats, dir, entry));
+    });
+    output.appendChild(entryElem);
+  }
   document.getElementById('output').replaceWith(output);
 }
 
