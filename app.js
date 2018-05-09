@@ -210,6 +210,7 @@ async function generate(dir='') {
   output.appendChild(document.createElement('br'));
 
   const header = document.createElement('div');
+  header.className = 'header';
   columns.forEach(([name, ]) => {
     const span = getSpanForValue(name);
     if (name === 'File name') {
