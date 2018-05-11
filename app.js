@@ -134,7 +134,7 @@ function getSpanForValue(value) {
   return span;
 }
 
-function getSpanForFile(data, dir, entry) {
+function getSpanForFile(data, github_rev, dir, entry) {
   const span = document.createElement('span');
   span.className = 'filename';
   const a = document.createElement('a');
@@ -144,7 +144,8 @@ function getSpanForFile(data, dir, entry) {
     a.href = '#' + path;
   } else {
     a.target = '_blank';
-    a.href = 'https://codecov.io/gh/mozilla/gecko-dev/src/master/' + path;
+    const rev = github_rev ? github_rev : 'master';
+    a.href = `https://codecov.io/gh/mozilla/gecko-dev/src/${rev}/${path}`;
   }
   span.appendChild(a);
   return span;
@@ -167,6 +168,7 @@ async function generate(dir='') {
   }
 
   const data = await get_data();
+  const github_revision = data['github_revision'];
   let files = data['files'].filter(file => file.name.startsWith(dir));
   files = await filter_third_party(files);
   files = filter_languages(files);
@@ -193,7 +195,7 @@ async function generate(dir='') {
     }
   }
 
-  const columns = [['File name', (x, dir, entry) => getSpanForFile(x, dir, entry)],
+  const columns = [['File name', (x, dir, entry) => getSpanForFile(x, github_revision, dir, entry)],
                    ['Children', (x) => getSpanForValue(x.children)],
                    ['Functions', (x) => getSpanForValue(x.funcs)],
                    ['First push', (x) => getSpanForValue(x.first_push_date)],
