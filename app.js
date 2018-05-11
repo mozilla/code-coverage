@@ -166,7 +166,8 @@ async function generate(dir='') {
     dir = '';
   }
 
-  let files = (await get_data()).filter(file => file.name.startsWith(dir));
+  const data = await get_data();
+  let files = data['files'].filter(file => file.name.startsWith(dir));
   files = await filter_third_party(files);
   files = filter_languages(files);
   files = filter_headers(files);
