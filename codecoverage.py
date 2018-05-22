@@ -167,7 +167,7 @@ def download_grcov():
         if installed_ver == latest_tag:
             return
 
-    urlretrieve('https://github.com/marco-c/grcov/releases/download/%s/grcov-linux-standalone-x86_64.tar.bz2' % latest_tag, 'grcov.tar.bz2')
+    urlretrieve('https://github.com/marco-c/grcov/releases/download/%s/grcov-linux-x86_64.tar.bz2' % latest_tag, 'grcov.tar.bz2')
 
     tar = tarfile.open('grcov.tar.bz2', 'r:bz2')
     tar.extractall()
