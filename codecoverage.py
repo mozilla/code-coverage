@@ -107,7 +107,7 @@ def download_coverage_artifacts(build_task_id, suites):
     for test_task in test_tasks:
         artifacts = get_task_artifacts(test_task['status']['taskId'])
         for artifact in artifacts:
-            if 'code-coverage-gcda.zip' in artifact['name']:
+            if any(a in artifact['name'] for a in ['code-coverage-grcov.zip', 'code-coverage-jsvm.zip']):
                 download_artifact(test_task['status']['taskId'], artifact)
 
 
