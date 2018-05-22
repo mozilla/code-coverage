@@ -125,9 +125,10 @@ def generate_info(grcov_path):
     proc = subprocess.Popen(cmd, stdout=fout, stderr=subprocess.PIPE, env=mod_env)
     i = 0
     while proc.poll() is None:
-        print('Running grcov... ' + str(i))
+        if i % 60 == 0:
+            print('Running grcov... ' + str(i))
         i += 1
-        time.sleep(60)
+        time.sleep(1)
 
     if proc.poll() != 0:
         raise Exception("Error while running grcov:\n" + proc.stderr.read())
