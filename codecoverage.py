@@ -29,12 +29,12 @@ def is_taskcluster_loaner():
 
 
 def get_last_task():
-    last_task = get_json('https://index.taskcluster.net/v1/task/gecko.v2.mozilla-central.latest.firefox.linux64-ccov-opt')
+    last_task = get_json('https://index.taskcluster.net/v1/task/gecko.v2.mozilla-central.latest.firefox.linux64-ccov-debug')
     return last_task['taskId']
 
 
 def get_task(branch, revision):
-    task = get_json('https://index.taskcluster.net/v1/task/gecko.v2.%s.revision.%s.firefox.linux64-ccov-opt' % (branch, revision))
+    task = get_json('https://index.taskcluster.net/v1/task/gecko.v2.%s.revision.%s.firefox.linux64-ccov-debug' % (branch, revision))
     return task['taskId']
 
 
@@ -68,7 +68,7 @@ def download_artifact(task_id, artifact):
 
 
 def suite_name_from_task_name(name):
-    name = name[len('test-linux64-ccov/opt-'):]
+    name = name[len('test-linux64-ccov/debug-'):]
     parts = [p for p in name.split('-') if p != 'e10s' and not p.isdigit()]
     return '-'.join(parts)
 

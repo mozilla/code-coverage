@@ -28,7 +28,7 @@ class Test(unittest.TestCase):
         self.assertTrue(task_id)
 
         task_data = codecoverage.get_task_details(task_id)
-        self.assertEqual(task_data['metadata']['name'], 'build-linux64-ccov/opt')
+        self.assertEqual(task_data['metadata']['name'], 'build-linux64-ccov/debug')
 
         revision = task_data['payload']['env']['GECKO_HEAD_REV']
         task_id_2 = codecoverage.get_task('mozilla-central', revision)
@@ -66,12 +66,12 @@ class Test(unittest.TestCase):
 
     def test_suite_name_from_task_name(self):
         cases = [
-            ('test-linux64-ccov/opt-gtest', 'gtest'),
-            ('test-linux64-ccov/opt-jsreftest-1', 'jsreftest'),
-            ('test-linux64-ccov/opt-mochitest-devtools-chrome-e10s-10', 'mochitest-devtools-chrome'),
-            ('test-linux64-ccov/opt-mochitest-clipboard', 'mochitest-clipboard'),
-            ('test-linux64-ccov/opt-reftest-no-accel-e10s-5', 'reftest-no-accel'),
-            ('test-linux64-ccov/opt-mochitest-5', 'mochitest'),
+            ('test-linux64-ccov/debug-gtest', 'gtest'),
+            ('test-linux64-ccov/debug-jsreftest-1', 'jsreftest'),
+            ('test-linux64-ccov/debug-mochitest-devtools-chrome-e10s-10', 'mochitest-devtools-chrome'),
+            ('test-linux64-ccov/debug-mochitest-clipboard', 'mochitest-clipboard'),
+            ('test-linux64-ccov/debug-reftest-no-accel-e10s-5', 'reftest-no-accel'),
+            ('test-linux64-ccov/debug-mochitest-5', 'mochitest'),
         ]
         for c in cases:
             self.assertEqual(codecoverage.suite_name_from_task_name(c[0]), c[1])
