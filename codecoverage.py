@@ -85,9 +85,6 @@ def download_coverage_artifacts(build_task_id, suites):
     task_data = get_task_details(build_task_id)
 
     artifacts = get_task_artifacts(build_task_id)
-    for artifact in artifacts:
-        if 'target.code-coverage-gcno.zip' in artifact['name']:
-            download_artifact(build_task_id, artifact)
 
     # Returns True if the task is a test-related task.
     def _is_test_task(t):
@@ -112,17 +109,6 @@ def download_coverage_artifacts(build_task_id, suites):
 
 
 def generate_info(grcov_path):
-    files = os.listdir("ccov-artifacts")
-    ordered_files = []
-    for fname in files:
-        if not fname.endswith('.zip'):
-            continue
-
-        if 'gcno' in fname:
-            ordered_files.insert(0, "ccov-artifacts/" + fname)
-        else:
-            ordered_files.append("ccov-artifacts/" + fname)
-
     mod_env = os.environ.copy()
     if is_taskcluster_loaner():
         one_click_loaner_gcc = '/home/worker/workspace/build/src/gcc/bin'
@@ -135,7 +121,7 @@ def generate_info(grcov_path):
 
     fout = open("output.info", 'w')
     cmd = [grcov_path, '-t', 'lcov', '-p', '/home/worker/workspace/build/src/']
-    cmd.extend(ordered_files)
+    cmd.extend([os.path.join('ccov-artifacts', p) for p in os.listdir('ccov-artifacts')])
     proc = subprocess.Popen(cmd, stdout=fout, stderr=subprocess.PIPE, env=mod_env)
     i = 0
     while proc.poll() is None:
