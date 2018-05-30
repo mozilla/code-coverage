@@ -11,6 +11,8 @@ script:
   - export PATH=$PWD/symlinks:$PATH
   - flake8 .
   - python -m unittest discover tests
+  - python setup.py sdist bdist_wheel
+  - pip install dist/firefox_code_coverage-1.0.0.tar.gz
 cache: pip
 addons:
   apt:
