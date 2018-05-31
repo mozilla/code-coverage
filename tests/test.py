@@ -57,11 +57,11 @@ class Test(unittest.TestCase):
         self.assertTrue(len(os.listdir('ccov-artifacts')) == 2)
 
         codecoverage.download_grcov()
-        codecoverage.generate_info('./grcov')
+        codecoverage.generate_report('./grcov', 'lcov', 'output.info')
         self.assertTrue(os.path.exists('output.info'))
 
         codecoverage.download_genhtml()
-        codecoverage.generate_report('tests')
+        codecoverage.generate_html_report('tests')
         self.assertTrue(os.path.isdir('report'))
 
     def test_suite_name_from_task_name(self):

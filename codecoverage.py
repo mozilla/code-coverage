@@ -6,13 +6,14 @@ import shutil
 import subprocess
 import tarfile
 import time
+import warnings
+
 try:
     from urllib.parse import urlencode
     from urllib.request import urlopen, urlretrieve
 except ImportError:
     from urllib import urlencode, urlretrieve
     from urllib2 import urlopen
-import warnings
 
 
 def get_json(url, params=None):
@@ -108,7 +109,7 @@ def download_coverage_artifacts(build_task_id, suites):
                 download_artifact(test_task['status']['taskId'], artifact)
 
 
-def generate_info(grcov_path):
+def generate_report(grcov_path, output_format, output_path):
     mod_env = os.environ.copy()
     if is_taskcluster_loaner():
         one_click_loaner_gcc = '/home/worker/workspace/build/src/gcc/bin'
@@ -118,9 +119,10 @@ def generate_info(grcov_path):
             i += 1
             time.sleep(60)
         mod_env['PATH'] = one_click_loaner_gcc + ':' + mod_env['PATH']
-
-    fout = open("output.info", 'w')
-    cmd = [grcov_path, '-t', 'lcov', '-p', '/home/worker/workspace/build/src/']
+    fout = open(output_path, 'w')
+    cmd = [grcov_path, '-t', output_format, '-p', '/home/worker/workspace/build/src/']
+    if output_format in ['coveralls', 'coveralls+']:
+        cmd += ['--token', 'UNUSED', '--commit-sha', 'UNUSED']
     cmd.extend([os.path.join('ccov-artifacts', p) for p in os.listdir('ccov-artifacts')])
     proc = subprocess.Popen(cmd, stdout=fout, stderr=subprocess.PIPE, env=mod_env)
     i = 0
@@ -134,10 +136,10 @@ def generate_info(grcov_path):
         raise Exception("Error while running grcov:\n" + proc.stderr.read())
 
 
-def generate_report(src_dir):
+def generate_html_report(src_dir):
     cwd = os.getcwd()
     os.chdir(src_dir)
-    ret = subprocess.call([os.path.join(cwd, "lcov-bin/usr/local/bin/genhtml"), "-o", os.path.join(cwd, "report"), "--show-details", "--highlight", "--ignore-errors", "source", "--legend", os.path.join(cwd, "output.info"), "--prefix", src_dir])
+    ret = subprocess.call([os.path.join(cwd, "lcov-bin/usr/local/bin/genhtml"), "-o", os.path.join(cwd, "report"), "--show-details", "--highlight", "--ignore-errors", "source", "--legend", os.path.join(cwd, 'output.info'), "--prefix", src_dir])
     if ret != 0:
         raise Exception("Error while running genhtml.")
     os.chdir(cwd)
@@ -230,10 +232,10 @@ def main():
             download_grcov()
             grcov_path = './grcov'
 
-        generate_info(grcov_path)
+        generate_report(grcov_path, 'lcov', 'output.info')
 
     download_genhtml()
-    generate_report(os.path.abspath(args.src_dir))
+    generate_html_report(os.path.abspath(args.src_dir))
 
 
 if __name__ == "__main__":
