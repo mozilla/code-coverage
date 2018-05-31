@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import argparse
 import errno
 import json
@@ -133,15 +135,15 @@ def generate_report(grcov_path, output_format, output_path):
         time.sleep(1)
 
     if proc.poll() != 0:
-        raise Exception("Error while running grcov:\n" + proc.stderr.read())
+        raise Exception('Error while running grcov:\n' + proc.stderr.read())
 
 
 def generate_html_report(src_dir):
     cwd = os.getcwd()
     os.chdir(src_dir)
-    ret = subprocess.call([os.path.join(cwd, "lcov-bin/usr/local/bin/genhtml"), "-o", os.path.join(cwd, "report"), "--show-details", "--highlight", "--ignore-errors", "source", "--legend", os.path.join(cwd, 'output.info'), "--prefix", src_dir])
+    ret = subprocess.call([os.path.join(cwd, 'lcov-bin/usr/local/bin/genhtml'), '-o', os.path.join(cwd, 'report'), '--show-details', '--highlight', '--ignore-errors', 'source', '--legend', os.path.join(cwd, 'output.info'), '--prefix', src_dir])
     if ret != 0:
-        raise Exception("Error while running genhtml.")
+        raise Exception('Error while running genhtml.')
     os.chdir(cwd)
 
 
@@ -201,13 +203,13 @@ def main():
         default_branch = None
         default_commit = None
 
-    parser.add_argument("src_dir", action="store", nargs=nargs, default=default_src_dir, help="Path to the source directory")
-    parser.add_argument("branch", action="store", nargs='?', default=default_branch, help="Branch on which jobs ran")
-    parser.add_argument("commit", action="store", nargs='?', default=default_commit, help="Commit hash for push")
-    parser.add_argument("--grcov", action="store", nargs='?', help="Path to grcov")
-    parser.add_argument("--no-download", action="store_true", help="Use already downloaded coverage files")
-    parser.add_argument("--no-grcov", action="store_true", help="Use already generated grcov output (implies --no-download)")
-    parser.add_argument("--suite", action="store", nargs='+', help="List of test suites to include (by default they are all included). E.g. 'mochitest', 'mochitest-chrome', 'gtest', etc.")
+    parser.add_argument('src_dir', action='store', nargs=nargs, default=default_src_dir, help='Path to the source directory')
+    parser.add_argument('branch', action='store', nargs='?', default=default_branch, help='Branch on which jobs ran')
+    parser.add_argument('commit', action='store', nargs='?', default=default_commit, help='Commit hash for push')
+    parser.add_argument('--grcov', action='store', nargs='?', help='Path to grcov')
+    parser.add_argument('--no-download', action='store_true', help='Use already downloaded coverage files')
+    parser.add_argument('--no-grcov', action='store_true', help='Use already generated grcov output (implies --no-download)')
+    parser.add_argument('--suite', action='store', nargs='+', help='List of test suites to include (by default they are all included). E.g. \'mochitest\', \'mochitest-chrome\', \'gtest\', etc.')
     args = parser.parse_args()
 
     if args.no_grcov:
@@ -238,5 +240,5 @@ def main():
     generate_html_report(os.path.abspath(args.src_dir))
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
