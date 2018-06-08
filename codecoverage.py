@@ -76,7 +76,7 @@ def suite_name_from_task_name(name):
     return '-'.join(parts)
 
 
-def download_coverage_artifacts(build_task_id, suites):
+def download_coverage_artifacts(build_task_id, suites, suites_to_ignore=['talos', 'awsy']):
     shutil.rmtree('ccov-artifacts', ignore_errors=True)
 
     try:
@@ -95,7 +95,8 @@ def download_coverage_artifacts(build_task_id, suites):
 
     # Returns True if the task is part of one of the suites chosen by the user.
     def _is_chosen_task(t):
-        return suites is None or suite_name_from_task_name(t['task']['metadata']['name']) in suites
+        suite_name = suite_name_from_task_name(t['task']['metadata']['name'])
+        return suites is None or suite_name in suites and suite_name not in suites_to_ignore
 
     test_tasks = [t for t in get_tasks_in_group(task_data['taskGroupId']) if _is_test_task(t) and _is_chosen_task(t)]
 
@@ -210,6 +211,7 @@ def main():
     parser.add_argument('--no-download', action='store_true', help='Use already downloaded coverage files')
     parser.add_argument('--no-grcov', action='store_true', help='Use already generated grcov output (implies --no-download)')
     parser.add_argument('--suite', action='store', nargs='+', help='List of test suites to include (by default they are all included). E.g. \'mochitest\', \'mochitest-chrome\', \'gtest\', etc.')
+    parser.add_argument('--ignore', action='store', nargs='+', help='List of test suites to ignore (by default \'talos\' and \'awsy\'). E.g. \'mochitest\', \'mochitest-chrome\', \'gtest\', etc.')
     args = parser.parse_args()
 
     if args.no_grcov:
@@ -224,8 +226,10 @@ def main():
             task_id = get_task(args.branch, args.commit)
         else:
             task_id = get_last_task()
-
-        download_coverage_artifacts(task_id, args.suite)
+        if args.ignore is None:
+            download_coverage_artifacts(task_id, args.suite)
+        else:
+            download_coverage_artifacts(task_id, args.suite, args.ignore)
 
     if not args.no_grcov:
         if args.grcov:
