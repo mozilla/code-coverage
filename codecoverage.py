@@ -112,7 +112,7 @@ def download_coverage_artifacts(build_task_id, suites, suites_to_ignore=['talos'
                 download_artifact(test_task['status']['taskId'], artifact)
 
 
-def generate_report(grcov_path, output_format, output_path):
+def generate_report(grcov_path, output_format, output_path, artifacts_path='ccov-artifacts'):
     mod_env = os.environ.copy()
     if is_taskcluster_loaner():
         one_click_loaner_gcc = '/home/worker/workspace/build/src/gcc/bin'
@@ -126,7 +126,7 @@ def generate_report(grcov_path, output_format, output_path):
     cmd = [grcov_path, '-t', output_format, '-p', '/home/worker/workspace/build/src/']
     if output_format in ['coveralls', 'coveralls+']:
         cmd += ['--token', 'UNUSED', '--commit-sha', 'UNUSED']
-    cmd.extend([os.path.join('ccov-artifacts', p) for p in os.listdir('ccov-artifacts')])
+    cmd.extend([os.path.join(artifacts_path, p) for p in os.listdir(artifacts_path)])
     proc = subprocess.Popen(cmd, stdout=fout, stderr=subprocess.PIPE, env=mod_env)
     i = 0
     while proc.poll() is None:
@@ -208,24 +208,22 @@ def main():
     parser.add_argument('branch', action='store', nargs='?', default=default_branch, help='Branch on which jobs ran')
     parser.add_argument('commit', action='store', nargs='?', default=default_commit, help='Commit hash for push')
     parser.add_argument('--grcov', action='store', nargs='?', help='Path to grcov')
-    parser.add_argument('--no-download', action='store_true', help='Use already downloaded coverage files')
-    parser.add_argument('--no-grcov', action='store_true', help='Use already generated grcov output (implies --no-download)')
+    parser.add_argument('--with-artifacts', action='store', nargs='?', help='Path to already downloaded coverage files')
+    parser.add_argument('--no-grcov', action='store_true', help='Use already generated grcov output')
     parser.add_argument('--suite', action='store', nargs='+', help='List of test suites to include (by default they are all included). E.g. \'mochitest\', \'mochitest-chrome\', \'gtest\', etc.')
     parser.add_argument('--ignore', action='store', nargs='+', help='List of test suites to ignore (by default \'talos\' and \'awsy\'). E.g. \'mochitest\', \'mochitest-chrome\', \'gtest\', etc.')
     args = parser.parse_args()
 
-    if args.no_grcov:
-        args.no_download = True
+    if not args.with_artifacts and not args.no_grcov:
+        if (args.branch is None) != (args.commit is None):
+            parser.print_help()
+            return
 
-    if (args.branch is None) != (args.commit is None) and not args.no_download:
-        parser.print_help()
-        return
-
-    if not args.no_download:
         if args.branch and args.commit:
             task_id = get_task(args.branch, args.commit)
         else:
             task_id = get_last_task()
+
         if args.ignore is None:
             download_coverage_artifacts(task_id, args.suite)
         else:
@@ -238,7 +236,10 @@ def main():
             download_grcov()
             grcov_path = './grcov'
 
-        generate_report(grcov_path, 'lcov', 'output.info')
+        if args.with_artifacts:
+            generate_report(grcov_path, 'lcov', 'output.info', args.with_artifacts)
+        else:
+            generate_report(grcov_path, 'lcov', 'output.info')
 
     download_genhtml()
     generate_html_report(os.path.abspath(args.src_dir))
