@@ -12,17 +12,18 @@ import warnings
 
 try:
     from urllib.parse import urlencode
-    from urllib.request import urlopen, urlretrieve
+    from urllib.request import Request, urlopen, urlretrieve
 except ImportError:
     from urllib import urlencode, urlretrieve
-    from urllib2 import urlopen
+    from urllib2 import Request, urlopen
 
 
-def get_json(url, params=None):
+def get_json(url, params=None, headers={}):
     if params is not None:
         url += '?' + urlencode(params)
 
-    r = urlopen(url).read().decode('utf-8')
+    request = Request(url, headers=headers)
+    r = urlopen(request).read().decode('utf-8')
 
     return json.loads(r)
 
@@ -149,7 +150,11 @@ def generate_html_report(src_dir):
 
 
 def download_grcov():
-    r = get_json('https://api.github.com/repos/marco-c/grcov/releases/latest')
+    headers = {}
+    if 'GITHUB_ACCESS_TOKEN' in os.environ:
+        headers['Authorization'] = 'token {}'.format(os.environ['GITHUB_ACCESS_TOKEN'])
+
+    r = get_json('https://api.github.com/repos/marco-c/grcov/releases/latest', headers=headers)
     latest_tag = r['tag_name']
 
     if os.path.exists('grcov') and os.path.exists('grcov_ver'):
