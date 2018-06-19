@@ -140,10 +140,10 @@ def generate_report(grcov_path, output_format, output_path, artifacts_path='ccov
         raise Exception('Error while running grcov:\n' + proc.stderr.read())
 
 
-def generate_html_report(src_dir):
+def generate_html_report(src_dir, info_file=os.path.join(os.getcwd(), 'output.info'), output_dir=os.path.join(os.getcwd(), 'report')):
     cwd = os.getcwd()
     os.chdir(src_dir)
-    ret = subprocess.call([os.path.join(cwd, 'lcov-bin/usr/local/bin/genhtml'), '-o', os.path.join(cwd, 'report'), '--show-details', '--highlight', '--ignore-errors', 'source', '--legend', os.path.join(cwd, 'output.info'), '--prefix', src_dir])
+    ret = subprocess.call([os.path.join(cwd, 'lcov-bin/usr/local/bin/genhtml'), '-o', output_dir, '--show-details', '--highlight', '--ignore-errors', 'source', '--legend', info_file, '--prefix', src_dir])
     if ret != 0:
         raise Exception('Error while running genhtml.')
     os.chdir(cwd)
