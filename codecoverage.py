@@ -68,7 +68,8 @@ def get_tasks_in_group(group_id):
 
 def download_artifact(task_id, artifact):
     fname = os.path.join('ccov-artifacts', task_id + '_' + os.path.basename(artifact['name']))
-    urlretrieve('https://queue.taskcluster.net/v1/task/' + task_id + '/artifacts/' + artifact['name'], fname)
+    if not os.path.exists(fname):
+        urlretrieve('https://queue.taskcluster.net/v1/task/' + task_id + '/artifacts/' + artifact['name'], fname)
 
 
 def suite_name_from_task_name(name):
