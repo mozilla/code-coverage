@@ -225,13 +225,12 @@ def main():
     parser.add_argument('commit', action='store', nargs='?', default=default_commit, help='Commit hash for push')
     parser.add_argument('--grcov', action='store', nargs='?', help='Path to grcov')
     parser.add_argument('--with-artifacts', action='store', nargs='?', help='Path to already downloaded coverage files')
-    parser.add_argument('--no-grcov', action='store_true', help='Use already generated grcov output')
     parser.add_argument('--suite', action='store', nargs='+', help='List of test suites to include (by default they are all included). E.g. \'mochitest\', \'mochitest-chrome\', \'gtest\', etc.')
     parser.add_argument('--ignore', action='store', nargs='+', help='List of test suites to ignore (by default \'talos\' and \'awsy\'). E.g. \'mochitest\', \'mochitest-chrome\', \'gtest\', etc.')
     parser.add_argument('--stats', action='store_true', help='Only generate high-level stats, not a full HTML report')
     args = parser.parse_args()
 
-    if not args.with_artifacts and not args.no_grcov:
+    if not args.with_artifacts:
         if (args.branch is None) != (args.commit is None):
             parser.print_help()
             return
@@ -246,17 +245,16 @@ def main():
         else:
             download_coverage_artifacts(task_id, args.suite, args.ignore)
 
-    if not args.no_grcov:
-        if args.grcov:
-            grcov_path = args.grcov
-        else:
-            download_grcov()
-            grcov_path = './grcov'
+    if args.grcov:
+        grcov_path = args.grcov
+    else:
+        download_grcov()
+        grcov_path = './grcov'
 
-        if args.with_artifacts:
-            generate_report(grcov_path, 'lcov' if not args.stats else 'json', 'output.info', args.with_artifacts)
-        else:
-            generate_report(grcov_path, 'lcov' if not args.stats else 'json', 'output.info')
+    if args.with_artifacts:
+        generate_report(grcov_path, 'lcov' if not args.stats else 'json', 'output.info', args.with_artifacts)
+    else:
+        generate_report(grcov_path, 'lcov' if not args.stats else 'json', 'output.info')
 
     if args.stats:
         with open('output.info', 'r') as f:
