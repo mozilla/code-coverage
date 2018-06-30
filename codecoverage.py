@@ -69,7 +69,17 @@ def get_tasks_in_group(group_id):
 def download_artifact(task_id, artifact):
     fname = os.path.join('ccov-artifacts', task_id + '_' + os.path.basename(artifact['name']))
     if not os.path.exists(fname):
-        urlretrieve('https://queue.taskcluster.net/v1/task/' + task_id + '/artifacts/' + artifact['name'], fname)
+        while True:
+            try:
+                urlretrieve('https://queue.taskcluster.net/v1/task/' + task_id + '/artifacts/' + artifact['name'], fname)
+                break
+            except:  # noqa: E722
+                try:
+                    os.remove(fname)
+                except OSError:
+                    pass
+
+                time.sleep(7)
 
 
 def suite_name_from_task_name(name):
