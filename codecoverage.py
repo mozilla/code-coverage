@@ -228,6 +228,7 @@ def main():
     parser.add_argument('--no-grcov', action='store_true', help='Use already generated grcov output')
     parser.add_argument('--suite', action='store', nargs='+', help='List of test suites to include (by default they are all included). E.g. \'mochitest\', \'mochitest-chrome\', \'gtest\', etc.')
     parser.add_argument('--ignore', action='store', nargs='+', help='List of test suites to ignore (by default \'talos\' and \'awsy\'). E.g. \'mochitest\', \'mochitest-chrome\', \'gtest\', etc.')
+    parser.add_argument('--stats', action='store_true', help='Only generate high-level stats, not a full HTML report')
     args = parser.parse_args()
 
     if not args.with_artifacts and not args.no_grcov:
@@ -253,12 +254,30 @@ def main():
             grcov_path = './grcov'
 
         if args.with_artifacts:
-            generate_report(grcov_path, 'lcov', 'output.info', args.with_artifacts)
+            generate_report(grcov_path, 'lcov' if not args.stats else 'json', 'output.info', args.with_artifacts)
         else:
-            generate_report(grcov_path, 'lcov', 'output.info')
+            generate_report(grcov_path, 'lcov' if not args.stats else 'json', 'output.info')
 
-    download_genhtml()
-    generate_html_report(os.path.abspath(args.src_dir))
+    if args.stats:
+        with open('output.info', 'r') as f:
+            report = json.load(f)
+        total_lines = 0
+        total_lines_covered = 0
+        for sf in report['source_files']:
+            for c in sf['coverage']:
+                if c is None:
+                    continue
+
+                total_lines += 1
+                if c > 0:
+                    total_lines_covered += 1
+
+        print('Coverable lines: {}'.format(total_lines))
+        print('Covered lines: {}'.format(total_lines_covered))
+        print('Coverage percentage: {}'.format(float(total_lines_covered) / float(total_lines)))
+    else:
+        download_genhtml()
+        generate_html_report(os.path.abspath(args.src_dir))
 
 
 if __name__ == '__main__':
