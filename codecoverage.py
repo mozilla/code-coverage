@@ -97,8 +97,6 @@ def download_coverage_artifacts(build_task_id, suites, artifacts_path, suites_to
 
     task_data = get_task_details(build_task_id)
 
-    artifacts = get_task_artifacts(build_task_id)
-
     # Returns True if the task is a test-related task.
     def _is_test_task(t):
         return t['task']['metadata']['name'].startswith('test-linux64-ccov')
