@@ -5,6 +5,7 @@ import errno
 import json
 import os
 import subprocess
+import sys
 import tarfile
 import time
 import warnings
@@ -115,11 +116,14 @@ def download_coverage_artifacts(build_task_id, suites, artifacts_path, suites_to
             if not any(suite in t['task']['metadata']['name'] for t in test_tasks):
                 warnings.warn('Suite %s not found' % suite)
 
-    for test_task in test_tasks:
+    for i, test_task in enumerate(test_tasks):
+        sys.stdout.write('\rDownloading artifacts from {}/{} test task...'.format(i, len(test_tasks)))
+        sys.stdout.flush()
         artifacts = get_task_artifacts(test_task['status']['taskId'])
         for artifact in artifacts:
             if any(a in artifact['name'] for a in ['code-coverage-grcov.zip', 'code-coverage-jsvm.zip']):
                 download_artifact(test_task['status']['taskId'], artifact, artifacts_path)
+    print('')
 
 
 def generate_report(grcov_path, output_format, output_path, artifacts_path):
@@ -141,9 +145,11 @@ def generate_report(grcov_path, output_format, output_path, artifacts_path):
     i = 0
     while proc.poll() is None:
         if i % 60 == 0:
-            print('Running grcov... ' + str(i))
+            sys.stdout.write('\rRunning grcov... {} seconds'.format(i))
+            sys.stdout.flush()
         i += 1
         time.sleep(1)
+    print('')
 
     if proc.poll() != 0:
         raise Exception('Error while running grcov:\n' + proc.stderr.read())
