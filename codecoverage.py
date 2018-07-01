@@ -66,8 +66,8 @@ def get_tasks_in_group(group_id):
     return tasks
 
 
-def download_artifact(task_id, artifact):
-    fname = os.path.join('ccov-artifacts', task_id + '_' + os.path.basename(artifact['name']))
+def download_artifact(task_id, artifact, artifacts_path):
+    fname = os.path.join(artifacts_path, task_id + '_' + os.path.basename(artifact['name']))
     if not os.path.exists(fname):
         while True:
             try:
@@ -88,11 +88,9 @@ def suite_name_from_task_name(name):
     return '-'.join(parts)
 
 
-def download_coverage_artifacts(build_task_id, suites, suites_to_ignore=['talos', 'awsy']):
-    shutil.rmtree('ccov-artifacts', ignore_errors=True)
-
+def download_coverage_artifacts(build_task_id, suites, artifacts_path, suites_to_ignore=['talos', 'awsy']):
     try:
-        os.mkdir('ccov-artifacts')
+        os.mkdir(artifacts_path)
     except OSError as e:
         if e.errno != errno.EEXIST:
             raise e
@@ -121,10 +119,10 @@ def download_coverage_artifacts(build_task_id, suites, suites_to_ignore=['talos'
         artifacts = get_task_artifacts(test_task['status']['taskId'])
         for artifact in artifacts:
             if any(a in artifact['name'] for a in ['code-coverage-grcov.zip', 'code-coverage-jsvm.zip']):
-                download_artifact(test_task['status']['taskId'], artifact)
+                download_artifact(test_task['status']['taskId'], artifact, artifacts_path)
 
 
-def generate_report(grcov_path, output_format, output_path, artifacts_path='ccov-artifacts'):
+def generate_report(grcov_path, output_format, output_path, artifacts_path):
     mod_env = os.environ.copy()
     if is_taskcluster_loaner():
         one_click_loaner_gcc = '/home/worker/workspace/build/src/gcc/bin'
@@ -224,26 +222,25 @@ def main():
     parser.add_argument('branch', action='store', nargs='?', default=default_branch, help='Branch on which jobs ran')
     parser.add_argument('commit', action='store', nargs='?', default=default_commit, help='Commit hash for push')
     parser.add_argument('--grcov', action='store', nargs='?', help='Path to grcov')
-    parser.add_argument('--with-artifacts', action='store', nargs='?', help='Path to already downloaded coverage files')
+    parser.add_argument('--with-artifacts', action='store', nargs='?', default='ccov-artifacts', help='Path to already downloaded coverage files')
     parser.add_argument('--suite', action='store', nargs='+', help='List of test suites to include (by default they are all included). E.g. \'mochitest\', \'mochitest-chrome\', \'gtest\', etc.')
     parser.add_argument('--ignore', action='store', nargs='+', help='List of test suites to ignore (by default \'talos\' and \'awsy\'). E.g. \'mochitest\', \'mochitest-chrome\', \'gtest\', etc.')
     parser.add_argument('--stats', action='store_true', help='Only generate high-level stats, not a full HTML report')
     args = parser.parse_args()
 
-    if not args.with_artifacts:
-        if (args.branch is None) != (args.commit is None):
-            parser.print_help()
-            return
+    if (args.branch is None) != (args.commit is None):
+        parser.print_help()
+        return
 
-        if args.branch and args.commit:
-            task_id = get_task(args.branch, args.commit)
-        else:
-            task_id = get_last_task()
+    if args.branch and args.commit:
+        task_id = get_task(args.branch, args.commit)
+    else:
+        task_id = get_last_task()
 
-        if args.ignore is None:
-            download_coverage_artifacts(task_id, args.suite)
-        else:
-            download_coverage_artifacts(task_id, args.suite, args.ignore)
+    if args.ignore is None:
+        download_coverage_artifacts(task_id, args.suite, args.with_artifacts)
+    else:
+        download_coverage_artifacts(task_id, args.suite, args.with_artifacts, args.ignore)
 
     if args.grcov:
         grcov_path = args.grcov
@@ -251,14 +248,12 @@ def main():
         download_grcov()
         grcov_path = './grcov'
 
-    if args.with_artifacts:
-        generate_report(grcov_path, 'lcov' if not args.stats else 'json', 'output.info', args.with_artifacts)
-    else:
-        generate_report(grcov_path, 'lcov' if not args.stats else 'json', 'output.info')
-
     if args.stats:
-        with open('output.info', 'r') as f:
+        generate_report(grcov_path, 'coveralls', 'output.json', args.with_artifacts)
+
+        with open('output.json', 'r') as f:
             report = json.load(f)
+
         total_lines = 0
         total_lines_covered = 0
         for sf in report['source_files']:
@@ -274,6 +269,8 @@ def main():
         print('Covered lines: {}'.format(total_lines_covered))
         print('Coverage percentage: {}'.format(float(total_lines_covered) / float(total_lines)))
     else:
+        generate_report(grcov_path, 'lcov', 'output.info', args.with_artifacts)
+
         download_genhtml()
         generate_html_report(os.path.abspath(args.src_dir))
 
