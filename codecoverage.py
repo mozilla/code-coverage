@@ -17,6 +17,9 @@ except ImportError:
     from urllib2 import Request, urlopen
 
 
+TEST_PLATFORMS = ['test-linux64-ccov/debug', 'test-windows10-64-ccov/debug']
+
+
 def get_json(url, params=None, headers={}):
     if params is not None:
         url += '?' + urlencode(params)
@@ -98,7 +101,7 @@ def download_coverage_artifacts(build_task_id, suites, artifacts_path, suites_to
 
     # Returns True if the task is a test-related task.
     def _is_test_task(t):
-        return t['task']['metadata']['name'].startswith('test-linux64-ccov')
+        return any(t['task']['metadata']['name'].startswith(tp) for tp in TEST_PLATFORMS)
 
     # Returns True if the task is part of one of the suites chosen by the user.
     def _is_chosen_task(t):
