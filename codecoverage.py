@@ -96,7 +96,16 @@ def get_suite(task_name):
     return '-'.join([p for p in get_chunk(task_name).split('-') if not p.isdigit()])
 
 
-def download_coverage_artifacts(build_task_id, suites, artifacts_path, suites_to_ignore=['talos', 'awsy']):
+def get_platform(task_name):
+    if 'linux' in task_name:
+        return 'linux'
+    elif 'windows' in task_name:
+        return 'windows'
+    else:
+        raise Exception('Unknown platform')
+
+
+def download_coverage_artifacts(build_task_id, suites, platforms, artifacts_path, suites_to_ignore=['talos', 'awsy']):
     try:
         os.mkdir(artifacts_path)
     except OSError as e:
@@ -110,11 +119,15 @@ def download_coverage_artifacts(build_task_id, suites, artifacts_path, suites_to
         return any(t['task']['metadata']['name'].startswith(tp) for tp in TEST_PLATFORMS)
 
     # Returns True if the task is part of one of the suites chosen by the user.
-    def _is_chosen_task(t):
+    def _is_in_suites_task(t):
         suite_name = get_suite(t['task']['metadata']['name'])
         return suites is None or suite_name in suites and suite_name not in suites_to_ignore
 
-    test_tasks = [t for t in get_tasks_in_group(task_data['taskGroupId']) if _is_test_task(t) and _is_chosen_task(t)]
+    def _is_in_platforms_task(t):
+        platform = get_platform(t['task']['metadata']['name'])
+        return platforms is None or platform in platforms
+
+    test_tasks = [t for t in get_tasks_in_group(task_data['taskGroupId']) if _is_test_task(t) and _is_in_suites_task(t) and _is_in_platforms_task(t)]
 
     if suites is not None:
         for suite in suites:
@@ -160,12 +173,16 @@ def generate_report(grcov_path, output_format, output_path, artifacts_path):
         raise Exception('Error while running grcov:\n' + proc.stderr.read())
 
 
-def generate_html_report(src_dir, info_file=os.path.join(os.getcwd(), 'output.info'), output_dir=os.path.join(os.getcwd(), 'report')):
+def generate_html_report(src_dir, info_file=os.path.join(os.getcwd(), 'output.info'), output_dir=os.path.join(os.getcwd(), 'report'), silent=False):
     cwd = os.getcwd()
     os.chdir(src_dir)
-    ret = subprocess.call([os.path.join(cwd, 'lcov-bin/usr/local/bin/genhtml'), '-o', output_dir, '--show-details', '--highlight', '--ignore-errors', 'source', '--legend', info_file, '--prefix', src_dir])
+
+    with open(os.devnull, 'w') as fnull:
+        ret = subprocess.call([os.path.join(cwd, 'lcov-bin/usr/local/bin/genhtml'), '-o', output_dir, '--show-details', '--highlight', '--ignore-errors', 'source', '--legend', info_file, '--prefix', src_dir], stdout=fnull if silent else None, stderr=fnull if silent else None)
+
     if ret != 0:
         raise Exception('Error while running genhtml.')
+
     os.chdir(cwd)
 
 
@@ -234,6 +251,7 @@ def main():
     parser.add_argument('commit', action='store', nargs='?', default=default_commit, help='Commit hash for push')
     parser.add_argument('--grcov', action='store', nargs='?', help='Path to grcov')
     parser.add_argument('--with-artifacts', action='store', nargs='?', default='ccov-artifacts', help='Path to already downloaded coverage files')
+    parser.add_argument('--platform', action='store', nargs='+', help='List of platforms to include (by default they are all included). E.g. \'linux\', \'windows\', etc.')
     parser.add_argument('--suite', action='store', nargs='+', help='List of test suites to include (by default they are all included). E.g. \'mochitest\', \'mochitest-chrome\', \'gtest\', etc.')
     parser.add_argument('--ignore', action='store', nargs='+', help='List of test suites to ignore (by default \'talos\' and \'awsy\'). E.g. \'mochitest\', \'mochitest-chrome\', \'gtest\', etc.')
     parser.add_argument('--stats', action='store_true', help='Only generate high-level stats, not a full HTML report')
@@ -249,9 +267,9 @@ def main():
         task_id = get_last_task()
 
     if args.ignore is None:
-        download_coverage_artifacts(task_id, args.suite, args.with_artifacts)
+        download_coverage_artifacts(task_id, args.suite, args.platform, args.with_artifacts)
     else:
-        download_coverage_artifacts(task_id, args.suite, args.with_artifacts, args.ignore)
+        download_coverage_artifacts(task_id, args.suite, args.platform, args.with_artifacts, args.ignore)
 
     if args.grcov:
         grcov_path = args.grcov

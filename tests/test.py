@@ -56,7 +56,7 @@ class Test(unittest.TestCase):
         self.assertTrue(os.path.exists('ccov-artifacts/%s_target.txt' % task_id))
         os.remove('ccov-artifacts/%s_target.txt' % task_id)
 
-        codecoverage.download_coverage_artifacts(task_id, 'cppunit', 'ccov-artifacts')
+        codecoverage.download_coverage_artifacts(task_id, 'cppunit', None, 'ccov-artifacts')
         self.assertEqual(len([a for a in os.listdir('ccov-artifacts') if 'grcov' in a]), 2)
         self.assertEqual(len([a for a in os.listdir('ccov-artifacts') if 'jsvm' in a]), 2)
 
@@ -71,7 +71,7 @@ class Test(unittest.TestCase):
         os.remove(os.path.join('ccov-artifacts', os.listdir('ccov-artifacts')[0]))
 
         codecoverage.download_genhtml()
-        codecoverage.generate_html_report('tests')
+        codecoverage.generate_html_report('tests', silent=True)
         self.assertTrue(os.path.isdir('report'))
 
     def test_suite_name_from_task_name(self):
