@@ -84,11 +84,16 @@ def download_artifact(task_id, artifact, artifacts_path):
 
                 time.sleep(7)
 
+def get_chunk(task_name):
+    for t in TEST_PLATFORMS:
+        if task_name.startswith(t):
+            task_name = task_name[len(t) + 1:]
+            break
+    return '-'.join([p for p in task_name.split('-') if p != 'e10s'])
 
-def suite_name_from_task_name(name):
-    name = name[len('test-linux64-ccov/debug-'):]
-    parts = [p for p in name.split('-') if p != 'e10s' and not p.isdigit()]
-    return '-'.join(parts)
+
+def get_suite(task_name):
+    return '-'.join([p for p in get_chunk(task_name).split('-') if not p.isdigit()])
 
 
 def download_coverage_artifacts(build_task_id, suites, artifacts_path, suites_to_ignore=['talos', 'awsy']):
@@ -106,7 +111,7 @@ def download_coverage_artifacts(build_task_id, suites, artifacts_path, suites_to
 
     # Returns True if the task is part of one of the suites chosen by the user.
     def _is_chosen_task(t):
-        suite_name = suite_name_from_task_name(t['task']['metadata']['name'])
+        suite_name = get_suite(t['task']['metadata']['name'])
         return suites is None or suite_name in suites and suite_name not in suites_to_ignore
 
     test_tasks = [t for t in get_tasks_in_group(task_data['taskGroupId']) if _is_test_task(t) and _is_chosen_task(t)]
