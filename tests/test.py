@@ -52,14 +52,16 @@ class Test(unittest.TestCase):
             if e.errno != errno.EEXIST:
                 raise e
 
-        codecoverage.download_artifact(task_id, chosen_artifact)
+        codecoverage.download_artifact(task_id, chosen_artifact, 'ccov-artifacts')
         self.assertTrue(os.path.exists('ccov-artifacts/%s_target.txt' % task_id))
 
-        codecoverage.download_coverage_artifacts(task_id, 'cppunit')
-        self.assertTrue(len(os.listdir('ccov-artifacts')) == 2)
+        codecoverage.download_coverage_artifacts(task_id, 'cppunit', 'ccov-artifacts')
+        self.assertEqual(len([a for a in os.listdir('ccov-artifacts') if 'grcov' in a]), 2)
+        self.assertEqual(len([a for a in os.listdir('ccov-artifacts') if 'jsvm' in a]), 2)
+        self.assertEqual(len([a for a in os.listdir('ccov-artifacts') if 'target' in a]), 1)
 
         codecoverage.download_grcov()
-        codecoverage.generate_report('./grcov', 'lcov', 'output.info')
+        codecoverage.generate_report('./grcov', 'lcov', 'output.info', 'ccov-artifacts')
         self.assertTrue(os.path.exists('output.info'))
 
         codecoverage.download_genhtml()
@@ -74,9 +76,11 @@ class Test(unittest.TestCase):
             ('test-linux64-ccov/debug-mochitest-clipboard', 'mochitest-clipboard'),
             ('test-linux64-ccov/debug-reftest-no-accel-e10s-5', 'reftest-no-accel'),
             ('test-linux64-ccov/debug-mochitest-5', 'mochitest'),
+            ('test-windows10-64-ccov/debug-mochitest-5', 'mochitest'),
+            ('test-windows10-64-ccov/debug-cppunit', 'cppunit'),
         ]
         for c in cases:
-            self.assertEqual(codecoverage.suite_name_from_task_name(c[0]), c[1])
+            self.assertEqual(codecoverage.get_suite(c[0]), c[1])
 
     def test_download_grcov(self):
         codecoverage.download_grcov()
