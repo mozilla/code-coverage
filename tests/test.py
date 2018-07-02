@@ -65,8 +65,10 @@ class Test(unittest.TestCase):
         self.assertTrue(os.path.exists('output.info'))
 
         # Remove all artifacts except one to make the genhtml pass faster for the test.
-        for a in os.listdir('ccov-artifacts')[:-1]:
-            os.remove(os.path.join('ccov-artifacts', a))
+        for a in os.listdir('ccov-artifacts'):
+            if 'jsvm' in a:
+                os.remove(os.path.join('ccov-artifacts', a))
+        os.remove(os.path.join('ccov-artifacts', os.listdir('ccov-artifacts')[0]))
 
         codecoverage.download_genhtml()
         codecoverage.generate_html_report('tests')
