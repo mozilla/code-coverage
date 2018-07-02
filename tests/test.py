@@ -54,15 +54,19 @@ class Test(unittest.TestCase):
 
         codecoverage.download_artifact(task_id, chosen_artifact, 'ccov-artifacts')
         self.assertTrue(os.path.exists('ccov-artifacts/%s_target.txt' % task_id))
+        os.remove('ccov-artifacts/%s_target.txt' % task_id)
 
         codecoverage.download_coverage_artifacts(task_id, 'cppunit', 'ccov-artifacts')
         self.assertEqual(len([a for a in os.listdir('ccov-artifacts') if 'grcov' in a]), 2)
         self.assertEqual(len([a for a in os.listdir('ccov-artifacts') if 'jsvm' in a]), 2)
-        self.assertEqual(len([a for a in os.listdir('ccov-artifacts') if 'target' in a]), 1)
 
         codecoverage.download_grcov()
         codecoverage.generate_report('./grcov', 'lcov', 'output.info', 'ccov-artifacts')
         self.assertTrue(os.path.exists('output.info'))
+
+        # Remove all artifacts except one to make the genhtml pass faster for the test.
+        for a in os.listdir('ccov-artifacts')[:-1]:
+            os.remove(os.path.join('ccov-artifacts', a))
 
         codecoverage.download_genhtml()
         codecoverage.generate_html_report('tests')
