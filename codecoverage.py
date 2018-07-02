@@ -84,6 +84,7 @@ def download_artifact(task_id, artifact, artifacts_path):
 
                 time.sleep(7)
 
+
 def get_chunk(task_name):
     for t in TEST_PLATFORMS:
         if task_name.startswith(t):
