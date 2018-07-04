@@ -174,12 +174,15 @@ def generate_report(grcov_path, output_format, output_path, artifacts_path):
         raise Exception('Error while running grcov:\n' + proc.stderr.read())
 
 
-def generate_html_report(src_dir, info_file=os.path.join(os.getcwd(), 'output.info'), output_dir=os.path.join(os.getcwd(), 'report'), silent=False):
+def generate_html_report(src_dir, info_file=os.path.join(os.getcwd(), 'output.info'), output_dir=os.path.join(os.getcwd(), 'report'), silent=False, style_file=None):
     cwd = os.getcwd()
     os.chdir(src_dir)
 
     with open(os.devnull, 'w') as fnull:
-        ret = subprocess.call([os.path.join(cwd, 'lcov-bin/usr/local/bin/genhtml'), '-o', output_dir, '--show-details', '--highlight', '--ignore-errors', 'source', '--legend', info_file, '--prefix', src_dir], stdout=fnull if silent else None, stderr=fnull if silent else None)
+        command = [os.path.join(cwd, 'lcov-bin/usr/local/bin/genhtml'), '-o', output_dir, '--show-details', '--highlight', '--ignore-errors', 'source', '--legend', info_file, '--prefix', src_dir]
+        if style_file is not None:
+            command += ['--css-file', style_file]
+        ret = subprocess.call(command, stdout=fnull if silent else None, stderr=fnull if silent else None)
 
     if ret != 0:
         raise Exception('Error while running genhtml.')
