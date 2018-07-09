@@ -19,6 +19,13 @@ except ImportError:
 
 
 TEST_PLATFORMS = ['test-linux64-ccov/debug', 'test-windows10-64-ccov/debug']
+FINISHED_STATUSES = ['completed', 'failed', 'exception']
+ALL_STATUSES = FINISHED_STATUSES + ['unscheduled', 'pending', 'running']
+STATUS_VALUE = {
+    'exception': 1,
+    'failed': 2,
+    'completed': 3,
+}
 
 
 def get_json(url, params=None, headers={}):
@@ -106,6 +113,11 @@ def get_platform(task_name):
         raise Exception('Unknown platform')
 
 
+def get_task_status(task_id):
+    status = get_json('https://queue.taskcluster.net/v1/task/{}/status'.format(task_id))
+    return status['status']['state']
+
+
 def download_coverage_artifacts(build_task_id, suites, platforms, artifacts_path, suites_to_ignore=['talos', 'awsy']):
     try:
         os.mkdir(artifacts_path)
@@ -135,7 +147,30 @@ def download_coverage_artifacts(build_task_id, suites, platforms, artifacts_path
             if not any(suite in t['task']['metadata']['name'] for t in test_tasks):
                 warnings.warn('Suite %s not found' % suite)
 
-    for i, test_task in enumerate(test_tasks):
+    download_tasks = {}
+
+    for test_task in test_tasks:
+        status = test_task['status']['state']
+        assert status in ALL_STATUSES, "State '{}' not recognized".format(status)
+
+        while status not in FINISHED_STATUSES:
+            sys.stdout.write('\rWaiting for task {} to finish...'.format(test_task['status']['taskId']))
+            sys.stdout.flush()
+            time.sleep(60)
+            status = get_task_status(test_task['status']['taskId'])
+            assert status in ALL_STATUSES
+
+        chunk_name = get_chunk(test_task['task']['metadata']['name'])
+        platform_name = get_platform(test_task['task']['metadata']['name'])
+
+        if (chunk_name, platform_name) not in download_tasks:
+            download_tasks[(chunk_name, platform_name)] = test_task
+        else:
+            prev_task = download_tasks[(chunk_name, platform_name)]
+            if STATUS_VALUE[status] > STATUS_VALUE[prev_task['status']['state']]:
+                download_tasks[(chunk_name, platform_name)] = test_task
+
+    for i, test_task in enumerate(download_tasks.values()):
         sys.stdout.write('\rDownloading artifacts from {}/{} test task...'.format(i, len(test_tasks)))
         sys.stdout.flush()
         artifacts = get_task_artifacts(test_task['status']['taskId'])
