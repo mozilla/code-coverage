@@ -90,6 +90,7 @@ def download_artifact(task_id, artifact, artifacts_path):
                     pass
 
                 time.sleep(7)
+    return fname
 
 
 def get_chunk(task_name):
@@ -170,17 +171,19 @@ def download_coverage_artifacts(build_task_id, suites, platforms, artifacts_path
             if STATUS_VALUE[status] > STATUS_VALUE[prev_task['status']['state']]:
                 download_tasks[(chunk_name, platform_name)] = test_task
 
+    artifact_paths = []
     for i, test_task in enumerate(download_tasks.values()):
         sys.stdout.write('\rDownloading artifacts from {}/{} test task...'.format(i, len(test_tasks)))
         sys.stdout.flush()
         artifacts = get_task_artifacts(test_task['status']['taskId'])
         for artifact in artifacts:
             if any(a in artifact['name'] for a in ['code-coverage-grcov.zip', 'code-coverage-jsvm.zip']):
-                download_artifact(test_task['status']['taskId'], artifact, artifacts_path)
+                artifact_paths.append(download_artifact(test_task['status']['taskId'], artifact, artifacts_path))
     print('')
+    return artifact_paths
 
 
-def generate_report(grcov_path, output_format, output_path, artifacts_path):
+def generate_report(grcov_path, output_format, output_path, artifact_paths):
     mod_env = os.environ.copy()
     if is_taskcluster_loaner():
         one_click_loaner_gcc = '/home/worker/workspace/build/src/gcc/bin'
@@ -194,7 +197,7 @@ def generate_report(grcov_path, output_format, output_path, artifacts_path):
     cmd = [grcov_path, '-t', output_format, '-p', '/home/worker/workspace/build/src/']
     if output_format in ['coveralls', 'coveralls+']:
         cmd += ['--token', 'UNUSED', '--commit-sha', 'UNUSED']
-    cmd.extend([os.path.join(artifacts_path, p) for p in os.listdir(artifacts_path)])
+    cmd.extend(artifact_paths)
     proc = subprocess.Popen(cmd, stdout=fout, stderr=subprocess.PIPE, env=mod_env)
     i = 0
     while proc.poll() is None:
@@ -306,9 +309,9 @@ def main():
         task_id = get_last_task()
 
     if args.ignore is None:
-        download_coverage_artifacts(task_id, args.suite, args.platform, args.with_artifacts)
+        artifact_paths = download_coverage_artifacts(task_id, args.suite, args.platform, args.with_artifacts)
     else:
-        download_coverage_artifacts(task_id, args.suite, args.platform, args.with_artifacts, args.ignore)
+        artifact_paths = download_coverage_artifacts(task_id, args.suite, args.platform, args.with_artifacts, args.ignore)
 
     if args.grcov:
         grcov_path = args.grcov
@@ -317,7 +320,7 @@ def main():
         grcov_path = './grcov'
 
     if args.stats:
-        generate_report(grcov_path, 'coveralls', 'output.json', args.with_artifacts)
+        generate_report(grcov_path, 'coveralls', 'output.json', artifact_paths)
 
         with open('output.json', 'r') as f:
             report = json.load(f)
@@ -337,7 +340,7 @@ def main():
         print('Covered lines: {}'.format(total_lines_covered))
         print('Coverage percentage: {}'.format(float(total_lines_covered) / float(total_lines)))
     else:
-        generate_report(grcov_path, 'lcov', 'output.info', args.with_artifacts)
+        generate_report(grcov_path, 'lcov', 'output.info', artifact_paths)
 
         download_genhtml()
         generate_html_report(os.path.abspath(args.src_dir))
