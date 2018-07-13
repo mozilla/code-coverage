@@ -16,6 +16,12 @@ async function getCoverage(revPromise, path) {
   return resultPromise;
 }
 
+function disableButton(button, text) {
+  button.setAttribute('disabled', 'disabled');
+  button.style['cursor'] = 'not-allowed';
+  button.title = text;
+}
+
 function injectToggle(revPromise, path) {
   // Preload coverage data.
   getCoverage(revPromise, path);
@@ -33,9 +39,15 @@ function injectToggle(revPromise, path) {
     enabled = !enabled;
     if (enabled) {
       button.appendChild(spinner);
-      await applyOverlay(revPromise, path);
-      button.removeChild(spinner);
-      button.style.backgroundColor = 'lightgrey';
+      try {
+        await applyOverlay(revPromise, path);
+        button.style.backgroundColor = 'lightgrey';
+      } catch (ex) {
+        button.style.backgroundColor = 'red';
+        disableButton(button, 'Error retrieving coverage information for this file');
+      } finally {
+        button.removeChild(spinner);
+      }
     } else {
       removeOverlay();
       button.style.backgroundColor = 'white';
