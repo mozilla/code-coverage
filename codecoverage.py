@@ -256,12 +256,6 @@ def download_grcov():
 
 
 def download_genhtml():
-    try:
-        os.mkdir('lcov-bin')
-    except OSError as e:
-        if e.errno != errno.EEXIST:
-            raise e
-
     if os.path.isdir('lcov'):
         os.chdir('lcov')
         subprocess.check_call(['git', 'pull'])
