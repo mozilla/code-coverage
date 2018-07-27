@@ -7,5 +7,6 @@ setup(
     name='firefox_code_coverage',
     version='1.0.0',
     description='Code Coverage Report generator for Firefox',
-    packages=find_packages(exclude=['contrib', 'docs', 'tests'])
+    packages=find_packages(exclude=['contrib', 'docs', 'tests']),
+    license='MPL2',
 )
