@@ -34,6 +34,11 @@ async function fetchChangesetCoverage(rev) {
   } while (!ready);
 }
 
+async function phidToHg(phid) {
+  let response = await fetch(`https://coverage.staging.moz.tools/phabricator/base_revision_from_phid/${phid}`);
+  return await response.json();
+}
+
 async function gitToHg(gitrev) {
   let response = await fetch(`https://api.pub.build.mozilla.org/mapper/gecko-dev/rev/git/${gitrev}`);
   if (!response.ok) {

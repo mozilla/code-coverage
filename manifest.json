@@ -44,12 +44,19 @@
       "js": ["supported_extensions.js", "coverage.js", "button.js", "hgmo.js"],
       "css": ["spinner.css", "dxr.css"],
       "run_at": "document_end"
+    },
+    {
+      "matches": ["*://phabricator.services.mozilla.com/D*"],
+      "js": ["supported_extensions.js", "coverage.js", "phabricator.js"],
+      "run_at": "document_idle"
     }
   ],
   "permissions": [
     "https://coverage.moz.tools/coverage/*",
     "https://api.pub.build.mozilla.org/mapper/gecko-dev/rev/git/*",
-    "https://reviewboard-hg.mozilla.org/gecko/*"
+    "https://reviewboard-hg.mozilla.org/gecko/*",
+    "https://hg.mozilla.org/mozilla-central/json-rev/*",
+    "https://coverage.staging.moz.tools/phabricator/*"
   ],
   "homepage_url": "https://github.com/marco-c/code-coverage-addon"
 }
