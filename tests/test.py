@@ -9,7 +9,7 @@ import os
 import shutil
 import unittest
 
-import codecoverage
+from firefox_code_coverage import codecoverage
 
 
 class Test(unittest.TestCase):
