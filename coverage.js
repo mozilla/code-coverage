@@ -35,7 +35,7 @@ async function fetchChangesetCoverage(rev) {
 }
 
 async function phidToHg(phid) {
-  let response = await fetch(`https://coverage.staging.moz.tools/phabricator/base_revision_from_phid/${phid}`);
+  let response = await fetch(`https://coverage.moz.tools/phabricator/base_revision_from_phid/${phid}`);
   return await response.json();
 }
 

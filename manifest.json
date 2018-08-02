@@ -55,8 +55,7 @@
     "https://coverage.moz.tools/coverage/*",
     "https://api.pub.build.mozilla.org/mapper/gecko-dev/rev/git/*",
     "https://reviewboard-hg.mozilla.org/gecko/*",
-    "https://hg.mozilla.org/mozilla-central/json-rev/*",
-    "https://coverage.staging.moz.tools/phabricator/*"
+    "https://hg.mozilla.org/mozilla-central/json-rev/*"
   ],
   "homepage_url": "https://github.com/marco-c/code-coverage-addon"
 }
