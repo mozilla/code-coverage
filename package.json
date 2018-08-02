@@ -19,12 +19,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/marco-c/code-coverage-addon.git"
+    "url": "git+https://github.com/mozilla/code-coverage-addon.git"
   },
   "author": "Marco Castelluccio",
   "license": "MPL-2.0",
   "bugs": {
-    "url": "https://github.com/marco-c/code-coverage-addon/issues"
+    "url": "https://github.com/mozilla/code-coverage-addon/issues"
   },
-  "homepage": "https://github.com/marco-c/code-coverage-addon#readme"
+  "homepage": "https://github.com/mozilla/code-coverage-addon#readme"
 }

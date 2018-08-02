@@ -57,5 +57,5 @@
     "https://reviewboard-hg.mozilla.org/gecko/*",
     "https://hg.mozilla.org/mozilla-central/json-rev/*"
   ],
-  "homepage_url": "https://github.com/marco-c/code-coverage-addon"
+  "homepage_url": "https://github.com/mozilla/code-coverage-addon"
 }
