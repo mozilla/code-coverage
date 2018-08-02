@@ -40,7 +40,7 @@ async function phidToHg(phid) {
 }
 
 async function gitToHg(gitrev) {
-  let response = await fetch(`https://api.pub.build.mozilla.org/mapper/gecko-dev/rev/git/${gitrev}`);
+  let response = await fetch(`https://mapper.mozilla-releng.net/gecko-dev/rev/git/${gitrev}`);
   if (!response.ok) {
     throw new Error(`Error retrieving git to mercurial mapping for ${gitrev}.`);
   }

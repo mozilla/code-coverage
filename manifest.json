@@ -53,7 +53,7 @@
   ],
   "permissions": [
     "https://coverage.moz.tools/coverage/*",
-    "https://api.pub.build.mozilla.org/mapper/gecko-dev/rev/git/*",
+    "https://mapper.mozilla-releng.net/gecko-dev/rev/git/*",
     "https://reviewboard-hg.mozilla.org/gecko/*",
     "https://hg.mozilla.org/mozilla-central/json-rev/*"
   ],
