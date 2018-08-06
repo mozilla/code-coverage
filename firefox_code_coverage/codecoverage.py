@@ -217,7 +217,7 @@ def generate_html_report(src_dir, info_file=os.path.join(os.getcwd(), 'output.in
     os.chdir(src_dir)
 
     with open(os.devnull, 'w') as fnull:
-        command = [os.path.join(cwd, 'lcov-bin/usr/local/bin/genhtml'), '-o', output_dir, '--show-details', '--highlight', '--ignore-errors', 'source', '--legend', info_file, '--prefix', src_dir]
+        command = [os.path.join(cwd, 'lcov-bin/usr/local/bin/genhtml'), '-o', output_dir, '--show-details', '--highlight', '--ignore-errors', 'source', '--legend', info_file]
         if style_file is not None:
             command += ['--css-file', style_file]
         ret = subprocess.call(command, stdout=fnull if silent else None, stderr=fnull if silent else None)
