@@ -209,7 +209,7 @@ def generate_report(grcov_path, output_format, output_path, artifact_paths):
     print('')
 
     if proc.poll() != 0:
-        raise Exception('Error while running grcov:\n' + proc.stderr.read())
+        raise Exception('Error while running grcov: {}\n'.format(proc.stderr.read()))
 
 
 def generate_html_report(src_dir, info_file=os.path.join(os.getcwd(), 'output.info'), output_dir=os.path.join(os.getcwd(), 'report'), silent=False, style_file=None):
