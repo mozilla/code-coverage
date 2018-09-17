@@ -8,7 +8,7 @@ let get_data = function() {
   let files = null;
   return async function() {
     if (!files) {
-      let response = await fetch('https://index.taskcluster.net/v1/task/project.releng.services.project.staging.shipit_code_coverage.latest/artifacts/public/zero_coverage_report.json');
+      let response = await fetch('https://index.taskcluster.net/v1/task/project.releng.services.project.production.shipit_code_coverage.latest/artifacts/public/zero_coverage_report.json');
       files = await response.json();
     }
 
