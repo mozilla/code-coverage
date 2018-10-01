@@ -18,11 +18,11 @@ fs.readFile('manifest.json', 'utf8', function(err, data) {
   if (err) throw err;
   let manObj = JSON.parse(data);
   fs.readFile('package.json', 'utf8', function(err, data) {
-      if (err) throw err;
-      let packObj = JSON.parse(data);
-      if (manObj["version"] != packObj["version"]) {
-          throw "Different versions of manifest.json and package.json";
-      }
+    if (err) throw err;
+    let packObj = JSON.parse(data);
+    if (manObj["version"] != packObj["version"]) {
+      throw "Different versions of manifest.json and package.json";
+    }
   });
 });
 

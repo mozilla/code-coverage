@@ -46,10 +46,10 @@ async function getChangesetData(path) {
         const coverage = await coveragePromise;
         const annotate = await annotatePromise;
 
-	if (!coverage.hasOwnProperty('data')) {
-	  return 'error'
-	}
-	const coverage_data = coverage['data'];
+        if (!coverage.hasOwnProperty('data')) {
+          return 'error';
+        }
+        const coverage_data = coverage['data'];
 
         let result = {};
 
@@ -228,8 +228,6 @@ async function injectButtons() {
 }
 
 async function getParents(rev) {
-  const hgurlPattern = new RegExp('https://reviewboard-hg.mozilla.org/gecko/rev/([0-9a-f]+)$');
-
   let revisions = [];
 
   let isPublic = false;

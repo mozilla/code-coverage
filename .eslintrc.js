@@ -10,7 +10,8 @@ module.exports = {
         "getPath": true,
         "gitToHg": true,
         "getNavigationPanel": true,
-        "SUPPORTED_EXTENSIONS": true
+        "SUPPORTED_EXTENSIONS": true,
+        "phidToHg": true
     },
     "env": {
         "es6": true,

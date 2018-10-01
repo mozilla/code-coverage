@@ -46,7 +46,7 @@ function removeOverlay() {
 
 const div_headers = document.querySelectorAll(".page_header");
 if (div_headers.length > 1) {
-  throw new Exception("Only one .page_header was expected");
+  throw new Error("Only one .page_header was expected");
 }
 const div_header = div_headers[0];
 const button = injectToggle(revision, filename);

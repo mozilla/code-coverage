@@ -60,7 +60,7 @@ if (Object.keys(fileinfo).length != 0) {
       fetchCoverage(revision, filename).then(data => {
         if (data !== null && !data.hasOwnProperty("error")) {
           if (!data.hasOwnProperty("data")) {
-            throw new Error("No \'data\' field");
+            throw new Error("No 'data' field");
           }
           const covData = data["data"];
           for (const le of lineElements) {
@@ -79,7 +79,7 @@ if (Object.keys(fileinfo).length != 0) {
       }).finally(() => {
         // Remove the spinners
         for (const le of lineElements) {
-          le.element.parentNode.removeChild(le.element);
+          le.element.remove();
         }
       });
     }
