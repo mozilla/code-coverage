@@ -6,7 +6,7 @@
   "icons": {
     "270": "coverage.jpg"
   },
-  "description": "Extension that augments several Mozilla websites (Phabricator, MozReview, DXR, Searchfox, Bugzilla) with code coverage information.",
+  "description": "Extension that augments several Mozilla websites (Phabricator, DXR, Searchfox, Bugzilla) with code coverage information.",
   "content_scripts": [
     {
       "matches": ["*://dxr.mozilla.org/mozilla-central/source/*"],
@@ -23,12 +23,6 @@
     {
       "matches": ["*://bugzilla.mozilla.org/show_bug.cgi?id=*"],
       "js": ["coverage.js", "bugzilla.js"],
-      "css": ["spinner.css"],
-      "run_at": "document_end"
-    },
-    {
-      "matches": ["*://reviewboard.mozilla.org/r/*/diff/*"],
-      "js": ["supported_extensions.js", "coverage.js", "mozreview.js"],
       "css": ["spinner.css"],
       "run_at": "document_end"
     },
@@ -54,7 +48,6 @@
   "permissions": [
     "https://coverage.moz.tools/coverage/*",
     "https://mapper.mozilla-releng.net/gecko-dev/rev/git/*",
-    "https://reviewboard-hg.mozilla.org/gecko/*",
     "https://hg.mozilla.org/mozilla-central/json-rev/*"
   ],
   "homepage_url": "https://github.com/mozilla/code-coverage-addon"

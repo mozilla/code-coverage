@@ -8,7 +8,7 @@ const includeFiles = [
   'bugzilla.js', 'coverage.jpg', 'coverage.js',
   'button.js',
   'dxr.css', 'dxr.js', 'dxr-common.js',
-  'manifest.json', 'mozreview.js', 'searchfox.js',
+  'manifest.json', 'searchfox.js',
   'socorro.js', 'socorro.css', 'codecov.png',
   'spinner.css', 'supported_extensions.js', 'hgmo.js',
   'phabricator.js'
