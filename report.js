@@ -4,18 +4,20 @@ function assert(condition, message) {
   }
 }
 
+const COVERAGE_BACKEND_HOST = 'https://coverage.moz.tools';
+
 async function get_data(path) {
-  let response = await fetch(`https://coverage.moz.tools/v2/path?path=${path}`);
+  let response = await fetch(`${COVERAGE_BACKEND_HOST}/v2/path?path=${path}`);
   return await response.json();
 }
 
 async function get_latest() {
-  let response = await fetch('https://coverage.moz.tools/coverage/latest');
+  let response = await fetch(`${COVERAGE_BACKEND_HOST}/coverage/latest`);
   return (await response.json())['latest_rev'];
 }
 
 async function get_file_coverage(changeset, path) {
-  let response = await fetch(`https://coverage.moz.tools/coverage/file?changeset=${changeset}&path=${path}`);
+  let response = await fetch(`${COVERAGE_BACKEND_HOST}/coverage/file?changeset=${changeset}&path=${path}`);
   return await response.json();
 }
 
