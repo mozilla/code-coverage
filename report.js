@@ -1,43 +1,3 @@
-function assert(condition, message) {
-  if (!condition) {
-    throw new Error(message || "Assertion failed");
-  }
-}
-
-const COVERAGE_BACKEND_HOST = 'https://coverage.testing.moz.tools';
-
-async function get_data(path) {
-  let response = await fetch(`${COVERAGE_BACKEND_HOST}/v2/path?path=${path}`);
-  return await response.json();
-}
-
-async function get_latest() {
-  let response = await fetch(`${COVERAGE_BACKEND_HOST}/coverage/latest`);
-  return (await response.json())['latest_rev'];
-}
-
-async function get_file_coverage(changeset, path) {
-  let response = await fetch(`${COVERAGE_BACKEND_HOST}/coverage/file?changeset=${changeset}&path=${path}`);
-  return await response.json();
-}
-
-let get_third_party_paths = function() {
-  let paths = null;
-  return async function() {
-    if (!paths) {
-      let response = await getSource('tools/rewriting/ThirdPartyPaths.txt');
-      paths = response.split('\n').filter(path => path != '');
-    }
-
-    return paths;
-  };
-}();
-
-function is_enabled(opt) {
-  let elem = document.getElementById(opt);
-  return elem.checked;
-}
-
 async function filter_third_party(files) {
   if (is_enabled('third_party')) {
     return files;
@@ -135,13 +95,8 @@ async function showDirectory(dir, files) {
   document.getElementById('output').replaceWith(output);
 }
 
-async function getSource(file) {
-  let response = await fetch(`https://hg.mozilla.org/mozilla-central/raw-file/tip/${file}`);
-  return await response.text();
-}
-
 async function showFile(file) {
-  let source = await getSource(file.path);
+  let source = await get_source(file.path);
 
   let language;
   if (file.path.endsWith('cpp') || file.path.endsWith('h')) {
@@ -228,7 +183,7 @@ async function generate(path='') {
   }*/
 
   console.log(path);
-  const data = await get_data(path);
+  const data = await get_path_coverage(path);
   console.log(data);
   if (data.type == 'directory') {
     await showDirectory(path, data.children);

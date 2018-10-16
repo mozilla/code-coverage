@@ -1,33 +1,3 @@
-function assert(condition, message) {
-  if (!condition) {
-    throw new Error(message || "Assertion failed");
-  }
-}
-
-let get_data = function() {
-  let files = null;
-  return async function() {
-    if (!files) {
-      let response = await fetch('https://index.taskcluster.net/v1/task/project.releng.services.project.production.code_coverage_bot.latest/artifacts/public/zero_coverage_report.json');
-      files = await response.json();
-    }
-
-    return files;
-  };
-}();
-
-let get_third_party_paths = function() {
-  let paths = null;
-  return async function() {
-    if (!paths) {
-      let response = await fetch('https://hg.mozilla.org/mozilla-central/raw-file/tip/tools/rewriting/ThirdPartyPaths.txt');
-      paths = (await response.text()).split('\n').filter(path => path != '');
-    }
-
-    return paths;
-  };
-}();
-
 function sort_entries(entries) {
   return entries.sort(([dir1, stats1], [dir2, stats2]) => {
     if (stats1.children != stats2.children) {
@@ -40,11 +10,6 @@ function sort_entries(entries) {
 
     return dir1 > dir2;
   });
-}
-
-function is_enabled(opt) {
-  let elem = document.getElementById(opt);
-  return elem.checked;
 }
 
 async function filter_third_party(files) {
@@ -167,7 +132,7 @@ async function generate(dir='') {
     dir = '';
   }
 
-  const data = await get_data();
+  const data = await get_zero_coverage_data();
   const github_revision = data['github_revision'];
   let files = data['files'].filter(file => file.name.startsWith(dir));
   files = await filter_third_party(files);
