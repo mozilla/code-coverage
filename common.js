@@ -5,6 +5,15 @@ function assert(condition, message) {
 }
 
 
+// Visualization.
+
+function getSpanForValue(value) {
+  const span = document.createElement('span');
+  span.innerText = value == 0 ? '' : value;
+  return span;
+}
+
+
 // Coverage retrieval.
 
 const COVERAGE_BACKEND_HOST = 'https://coverage.testing.moz.tools';
@@ -36,6 +45,7 @@ let get_zero_coverage_data = function() {
   };
 }();
 
+
 // Option handling.
 
 function is_enabled(opt) {
@@ -44,10 +54,13 @@ function is_enabled(opt) {
 }
 
 
+// hgmo.
+
 async function get_source(file) {
   let response = await fetch(`https://hg.mozilla.org/mozilla-central/raw-file/tip/${file}`);
   return await response.text();
 }
+
 
 // Filtering.
 
@@ -63,4 +76,60 @@ let get_third_party_paths = function() {
   };
 }();
 
+async function filter_third_party(files) {
+  if (is_enabled('third_party')) {
+    return files;
+  }
 
+  let paths = await get_third_party_paths();
+
+  return files.filter(file => {
+    for (let path of paths) {
+      if (file.path.startsWith(path)) {
+        return false;
+      }
+    }
+
+    return true;
+  });
+}
+
+function filter_languages(files) {
+  let cpp = is_enabled('cpp');
+  let cpp_extensions = ['c', 'cpp', 'cxx', 'cc', 'h', 'hh', 'hxx', 'hpp', 'inl', 'inc'];
+  let js = is_enabled('js');
+  let js_extensions = ['js', 'jsm', 'xml', 'xul', 'xhtml', 'html'];
+  let java = is_enabled('java');
+  let java_extensions = ['java'];
+
+  return files.filter(file => {
+    if (file.path.endsWith('/')) {
+      return true;
+    } else if (cpp_extensions.find(ext => file.path.endsWith('.' + ext))) {
+      return cpp;
+    } else if (js_extensions.find(ext => file.path.endsWith('.' + ext))) {
+      return js;
+    } else if (java_extensions.find(ext => file.path.endsWith('.' + ext))) {
+      return java;
+    } else {
+      console.warn('Unknown language for ' + file.path);
+      return false;
+    }
+  });
+}
+
+function filter_headers(files) {
+  if (is_enabled('headers')) {
+    return files;
+  }
+
+  return files.filter(file => !file.name.endsWith('.h'));
+}
+
+function filter_completely_uncovered(files) {
+  if (!is_enabled('completely_uncovered')) {
+    return files;
+  }
+
+  return files.filter(file => file.uncovered);
+}

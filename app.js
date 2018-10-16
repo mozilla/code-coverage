@@ -12,58 +12,6 @@ function sort_entries(entries) {
   });
 }
 
-async function filter_third_party(files) {
-  if (is_enabled('third_party')) {
-    return files;
-  }
-
-  let paths = await get_third_party_paths();
-
-  return files.filter(file => {
-    for (let path of paths) {
-      if (file.name.startsWith(path)) {
-        return false;
-      }
-    }
-
-    return true;
-  });
-}
-
-function filter_headers(files) {
-  if (is_enabled('headers')) {
-    return files;
-  }
-
-  return files.filter(file => !file.name.endsWith('.h'));
-}
-
-function filter_languages(files) {
-  let cpp = is_enabled('cpp');
-  let cpp_extensions = ['c', 'cpp', 'cxx', 'cc', 'h', 'hh', 'hxx', 'hpp', 'inl', 'inc'];
-  let js = is_enabled('js');
-  let js_extensions = ['js', 'jsm', 'xml', 'xul', 'xhtml', 'html'];
-
-  return files.filter(file => {
-    if (cpp_extensions.find(ext => file.name.endsWith('.' + ext))) {
-      return cpp;
-    } else if (js_extensions.find(ext => file.name.endsWith('.' + ext))) {
-      return js;
-    } else {
-      console.warn('Unknown language for ' + file.name);
-      return false;
-    }
-  });
-}
-
-function filter_completely_uncovered(files) {
-  if (!is_enabled('completely_uncovered')) {
-    return files;
-  }
-
-  return files.filter(file => file.uncovered);
-}
-
 function get_min_date(oldDate, newDate) {
   if (!oldDate) {
     return newDate;
@@ -91,12 +39,6 @@ function cumStats(prevStats, newStats) {
   prevStats.commits += newStats.commits;
   prevStats.first_push_date = get_min_date(prevStats.first_push_date, newStats.first_push_date);
   prevStats.last_push_date = get_min_date(prevStats.last_push_date, newStats.last_push_date);
-}
-
-function getSpanForValue(value) {
-  const span = document.createElement('span');
-  span.innerText = value == 0 ? '' : value;
-  return span;
 }
 
 function getSpanForFile(data, github_rev, dir, entry) {
@@ -135,6 +77,11 @@ async function generate(dir='') {
   const data = await get_zero_coverage_data();
   const github_revision = data['github_revision'];
   let files = data['files'].filter(file => file.name.startsWith(dir));
+  // TODO: Do this in the backend directly!
+  files = files.forEach(file => {
+    file.path = file.name;
+    delete file.name;
+  });
   files = await filter_third_party(files);
   files = filter_languages(files);
   files = filter_headers(files);
