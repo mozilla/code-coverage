@@ -4,7 +4,7 @@ function assert(condition, message) {
   }
 }
 
-const COVERAGE_BACKEND_HOST = 'https://coverage.moz.tools';
+const COVERAGE_BACKEND_HOST = 'https://coverage.testing.moz.tools';
 
 async function get_data(path) {
   let response = await fetch(`${COVERAGE_BACKEND_HOST}/v2/path?path=${path}`);
