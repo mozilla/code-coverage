@@ -67,7 +67,9 @@ function getFileSize(size) {
   return size;
 }
 
-async function generate(dir='') {
+async function generate() {
+  let dir = window.location.hash.substring(1);
+
   while (dir.endsWith('/')) dir = dir.substring(0, dir.length - 1);
   dir += '/';
   if (dir == '/') {
@@ -145,22 +147,4 @@ async function generate(dir='') {
   document.getElementById('output').replaceWith(output);
 }
 
-async function main() {
-  await new Promise(resolve => window.onload = resolve);
-
-  function go() {
-    generate(window.location.hash.substring(1));
-  }
-
-  let opts = ['third_party', 'headers', 'completely_uncovered', 'cpp', 'js', 'java', 'rust'];
-  for (let opt of opts) {
-    let elem = document.getElementById(opt);
-    elem.onchange = go;
-  }
-
-  window.onhashchange = go;
-
-  go();
-}
-
-main();
+main(generate, ['third_party', 'headers', 'completely_uncovered', 'cpp', 'js', 'java', 'rust']);

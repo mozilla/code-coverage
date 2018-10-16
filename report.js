@@ -127,16 +127,13 @@ async function showFile(file) {
   document.getElementById('output').replaceWith(pre);*/
 }
 
-async function generate(path='') {
-  /*while (dir.endsWith('/')) dir = dir.substring(0, dir.length - 1);
-  dir += '/';
-  if (dir == '/') {
-    dir = '';
-  }*/
-
+async function generate() {
+  const path = window.location.hash.substring(1);
   console.log(path);
+
   const data = await get_path_coverage(path);
   console.log(data);
+
   if (data.type == 'directory') {
     await showDirectory(path, data.children);
   } else if (data.type === 'file') {
@@ -144,22 +141,4 @@ async function generate(path='') {
   }
 }
 
-async function main() {
-  await new Promise(resolve => window.onload = resolve);
-
-  function go() {
-    generate(window.location.hash.substring(1));
-  }
-
-  let opts = ['third_party', 'cpp', 'js', 'java', 'rust'];
-  for (let opt of opts) {
-    let elem = document.getElementById(opt);
-    elem.onchange = go;
-  }
-
-  window.onhashchange = go;
-
-  go();
-}
-
-main();
+main(generate, ['third_party', 'cpp', 'js', 'java', 'rust']);

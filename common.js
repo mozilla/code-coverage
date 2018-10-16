@@ -4,6 +4,20 @@ function assert(condition, message) {
   }
 }
 
+function windowLoaded() {
+  return new Promise(resolve => window.onload = resolve);
+}
+
+async function main(fn, opts) {
+  await windowLoaded();
+
+  monitor_options(opts, fn);
+
+  window.onhashchange = fn;
+
+  fn();
+}
+
 
 // Visualization.
 
@@ -51,6 +65,13 @@ let get_zero_coverage_data = function() {
 function is_enabled(opt) {
   let elem = document.getElementById(opt);
   return elem.checked;
+}
+
+function monitor_options(opts, callback) {
+  for (let opt of opts) {
+    let elem = document.getElementById(opt);
+    elem.onchange = callback;
+  }
 }
 
 
