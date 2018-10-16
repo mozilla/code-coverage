@@ -151,7 +151,7 @@ async function main() {
     generate(window.location.hash.substring(1));
   }
 
-  let opts = ['third_party', 'cpp', 'js', 'java'];
+  let opts = ['third_party', 'cpp', 'js', 'java', 'rust'];
   for (let opt of opts) {
     let elem = document.getElementById(opt);
     elem.onchange = go;

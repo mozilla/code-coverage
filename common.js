@@ -101,6 +101,8 @@ function filter_languages(files) {
   let js_extensions = ['js', 'jsm', 'xml', 'xul', 'xhtml', 'html'];
   let java = is_enabled('java');
   let java_extensions = ['java'];
+  let rust = is_enabled('rust');
+  let rust_extensions = ['rs'];
 
   return files.filter(file => {
     if (file.path.endsWith('/')) {
@@ -109,6 +111,8 @@ function filter_languages(files) {
       return cpp;
     } else if (js_extensions.find(ext => file.path.endsWith('.' + ext))) {
       return js;
+    } else if (rust_extensions.find(ext => file.path.endsWith('.' + ext))) {
+      return rust;
     } else if (java_extensions.find(ext => file.path.endsWith('.' + ext))) {
       return java;
     } else {
@@ -123,7 +127,7 @@ function filter_headers(files) {
     return files;
   }
 
-  return files.filter(file => !file.name.endsWith('.h'));
+  return files.filter(file => !file.path.endsWith('.h'));
 }
 
 function filter_completely_uncovered(files) {

@@ -78,9 +78,8 @@ async function generate(dir='') {
   const github_revision = data['github_revision'];
   let files = data['files'].filter(file => file.name.startsWith(dir));
   // TODO: Do this in the backend directly!
-  files = files.forEach(file => {
+  files.forEach(file => {
     file.path = file.name;
-    delete file.name;
   });
   files = await filter_third_party(files);
   files = filter_languages(files);
@@ -90,7 +89,7 @@ async function generate(dir='') {
   let map = new Map();
 
   for (let file of files) {
-    let rest = file.name.substring(dir.lastIndexOf('/') + 1);
+    let rest = file.path.substring(dir.lastIndexOf('/') + 1);
 
     if (rest.includes('/')) {
       rest = rest.substring(0, rest.indexOf('/'));
@@ -153,7 +152,7 @@ async function main() {
     generate(window.location.hash.substring(1));
   }
 
-  let opts = ['third_party', 'headers', 'completely_uncovered', 'cpp', 'js'];
+  let opts = ['third_party', 'headers', 'completely_uncovered', 'cpp', 'js', 'java', 'rust'];
   for (let opt of opts) {
     let elem = document.getElementById(opt);
     elem.onchange = go;
