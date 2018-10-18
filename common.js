@@ -89,7 +89,7 @@ let get_third_party_paths = function() {
   let paths = null;
   return async function() {
     if (!paths) {
-      let response = await getSource('tools/rewriting/ThirdPartyPaths.txt');
+      let response = await get_source('tools/rewriting/ThirdPartyPaths.txt');
       paths = response.split('\n').filter(path => path != '');
     }
 
