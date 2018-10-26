@@ -56,11 +56,5 @@ function injectToggle(revPromise, path) {
 
   button.onclick = toggle;
 
-  document.onkeyup = function(e) {
-    if (e.key == 'c') {
-      toggle();
-    }
-  };
-
   return button;
 }
