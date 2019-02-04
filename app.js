@@ -87,6 +87,7 @@ async function generate() {
   files = filter_languages(files);
   files = filter_headers(files);
   files = filter_completely_uncovered(files);
+  files = filter_last_push_date(files);
 
   let map = new Map();
 
@@ -147,4 +148,4 @@ async function generate() {
   document.getElementById('output').replaceWith(output);
 }
 
-main(generate, ['third_party', 'headers', 'completely_uncovered', 'cpp', 'js', 'java', 'rust']);
+main(generate, ['third_party', 'headers', 'completely_uncovered', 'cpp', 'js', 'java', 'rust', 'last_push']);

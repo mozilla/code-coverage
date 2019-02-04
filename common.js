@@ -158,3 +158,31 @@ function filter_completely_uncovered(files) {
 
   return files.filter(file => file.uncovered);
 }
+
+function filter_last_push_date(files) {
+  let elem = document.getElementById('last_push');
+  let upper_limit = new Date();
+  let lower_limit = new Date();
+
+  if (elem.value == 'one_year') {
+    lower_limit.setFullYear(upper_limit.getFullYear() - 1);
+  } else if (elem.value == 'two_years') {
+    upper_limit.setFullYear(upper_limit.getFullYear() - 1);
+    lower_limit.setFullYear(lower_limit.getFullYear() - 2);
+  } else if (elem.value == 'older_than_two_years') {
+    upper_limit.setFullYear(upper_limit.getFullYear() - 2);
+    lower_limit = new Date('1970-01-01T00:00:00Z');
+  } else {
+    return files;
+  }
+
+  return files.filter(file => {
+    let last_push_date = new Date(file.last_push_date);
+    if (last_push_date.getTime() <= upper_limit.getTime()
+      && last_push_date.getTime() >= lower_limit.getTime()) {
+      return true;
+    } else {
+      return false;
+    }
+  });
+}
