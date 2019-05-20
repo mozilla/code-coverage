@@ -66,7 +66,7 @@ async function showFile(file) {
   }
 
   const changeset = await get_latest();
-  const coverage = await get_file_coverage(changeset, file.path);
+  const coverage = await get_path_coverage(file.path);
 
   const table = document.createElement('table');
   table.style.borderCollapse = 'collapse';
@@ -103,8 +103,8 @@ async function showFile(file) {
     code.classList.add(`lang-${language}`);
     Prism.highlightElement(code);
 
-    if (coverage['data'].hasOwnProperty(lineNumber)) {
-      if (coverage['data'][lineNumber] > 0) {
+    if (coverage['coverage'][lineNumber] != -1) {
+      if (coverage['coverage'][lineNumber] > 0) {
         pre.style.backgroundColor = lineNumberTd.style.backgroundColor = 'palegreen';
       } else {
         pre.style.backgroundColor = lineNumberTd.style.backgroundColor = 'coral';
