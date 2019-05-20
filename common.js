@@ -126,7 +126,7 @@ function filter_languages(files) {
   let rust_extensions = ['rs'];
 
   return files.filter(file => {
-    if (file.path.endsWith('/')) {
+    if (file.type == "directory") {
       return true;
     } else if (cpp_extensions.find(ext => file.path.endsWith('.' + ext))) {
       return cpp;
