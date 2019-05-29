@@ -20,10 +20,6 @@
   border-top: 3px solid black;
 }
 
-.gecko_coverage_loader_bugzilla {
-  border-top: 3px solid green;
-}
-
 .gecko_coverage_loader_socorro {
   border-top: 3px solid blue;
 }

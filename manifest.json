@@ -6,7 +6,7 @@
   "icons": {
     "270": "coverage.jpg"
   },
-  "description": "Extension that augments several Mozilla websites (Phabricator, DXR, Searchfox, Bugzilla) with code coverage information.",
+  "description": "Extension that augments several Mozilla websites (Phabricator, DXR, Searchfox) with code coverage information.",
   "content_scripts": [
     {
       "matches": ["*://dxr.mozilla.org/mozilla-central/source/*"],
@@ -18,12 +18,6 @@
       "matches": ["*://searchfox.org/mozilla-central/source/*"],
       "js": ["supported_extensions.js", "coverage.js", "dxr-common.js", "button.js", "searchfox.js"],
       "css": ["dxr.css", "spinner.css"],
-      "run_at": "document_end"
-    },
-    {
-      "matches": ["*://bugzilla.mozilla.org/show_bug.cgi?id=*"],
-      "js": ["coverage.js", "bugzilla.js"],
-      "css": ["spinner.css"],
       "run_at": "document_end"
     },
     {

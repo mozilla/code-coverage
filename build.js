@@ -5,7 +5,7 @@ const https = require('https');
 const archiver = require('archiver');
 
 const includeFiles = [
-  'bugzilla.js', 'coverage.jpg', 'coverage.js',
+  'coverage.jpg', 'coverage.js',
   'button.js',
   'dxr.css', 'dxr.js', 'dxr-common.js',
   'manifest.json', 'searchfox.js',
