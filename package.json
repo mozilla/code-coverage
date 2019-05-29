@@ -1,7 +1,7 @@
 {
   "name": "gecko-code-coverage",
   "version": "0.10.1",
-  "description": "Extension that augments several Mozilla websites (Phabricator, DXR, Searchfox) with code coverage information.",
+  "description": "Extension that augments several Mozilla websites (DXR, Searchfox) with code coverage information.",
   "dependencies": {
     "web-ext": "^2.6.0"
   },

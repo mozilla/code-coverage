@@ -10,8 +10,7 @@ const includeFiles = [
   'dxr.css', 'dxr.js', 'dxr-common.js',
   'manifest.json', 'searchfox.js',
   'socorro.js', 'socorro.css', 'codecov.png',
-  'spinner.css', 'supported_extensions.js', 'hgmo.js',
-  'phabricator.js'
+  'spinner.css', 'supported_extensions.js', 'hgmo.js'
 ];
 const zipName = './gecko-code-coverage.zip';
 fs.readFile('manifest.json', 'utf8', function(err, data) {
