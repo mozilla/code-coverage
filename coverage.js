@@ -5,7 +5,7 @@
 'use strict';
 
 async function fetchCoverage(rev, path) {
-  let response = await fetch(`https://coverage.moz.tools/coverage/file?changeset=${rev}&path=${path}`);
+  let response = await fetch(`${CONFIG.BACKEND_URL}/v2/path?path=${path}&changeset=${rev}`);
   return await response.json();
 }
 
@@ -16,22 +16,6 @@ function wait(time) {
 async function waitIdle(time) {
   await wait(time);
   return new Promise(resolve => requestIdleCallback(resolve));
-}
-
-async function fetchChangesetCoverage(rev) {
-  let ready = false;
-  do {
-    let response = await fetch(`https://coverage.moz.tools/coverage/changeset_summary/${rev}`);
-
-    if (response.status == 202) {
-      await wait(5000);
-      continue;
-    }
-
-    let result = await response.json();
-    result['rev'] = rev;
-    return result;
-  } while (!ready);
 }
 
 async function gitToHg(gitrev) {

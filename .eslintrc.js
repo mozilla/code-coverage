@@ -4,7 +4,6 @@ module.exports = {
         "wait": true,
         "fetchCoverage": true,
         "fetchAnnotate": true,
-        "fetchChangesetCoverage": true,
         "isCoverageSupported": true,
         "injectToggle": true,
         "getPath": true,
@@ -42,6 +41,6 @@ module.exports = {
             {
                 "allow": ["error"]
             }
-        ]    
+        ]
     }
 };

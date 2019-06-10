@@ -59,10 +59,10 @@ if (Object.keys(fileinfo).length != 0) {
       }
       fetchCoverage(revision, filename).then(data => {
         if (data !== null && !data.hasOwnProperty("error")) {
-          if (!data.hasOwnProperty("data")) {
+          if (!data.hasOwnProperty("coverage")) {
             throw new Error("No 'data' field");
           }
-          const covData = data["data"];
+          const covData = data["coverage"];
           for (const le of lineElements) {
             const line = le.line;
             if (line in covData) {

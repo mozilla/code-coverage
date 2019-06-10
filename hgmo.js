@@ -19,10 +19,10 @@ document.querySelectorAll("title").forEach(title => {
 
 async function applyOverlay(revPromise, path) {
   let result = await getCoverage(revPromise, path);
-  if (!result.hasOwnProperty("data")) {
-    throw new Error("No 'data' field");
+  if (!result.hasOwnProperty("coverage")) {
+    throw new Error("No 'coverage' field");
   }
-  const data = result["data"];
+  const data = result["coverage"];
   document.querySelectorAll("[id^='l']").forEach(e => {
     const m = e.id.match(linePattern);
     if (!m) {

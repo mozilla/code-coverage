@@ -3,8 +3,10 @@
 const fs = require('fs');
 const https = require('https');
 const archiver = require('archiver');
+require('./config.js');
 
 const includeFiles = [
+  'config.js',
   'coverage.jpg', 'coverage.js',
   'button.js',
   'dxr.css', 'dxr.js', 'dxr-common.js',
@@ -25,9 +27,13 @@ fs.readFile('manifest.json', 'utf8', function(err, data) {
   });
 });
 
-https.get('https://coverage.moz.tools/coverage/supported_extensions', res => {
+https.get(CONFIG.BACKEND_URL + '/v2/extensions', res => {
+  if (res.statusCode !== 200) {
+    throw new Error('Invalid response from backend: ' + res.statusCode);
+  }
+
   let data = '';
-    
+
   res.on('data', chunk => data += chunk);
   res.on('end', () => {
     let content = `const SUPPORTED_EXTENSIONS = ${data};`;

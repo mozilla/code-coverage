@@ -25,13 +25,14 @@ let lineNoMap = (function() {
 async function applyOverlay(revPromise, path) {
   let result = await getCoverage(revPromise, path);
 
-  if (!result.hasOwnProperty('data')) {
-    throw new Error('No \'data\' field');
+  if (!result.hasOwnProperty('coverage')) {
+    throw new Error('No \'coverage\' field');
   }
-  for (let [l, c] of Object.entries(result['data'])) {
+  for (var l in result.coverage) {
+    l = parseInt(l) + 1;
     const line_no = document.getElementById(lineNoMap(l));
     const line = document.getElementById(`line-${l}`);
-    if (c > 0) {
+    if (result.coverage[l] > 0) {
       line_no.style.backgroundColor = 'greenyellow';
       line.style.backgroundColor = 'greenyellow';
     } else {
