@@ -4,8 +4,10 @@
 
 'use strict';
 
+import {fetchCoverage} from './coverage';
+
 let resultPromise;
-async function getCoverage(revPromise, path) {
+export async function getCoverage(revPromise, path) {
   if (!resultPromise) {
     resultPromise = (async function() {
       const rev = await revPromise;
@@ -22,7 +24,7 @@ function disableButton(button, text) {
   button.title = text;
 }
 
-function injectToggle(revPromise, path) {
+export function injectToggle(revPromise, path, applyOverlay, removeOverlay) {
   // Preload coverage data.
   getCoverage(revPromise, path);
 

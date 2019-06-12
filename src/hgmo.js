@@ -4,6 +4,8 @@
 
 "use strict";
 
+import {getCoverage, injectToggle} from './button';
+
 let filename = "";
 let revision = "";
 const linePattern = new RegExp("^l([0-9]+)$");
@@ -49,5 +51,5 @@ if (div_headers.length > 1) {
   throw new Error("Only one .page_header was expected");
 }
 const div_header = div_headers[0];
-const button = injectToggle(revision, filename);
+const button = injectToggle(revision, filename, applyOverlay, removeOverlay);
 div_header.append(button);

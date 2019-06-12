@@ -4,6 +4,10 @@
 
 'use strict';
 
+import {injectToggle} from './button';
+import {isCoverageSupported} from './coverage';
+import {applyOverlay, removeOverlay, getPath, getNavigationPanel} from './dxr-common';
+
 (function() {
   // Don't do anything if this isn't a file.
   const panel = getNavigationPanel();
@@ -21,7 +25,7 @@
   const m = panel.innerHTML.match(revPattern);
   const revPromise = Promise.resolve(m[1]);
 
-  const button = injectToggle(revPromise, path);
+  const button = injectToggle(revPromise, path, applyOverlay, removeOverlay);
   if (!button) {
     return;
   }

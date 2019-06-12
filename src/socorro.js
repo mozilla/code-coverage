@@ -4,6 +4,8 @@
 
 "use strict";
 
+import {isCoverageSupported, fetchCoverage} from './coverage';
+
 const hgurlPattern = new RegExp("^http[s]?://hg\\.mozilla\\.org/mozilla-central/annotate/([0-9a-f]+)/([^#]+)#l([0-9]+)$");
 // fileinfo: filename => { revision => [{line, element}, ...] }
 const fileinfo = {};

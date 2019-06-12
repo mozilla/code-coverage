@@ -4,21 +4,15 @@
 
 'use strict';
 
-async function fetchCoverage(rev, path) {
-  let response = await fetch(`${CONFIG.BACKEND_URL}/v2/path?path=${path}&changeset=${rev}`);
+import {BACKEND_URL} from './config';
+const extensions = require('extensions.json')
+
+export async function fetchCoverage(rev, path) {
+  let response = await fetch(`${BACKEND_URL}/v2/path?path=${path}&changeset=${rev}`);
   return await response.json();
 }
 
-function wait(time) {
-  return new Promise(resolve => setTimeout(resolve, time));
-}
-
-async function waitIdle(time) {
-  await wait(time);
-  return new Promise(resolve => requestIdleCallback(resolve));
-}
-
-async function gitToHg(gitrev) {
+export async function gitToHg(gitrev) {
   let response = await fetch(`https://mapper.mozilla-releng.net/gecko-dev/rev/git/${gitrev}`);
   if (!response.ok) {
     throw new Error(`Error retrieving git to mercurial mapping for ${gitrev}.`);
@@ -27,6 +21,6 @@ async function gitToHg(gitrev) {
   return text.split(' ')[1];
 }
 
-function isCoverageSupported(path) {
-  return SUPPORTED_EXTENSIONS.findIndex(ext => path.endsWith(`.${ext}`)) != -1;
+export function isCoverageSupported(path) {
+  return extensions.findIndex(ext => path.endsWith(`.${ext}`)) != -1;
 }

@@ -4,6 +4,10 @@
 
 'use strict';
 
+import {injectToggle} from './button';
+import {gitToHg, isCoverageSupported} from './coverage';
+import {applyOverlay, removeOverlay, getPath, getNavigationPanel} from './dxr-common';
+
 (async function() {
   // Don't do anything if this isn't a file.
   if (!getNavigationPanel()) {
@@ -22,7 +26,7 @@
   const gitRev = m[1];
   const revPromise = gitToHg(gitRev);
 
-  const button = injectToggle(revPromise, path);
+  const button = injectToggle(revPromise, path, applyOverlay, removeOverlay);
   if (!button) {
     return;
   }

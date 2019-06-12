@@ -4,6 +4,8 @@
 
 'use strict';
 
+import {getCoverage} from './button';
+
 let lineNoMap = (function() {
   let mapper;
 
@@ -22,7 +24,7 @@ let lineNoMap = (function() {
   };
 })();
 
-async function applyOverlay(revPromise, path) {
+export async function applyOverlay(revPromise, path) {
   let result = await getCoverage(revPromise, path);
 
   if (!result.hasOwnProperty('coverage')) {
@@ -42,10 +44,11 @@ async function applyOverlay(revPromise, path) {
   }
 }
 
-function removeOverlay() {
+export function removeOverlay() {
   let l = 1;
-  while (true) {
-    const line_no = document.getElementById(lineNoMap(l));
+  var line_no = true;
+  while (line_no) {
+    line_no = document.getElementById(lineNoMap(l));
     if (!line_no) {
       break;
     }
@@ -59,7 +62,7 @@ function removeOverlay() {
 }
 
 // Get the currently open file path.
-function getPath() {
+export function getPath() {
   const breadcrumbs = document.querySelector('.breadcrumbs');
   if (!breadcrumbs) {
     return;
@@ -68,6 +71,6 @@ function getPath() {
   return breadcrumbs.lastElementChild.href.split('/mozilla-central/source/')[1];
 }
 
-function getNavigationPanel() {
+export function getNavigationPanel() {
   return document.getElementById('panel-content');
 }

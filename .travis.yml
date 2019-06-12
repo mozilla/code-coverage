@@ -3,5 +3,6 @@ node_js: node
 script:
     - npm run lint
     - npm run build
+    - npm run export
     - npm test
-    - test -f gecko-code-coverage.zip
+    - test -f web-ext-artifacts/gecko_code_coverage-*.zip

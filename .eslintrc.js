@@ -1,16 +1,5 @@
 module.exports = {
     "globals": {
-        "waitIdle": true,
-        "wait": true,
-        "fetchCoverage": true,
-        "fetchAnnotate": true,
-        "isCoverageSupported": true,
-        "injectToggle": true,
-        "getPath": true,
-        "gitToHg": true,
-        "getNavigationPanel": true,
-        "SUPPORTED_EXTENSIONS": true,
-        "phidToHg": true
     },
     "env": {
         "es6": true,
