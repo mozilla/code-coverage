@@ -146,6 +146,31 @@ async function generate() {
     output.appendChild(entryElem);
   }
   document.getElementById('output').replaceWith(output);
+
+  graphHistory(dir);
+}
+
+function graphHistory(path){
+  // Backend needs path without ending /
+  if (path && path.endsWith('/')) {
+    path = path.substring(0, path.length-1);
+  }
+
+  get_history(path).then(function(data){
+    var trace = {
+      x: data.map(push => new Date(push.date * 1000)),
+      y: data.map(push => push.coverage),
+      type: 'scatter',
+      mode: 'lines+markers',
+      name: 'Coverage %'
+    };
+
+    var layout = {
+      title:'Coverage history for ' + (path || 'full repository')
+    };
+
+    Plotly.newPlot('history', [ trace ], layout);
+  });
 }
 
 main(generate, ['third_party', 'headers', 'completely_uncovered', 'cpp', 'js', 'java', 'rust', 'last_push']);

@@ -7,9 +7,11 @@
 <title>Uncovered files and functions</title>
 </head>
 <body>
+<script async defer src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <script src="common.js" type="text/javascript"></script>
 <script src="app.js" type="text/javascript"></script>
 <script async defer src="https://buttons.github.io/buttons.js"></script>
+
 <input type="checkbox" name="third_party" id="third_party" checked="checked"><label for="third_party">Show third-party files</label>
 <input type="checkbox" name="headers" id="headers"><label for="headers">Show headers</label>
 <input type="checkbox" name="completely_uncovered" id="completely_uncovered"><label for="completely_uncovered">Show completely uncovered files only</label>
@@ -24,6 +26,7 @@
 <option value="older_than_two_years">Older than 2 years</option>
 </select>
 <br />
+<div id="history"></div>
 <br />
 <div id="output">
 </div>

@@ -30,7 +30,7 @@ function getSpanForValue(value) {
 
 // Coverage retrieval.
 
-const COVERAGE_BACKEND_HOST = 'https://coverage.testing.moz.tools';
+const COVERAGE_BACKEND_HOST = 'https://coverage.moz.tools';
 
 async function get_path_coverage(path) {
   let response = await fetch(`${COVERAGE_BACKEND_HOST}/v2/path?path=${path}`);
@@ -43,7 +43,12 @@ async function get_latest() {
 }
 
 async function get_file_coverage(changeset, path) {
-  let response = await fetch(`${COVERAGE_BACKEND_HOST}/coverage/file?changeset=${changeset}&path=${path}`);
+  let response = await fetch(`${COVERAGE_BACKEND_HOST}/v2/path?changeset=${changeset}&path=${path}`);
+  return await response.json();
+}
+
+async function get_history(path) {
+  let response = await fetch(`${COVERAGE_BACKEND_HOST}/v2/history?path=${path}`);
   return await response.json();
 }
 
