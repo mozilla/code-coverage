@@ -13,7 +13,7 @@ async function showDirectory(dir, files) {
   files = filter_languages(files);
 
   const columns = [['File name', x => getSpanForFile(x, dir)],
-                   ['Children', x => getSpanForValue('UNKNOWN')],
+                   ['Children', x => getSpanForValue(x.children)],
                    ['Coverage', x => getSpanForValue(x.coveragePercent + ' %')]];
 
   const output = document.createElement('div');
@@ -69,6 +69,7 @@ async function showFile(file) {
   const coverage = await get_path_coverage(file.path);
 
   const table = document.createElement('table');
+  table.id = 'output';
   table.style.borderCollapse = 'collapse';
   table.style.borderSpacing = 0;
   const tbody = document.createElement('tbody');
