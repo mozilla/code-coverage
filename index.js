@@ -8,6 +8,29 @@ function getSpanForFile(data, dir) {
   return span;
 }
 
+function graphHistory(path) {
+  // Backend needs path without ending /
+  if (path && path.endsWith('/')) {
+    path = path.substring(0, path.length-1);
+  }
+
+  get_history(path).then(function(data){
+    var trace = {
+      x: data.map(push => new Date(push.date * 1000)),
+      y: data.map(push => push.coverage),
+      type: 'scatter',
+      mode: 'lines+markers',
+      name: 'Coverage %'
+    };
+
+    var layout = {
+      title:'Coverage history for ' + (path || 'full repository')
+    };
+
+    Plotly.newPlot('history', [ trace ], layout);
+  });
+}
+
 async function showDirectory(dir, files) {
   files = await filter_third_party(files);
   files = filter_languages(files);
@@ -45,6 +68,8 @@ async function showDirectory(dir, files) {
     output.appendChild(entryElem);
   }
   document.getElementById('output').replaceWith(output);
+
+  graphHistory(dir);
 }
 
 async function showFile(file) {
