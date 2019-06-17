@@ -45,7 +45,7 @@ async function showDirectory(dir, files) {
   output.id = 'output';
 
   const global = document.createElement('div');
-  global.textContent = files.length + ' files';
+  global.textContent = files.length + ' directories/files';
   output.appendChild(global);
   output.appendChild(document.createElement('br'));
   output.appendChild(document.createElement('br'));
