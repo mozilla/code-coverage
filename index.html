@@ -3,28 +3,22 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <link rel="stylesheet" href="style.css" type="text/css" media="all" />
-
-<title>Uncovered files and functions</title>
+<link rel="stylesheet" href="prism.css" />
+<title>mozilla-central coverage</title>
 </head>
 <body>
+<script async defer src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <script src="common.js" type="text/javascript"></script>
-<script src="app.js" type="text/javascript"></script>
+<script src="index.js" type="text/javascript"></script>
+<script src="prism.js"></script>
 <script async defer src="https://buttons.github.io/buttons.js"></script>
-
 <input type="checkbox" name="third_party" id="third_party" checked="checked"><label for="third_party">Show third-party files</label>
-<input type="checkbox" name="headers" id="headers"><label for="headers">Show headers</label>
-<input type="checkbox" name="completely_uncovered" id="completely_uncovered"><label for="completely_uncovered">Show completely uncovered files only</label>
 <input type="checkbox" name="cpp" id="cpp" checked="checked"><label for="cpp">C/C++</label>
 <input type="checkbox" name="js" id="js" checked="checked"><label for="js">JavaScript</label>
 <input type="checkbox" name="java" id="java" checked="checked"><label for="java">Java</label>
 <input type="checkbox" name="rust" id="rust" checked="checked"><label for="rust">Rust</label>
-<select id="last_push">
-<option value="all">All</option>
-<option value="one_year">0 &lt; 1 year</option>
-<option value="two_years">1 &lt; 2 years</option>
-<option value="older_than_two_years">Older than 2 years</option>
-</select>
 <br />
+<div id="history"></div>
 <br />
 <div id="output">
 </div>
