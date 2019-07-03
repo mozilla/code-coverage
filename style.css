@@ -40,6 +40,20 @@ label {
   height: 1.5em;
 }
 
+/* Directory navigation */
+#output .row span {
+  display: table-cell;
+}
+
+#output .row:nth-child(2n+5) {
+  background: AliceBlue;
+}
+
+#output .row:hover {
+  background-color: #d8dfe5;
+}
+
+/* File coverage */
 #output div:first-child {
   color: #cc0000;
   font-weight: bold;
