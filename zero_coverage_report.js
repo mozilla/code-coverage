@@ -52,7 +52,7 @@ function getSpanForFile(data, github_rev, dir, entry) {
   } else {
     a.target = '_blank';
     const rev = github_rev ? github_rev : 'master';
-    a.href = `https://codecov.io/gh/mozilla/gecko-dev/src/${rev}/${path}`;
+    a.href = `https://mozilla.github.io/code-coverage-reports/#${path}`;
   }
   span.appendChild(a);
   return span;
