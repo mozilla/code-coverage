@@ -73,8 +73,8 @@ label {
   font-size: 1.3em;
 }
 
-#output h2 button {
-  float: right;
+#output h2 * {
+  display: inline-block;
 }
 
 /* File coverage */
@@ -82,7 +82,7 @@ label {
   width: 100%;
 }
 
-#output.file button {
+#output.file nav {
   margin: 5px;
 }
 
@@ -127,4 +127,15 @@ label {
 
 #output tr.uncovered pre {
   background: #ffc8bd;
+}
+
+/* Breadcrumb navigation */
+nav {
+  margin-right: 5px;
+}
+
+nav a:not(:last-child)::after {
+  content: "/";
+  color: #CCC;
+  margin: 0 2px;
 }

@@ -119,12 +119,18 @@ async function generate() {
 
   const output = document.createElement('div');
   output.id = 'output';
+  output.className = 'directory';
 
-  const global = document.createElement('div');
-  global.textContent = files.length + ' files';
-  output.appendChild(global);
-  output.appendChild(document.createElement('br'));
-  output.appendChild(document.createElement('br'));
+  // Create menu with navbar
+  const menu = document.createElement('h2');
+  menu.appendChild(navbar(dir));
+  let title = document.createElement('span');
+  title.textContent = ' : ' + files.length + ' files';
+  menu.appendChild(title)
+  output.appendChild(menu);
+
+  const table = document.createElement('div');
+  table.className = 'table';
 
   const header = document.createElement('div');
   header.className = 'header';
@@ -135,7 +141,7 @@ async function generate() {
     }
     header.append(span);
   });
-  output.append(header);
+  table.append(header);
 
   for (const [entry, stats] of sort_entries(Array.from(map.entries()))) {
     const entryElem = document.createElement('div');
@@ -143,8 +149,9 @@ async function generate() {
     columns.forEach(([, func]) => {
       entryElem.append(func(stats, dir, entry));
     });
-    output.appendChild(entryElem);
+    table.appendChild(entryElem);
   }
+  output.append(table);
   document.getElementById('output').replaceWith(output);
 }
 

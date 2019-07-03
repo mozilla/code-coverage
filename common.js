@@ -191,3 +191,24 @@ function filter_last_push_date(files) {
     }
   });
 }
+
+// Build a breadcrumb Navbar from a path
+function navbar(path) {
+  let files = path.split('/');
+  files.unshift(null); // add mozilla-central
+  let nav = document.createElement('nav');
+  let base = '';
+  files.forEach(file => {
+    let a = document.createElement('a');
+    if (file !== null) {
+      base += (base ? '/' : '') + file;
+      a.href = '#' + base;
+      a.textContent = file;
+    }else{
+      a.href = '#';
+      a.textContent = 'mozilla-central';
+    }
+    nav.appendChild(a);
+  });
+  return nav;
+}
