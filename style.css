@@ -23,47 +23,67 @@ label {
   background-color: white;
   border-top: 1px solid darkgray;
   border-bottom: 1px solid darkgray;
-  padding: 1em 20%;
-  text-align: left;
   margin: auto;
-  display: table;
-  width: 60%;
+  text-align: left;
 }
 
-#output div {
+/* Directory navigation */
+#output.directory {
+  padding: 1em 20%;
+}
+
+#output .table {
+  display: table;
+  width: 100%;
+}
+
+#output .table div {
   display: table-row;
   height: 1.5em;
 }
 
-#output span {
+#output .table div > :first-child {
+  text-align: left;
+}
+
+#output .table div > :last-child {
+  text-align: right;
+}
+
+#output .table span {
   text-align: center;
   height: 1.5em;
 }
 
-/* Directory navigation */
-#output .row span {
+#output .table .row span, #output .table .header span {
   display: table-cell;
 }
 
-#output .row:nth-child(2n+5) {
+#output .table .row:nth-child(2n+3) {
   background: AliceBlue;
 }
 
-#output .row:hover {
+#output .table .row:hover {
   background-color: #d8dfe5;
 }
 
-/* File coverage */
-#output div:first-child {
-  color: #cc0000;
-  font-weight: bold;
-  margin-bottom: 1em;
-  margin-left: 1em;
-  display: inline-block;
+#output h2 {
+  width: 100%;
+  display: block;
+  font-size: 1.3em;
 }
 
-#output br {
-  display: none;
+#output h2 button {
+  float: right;
+}
+
+/* File coverage */
+#output.file, #output.file table {
+  width: 100%;
+}
+
+#output.file button {
+  margin: 5px;
 }
 
 #output .filename {

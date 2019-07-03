@@ -2,10 +2,21 @@ function getSpanForFile(data, dir) {
   const span = document.createElement('span');
   span.className = 'filename';
   const a = document.createElement('a');
-  a.textContent = data.path.substring(dir.length);
+  a.textContent = dir ? data.path.substring(dir.length+1) : data.path;
   a.href = '#' + data.path;
   span.appendChild(a);
   return span;
+}
+
+function getBackButton(path) {
+  let pos = path.lastIndexOf('/');
+  let parentDir = pos ? path.substring(0, pos) : '';
+  let back = document.createElement('button');
+  back.textContent = 'Go up to ' + (parentDir || '/');
+  back.onclick = function(){
+    window.location.hash = '#' + parentDir;
+  };
+  return back;
 }
 
 async function graphHistory(path) {
@@ -43,12 +54,20 @@ async function showDirectory(dir, files) {
 
   const output = document.createElement('div');
   output.id = 'output';
+  output.className = 'directory';
 
-  const global = document.createElement('div');
-  global.textContent = files.length + ' directories/files';
-  output.appendChild(global);
-  output.appendChild(document.createElement('br'));
-  output.appendChild(document.createElement('br'));
+  // Create menu with navigation button
+  const menu = document.createElement('h2');
+  let title = document.createElement('span');
+  title.textContent = '/' + dir + ' : ' + files.length + ' directories/files';
+  menu.appendChild(title)
+  if (dir) {
+    menu.appendChild(getBackButton(dir));
+  }
+  output.appendChild(menu);
+
+  const table = document.createElement('div');
+  table.className = 'table';
 
   const header = document.createElement('div');
   header.className = 'header';
@@ -59,7 +78,7 @@ async function showDirectory(dir, files) {
     }
     header.append(span);
   });
-  output.append(header);
+  table.append(header);
 
   for (const file of files) {
     const entryElem = document.createElement('div');
@@ -67,8 +86,9 @@ async function showDirectory(dir, files) {
     columns.forEach(([, func]) => {
       entryElem.append(func(file));
     });
-    output.appendChild(entryElem);
+    table.appendChild(entryElem);
   }
+  output.appendChild(table);
   document.getElementById('output').replaceWith(output);
 }
 
@@ -93,8 +113,13 @@ async function showFile(file) {
   const changeset = await get_latest();
   const coverage = await get_path_coverage(file.path);
 
+  const output = document.createElement('div');
+  output.id = 'output';
+  output.className = 'file';
+  output.appendChild(getBackButton(file.path));
+
   const table = document.createElement('table');
-  table.id = 'output';
+  table.id = 'file';
   table.style.borderCollapse = 'collapse';
   table.style.borderSpacing = 0;
   const tbody = document.createElement('tbody');
@@ -131,7 +156,8 @@ async function showFile(file) {
     }
   }
 
-  document.getElementById('output').replaceWith(table);
+  output.appendChild(table);
+  document.getElementById('output').replaceWith(output);
 
   /*const pre = document.createElement('pre');
   const code = document.createElement('code');
@@ -148,10 +174,8 @@ async function showFile(file) {
 
 async function generate() {
   const path = window.location.hash.substring(1);
-  console.log(path);
 
   const data = await get_path_coverage(path);
-  console.log(data);
 
   if (data.type == 'directory') {
     await showDirectory(path, data.children);
