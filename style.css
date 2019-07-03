@@ -36,17 +36,8 @@ label {
 }
 
 #output span {
-  display: table-cell;
   text-align: center;
   height: 1.5em;
-}
-
-#output .row:nth-child(2n+5) {
-  background: AliceBlue;
-}
-
-#output .row:hover {
-  background-color: #d8dfe5;
 }
 
 #output div:first-child {
@@ -67,4 +58,39 @@ label {
 
 #output .header {
   font-weight: bold;
+}
+
+#output tr * {
+  padding: 0;
+  margin: 0;
+}
+
+#output tr pre {
+  padding: 0 2px;
+}
+
+#output tr td:first-child {
+  color: grey;
+  font-size: 1em;
+  vertical-align: middle;
+  border-right: 1px solid #CCC;
+  font-family: monospace;
+  background: #f5f2f0;
+  padding: 0 2px;
+}
+
+#output tr.covered td {
+  background: #c3fca2;
+}
+
+#output tr.covered pre {
+  background: #e7ffd9;
+}
+
+#output tr.uncovered td {
+  background: #ff8870;
+}
+
+#output tr.uncovered pre {
+  background: #ffc8bd;
 }

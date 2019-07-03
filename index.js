@@ -106,15 +106,11 @@ async function showFile(file) {
     tbody.appendChild(tr);
 
     const lineNumberTd = document.createElement('td');
-    lineNumberTd.style.padding = 0;
     lineNumberTd.textContent = lineNumber;
     tr.appendChild(lineNumberTd);
 
     const lineTextTd = document.createElement('td');
-    lineTextTd.style.padding = 0;
     const pre = document.createElement('pre');
-    pre.style.margin = 0;
-    pre.style.padding = 0;
     const code = document.createElement('code');
     pre.appendChild(code);
     lineTextTd.appendChild(pre);
@@ -130,11 +126,8 @@ async function showFile(file) {
     Prism.highlightElement(code);
 
     if (coverage['coverage'][lineNumber] != -1) {
-      if (coverage['coverage'][lineNumber] > 0) {
-        pre.style.backgroundColor = lineNumberTd.style.backgroundColor = 'palegreen';
-      } else {
-        pre.style.backgroundColor = lineNumberTd.style.backgroundColor = 'coral';
-      }
+      let cssClass = (coverage['coverage'][lineNumber] > 0) ? 'covered' : 'uncovered';
+      tr.classList.add(cssClass);
     }
   }
 
