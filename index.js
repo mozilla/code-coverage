@@ -1,9 +1,9 @@
-function getSpanForFile(data, dir) {
+function getSpanForFile(data, dir, revision) {
   const span = document.createElement('span');
   span.className = 'filename';
   const a = document.createElement('a');
   a.textContent = dir ? data.path.substring(dir.length+1) : data.path;
-  a.href = '#' + data.path;
+  a.href = '#' + (revision || REV_LATEST) + ':' + data.path;
   span.appendChild(a);
   return span;
 }
@@ -25,16 +25,17 @@ async function graphHistory(path) {
   };
 
   let layout = {
-    title:'Coverage history for ' + (path || 'full repository')
+    title:'Coverage history for ' + (path || 'mozilla-central')
   };
 
+  show('history');
   Plotly.newPlot('history', [ trace ], layout);
 }
 
-async function showDirectory(dir, files) {
+async function showDirectory(dir, revision, files) {
   graphHistory(dir);
 
-  const columns = [['File name', x => getSpanForFile(x, dir)],
+  const columns = [['File name', x => getSpanForFile(x, dir, revision)],
                    ['Children', x => getSpanForValue(x.children)],
                    ['Coverage', x => getSpanForValue(x.coveragePercent + ' %')]];
 
@@ -44,9 +45,9 @@ async function showDirectory(dir, files) {
 
   // Create menu with navbar
   const menu = document.createElement('h2');
-  menu.appendChild(navbar(dir));
+  menu.appendChild(navbar(dir, revision));
   let title = document.createElement('span');
-  title.textContent = ' : ' + files.length + ' directories/files';
+  title.textContent = ': ' + files.length + ' directories/files';
   menu.appendChild(title)
   output.appendChild(menu);
 
@@ -73,10 +74,11 @@ async function showDirectory(dir, files) {
     table.appendChild(entryElem);
   }
   output.appendChild(table);
-  document.getElementById('output').replaceWith(output);
+  hide('message');
+  show('output', output);
 }
 
-async function showFile(file) {
+async function showFile(file, revision) {
   let source = await get_source(file.path);
 
   let language;
@@ -95,12 +97,11 @@ async function showFile(file) {
   }
 
   const changeset = await get_latest();
-  const coverage = await get_path_coverage(file.path);
 
   const output = document.createElement('div');
   output.id = 'output';
   output.className = 'file';
-  output.appendChild(navbar(file.path));
+  output.appendChild(navbar(file.path, revision));
 
   const table = document.createElement('table');
   table.id = 'file';
@@ -134,15 +135,15 @@ async function showFile(file) {
     code.classList.add(`lang-${language}`);
     Prism.highlightElement(code);
 
-    if (coverage['coverage'][lineNumber] != -1) {
-      let cssClass = (coverage['coverage'][lineNumber] > 0) ? 'covered' : 'uncovered';
+    if (file.coverage[lineNumber] != -1) {
+      let cssClass = (file.coverage[lineNumber] > 0) ? 'covered' : 'uncovered';
       tr.classList.add(cssClass);
     }
   }
 
   output.appendChild(table);
-  document.getElementById('output').replaceWith(output);
-  document.getElementById('history').innerHTML = '';
+  hide('message');
+  show('output', output);
 
   /*const pre = document.createElement('pre');
   const code = document.createElement('code');
@@ -157,16 +158,67 @@ async function showFile(file) {
   document.getElementById('output').replaceWith(pre);*/
 }
 
-async function generate() {
-  const path = window.location.hash.substring(1);
+function readHash() {
+  // Reads changeset & path from current URL hash
+  let hash = window.location.hash.substring(1);
+  let pos = hash.indexOf(':');
+  if (pos === -1) {
+    return ['', ''];
+  }
+  return [
+    hash.substring(0, pos),
+    hash.substring(pos+1),
+  ]
+}
 
-  const data = await get_path_coverage(path);
+function updateHash(newChangeset, newPath) {
+  // Set the URL hash with both changeset & path
+  let [changeset, path] = readHash();
+  changeset = newChangeset || changeset || REV_LATEST;
+  path = newPath || path || '';
+  window.location.hash = '#' + changeset + ':' + path;
+}
+
+async function generate() {
+  let [revision, path] = readHash();
+
+  // Reset display
+  hide('history');
+  hide('output');
+  message('loading', 'Loading coverage data for ' + (path || 'mozilla-central') + ' @ ' + (revision || REV_LATEST));
+
+  // Also update the revision element
+  if (revision != REV_LATEST) {
+    let input = document.getElementById('revision');
+    input.value = revision;
+  }
+
+  try {
+    var data = await get_path_coverage(path, revision);
+  } catch (err) {
+    message('error', 'Failed to load coverage: ' + err.message);
+    return;
+  }
 
   if (data.type == 'directory') {
-    await showDirectory(path, data.children);
+    await showDirectory(path, revision, data.children);
   } else if (data.type === 'file') {
-    await showFile(data);
+    await showFile(data, revision);
   }
 }
 
-main(generate, []);
+async function workflow() {
+
+  // Revision input management
+  const revision = document.getElementById('revision');
+  revision.onkeydown = async function(evt){
+    if(evt.keyCode === 13) {
+      updateHash(revision.value);
+    }
+  };
+
+  // Default generation with latest data
+  await generate();
+};
+
+main(workflow, []);

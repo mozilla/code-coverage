@@ -19,12 +19,34 @@ label {
   padding-right: 2em;
 }
 
-#output {
+header input {
+  min-width: 350px;
+  font-family: monospace;
+}
+
+#main {
   background-color: white;
   border-top: 1px solid darkgray;
   border-bottom: 1px solid darkgray;
   margin: auto;
   text-align: left;
+}
+
+#main div.message {
+  padding: 10px;
+  color: white;
+  width: 40%;
+  margin: 30px auto;
+}
+
+#main div.message.loading {
+  border: 1px solid blue;
+  background: #209cee;
+}
+
+#main div.message.error {
+  border: 1px solid red;
+  background: #ff3860;
 }
 
 /* Directory navigation */
@@ -75,6 +97,7 @@ label {
 
 #output h2 * {
   display: inline-block;
+  margin-right: 3px;
 }
 
 /* File coverage */

@@ -70,6 +70,9 @@ function getFileSize(size) {
 async function generate() {
   let dir = window.location.hash.substring(1);
 
+  hide('output');
+  message('loading', 'Loading zero coverage report for ' + (dir || 'mozilla-central'));
+
   while (dir.endsWith('/')) dir = dir.substring(0, dir.length - 1);
   dir += '/';
   if (dir == '/') {
@@ -152,7 +155,8 @@ async function generate() {
     table.appendChild(entryElem);
   }
   output.append(table);
-  document.getElementById('output').replaceWith(output);
+  hide('message');
+  show('output', output);
 }
 
 main(generate, ['third_party', 'headers', 'completely_uncovered', 'cpp', 'js', 'java', 'rust', 'last_push']);

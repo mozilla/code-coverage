@@ -1,3 +1,5 @@
+const REV_LATEST = 'latest';
+
 function assert(condition, message) {
   if (!condition) {
     throw new Error(message || "Assertion failed");
@@ -32,8 +34,15 @@ function getSpanForValue(value) {
 
 const COVERAGE_BACKEND_HOST = 'https://coverage.moz.tools';
 
-async function get_path_coverage(path) {
-  let response = await fetch(`${COVERAGE_BACKEND_HOST}/v2/path?path=${path}`);
+async function get_path_coverage(path, changeset) {
+  let params = `path=${path}`;
+  if (changeset && changeset !== REV_LATEST) {
+    params += `&changeset=${changeset}`;
+  }
+  let response = await fetch(`${COVERAGE_BACKEND_HOST}/v2/path?${params}`).catch(alert);
+  if (response.status !== 200) {
+    throw new Error(response.status + ' - ' + response.statusText);
+  }
   return await response.json();
 }
 
@@ -193,22 +202,45 @@ function filter_last_push_date(files) {
 }
 
 // Build a breadcrumb Navbar from a path
-function navbar(path) {
+function navbar(path, revision) {
   let files = path.split('/');
   files.unshift(null); // add mozilla-central
   let nav = document.createElement('nav');
   let base = '';
+  let href = revision !== undefined ? (revision + ':') : '';
   files.forEach(file => {
     let a = document.createElement('a');
     if (file !== null) {
       base += (base ? '/' : '') + file;
-      a.href = '#' + base;
+      a.href = '#' + href + base;
       a.textContent = file;
     }else{
-      a.href = '#';
+      a.href = '#' + href;
       a.textContent = 'mozilla-central';
     }
     nav.appendChild(a);
   });
   return nav;
+}
+
+
+// Display message as main output
+function message(cssClass, message) {
+  let box = document.getElementById('message');
+  box.className = 'message ' + cssClass;
+  box.textContent = message;
+  box.style.display = 'block';
+}
+
+function hide(id) {
+  let box = document.getElementById(id);
+  box.style.display = 'none';
+}
+
+function show(id, node) {
+  let box = document.getElementById(id);
+  box.style.display = 'block';
+  if (node) {
+    box.replaceWith(node);
+  }
 }
