@@ -34,9 +34,6 @@ async function graphHistory(path) {
 async function showDirectory(dir, files) {
   graphHistory(dir);
 
-  files = await filter_third_party(files);
-  files = filter_languages(files);
-
   const columns = [['File name', x => getSpanForFile(x, dir)],
                    ['Children', x => getSpanForValue(x.children)],
                    ['Coverage', x => getSpanForValue(x.coveragePercent + ' %')]];
@@ -172,4 +169,4 @@ async function generate() {
   }
 }
 
-main(generate, ['third_party', 'cpp', 'js', 'java', 'rust']);
+main(generate, []);
