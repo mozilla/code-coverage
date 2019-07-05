@@ -38,7 +38,7 @@ async function graphHistory(path) {
 }
 
 async function showDirectory(dir, revision, files) {
-  graphHistory(dir);
+  await graphHistory(dir);
 
   const columns = [['File name', x => getSpanForFile(x, dir, revision)],
                    ['Children', x => getSpanForValue(x.children)],
@@ -148,6 +148,7 @@ async function showFile(file, revision) {
 
   output.appendChild(table);
   hide('message');
+  hide('history');
   show('output', output);
 
   /*const pre = document.createElement('pre');
