@@ -8,22 +8,15 @@ function getSpanForFile(data, dir, revision) {
   return span;
 }
 
-async function graphHistory(path) {
-  // Backend needs path without ending /
-  if (path && path.endsWith('/')) {
-    path = path.substring(0, path.length-1);
-  }
-
-  try {
-    var data = await get_history(path);
-  } catch (err) {
-    message('warning', err.message);
+async function graphHistory(history, path) {
+  if (history === null) {
+    message('warning', `No history data for ${path}`);
     return;
   }
 
   let trace = {
-    x: data.map(push => new Date(push.date * 1000)),
-    y: data.map(push => push.coverage),
+    x: history.map(push => new Date(push.date * 1000)),
+    y: history.map(push => push.coverage),
     type: 'scatter',
     mode: 'lines+markers',
     name: 'Coverage %'
@@ -38,8 +31,6 @@ async function graphHistory(path) {
 }
 
 async function showDirectory(dir, revision, files) {
-  await graphHistory(dir);
-
   const columns = [['File name', x => getSpanForFile(x, dir, revision)],
                    ['Children', x => getSpanForValue(x.children)],
                    ['Coverage', x => getSpanForValue(x.coveragePercent + ' %')]];
@@ -79,7 +70,6 @@ async function showDirectory(dir, revision, files) {
     table.appendChild(entryElem);
   }
   output.appendChild(table);
-  hide('message');
   show('output', output);
 }
 
@@ -200,16 +190,23 @@ async function generate() {
   }
 
   try {
-    var data = await get_path_coverage(path, revision);
+    var [coverage, history] = await Promise.all([
+      get_path_coverage(path, revision),
+      get_history(path),
+    ]);
   } catch (err) {
     message('error', 'Failed to load coverage: ' + err.message);
     return;
   }
 
-  if (data.type == 'directory') {
-    await showDirectory(path, revision, data.children);
-  } else if (data.type === 'file') {
-    await showFile(data, revision);
+  if (coverage.type === 'directory') {
+    hide('message');
+    await graphHistory(history, path);
+    await showDirectory(path, revision, coverage.children);
+  } else if (coverage.type === 'file') {
+    await showFile(coverage, revision);
+  } else {
+    message('error', 'Invalid file type: ' + date.type);
   }
 }
 

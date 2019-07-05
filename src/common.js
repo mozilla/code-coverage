@@ -57,6 +57,11 @@ async function get_file_coverage(changeset, path) {
 }
 
 async function get_history(path) {
+  // Backend needs path without trailing /
+  if (path && path.endsWith('/')) {
+    path = path.substring(0, path.length-1);
+  }
+
   let response = await fetch(`${COVERAGE_BACKEND_HOST}/v2/history?path=${path}`);
   let data = await response.json();
 
@@ -66,7 +71,8 @@ async function get_history(path) {
     return point.coverage !== null;
   });
   if (coverage.length === 0 ) {
-    throw new Error(`No history data for ${path}`);
+    console.warn(`No history data for ${path}`);
+    return null;
   }
 
   return data;
