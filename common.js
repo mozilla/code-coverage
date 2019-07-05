@@ -58,7 +58,18 @@ async function get_file_coverage(changeset, path) {
 
 async function get_history(path) {
   let response = await fetch(`${COVERAGE_BACKEND_HOST}/v2/history?path=${path}`);
-  return await response.json();
+  let data = await response.json();
+
+  // Check data has coverage values
+  // These values are missing when going above 2 levels right now
+  let coverage = data.filter(point => {
+    return point.coverage !== null;
+  });
+  if (coverage.length === 0 ) {
+    throw new Error(`No history data for ${path}`);
+  }
+
+  return data;
 }
 
 let get_zero_coverage_data = function() {

@@ -14,7 +14,12 @@ async function graphHistory(path) {
     path = path.substring(0, path.length-1);
   }
 
-  let data = await get_history(path);
+  try {
+    var data = await get_history(path);
+  } catch (err) {
+    message('warning', err.message);
+    return;
+  }
 
   let trace = {
     x: data.map(push => new Date(push.date * 1000)),

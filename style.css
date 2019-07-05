@@ -44,6 +44,11 @@ header input {
   background: #209cee;
 }
 
+#main div.message.warning {
+  border: 1px solid orange;
+  background: #c48404;
+}
+
 #main div.message.error {
   border: 1px solid red;
   background: #ff3860;
