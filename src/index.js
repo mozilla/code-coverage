@@ -175,19 +175,13 @@ function updateHash(newChangeset, newPath) {
   window.location.hash = '#' + changeset + ':' + path;
 }
 
-async function generate() {
+async function load() {
   let [revision, path] = readHash();
 
-  // Reset display
+  // Reset display, dom-safe
   hide('history');
   hide('output');
   message('loading', 'Loading coverage data for ' + (path || 'mozilla-central') + ' @ ' + (revision || REV_LATEST));
-
-  // Also update the revision element
-  if (revision != REV_LATEST) {
-    let input = document.getElementById('revision');
-    input.value = revision;
-  }
 
   try {
     var [coverage, history] = await Promise.all([
@@ -199,29 +193,39 @@ async function generate() {
     return;
   }
 
-  if (coverage.type === 'directory') {
-    hide('message');
-    await graphHistory(history, path);
-    await showDirectory(path, revision, coverage.children);
-  } else if (coverage.type === 'file') {
-    await showFile(coverage, revision);
-  } else {
-    message('error', 'Invalid file type: ' + date.type);
-  }
+  return {
+    path,
+    revision,
+    coverage,
+    history,
+  };
 }
 
-async function workflow() {
+async function display(data) {
 
   // Revision input management
   const revision = document.getElementById('revision');
   revision.onkeydown = async function(evt){
     if(evt.keyCode === 13) {
-      updateHash(revision.value);
+      updateHash(data.revision.value);
     }
   };
 
-  // Default generation with latest data
-  await generate();
-};
+  // Also update the revision element
+  if (data.revision != REV_LATEST) {
+    let input = document.getElementById('revision');
+    input.value = data.revision;
+  }
 
-main(workflow, []);
+  if (data.coverage.type === 'directory') {
+    hide('message');
+    await graphHistory(data.history, data.path);
+    await showDirectory(data.path, data.revision, data.coverage.children);
+  } else if (data.coverage.type === 'file') {
+    await showFile(data.coverage, data.revision);
+  } else {
+    message('error', 'Invalid file type: ' + data.coverage.type);
+  }
+}
+
+main(load, display, []);

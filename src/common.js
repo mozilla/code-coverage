@@ -6,18 +6,29 @@ function assert(condition, message) {
   }
 }
 
-function windowLoaded() {
-  return new Promise(resolve => window.onload = resolve);
+function domContentLoaded() {
+  return new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve));
 }
 
-async function main(fn, opts) {
-  await windowLoaded();
+async function main(load, display, opts) {
+  // Immediately listen to DOM event
+  let domReady = domContentLoaded();
 
-  monitor_options(opts, fn);
+  // Load initial data before DOM is available
+  let data = await load();
 
-  window.onhashchange = fn;
+  // Wait for DOM to be ready before displaying
+  await domReady;
+  await display(data);
 
-  fn();
+  // Full workflow, loading then displaying data
+  // used for following updates
+  let full = async function() {
+    let data = await load();
+    await display(data);
+  };
+  monitor_options(opts, full);
+  window.onhashchange = full;
 }
 
 
@@ -241,8 +252,14 @@ function navbar(path, revision) {
 }
 
 
-// Display message as main output
+// Display helpers
+function canDisplay() {
+  return document.readyState == 'complete';
+}
+
 function message(cssClass, message) {
+  if(!canDisplay()) return;
+
   let box = document.getElementById('message');
   box.className = 'message ' + cssClass;
   box.textContent = message;
@@ -250,11 +267,15 @@ function message(cssClass, message) {
 }
 
 function hide(id) {
+  if(!canDisplay()) return;
+
   let box = document.getElementById(id);
   box.style.display = 'none';
 }
 
 function show(id, node) {
+  if(!canDisplay()) return;
+
   let box = document.getElementById(id);
   box.style.display = 'block';
   if (node) {

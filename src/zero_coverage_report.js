@@ -67,7 +67,7 @@ function getFileSize(size) {
   return size;
 }
 
-async function generate() {
+async function display(data) {
   let dir = window.location.hash.substring(1);
 
   hide('output');
@@ -79,7 +79,6 @@ async function generate() {
     dir = '';
   }
 
-  const data = await get_zero_coverage_data();
   const github_revision = data['github_revision'];
   let files = data['files'].filter(file => file.name.startsWith(dir));
   // TODO: Do this in the backend directly!
@@ -159,4 +158,4 @@ async function generate() {
   show('output', output);
 }
 
-main(generate, ['third_party', 'headers', 'completely_uncovered', 'cpp', 'js', 'java', 'rust', 'last_push']);
+main(get_zero_coverage_data, display, ['third_party', 'headers', 'completely_uncovered', 'cpp', 'js', 'java', 'rust', 'last_push']);
