@@ -17,6 +17,7 @@ async function graphHistory(history, path) {
   let trace = {
     x: history.map(push => new Date(push.date * 1000)),
     y: history.map(push => push.coverage),
+    text: history.map(push => push.changeset),
     type: 'scatter',
     mode: 'lines+markers',
     name: 'Coverage %'
@@ -26,8 +27,12 @@ async function graphHistory(history, path) {
     title:'Coverage history for ' + (path || 'mozilla-central')
   };
 
-  show('history');
+  let plot = show('history');
   Plotly.newPlot('history', [ trace ], layout);
+
+  plot.on('plotly_click', function(data){
+    updateHash(data.points[0].text, path);
+  });
 }
 
 async function showDirectory(dir, revision, files) {

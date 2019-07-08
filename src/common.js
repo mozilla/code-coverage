@@ -281,4 +281,5 @@ function show(id, node) {
   if (node) {
     box.replaceWith(node);
   }
+  return box;
 }
