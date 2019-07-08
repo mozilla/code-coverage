@@ -55,7 +55,7 @@ header input {
 }
 
 /* Directory navigation */
-#output.directory {
+#output.directory, #output > .directory {
   padding: 1em 20%;
 }
 
@@ -106,11 +106,11 @@ header input {
 }
 
 /* File coverage */
-#output.file, #output.file table {
+#output > .file, #output > .file table {
   width: 100%;
 }
 
-#output.file nav {
+#output > .file nav {
   margin: 5px;
 }
 
@@ -120,6 +120,12 @@ header input {
 
 #output .header {
   font-weight: bold;
+}
+
+
+#output .file table {
+  border-collapse: collapse;
+  border-spacing: 0;
 }
 
 #output tr * {

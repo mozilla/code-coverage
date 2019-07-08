@@ -9,6 +9,8 @@ function sort_entries(entries) {
     }
 
     return dir1 > dir2;
+  }).map(([dir , stats]) => {
+    return {stats, dir};
   });
 }
 
@@ -39,23 +41,6 @@ function cumStats(prevStats, newStats) {
   prevStats.commits += newStats.commits;
   prevStats.first_push_date = get_min_date(prevStats.first_push_date, newStats.first_push_date);
   prevStats.last_push_date = get_min_date(prevStats.last_push_date, newStats.last_push_date);
-}
-
-function getSpanForFile(data, github_rev, dir, entry) {
-  const span = document.createElement('span');
-  span.className = 'filename';
-  const a = document.createElement('a');
-  a.textContent = entry;
-  const path = dir + entry;
-  if (data.children != 0) {
-    a.href = '#' + path;
-  } else {
-    a.target = '_blank';
-    const rev = github_rev ? github_rev : 'master';
-    a.href = `./index.html#${REV_LATEST}:${path}`;
-  }
-  span.appendChild(a);
-  return span;
 }
 
 function getFileSize(size) {
@@ -111,51 +96,23 @@ async function display(data) {
     }
   }
 
-  const columns = [['File name', (x, dir, entry) => getSpanForFile(x, github_revision, dir, entry)],
-                   ['Children', (x) => getSpanForValue(x.children)],
-                   ['Functions', (x) => getSpanForValue(x.funcs)],
-                   ['First push', (x) => getSpanForValue(x.first_push_date)],
-                   ['Last push', (x) => getSpanForValue(x.last_push_date)],
-                   ['Size', (x) => getSpanForValue(getFileSize(x.size))],
-                   ['Commits', (x) => getSpanForValue(x.commits)]];
+  let context = {
+    current_dir: dir,
+    entries: sort_entries(Array.from(map.entries())),
+    entry_url : function() {
+      let path = dir + this.dir;
+      if (this.stats.children != 0) {
+        return `#${path}`;
+      } else {
+        return `./index.html#${REV_LATEST}:${path}`;
+      }
+    },
+    navbar: build_navbar(dir),
+    total: files.length,
+  };
 
-  const output = document.createElement('div');
-  output.id = 'output';
-  output.className = 'directory';
-
-  // Create menu with navbar
-  const menu = document.createElement('h2');
-  menu.appendChild(navbar(dir));
-  let title = document.createElement('span');
-  title.textContent = ' : ' + files.length + ' files';
-  menu.appendChild(title)
-  output.appendChild(menu);
-
-  const table = document.createElement('div');
-  table.className = 'table';
-
-  const header = document.createElement('div');
-  header.className = 'header';
-  columns.forEach(([name, ]) => {
-    const span = getSpanForValue(name);
-    if (name === 'File name') {
-      span.className = 'filename';
-    }
-    header.append(span);
-  });
-  table.append(header);
-
-  for (const [entry, stats] of sort_entries(Array.from(map.entries()))) {
-    const entryElem = document.createElement('div');
-    entryElem.className = 'row';
-    columns.forEach(([, func]) => {
-      entryElem.append(func(stats, dir, entry));
-    });
-    table.appendChild(entryElem);
-  }
-  output.append(table);
   hide('message');
-  show('output', output);
+  render('zerocoverage', context, 'output');
 }
 
 main(get_zero_coverage_data, display, ['third_party', 'headers', 'completely_uncovered', 'cpp', 'js', 'java', 'rust', 'last_push']);

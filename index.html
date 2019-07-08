@@ -11,7 +11,65 @@
 <script src="src/common.js" type="text/javascript"></script>
 <script src="src/index.js" type="text/javascript"></script>
 <script src="vendor/prism.js"></script>
+<script src="https://unpkg.com/mustache@3.0.1/mustache.min.js" type="text/javascript"></script>
 <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+<script id="file_coverage" type="x-tmpl-mustache">
+<div class="file">
+  <h2>
+    <nav>
+      {{#navbar}}
+      <a href="#{{ revision }}:{{ path }}">{{ name }}</a>
+      {{/navbar}}
+    </nav>
+  </h2>
+
+  <table>
+    <tbody>
+      {{#lines}}
+      <tr class="{{covered}}">
+        <td>{{ nb }}</td>
+        <td>
+          <pre class="language-{{ language }}"><code>{{ line }}</code></pre>
+        </td>
+      </tr>
+      {{/lines}}
+    </tbody>
+  </table>
+
+</div>
+</script>
+
+<script id="browser" type="x-tmpl-mustache">
+<div class="directory">
+  <h2>
+    <nav>
+      {{#navbar}}
+      <a href="#{{ revision }}:{{ path }}">{{ name }}</a>
+      {{/navbar}}
+    </nav>
+    <span> : {{ files.length }} files</span>
+  </h2>
+
+  <div class="table">
+    <div class="header">
+      <span class="filename">File name</span>
+      <span>Children</span>
+      <span>Coverage</span>
+    </div>
+
+    {{#files}}
+    <div class="row">
+      <span class="filename"><a href="#{{ revision }}:{{ path }}">{{ file_name }}</a></span>
+      <span>{{ children }}</span>
+      <span>{{ coveragePercent }} %</span>
+    </div>
+    {{/files}}
+	</div>
+
+</div>
+</script>
+
 <header>
   <a href="zero_coverage_report.html">View the zero coverage report</a>
   &bull;

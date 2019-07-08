@@ -32,15 +32,6 @@ async function main(load, display, opts) {
 }
 
 
-// Visualization.
-
-function getSpanForValue(value) {
-  const span = document.createElement('span');
-  span.innerText = value == 0 ? '' : value;
-  return span;
-}
-
-
 // Coverage retrieval.
 
 const COVERAGE_BACKEND_HOST = 'https://coverage.moz.tools';
@@ -55,11 +46,6 @@ async function get_path_coverage(path, changeset) {
     throw new Error(response.status + ' - ' + response.statusText);
   }
   return await response.json();
-}
-
-async function get_latest() {
-  let response = await fetch(`${COVERAGE_BACKEND_HOST}/v2/latest`);
-  return (await response.json())[0]['revision'];
 }
 
 async function get_file_coverage(changeset, path) {
@@ -229,28 +215,26 @@ function filter_last_push_date(files) {
   });
 }
 
-// Build a breadcrumb Navbar from a path
-function navbar(path, revision) {
-  let files = path.split('/');
-  files.unshift(null); // add mozilla-central
-  let nav = document.createElement('nav');
+// Build the urls for a breadcrumb Navbar from a path
+function build_navbar(path, revision) {
+  if (path.endsWith('/')) {
+    path = path.substring(0, path.length-1);
+  }
   let base = '';
-  let href = revision !== undefined ? (revision + ':') : '';
-  files.forEach(file => {
-    let a = document.createElement('a');
-    if (file !== null) {
-      base += (base ? '/' : '') + file;
-      a.href = '#' + href + base;
-      a.textContent = file;
-    }else{
-      a.href = '#' + href;
-      a.textContent = 'mozilla-central';
+  let links = [
+    {
+      'name': 'mozilla-central',
+      'path': '',
     }
-    nav.appendChild(a);
-  });
-  return nav;
+  ];
+  return links.concat(path.split('/').map(file => {
+    base += (base ? '/' : '') + file;
+    return {
+      'name': file,
+      'path': base,
+    };
+  }));
 }
-
 
 // Display helpers
 function canDisplay() {
@@ -281,5 +265,13 @@ function show(id, node) {
   if (node) {
     box.replaceWith(node);
   }
+  return box;
+}
+
+function render(template, data, target) {
+  var output = Mustache.render(document.getElementById(template).innerHTML, data);
+  let box = document.getElementById(target);
+  box.innerHTML = output;
+  box.style.display = 'block';
   return box;
 }
