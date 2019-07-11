@@ -9,16 +9,16 @@ function assert(condition, message) {
 function domContentLoaded() {
   return new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve));
 }
+DOM_READY = domContentLoaded();
 
 async function main(load, display, opts) {
   // Immediately listen to DOM event
-  let domReady = domContentLoaded();
 
   // Load initial data before DOM is available
   let data = await load();
 
   // Wait for DOM to be ready before displaying
-  await domReady;
+  await DOM_READY;
   await display(data);
 
   // Full workflow, loading then displaying data

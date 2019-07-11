@@ -117,8 +117,10 @@ async function load() {
       get_history(path),
     ]);
   } catch (err) {
+    console.warn('Failed to load coverage', err);
+    await DOM_READY; // We want to always display this message
     message('error', 'Failed to load coverage: ' + err.message);
-    return;
+    throw err;
   }
 
   return {
