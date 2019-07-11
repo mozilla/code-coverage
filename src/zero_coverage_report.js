@@ -64,7 +64,6 @@ async function display(data) {
     dir = '';
   }
 
-  const github_revision = data['github_revision'];
   let files = data['files'].filter(file => file.name.startsWith(dir));
   // TODO: Do this in the backend directly!
   files.forEach(file => {
@@ -96,6 +95,7 @@ async function display(data) {
     }
   }
 
+  const revision = data['hg_revision'];
   let context = {
     current_dir: dir,
     entries: sort_entries(Array.from(map.entries())),
@@ -104,7 +104,7 @@ async function display(data) {
       if (this.stats.children != 0) {
         return `#${path}`;
       } else {
-        return `./index.html#${REV_LATEST}:${path}`;
+        return `./index.html#${revision}:${path}`;
       }
     },
     navbar: build_navbar(dir),
