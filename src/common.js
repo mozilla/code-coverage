@@ -36,7 +36,38 @@ async function main(load, display, opts) {
 
 const COVERAGE_BACKEND_HOST = 'https://coverage.moz.tools';
 
+function cache_get(cache, key) {
+  if (key in cache) {
+    return cache[key].val;
+  }
+}
+
+function cache_set(cache, key, value) {
+  let now = new Date().getTime() / 1000;
+
+  // If the cache got too big, remove all elements that were added more
+  // than 15 minutes ago.
+  if (Object.keys(cache).length > 100) {
+    for (let key in cache) {
+      if (cache[key].time < now - 15 * 60) {
+        delete cache[key];
+      }
+    }
+  }
+
+  cache[key] = {
+    'val': value,
+    'time': now,
+  };
+}
+
+let path_coverage_cache = {};
 async function get_path_coverage(path, changeset) {
+  let data = cache_get(path_coverage_cache, `${changeset}_${path}`);
+  if (data) {
+    return data;
+  }
+
   let params = `path=${path}`;
   if (changeset && changeset !== REV_LATEST) {
     params += `&changeset=${changeset}`;
@@ -45,22 +76,29 @@ async function get_path_coverage(path, changeset) {
   if (response.status !== 200) {
     throw new Error(response.status + ' - ' + response.statusText);
   }
-  return await response.json();
+  data = await response.json();
+
+  cache_set(path_coverage_cache, `${changeset}_${path}`, data);
+
+  return data;
 }
 
-async function get_file_coverage(changeset, path) {
-  let response = await fetch(`${COVERAGE_BACKEND_HOST}/v2/path?changeset=${changeset}&path=${path}`);
-  return await response.json();
-}
-
+let history_cache = {};
 async function get_history(path) {
   // Backend needs path without trailing /
   if (path && path.endsWith('/')) {
     path = path.substring(0, path.length-1);
   }
 
+  let data = cache_get(history_cache, path);
+  if (data) {
+    return data;
+  }
+
   let response = await fetch(`${COVERAGE_BACKEND_HOST}/v2/history?path=${path}`);
-  let data = await response.json();
+  data = await response.json();
+
+  cache_set(history_cache, path, data);
 
   // Check data has coverage values
   // These values are missing when going above 2 levels right now
