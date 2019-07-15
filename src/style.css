@@ -19,9 +19,14 @@ label {
   padding-right: 2em;
 }
 
-header input {
+header #browser input {
   min-width: 350px;
   font-family: monospace;
+}
+
+header > div {
+  /* By default do not display any menu : managed by JS */
+  display: none;
 }
 
 #main {

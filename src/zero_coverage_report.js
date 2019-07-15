@@ -52,10 +52,9 @@ function getFileSize(size) {
   return size;
 }
 
-async function display(data) {
-  let dir = window.location.hash.substring(1);
-
+async function zero_coverage_display(data, dir) {
   hide('output');
+  hide('history');
   message('loading', 'Loading zero coverage report for ' + (dir || 'mozilla-central'));
 
   while (dir.endsWith('/')) dir = dir.substring(0, dir.length - 1);
@@ -102,9 +101,9 @@ async function display(data) {
     entry_url : function() {
       let path = dir + this.dir;
       if (this.stats.children != 0) {
-        return `#${path}`;
+        return `#zero:${path}`;
       } else {
-        return `./index.html#${revision}:${path}`;
+        return `#${revision}:${path}`;
       }
     },
     navbar: build_navbar(dir),
@@ -114,5 +113,3 @@ async function display(data) {
   hide('message');
   render('zerocoverage', context, 'output');
 }
-
-main(get_zero_coverage_data, display, ['third_party', 'headers', 'completely_uncovered', 'cpp', 'js', 'java', 'rust', 'last_push']);

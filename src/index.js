@@ -1,3 +1,7 @@
+const VIEW_ZERO_COVERAGE = 'zero';
+const VIEW_BROWSER = 'browser';
+
+
 async function graphHistory(history, path) {
   if (history === null) {
     message('warning', `No history data for ${path}`);
@@ -111,6 +115,16 @@ async function load() {
   hide('output');
   message('loading', 'Loading coverage data for ' + (path || 'mozilla-central') + ' @ ' + (revision || REV_LATEST));
 
+  // Load only zero coverage for that specific view
+  if (revision === VIEW_ZERO_COVERAGE) {
+    let zero_coverage = await get_zero_coverage_data();
+    return {
+      view: VIEW_ZERO_COVERAGE,
+      path,
+      zero_coverage,
+    }
+  }
+
   try {
     var [coverage, history] = await Promise.all([
       get_path_coverage(path, revision),
@@ -124,6 +138,7 @@ async function load() {
   }
 
   return {
+    view: VIEW_BROWSER,
     path,
     revision,
     coverage,
@@ -132,6 +147,17 @@ async function load() {
 }
 
 async function display(data) {
+
+  // Toggle menu per views
+  if (data.view === VIEW_BROWSER) {
+    show('menu_browser');
+    hide('menu_zero');
+  } else if (data.view === VIEW_ZERO_COVERAGE) {
+    show('menu_zero');
+    hide('menu_browser');
+  } else {
+    message('error', 'Invalid view : ' + data.view);
+  }
 
   // Revision input management
   const revision = document.getElementById('revision');
@@ -142,20 +168,25 @@ async function display(data) {
   };
 
   // Also update the revision element
-  if (data.revision != REV_LATEST) {
+  if (data.revision && data.revision != REV_LATEST) {
     let input = document.getElementById('revision');
     input.value = data.revision;
   }
 
-  if (data.coverage.type === 'directory') {
+  if (data.view === VIEW_ZERO_COVERAGE ) {
+    await zero_coverage_display(data.zero_coverage, data.path);
+
+  } else if (data.view === VIEW_BROWSER && data.coverage.type === 'directory') {
     hide('message');
     await graphHistory(data.history, data.path);
     await showDirectory(data.path, data.revision, data.coverage.children);
-  } else if (data.coverage.type === 'file') {
+
+  } else if (data.view === VIEW_BROWSER && data.coverage.type === 'file') {
     await showFile(data.coverage, data.revision);
+
   } else {
     message('error', 'Invalid file type: ' + data.coverage.type);
   }
 }
 
-main(load, display, []);
+main(load, display, ['third_party', 'headers', 'completely_uncovered', 'cpp', 'js', 'java', 'rust', 'last_push'])
