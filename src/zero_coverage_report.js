@@ -1,3 +1,6 @@
+import {hide, message, build_navbar, render, filter_third_party, filter_languages, filter_headers, filter_completely_uncovered, filter_last_push_date} from './common.js';
+
+
 function sort_entries(entries) {
   return entries.sort(([dir1, stats1], [dir2, stats2]) => {
     if (stats1.children != stats2.children) {
@@ -52,7 +55,7 @@ function getFileSize(size) {
   return size;
 }
 
-async function zero_coverage_display(data, dir) {
+export async function zero_coverage_display(data, dir) {
   hide('output');
   hide('history');
   message('loading', 'Loading zero coverage report for ' + (dir || 'mozilla-central'));

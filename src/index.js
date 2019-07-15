@@ -1,6 +1,12 @@
+import {REV_LATEST, DOM_READY, main, show, hide, message, get_path_coverage, get_history, get_zero_coverage_data, build_navbar, render, get_source} from './common.js';
+import {zero_coverage_display} from './zero_coverage_report.js';
+import './style.css';
+import Prism from 'prismjs';
+import Chartist from 'chartist';
+import 'chartist/dist/chartist.css';
+
 const VIEW_ZERO_COVERAGE = 'zero';
 const VIEW_BROWSER = 'browser';
-
 
 async function graphHistory(history, path) {
   if (history === null) {
