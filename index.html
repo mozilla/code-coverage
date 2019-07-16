@@ -6,12 +6,15 @@
 <title>mozilla-central coverage</title>
 </head>
 <body>
-<script async defer src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <script src="src/common.js" type="text/javascript"></script>
 <script src="src/zero_coverage_report.js" type="text/javascript"></script>
 <script src="src/index.js" type="text/javascript"></script>
 <script src="https://unpkg.com/mustache@3.0.1/mustache.min.js" type="text/javascript"></script>
 <script async defer src="https://buttons.github.io/buttons.js"></script>
+
+<!-- Chart -->
+<script src="https://unpkg.com/chartist@0.11.3/dist/chartist.min.js" type="text/javascript"></script>
+<link href="https://unpkg.com/chartist@0.11.3/dist/chartist.min.css" rel="stylesheet" />
 
 <!-- Syntax highlighter -->
 <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.16.0/themes/prism.css" rel="stylesheet" />
@@ -112,6 +115,10 @@
 </div>
 </script>
 
+<script id="history_point" type="x-tmpl-mustache">
+  <span>Revision <samp>{{ revision }}</samp> from {{ date }}</span>
+</script>
+
 <header>
   <div id="menu_browser">
     <a href="#zero:">View the zero coverage report</a>
@@ -138,7 +145,10 @@
 
 <main id="main">
   <div id="message" class="message loading">Loading...</div>
-  <div id="history"></div>
+  <div id="history">
+    <div class="ct-chart"></div>
+    <div id="history_details">Hover a point to see its details</div>
+  </div>
   <div id="output"></div>
 </main>
 

@@ -8,24 +8,57 @@ async function graphHistory(history, path) {
     return;
   }
 
-  let trace = {
-    x: history.map(push => new Date(push.date * 1000)),
-    y: history.map(push => push.coverage),
-    text: history.map(push => push.changeset),
-    type: 'scatter',
-    mode: 'lines+markers',
-    name: 'Coverage %'
+  let dateStr = function(timestamp){
+    let date = new Date(timestamp);
+    return date.getDate() + '/' + date.getMonth() + '/' + date.getFullYear();
+  }
+
+  var data = {
+    series: [
+      {
+        name: 'History',
+        data: history.map(push => {
+          return {
+            x: push.date * 1000,
+            y: push.coverage,
+          }
+        })
+      }
+    ],
   };
+  var config = {
+    // Display dates on a linear scale
+    axisX: {
+      type: Chartist.FixedScaleAxis,
+      divisor: 20,
+      labelInterpolationFnc: dateStr,
+    },
 
-  let layout = {
-    title:'Coverage history for ' + (path || 'mozilla-central')
+    // Fix display bug when points are too close
+    lineSmooth: Chartist.Interpolation.cardinal({
+      tension: 1,
+    }),
   };
+  let elt = show('history').querySelector('.ct-chart');
+  let chart = new Chartist.Line(elt, data, config);
 
-  let plot = show('history');
-  Plotly.newPlot('history', [ trace ], layout);
+  chart.on('draw', function(evt) {
+    if(evt.type === 'point') {
+      // Load revision from graph when a point is clicked
+      let revision = history[evt.index].changeset;
+      evt.element._node.onclick = function(){
+        updateHash(revision, path);
+      };
 
-  plot.on('plotly_click', function(data){
-    updateHash(data.points[0].text, path);
+      // Display revision from graph when a point is overed
+      evt.element._node.onmouseover = function(){
+        let ctx = {
+          revision: revision.substring(0, 12),
+          date: dateStr(evt.value.x),
+        };
+        render('history_point', ctx, 'history_details');
+      };
+    }
   });
 }
 

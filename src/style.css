@@ -178,3 +178,28 @@ nav a:not(:last-child)::after {
   color: #CCC;
   margin: 0 2px;
 }
+
+/* History graph */
+#history, #history svg {
+  width: 100%;
+  height: 35%;
+}
+
+#history .ct-point {
+  stroke: #6fc0f2;
+  cursor: pointer;
+}
+
+#history .ct-line {
+  stroke: #ccf2ff;
+}
+
+#history .ct-point:hover {
+  stroke: #d91e44;
+}
+
+#history #history_details {
+  color: darkgrey;
+  margin-right: 20px;
+  float: right;
+}
