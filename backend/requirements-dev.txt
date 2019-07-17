@@ -1,5 +1,8 @@
--r ./../../../lib/backend_common/requirements-dev.txt
 
 responses
 aresponses
 fakeredis
+flake8
+flake8-isort
+pytest==4.3.1
+responses
