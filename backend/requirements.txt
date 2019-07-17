@@ -1,7 +1,3 @@
-
-aiohttp
-async-lru
-cachetools
 connexion
 datadog
 -e ../tools #egg=code-coverage-tools
@@ -12,7 +8,5 @@ gunicorn
 python-dateutil
 pytoml
 redis
-rq
-setuptools-scm # needed by py-1.5.4 buildInputs
 swagger-ui-bundle
 zstandard
