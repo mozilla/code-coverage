@@ -17,7 +17,7 @@ import pytest
 import responses
 import zstandard as zstd
 
-import codecoverage_backend.backend
+import code_coverage_backend.backend
 
 FIXTURES_DIR = os.path.join(os.path.dirname(__file__), 'fixtures')
 
@@ -27,7 +27,7 @@ def mock_secrets():
     '''
     Provide configuration through mock Taskcluster secrets
     '''
-    from codecoverage_backend import taskcluster
+    from code_coverage_backend import taskcluster
 
     taskcluster.options = {
         'rootUrl': 'http://taskcluster.test',
@@ -47,13 +47,13 @@ def mock_secrets():
 @pytest.fixture
 def app(mock_secrets):
     '''
-    Load codecoverage_backend app in test mode
+    Load code_coverage_backend app in test mode
     '''
 
-    app = codecoverage_backend.backend.build_flask_app(
+    app = code_coverage_backend.backend.build_flask_app(
         project_name='Test',
         app_name='test',
-        openapi=os.path.join(os.path.dirname(__file__), '../codecoverage_backend/api.yml')
+        openapi=os.path.join(os.path.dirname(__file__), '../code_coverage_backend/api.yml')
     )
 
     with app.app.app_context():
@@ -117,7 +117,7 @@ def mock_cache(mock_secrets, mock_bucket, tmpdir):
     '''
     Mock a GCPCache instance, using fakeredis and a mocked GCP bucket
     '''
-    from codecoverage_backend.gcp import GCPCache
+    from code_coverage_backend.gcp import GCPCache
 
     class MockCache(GCPCache):
 

@@ -30,7 +30,7 @@ def read_requirements(file_):
 
 
 setup(
-    name='codecoverage_backend',
+    name='code_coverage_backend',
     version=version,
     description='The code behind https://coverage.moz.tools',
     author='Mozilla Release Management',

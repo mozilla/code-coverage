@@ -8,7 +8,7 @@ from rq import Connection
 from rq import Queue
 from rq import SimpleWorker
 
-from codecoverage_backend import taskcluster
+from code_coverage_backend import taskcluster
 
 conn = redis.from_url(taskcluster.secrets['REDIS_URL'])
 

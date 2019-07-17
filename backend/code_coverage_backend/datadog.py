@@ -6,8 +6,8 @@ import logging
 
 import datadog
 
-from codecoverage_backend import config
-from codecoverage_backend import taskcluster
+from code_coverage_backend import config
+from code_coverage_backend import taskcluster
 
 logger = logging.getLogger(__name__)
 

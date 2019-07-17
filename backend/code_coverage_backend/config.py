@@ -6,7 +6,7 @@
 from __future__ import absolute_import
 
 PROJECT_NAME = 'code-coverage-backend'
-APP_NAME = 'codecoverage_backend'
+APP_NAME = 'code_coverage_backend'
 COVERAGE_EXTENSIONS = [
     # C
     'c', 'h',

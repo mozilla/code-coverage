@@ -6,7 +6,7 @@ def test_open_report(tmpdir, mock_covdir_report):
     '''
     Test opening reports
     '''
-    from codecoverage_backend import covdir
+    from code_coverage_backend import covdir
 
     empty = tmpdir.join('empty.json')
     assert covdir.open_report(empty.realpath()) is None
@@ -30,7 +30,7 @@ def test_get_path_coverage(mock_covdir_report):
     '''
     Test covdir report parsing to obtain coverage for a specific path
     '''
-    from codecoverage_backend import covdir
+    from code_coverage_backend import covdir
 
     # Full coverage
     report = covdir.open_report(mock_covdir_report)
@@ -107,7 +107,7 @@ def test_get_overall_coverage(mock_covdir_report):
     '''
     Test covdir report overall coverage extraction
     '''
-    from codecoverage_backend import covdir
+    from code_coverage_backend import covdir
 
     report = covdir.open_report(mock_covdir_report)
     assert report is not None

@@ -6,8 +6,8 @@
 import structlog
 from flask import abort
 
-from codecoverage_backend.config import COVERAGE_EXTENSIONS
-from codecoverage_backend.gcp import load_cache
+from code_coverage_backend.config import COVERAGE_EXTENSIONS
+from code_coverage_backend.gcp import load_cache
 
 DEFAULT_REPOSITORY = 'mozilla-central'
 logger = structlog.get_logger(__name__)

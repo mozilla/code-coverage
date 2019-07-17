@@ -12,8 +12,8 @@ import zstandard as zstd
 from dateutil.relativedelta import relativedelta
 
 from code_coverage_tools.gcp import get_bucket
-from codecoverage_backend import covdir
-from codecoverage_backend import taskcluster
+from code_coverage_backend import covdir
+from code_coverage_backend import taskcluster
 
 logger = structlog.get_logger(__name__)
 __cache = None
