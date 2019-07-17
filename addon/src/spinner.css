@@ -1,0 +1,25 @@
+/* This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+
+@keyframes gecko_coverage_loader_spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.gecko_coverage_loader {
+  border: 3px solid #f3f3f3;
+  border-radius: 50%;
+  width: 13px;
+  height: 13px;
+  animation: gecko_coverage_loader_spin 2s linear infinite;
+  display: inline-block;
+}
+
+.gecko_coverage_loader_dxr {
+  border-top: 3px solid black;
+}
+
+.gecko_coverage_loader_socorro {
+  border-top: 3px solid blue;
+}

@@ -1,0 +1,43 @@
+{
+  "author": "Marco Castelluccio",
+  "manifest_version": 2,
+  "name": "Gecko Code Coverage",
+  "version": "0.11.0",
+  "icons": {
+    "270": "assets/coverage.jpg"
+  },
+  "description": "Extension that augments several Mozilla websites (DXR, Searchfox) with code coverage information.",
+  "content_scripts": [
+    {
+      "matches": ["*://dxr.mozilla.org/mozilla-central/source/*"],
+      "js": ["build/dxr.js"],
+      "css": ["src/spinner.css", "src/dxr.css"],
+      "run_at": "document_end"
+    },
+    {
+      "matches": ["*://searchfox.org/mozilla-central/source/*"],
+      "js": ["build/searchfox.js"],
+      "css": ["src/spinner.css", "src/dxr.css"],
+      "run_at": "document_end"
+    },
+    {
+      "matches": ["*://crash-stats.mozilla.com/report/index/*"],
+      "js": ["build/socorro.js"],
+      "css": ["src/spinner.css", "src/socorro.css"],
+      "run_at": "document_end"
+    },
+    {
+      "matches": ["*://hg.mozilla.org/mozilla-central/file/*",
+                  "*://hg.mozilla.org/mozilla-central/annotate/*"],
+      "js": ["build/hgmo.js"],
+      "css": ["src/spinner.css", "src/dxr.css"],
+      "run_at": "document_end"
+    }
+  ],
+  "permissions": [
+    "https://coverage.moz.tools/v2/*",
+    "https://mapper.mozilla-releng.net/gecko-dev/rev/git/*",
+    "https://hg.mozilla.org/mozilla-central/json-rev/*"
+  ],
+  "homepage_url": "https://github.com/mozilla/code-coverage-addon"
+}
