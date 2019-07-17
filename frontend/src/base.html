@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>mozilla-central coverage</title>
+</head>
+<body>
+<script id="zerocoverage" type="x-tmpl-mustache">
+<div class="directory">
+  <h2>
+    <nav>
+      {{#navbar}}
+      <a href="#{{ path }}">{{ name }}</a>
+      {{/navbar}}
+    </nav>
+    <span> : {{ total }} files</span>
+  </h2>
+
+  <div class="table">
+    <div class="header">
+      <span class="filename">File name</span>
+      <span>Children</span>
+      <span>Functions</span>
+      <span>First push</span>
+      <span>Last push</span>
+      <span>Size</span>
+      <span>Commits</span>
+    </div>
+
+    {{#entries}}
+    <div class="row">
+      <span class="filename"><a href="{{ entry_url }}">{{ dir }}</a></span>
+      <span>{{ stats.children }}</span>
+      <span>{{ stats.funcs }}</span>
+      <span>{{ stats.first_push_date }}</span>
+      <span>{{ stats.last_push_date }}</span>
+      <span>{{ stats.size }}</span>
+      <span>{{ stats.commits }}</span>
+    </div>
+    {{/entries}}
+  </div>
+</div>
+</script>
+
+<script id="file_coverage" type="x-tmpl-mustache">
+<div class="file">
+  <h2>
+    <nav>
+      {{#navbar}}
+      <a href="#{{ revision }}:{{ path }}">{{ name }}</a>
+      {{/navbar}}
+    </nav>
+  </h2>
+
+  <table>
+    <tbody>
+      {{#lines}}
+      <tr class="{{covered}}">
+        <td>{{ nb }}</td>
+        <td>
+          <pre class="language-{{ language }}"><code>{{ line }}</code></pre>
+        </td>
+      </tr>
+      {{/lines}}
+    </tbody>
+  </table>
+
+</div>
+</script>
+
+<script id="browser" type="x-tmpl-mustache">
+<div class="directory">
+  <h2>
+    <nav>
+      {{#navbar}}
+      <a href="#{{ revision }}:{{ path }}">{{ name }}</a>
+      {{/navbar}}
+    </nav>
+    <span> : {{ files.length }} files</span>
+  </h2>
+
+  <div class="table">
+    <div class="header">
+      <span class="filename">File name</span>
+      <span>Children</span>
+      <span>Coverage</span>
+    </div>
+
+    {{#files}}
+    <div class="row">
+      <span class="filename"><a href="#{{ revision }}:{{ path }}">{{ file_name }}</a></span>
+      <span>{{ children }}</span>
+      <span>{{ coveragePercent }} %</span>
+    </div>
+    {{/files}}
+  </div>
+
+</div>
+</script>
+
+<script id="history_point" type="x-tmpl-mustache">
+  <span>Revision <samp>{{ revision }}</samp> from {{ date }}</span>
+</script>
+
+<header>
+  <div id="menu_browser">
+    <a href="#zero:">View the zero coverage report</a>
+    &bull;
+    <input type="text" id="revision" placeholder="Mercurial revision" </input>
+  </div>
+
+  <div id="menu_zero">
+    <input type="checkbox" name="third_party" id="third_party" checked="checked"><label for="third_party">Show third-party files</label>
+    <input type="checkbox" name="headers" id="headers"><label for="headers">Show headers</label>
+    <input type="checkbox" name="completely_uncovered" id="completely_uncovered"><label for="completely_uncovered">Show completely uncovered files only</label>
+    <input type="checkbox" name="cpp" id="cpp" checked="checked"><label for="cpp">C/C++</label>
+    <input type="checkbox" name="js" id="js" checked="checked"><label for="js">JavaScript</label>
+    <input type="checkbox" name="java" id="java" checked="checked"><label for="java">Java</label>
+    <input type="checkbox" name="rust" id="rust" checked="checked"><label for="rust">Rust</label>
+    <select id="last_push">
+      <option value="all">All</option>
+      <option value="one_year">0 &lt; 1 year</option>
+      <option value="two_years">1 &lt; 2 years</option>
+      <option value="older_than_two_years">Older than 2 years</option>
+    </select>
+  </div>
+</header>
+
+<main id="main">
+  <div id="message" class="message loading">Loading...</div>
+  <div id="history">
+    <div class="ct-chart"></div>
+    <div id="history_details">Hover a point to see its details</div>
+  </div>
+  <div id="output"></div>
+</main>
+
+<footer>
+  <a href="https://github.com/marco-c/code-coverage-reports/issues/new">Report an issue</a>
+  <a class="github-button" href="https://github.com/marco-c/code-coverage-reports/fork" data-icon="octicon-repo-forked" data-size="large"
+   data-show-count="true" aria-label="Fork marco-c/code-coverage-reports on GitHub">Fork</a>
+</footer>
+
+</body>
+</html>
