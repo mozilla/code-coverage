@@ -12,3 +12,8 @@ gunicorn
 setuptools-scm # needed by py-1.5.4 buildInputs
 zstandard
 pytoml
+python-dateutil
+connexion
+flask_cors
+flask_talisman
+swagger-ui-bundle
