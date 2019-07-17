@@ -9,8 +9,8 @@ import structlog
 
 import code_coverage_backend.datadog
 import code_coverage_backend.gcp
-from code_coverage_tools.log import init_logger
 from code_coverage_backend import taskcluster
+from code_coverage_tools.log import init_logger
 
 from .build import build_flask_app
 
