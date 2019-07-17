@@ -35,7 +35,7 @@ setup(
     description='The code behind https://coverage.moz.tools',
     author='Mozilla Release Management',
     author_email='release-mgmt-analysis@mozilla.com',
-    url='https://coverage.moz.tools',
+    url='https://api.coverage.moz.tools',
     tests_require=read_requirements('requirements-dev.txt'),
     install_requires=read_requirements('requirements.txt'),
     packages=find_packages(),
