@@ -145,6 +145,7 @@ def mock_hgmo():
         assert len(revision) == 32
         resp = {
             'pushid': int(revision[:3]),
+            'date': [time.time(), 0],
         }
         return (200, headers, json.dumps(resp))
 

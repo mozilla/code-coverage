@@ -2,6 +2,7 @@
 import calendar
 import math
 import os
+import re
 import tempfile
 from datetime import datetime
 
@@ -45,6 +46,21 @@ def load_cache():
         __cache = GCPCache()
 
     return __cache
+
+
+def hgmo_revision_details(repository, changeset):
+    '''
+    HGMO helper to retrieve details for a changeset
+    '''
+    url = HGMO_REVISION_URL.format(
+        repository=repository,
+        revision=changeset,
+    )
+    resp = requests.get(url)
+    resp.raise_for_status()
+    data = resp.json()
+    assert 'pushid' in data, 'Missing pushid'
+    return data['pushid'], data['date'][0]
 
 
 class GCPCache(object):
@@ -238,15 +254,7 @@ class GCPCache(object):
         else:
 
             # Lookup push from HGMO (slow)
-            url = HGMO_REVISION_URL.format(
-                repository=repository,
-                revision=changeset,
-            )
-            resp = requests.get(url)
-            resp.raise_for_status()
-            data = resp.json()
-            assert 'pushid' in data, 'Missing pushid'
-            push_id = data['pushid']
+            push_id, _ = hgmo_revision_details(repository, changeset)
 
             # Ingest pushes as we clearly don't have it in cache
             self.ingest_pushes(repository, min_push_id=push_id-1, nb_pages=1)
@@ -343,3 +351,25 @@ class GCPCache(object):
             _coverage(changeset, date)
             for changeset, date in history
         ]
+
+    def ingest_available_reports(self, repository):
+        '''
+        Ingest all the available reports for a repository
+        '''
+        assert isinstance(repository, str)
+        REGEX_BLOB = re.compile(r'^{}/(\w+).json.zstd$'.format(repository))
+        for blob in self.bucket.list_blobs(prefix=repository):
+
+            # Get changeset from blob name
+            match = REGEX_BLOB.match(blob.name)
+            if match is None:
+                logger.warn('Invalid blob found {}'.format(blob.name))
+                continue
+            changeset = match.group(1)
+
+            # Get extra informations from HGMO
+            push_id, date = hgmo_revision_details(repository, changeset)
+            logger.info('Found report', changeset=changeset, push=push_id)
+
+            # Ingest report
+            self.ingest_report(repository, push_id, changeset, int(date))
