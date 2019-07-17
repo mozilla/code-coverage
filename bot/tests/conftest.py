@@ -323,7 +323,7 @@ def mock_taskcluster():
 
     responses.add(
         responses.POST,
-        'http://taskcluster.test/notify/v1/email',
+        'http://taskcluster.test/api/notify/v1/email',
         body='{}',
         content_type='application/json',
     )
