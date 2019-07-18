@@ -1,5 +1,16 @@
 # Mozilla Code Coverage Backend
 
+This project is a Python 3 REST API, powered by [Flask](https://palletsprojects.com/p/flask/) that serves code coverage data aggregated by the bot project.
+
+The production instance of this service is hosted on https://api.coverage.moz.tools
+
+We currently have several endpoints implemented:
+
+* `/v2/extensions` lists all the file extensions supported by the code coverage suite,
+* `/v2/latest` lists the 10 latest code coverage reports ingested on the backend and available to query,
+* `/v2/history` shows the code coverage progression for a specific path in a repository,
+* `/v2/path` provides the code coverage information for a directory or file in a repository, at a given revision.
+
 
 ## Setup instructions for developpers
 
