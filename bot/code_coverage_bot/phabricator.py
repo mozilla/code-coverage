@@ -28,7 +28,19 @@ class PhabricatorUploader(object):
         self.revision = revision
 
     def _find_coverage(self, report, path):
-        return next((sf['coverage'] for sf in report['source_files'] if sf['name'] == path), None)
+        '''
+        Find coverage value in a covdir report
+        '''
+        assert isinstance(report, dict)
+
+        parts = path.split('/')
+        for part in filter(None, parts):
+            if part not in report['children']:
+                logger.warn('Path {} not found in report'.format(path))
+                return
+            report = report['children'][part]
+
+        return report['coverage']
 
     def _build_coverage_map(self, annotate, coverage_record):
         # We can't use plain line numbers to map coverage data from the build changeset to the
