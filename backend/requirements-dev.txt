@@ -1,8 +1,5 @@
-
-responses
-aresponses
 fakeredis
 flake8
 flake8-isort
-pytest==4.3.1
+pytest
 responses
