@@ -150,7 +150,7 @@ class CodeCov(object):
         output = self.generate_covdir()
 
         report = json.loads(output)
-        paths = uploader.covdir_paths(output)
+        paths = uploader.covdir_paths(report)
         expected_extensions = ['.js', '.cpp']
         for extension in expected_extensions:
             assert any(path.endswith(extension) for path in paths), \
