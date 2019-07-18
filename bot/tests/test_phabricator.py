@@ -7,6 +7,7 @@ import urllib.parse
 import responses
 
 from code_coverage_bot.phabricator import PhabricatorUploader
+from conftest import covdir_report
 from mercurial import add_file
 from mercurial import changesets
 from mercurial import commit
@@ -25,12 +26,13 @@ def test_simple(mock_secrets, mock_phabricator, fake_hg_repo):
     copy_pushlog_database(remote, local)
 
     phabricator = PhabricatorUploader(local, revision)
-    results = phabricator.generate({
+    report = covdir_report({
         'source_files': [{
             'name': 'file',
             'coverage': [None, 0, 1, 1, 1, 1, 0],
         }]
-    }, changesets(local, revision))
+    })
+    results = phabricator.generate(report, changesets(local, revision))
 
     assert results == {
         1: {
@@ -42,12 +44,7 @@ def test_simple(mock_secrets, mock_phabricator, fake_hg_repo):
         }
     }
 
-    phabricator.upload({
-        'source_files': [{
-            'name': 'file',
-            'coverage': [None, 0, 1, 1, 1, 1, 0],
-        }]
-    }, changesets(local, revision))
+    phabricator.upload(report, changesets(local, revision))
 
     assert len(responses.calls) >= 3
 
@@ -97,9 +94,10 @@ def test_file_with_no_coverage(mock_secrets, fake_hg_repo):
     copy_pushlog_database(remote, local)
 
     phabricator = PhabricatorUploader(local, revision)
-    results = phabricator.generate({
+    report = covdir_report({
         'source_files': []
-    }, changesets(local, revision))
+    })
+    results = phabricator.generate(report, changesets(local, revision))
 
     assert results == {
         1: {}
@@ -118,12 +116,13 @@ def test_one_commit_without_differential(mock_secrets, fake_hg_repo):
     copy_pushlog_database(remote, local)
 
     phabricator = PhabricatorUploader(local, revision)
-    results = phabricator.generate({
+    report = covdir_report({
         'source_files': [{
             'name': 'file_one_commit',
             'coverage': [None, 0, 1, 1, 1, 1, 0],
         }]
-    }, changesets(local, revision))
+    })
+    results = phabricator.generate(report, changesets(local, revision))
 
     assert results == {}
 
@@ -144,7 +143,7 @@ def test_two_commits_two_files(mock_secrets, fake_hg_repo):
     copy_pushlog_database(remote, local)
 
     phabricator = PhabricatorUploader(local, revision)
-    results = phabricator.generate({
+    report = covdir_report({
         'source_files': [{
             'name': 'file1_commit1',
             'coverage': [None, 0, 1, 1, 1, 1, 0],
@@ -155,7 +154,8 @@ def test_two_commits_two_files(mock_secrets, fake_hg_repo):
             'name': 'file3_commit2',
             'coverage': [1, 1, 0, 1, None],
         }]
-    }, changesets(local, revision))
+    })
+    results = phabricator.generate(report, changesets(local, revision))
 
     assert results == {
         1: {
@@ -196,12 +196,13 @@ def test_changesets_overwriting(mock_secrets, fake_hg_repo):
     copy_pushlog_database(remote, local)
 
     phabricator = PhabricatorUploader(local, revision)
-    results = phabricator.generate({
+    report = covdir_report({
         'source_files': [{
             'name': 'file',
             'coverage': [None, 0, 1, 1, 1, 1, 0],
         }]
-    }, changesets(local, revision))
+    })
+    results = phabricator.generate(report, changesets(local, revision))
 
     assert results == {
         1: {
@@ -236,12 +237,13 @@ def test_changesets_displacing(mock_secrets, fake_hg_repo):
     copy_pushlog_database(remote, local)
 
     phabricator = PhabricatorUploader(local, revision)
-    results = phabricator.generate({
+    report = covdir_report({
         'source_files': [{
             'name': 'file',
             'coverage': [0, 1, None, 0, 1, 1, 1, 1, 0, 1, 0],
         }]
-    }, changesets(local, revision))
+    })
+    results = phabricator.generate(report, changesets(local, revision))
 
     assert results == {
         1: {
@@ -276,12 +278,13 @@ def test_changesets_reducing_size(mock_secrets, fake_hg_repo):
     copy_pushlog_database(remote, local)
 
     phabricator = PhabricatorUploader(local, revision)
-    results = phabricator.generate({
+    report = covdir_report({
         'source_files': [{
             'name': 'file',
             'coverage': [None, 0, 1, 1, 1],
         }]
-    }, changesets(local, revision))
+    })
+    results = phabricator.generate(report, changesets(local, revision))
 
     assert results == {
         1: {
@@ -316,12 +319,14 @@ def test_changesets_overwriting_one_commit_without_differential(mock_secrets, fa
     copy_pushlog_database(remote, local)
 
     phabricator = PhabricatorUploader(local, revision)
-    results = phabricator.generate({
+
+    report = covdir_report({
         'source_files': [{
             'name': 'file',
             'coverage': [None, 0, 1, 1, 1, 1, 0],
         }]
-    }, changesets(local, revision))
+    })
+    results = phabricator.generate(report, changesets(local, revision))
 
     assert results == {
         1: {
@@ -349,9 +354,10 @@ def test_removed_file(mock_secrets, fake_hg_repo):
     copy_pushlog_database(remote, local)
 
     phabricator = PhabricatorUploader(local, revision)
-    results = phabricator.generate({
+    report = covdir_report({
         'source_files': []
-    }, changesets(local, revision))
+    })
+    results = phabricator.generate(report, changesets(local, revision))
 
     assert results == {
         1: {}
@@ -376,12 +382,13 @@ def test_backout_removed_file(mock_secrets, fake_hg_repo):
     copy_pushlog_database(remote, local)
 
     phabricator = PhabricatorUploader(local, revision)
-    results = phabricator.generate({
+    report = covdir_report({
         'source_files': [{
             'name': 'file',
             'coverage': [None, 0, 1, 1, 1, 1, 0],
         }]
-    }, changesets(local, revision))
+    })
+    results = phabricator.generate(report, changesets(local, revision))
 
     assert results == {
         1: {

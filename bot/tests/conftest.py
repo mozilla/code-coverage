@@ -331,3 +331,40 @@ def mock_taskcluster():
     taskcluster_config.options = {
         'rootUrl': 'http://taskcluster.test',
     }
+
+
+def covdir_report(codecov):
+    '''
+    Convert source files to covdir format
+    '''
+    assert isinstance(codecov, dict)
+    assert 'source_files' in codecov
+
+    out = {}
+    for cov in codecov['source_files']:
+        assert '/' not in cov['name']
+        coverage = cov['coverage']
+        total = len(coverage)
+        covered = sum(l is not None and l > 0 for l in coverage)
+        out[cov['name']] = {
+            'children': {},
+            'name': cov['name'],
+            'coverage': coverage,
+            'coveragePercent': 100.0 * covered / total,
+            'linesCovered': covered,
+            'linesMissed': total - covered,
+            'linesTotal': total,
+        }
+
+    # Covdir has a root level
+    def _sum(name):
+        return sum(c[name] for c in out.values())
+    return {
+        'children': out,
+        'name': 'src',
+        'coverage': [],
+        'coveragePercent': _sum('coveragePercent') / len(out) if out else 0,
+        'linesCovered': _sum('linesCovered'),
+        'linesMissed': _sum('linesMissed'),
+        'linesTotal': _sum('linesTotal'),
+    }

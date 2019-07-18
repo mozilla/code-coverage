@@ -3,6 +3,7 @@ import responses
 
 from code_coverage_bot.notifier import notify_email
 from code_coverage_bot.phabricator import PhabricatorUploader
+from conftest import covdir_report
 from mercurial import add_file
 from mercurial import changesets
 from mercurial import commit
@@ -28,12 +29,12 @@ def test_notification(mock_secrets, mock_taskcluster, mock_phabricator, fake_hg_
     assert stack[0]['desc'] == "Commit [(b'A', b'file')]Differential Revision: https://phabricator.services.mozilla.com/D1"
     assert stack[1]['desc'] == "Commit [(b'M', b'file')]Differential Revision: https://phabricator.services.mozilla.com/D2"
 
-    report = {
+    report = covdir_report({
         'source_files': [{
             'name': 'file',
             'coverage': [None, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
         }]
-    }
+    })
     phab = PhabricatorUploader(local, revision)
     changesets_coverage = phab.generate(report, stack)
 
