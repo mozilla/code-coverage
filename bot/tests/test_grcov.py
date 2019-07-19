@@ -3,30 +3,21 @@ import json
 
 import pytest
 
-import code_coverage_bot.utils
 from code_coverage_bot import grcov
 
 
+def covdir_get(report, path):
+    parts = path.split('/')
+    for part in parts:
+        report = report['children'][part]
+    return report
+
+
 def test_report_invalid_output_format(grcov_artifact):
-    with pytest.raises(code_coverage_bot.utils.RunException, message='`grcov` failed with code: 1.'):
+    with pytest.raises(AssertionError, message='Unsupported output format'):
         grcov.report([grcov_artifact], out_format='UNSUPPORTED')
-
-
-def test_report_grcov_artifact(grcov_artifact):
-    output = grcov.report([grcov_artifact], out_format='coveralls')
-    report = json.loads(output.decode('utf-8'))
-    assert report['repo_token'] == 'unused'
-    assert report['service_name'] == 'TaskCluster'
-    assert report['service_job_number'] == '1'
-    assert report['git']['branch'] == 'master'
-    assert report['git']['head']['id'] == 'unused'
-    assert report['service_number'] == ''
-    assert len(report['source_files']) == 1
-    assert report['source_files'][0]['name'] == 'js/src/jit/BitSet.cpp'
-    assert report['source_files'][0]['coverage'] == [42, 42]
-    assert report['source_files'][0]['branches'] == []
-    assert 'source_digest' in report['source_files'][0]
-    assert 'functions' not in report['source_files'][0]
+    with pytest.raises(AssertionError, message='Unsupported output format'):
+        grcov.report([grcov_artifact], out_format='coveralls')
 
 
 def test_report_grcov_artifact_coverallsplus(grcov_artifact):
@@ -49,69 +40,226 @@ def test_report_grcov_artifact_coverallsplus(grcov_artifact):
     assert report['source_files'][0]['functions'][0]['start'] == 1
 
 
-def test_report_jsvm_artifact(jsvm_artifact):
-    output = grcov.report([jsvm_artifact], out_format='coveralls')
+def test_report_grcov_artifact(grcov_artifact):
+    output = grcov.report([grcov_artifact], out_format='covdir')
     report = json.loads(output.decode('utf-8'))
-    assert report['repo_token'] == 'unused'
-    assert report['service_name'] == 'TaskCluster'
-    assert report['service_job_number'] == '1'
-    assert report['git']['branch'] == 'master'
-    assert report['git']['head']['id'] == 'unused'
-    assert report['service_number'] == ''
-    assert len(report['source_files']) == 1
-    assert report['source_files'][0]['name'] == 'toolkit/components/osfile/osfile.jsm'
-    assert report['source_files'][0]['coverage'] == [42, 42]
-    assert report['source_files'][0]['branches'] == []
-    assert 'source_digest' in report['source_files'][0]
-    assert 'functions' not in report['source_files'][0]
+    assert report == {
+        'children': {
+            'js': {
+                'children': {
+                    'src': {
+                        'children': {
+                            'jit': {
+                                'children': {
+                                    'BitSet.cpp': {
+                                        'coverage': [
+                                            42,
+                                            42
+                                        ],
+                                        'coveragePercent': 100.0,
+                                        'linesCovered': 2,
+                                        'linesMissed': 0,
+                                        'linesTotal': 2,
+                                        'name': 'BitSet.cpp'
+                                    }
+                                },
+                                'coveragePercent': 100.0,
+                                'linesCovered': 2,
+                                'linesMissed': 0,
+                                'linesTotal': 2,
+                                'name': 'jit'
+                            }
+                        },
+                        'coveragePercent': 100.0,
+                        'linesCovered': 2,
+                        'linesMissed': 0,
+                        'linesTotal': 2,
+                        'name': 'src'
+                    }
+                },
+                'coveragePercent': 100.0,
+                'linesCovered': 2,
+                'linesMissed': 0,
+                'linesTotal': 2,
+                'name': 'js'
+            }
+        },
+        'coveragePercent': 100.0,
+        'linesCovered': 2,
+        'linesMissed': 0,
+        'linesTotal': 2,
+        'name': ''
+    }
+
+
+def test_report_jsvm_artifact(jsvm_artifact):
+    output = grcov.report([jsvm_artifact], out_format='covdir')
+    report = json.loads(output.decode('utf-8'))
+    assert report == {
+        'children': {
+            'toolkit': {
+                'children': {
+                    'components': {
+                        'children': {
+                            'osfile': {
+                                'children': {
+                                    'osfile.jsm': {
+                                        'coverage': [
+                                            42,
+                                            42
+                                        ],
+                                        'coveragePercent': 100.0,
+                                        'linesCovered': 2,
+                                        'linesMissed': 0,
+                                        'linesTotal': 2,
+                                        'name': 'osfile.jsm'
+                                    }
+                                },
+                                'coveragePercent': 100.0,
+                                'linesCovered': 2,
+                                'linesMissed': 0,
+                                'linesTotal': 2,
+                                'name': 'osfile'
+                            }
+                        },
+                        'coveragePercent': 100.0,
+                        'linesCovered': 2,
+                        'linesMissed': 0,
+                        'linesTotal': 2,
+                        'name': 'components'
+                    }
+                },
+                'coveragePercent': 100.0,
+                'linesCovered': 2,
+                'linesMissed': 0,
+                'linesTotal': 2,
+                'name': 'toolkit'
+            }
+        },
+        'coveragePercent': 100.0,
+        'linesCovered': 2,
+        'linesMissed': 0,
+        'linesTotal': 2,
+        'name': ''
+    }
 
 
 def test_report_multiple_artifacts(grcov_artifact, jsvm_artifact):
-    output = grcov.report([grcov_artifact, jsvm_artifact], out_format='coveralls')
+    output = grcov.report([grcov_artifact, jsvm_artifact], out_format='covdir')
     report = json.loads(output.decode('utf-8'))
-    assert report['repo_token'] == 'unused'
-    assert report['service_name'] == 'TaskCluster'
-    assert report['service_job_number'] == '1'
-    assert report['git']['branch'] == 'master'
-    assert report['git']['head']['id'] == 'unused'
-    assert report['service_number'] == ''
-    assert len(report['source_files']) == 2
-    assert set(['toolkit/components/osfile/osfile.jsm', 'js/src/jit/BitSet.cpp']) == set([sf['name'] for sf in report['source_files']])
+
+    assert report['linesTotal'] == 4
+    assert report['linesCovered'] == 4
+    assert report['coveragePercent'] == 100.0
+
+    assert covdir_get(report, 'toolkit/components/osfile/osfile.jsm') == {
+        'coverage': [
+            42,
+            42
+        ],
+        'coveragePercent': 100.0,
+        'linesCovered': 2,
+        'linesMissed': 0,
+        'linesTotal': 2,
+        'name': 'osfile.jsm'
+    }
+    assert covdir_get(report, 'js/src/jit/BitSet.cpp') == {
+        'coverage': [
+            42,
+            42
+        ],
+        'coveragePercent': 100.0,
+        'linesCovered': 2,
+        'linesMissed': 0,
+        'linesTotal': 2,
+        'name': 'BitSet.cpp'
+    }
 
 
 def test_report_source_dir(fake_source_dir, grcov_artifact, grcov_existing_file_artifact):
-    output = grcov.report([grcov_existing_file_artifact], source_dir=fake_source_dir, out_format='coveralls')
+    output = grcov.report([grcov_existing_file_artifact], source_dir=fake_source_dir, out_format='covdir')
     report = json.loads(output.decode('utf-8'))
-    # When we pass the source directory to the report function, grcov ignores not-existing files.
-    assert len(report['source_files']) == 1
-    assert report['source_files'][0]['name'] == 'code_coverage_bot/cli.py'
-    # When we pass the source directory to grcov and the file exists, grcov can calculate its hash.
-    assert report['source_files'][0]['source_digest'] == '6ddb4095eb719e2a9f0a3f95677d24e0'
-
-
-def test_report_service_number(grcov_artifact):
-    output = grcov.report([grcov_artifact], service_number='test', out_format='coveralls')
-    report = json.loads(output.decode('utf-8'))
-    assert report['service_number'] == 'test'
-
-
-def test_report_commit_sha(grcov_artifact):
-    output = grcov.report([grcov_artifact], commit_sha='test', out_format='coveralls')
-    report = json.loads(output.decode('utf-8'))
-    assert report['git']['head']['id'] == 'test'
-
-
-def test_report_token(grcov_artifact):
-    output = grcov.report([grcov_artifact], token='test', out_format='coveralls')
-    report = json.loads(output.decode('utf-8'))
-    assert report['repo_token'] == 'test'
+    assert report == {
+        'children': {
+            'code_coverage_bot': {
+                'children': {
+                    'cli.py': {
+                        'coverage': [
+                            42,
+                            42
+                        ],
+                        'coveragePercent': 100.0,
+                        'linesCovered': 2,
+                        'linesMissed': 0,
+                        'linesTotal': 2,
+                        'name': 'cli.py'
+                    }
+                },
+                'coveragePercent': 100.0,
+                'linesCovered': 2,
+                'linesMissed': 0,
+                'linesTotal': 2,
+                'name': 'code_coverage_bot'
+            }
+        },
+        'coveragePercent': 100.0,
+        'linesCovered': 2,
+        'linesMissed': 0,
+        'linesTotal': 2,
+        'name': ''
+    }
 
 
 def test_report_options(grcov_artifact, jsvm_artifact):
-    output = grcov.report([grcov_artifact, jsvm_artifact], out_format='coveralls', options=['--ignore-dir', 'toolkit/*'])
+    output = grcov.report([grcov_artifact, jsvm_artifact], out_format='covdir', options=['--ignore-dir', 'toolkit/*'])
     report = json.loads(output.decode('utf-8'))
-    assert len(report['source_files']) == 1
-    assert report['source_files'][0]['name'] == 'js/src/jit/BitSet.cpp'
+    assert report == {
+        'children': {
+            'js': {
+                'children': {
+                    'src': {
+                        'children': {
+                            'jit': {
+                                'children': {
+                                    'BitSet.cpp': {
+                                        'coverage': [
+                                            42,
+                                            42
+                                        ],
+                                        'coveragePercent': 100.0,
+                                        'linesCovered': 2,
+                                        'linesMissed': 0,
+                                        'linesTotal': 2,
+                                        'name': 'BitSet.cpp'
+                                    }
+                                },
+                                'coveragePercent': 100.0,
+                                'linesCovered': 2,
+                                'linesMissed': 0,
+                                'linesTotal': 2,
+                                'name': 'jit'
+                            }
+                        },
+                        'coveragePercent': 100.0,
+                        'linesCovered': 2,
+                        'linesMissed': 0,
+                        'linesTotal': 2,
+                        'name': 'src'
+                    }
+                },
+                'coveragePercent': 100.0,
+                'linesCovered': 2,
+                'linesMissed': 0,
+                'linesTotal': 2,
+                'name': 'js'
+            }
+        },
+        'coveragePercent': 100.0,
+        'linesCovered': 2,
+        'linesMissed': 0,
+        'linesTotal': 2,
+        'name': ''
+    }
 
 
 def test_files_list(grcov_artifact, grcov_uncovered_artifact):
