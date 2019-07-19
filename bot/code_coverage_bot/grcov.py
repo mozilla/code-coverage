@@ -6,22 +6,21 @@ from code_coverage_bot.utils import run_check
 logger = structlog.get_logger(__name__)
 
 
-def report(artifacts, source_dir=None, service_number=None, commit_sha='unused', token='unused', out_format='coveralls', options=[]):
+def report(artifacts, source_dir=None, out_format='covdir', options=[]):
+    assert out_format in ('covdir', 'files', 'lcov', 'coveralls+'), 'Unsupported output format'
     cmd = [
       'grcov',
       '-t', out_format,
     ]
 
-    if 'coveralls' in out_format:
+    # Coveralls+ is only needed for zero-coverage reports
+    if out_format == 'coveralls+':
         cmd.extend([
           '--service-name', 'TaskCluster',
-          '--commit-sha', commit_sha,
-          '--token', token,
+          '--commit-sha', 'unused',
+          '--token', 'unused',
           '--service-job-number', '1',
         ])
-
-        if service_number is not None:
-            cmd.extend(['--service-number', str(service_number)])
 
     if source_dir is not None:
         cmd.extend(['-s', source_dir])
