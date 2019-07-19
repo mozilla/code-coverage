@@ -35,7 +35,7 @@ class PhabricatorUploader(object):
 
         parts = path.split('/')
         for part in filter(None, parts):
-            if part not in report['children']:
+            if part not in report.get('children', {}):
                 logger.warn('Path {} not found in report'.format(path))
                 return
             report = report['children'][part]
