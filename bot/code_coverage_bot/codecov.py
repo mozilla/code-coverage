@@ -168,7 +168,7 @@ class CodeCov(object):
         uploader.gcp(self.branch, self.revision, output)
 
         logger.info('Build uploaded on GCP')
-        notify_email(self.revision, changesets, changesets_coverage, self.client_id, self.access_token)
+        notify_email(self.revision, changesets, changesets_coverage)
 
     # This function is executed when the bot is triggered at the end of a try build.
     def go_from_trigger_try(self):
