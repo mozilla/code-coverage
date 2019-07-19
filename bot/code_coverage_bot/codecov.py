@@ -122,7 +122,7 @@ class CodeCov(object):
             out_format='covdir',
         )
         logger.info('Covdir report generated successfully')
-        return output
+        return json.loads(output)
 
     # This function is executed when the bot is triggered at the end of a mozilla-central build.
     def go_from_trigger_mozilla_central(self):
@@ -147,9 +147,8 @@ class CodeCov(object):
                         if len(missing_files) != 0:
                             logger.warn(f'{missing_files} are present in coverage reports, but missing from the repository')
 
-        output = self.generate_covdir()
+        report = self.generate_covdir()
 
-        report = json.loads(output)
         paths = uploader.covdir_paths(report)
         expected_extensions = ['.js', '.cpp']
         for extension in expected_extensions:
@@ -165,7 +164,7 @@ class CodeCov(object):
         phabricatorUploader = PhabricatorUploader(self.repo_dir, self.revision)
         changesets_coverage = phabricatorUploader.upload(report, changesets)
 
-        uploader.gcp(self.branch, self.revision, output)
+        uploader.gcp(self.branch, self.revision, report)
 
         logger.info('Build uploaded on GCP')
         notify_email(self.revision, changesets, changesets_coverage)
@@ -183,17 +182,10 @@ class CodeCov(object):
 
         self.retrieve_source_and_artifacts()
 
-        output = grcov.report(
-            self.artifactsHandler.get(),
-            source_dir=self.repo_dir,
-            service_number='SERVICE_NUMBER',
-            commit_sha='COMMIT_SHA',
-            token='TOKEN',
-        )
-        logger.info('Report generated successfully')
+        report = self.generate_covdir()
 
         logger.info('Upload changeset coverage data to Phabricator')
-        phabricatorUploader.upload(json.loads(output), changesets)
+        phabricatorUploader.upload(report, changesets)
 
     # This function is executed when the bot is triggered via cron.
     def go_from_cron(self):

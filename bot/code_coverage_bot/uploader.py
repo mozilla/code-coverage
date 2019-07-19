@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import itertools
+import json
 import os.path
 
 import requests
@@ -14,19 +15,19 @@ logger = structlog.get_logger(__name__)
 GCP_COVDIR_PATH = '{repository}/{revision}.json.zstd'
 
 
-def gcp(repository, revision, data):
+def gcp(repository, revision, report):
     '''
     Upload a grcov raw report on Google Cloud Storage
     * Compress with zstandard
     * Upload on bucket using revision in name
     * Trigger ingestion on channel's backend
     '''
-    assert isinstance(data, bytes)
+    assert isinstance(report, dict)
     bucket = get_bucket(secrets[secrets.GOOGLE_CLOUD_STORAGE])
 
     # Compress report
     compressor = zstd.ZstdCompressor()
-    archive = compressor.compress(data)
+    archive = compressor.compress(json.dumps(report))
 
     # Upload archive
     path = GCP_COVDIR_PATH.format(repository=repository, revision=revision)
