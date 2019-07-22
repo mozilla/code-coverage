@@ -8,7 +8,6 @@ from code_coverage_bot.secrets import secrets
 from code_coverage_bot.taskcluster import taskcluster_config
 
 CODECOV_URL = 'https://codecov.io/api/gh/marco-c/gecko-dev/commit'
-MC_REPO = 'https://hg.mozilla.org/mozilla-central'
 HOOK_GROUP = 'project-relman'
 HOOK_ID = 'code-coverage-{app_channel}'
 
@@ -29,20 +28,21 @@ def list_commits(tasks):
     for task_id in tasks:
         try:
             task = queue.task(task_id)
-            yield task['payload']['env']['REVISION']
+            env = task['payload']['env']
+            yield env['REPOSITORY'], env['REVISION']
         except Exception as e:
             print('Failed to load task {}: {}'.format(task_id, e))
 
 
-def trigger_task(task_group_id, commit):
+def trigger_task(task_group_id, repository, commit):
     '''
     Trigger a code coverage task to build covdir at a specified revision
     '''
     assert isinstance(commit, str)
-    name = 'covdir {} - {}'.format(secrets[secrets.APP_CHANNEL], commit)
+    name = 'covdir {} - {} - {}'.format(secrets[secrets.APP_CHANNEL], repository, commit)
     hooks = taskcluster_config.get_service('hooks')
     payload = {
-        'REPOSITORY': MC_REPO,
+        'REPOSITORY': repository,
         'REVISION': commit,
         'taskGroupId': task_group_id,
         'taskName': name,
@@ -76,20 +76,20 @@ def main():
 
     # Trigger a task for each commit
     triggered = 0
-    for commit in list_commits(args.tasks):
-        if commit in commits:
-            print('Skipping existing commit {}'.format(commit))
+    for repository, commit in list_commits(args.tasks):
+        if (repository, commit) in commits:
+            print('Skipping existing commit {} {}'.format(repository, commit))
             continue
 
-        print('Triggering commit {}'.format(commit))
+        print('Triggering {} : {}'.format(repository, commit))
         if args.dry_run:
             print('>>> No trigger on dry run')
         else:
-            out = trigger_task(args.group, commit)
+            out = trigger_task(args.group, repository, commit)
             print('>>>', out['status']['taskId'])
             triggered += 1
 
-        commits.append(commit)
+        commits.append((repository, commit))
         if triggered >= args.nb_tasks:
             print('Max nb tasks reached !')
             break
