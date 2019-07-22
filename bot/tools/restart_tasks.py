@@ -22,7 +22,7 @@ secrets.load(
 queue = taskcluster_config.get_service('queue')
 
 
-def list_commits(tasks, existing=[]):
+def list_commits(tasks):
     '''
     Read the revision from an existing code coverage task
     '''
@@ -75,16 +75,22 @@ def main():
         commits = []
 
     # Trigger a task for each commit
-    for commit in list_commits(args.tasks, commits):
+    triggered = 0
+    for commit in list_commits(args.tasks):
+        if commit in commits:
+            print('Skipping existing commit {}'.format(commit))
+            continue
+
         print('Triggering commit {}'.format(commit))
         if args.dry_run:
             print('>>> No trigger on dry run')
         else:
             out = trigger_task(args.group, commit)
             print('>>>', out['status']['taskId'])
+            triggered += 1
 
         commits.append(commit)
-        if len(commits) > args.nb_tasks:
+        if triggered >= args.nb_tasks:
             print('Max nb tasks reached !')
             break
 
