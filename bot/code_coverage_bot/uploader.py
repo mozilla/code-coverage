@@ -27,7 +27,7 @@ def gcp(repository, revision, report):
 
     # Compress report
     compressor = zstd.ZstdCompressor()
-    archive = compressor.compress(json.dumps(report))
+    archive = compressor.compress(json.dumps(report).encode('utf-8'))
 
     # Upload archive
     path = GCP_COVDIR_PATH.format(repository=repository, revision=revision)

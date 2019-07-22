@@ -35,7 +35,7 @@
     }
   ],
   "permissions": [
-    "https://coverage.moz.tools/v2/*",
+    "https://api.coverage.moz.tools/v2/*",
     "https://mapper.mozilla-releng.net/gecko-dev/rev/git/*",
     "https://hg.mozilla.org/mozilla-central/json-rev/*"
   ],

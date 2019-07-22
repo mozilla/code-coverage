@@ -18,7 +18,7 @@ flake8-isort==2.7.0
 Flask==1.1.1
 Flask-Cors==3.0.8
 flask-talisman==0.7.0
-google-api-core==1.13.0
+google-api-core==1.14.0
 google-auth==1.6.3
 google-cloud-core==1.0.2
 google-cloud-storage==1.16.1
@@ -32,7 +32,7 @@ inflection==0.3.1
 isort==4.3.21
 itsdangerous==1.1.0
 Jinja2==2.10.1
-jsonschema==2.6.0
+jsonschema==3.0.1
 Logbook==1.4.3
 MarkupSafe==1.1.1
 mccabe==0.6.1
