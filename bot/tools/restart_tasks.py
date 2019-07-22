@@ -64,15 +64,15 @@ def main():
     print('Group', args.group)
     try:
         group = queue.listTaskGroup(args.group)
-        commits = [
-            task['task']['payload']['env']['REVISION']
+        commits = set([
+            (task['task']['payload']['env']['REPOSITORY'], task['task']['payload']['env']['REVISION'])
             for task in group['tasks']
             if task['status']['state'] not in ('failed', 'exception')
-        ]
+        ])
         print('Found {} commits processed in task group {}'.format(len(commits), args.group))
     except Exception as e:
         print('Invalid task group : {}'.format(e))
-        commits = []
+        commits = set()
 
     # Trigger a task for each commit
     triggered = 0
@@ -89,7 +89,7 @@ def main():
             print('>>>', out['status']['taskId'])
             triggered += 1
 
-        commits.append((repository, commit))
+        commits.add((repository, commit))
         if triggered >= args.nb_tasks:
             print('Max nb tasks reached !')
             break
