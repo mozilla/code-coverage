@@ -1,7 +1,6 @@
-
 -e ../tools #egg=code-coverage-tools
-google-cloud-storage
-libmozdata>=0.1.57
-pytoml
-pytz
-zstandard
+google-cloud-storage==1.16.1
+libmozdata==0.1.57
+pytoml==0.1.20
+pytz==2019.1
+zstandard==0.11.1
