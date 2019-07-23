@@ -41,7 +41,7 @@
                         "$if": "firedBy == 'triggerHook'",
                         "else": "Code Coverage aggregation task (CHANNEL)",
                         "then": {
-                            "$if": "firedBy == 'triggerHook' && 'taskName' in payload",
+                            "$if": "'taskName' in payload",
                             "else": "Code Coverage aggregation task (CHANNEL)",
                             "then": {
                                 "$eval": "payload.taskName"
