@@ -8,7 +8,7 @@ cffi==1.12.3
 chardet==3.0.4
 -e git+git@github.com:mozilla/code-coverage.git@85f62f11cd712e41e8a53668976af73d400cee11#egg=code_coverage_tools&subdirectory=tools
 cryptography==2.7
-google-api-core==1.13.0
+google-api-core==1.14.0
 google-api-python-client==1.7.9
 google-auth==1.6.3
 google-auth-httplib2==0.0.3
