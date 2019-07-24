@@ -45,7 +45,7 @@ def test_get_task_failure(TASK_NOT_FOUND):
     err['code'] = 'RandomError'
     responses.add(responses.GET, 'https://index.taskcluster.net/v1/task/gecko.v2.mozilla-central.revision.b2a9a4bb5c94de179ae7a3f52fde58c0e2897498.firefox.linux64-ccov-debug', json=err, status=500)  # noqa
 
-    with pytest.raises(taskcluster.TaskclusterException, message='Unknown TaskCluster index error.'):
+    with pytest.raises(taskcluster.TaskclusterException, match='Unknown TaskCluster index error.'):
         taskcluster.get_task('mozilla-central', 'b2a9a4bb5c94de179ae7a3f52fde58c0e2897498', 'linux')
 
 
@@ -179,7 +179,7 @@ def test_get_platform():
 def test_download_artifact_forbidden(mocked_sleep, tmpdir):
     responses.add(responses.GET, 'https://queue.taskcluster.net/v1/task/FBdocjnAQOW_GJDOfmgjxw/artifacts/public/test_info/code-coverage-grcov.zip', body='xml error...', status=403)  # noqa
 
-    with pytest.raises(requests.exceptions.HTTPError, message='403 Client Error: Forbidden for url: https://taskcluster-artifacts.net/FBdocjnAQOW_GJDOfmgjxw/0/public/test_info/code-coverage-grcov.zip'):  # noqa
+    with pytest.raises(requests.exceptions.HTTPError, match='403 Client Error: Forbidden for url: https://queue.taskcluster.net/v1/task/FBdocjnAQOW_GJDOfmgjxw/artifacts/public/test_info/code-coverage-grcov.zip'):  # noqa
         taskcluster.download_artifact(
             os.path.join(tmpdir.strpath, 'windows_reftest-6_code-coverage-grcov.zip'),
             'FBdocjnAQOW_GJDOfmgjxw',
@@ -194,7 +194,7 @@ def test_download_artifact_forbidden(mocked_sleep, tmpdir):
 def test_download_artifact_badzip(mocked_sleep, tmpdir):
     responses.add(responses.GET, 'https://queue.taskcluster.net/v1/task/FBdocjnAQOW_GJDOfmgjxw/artifacts/public/test_info/code-coverage-grcov.zip', body='NOT A ZIP FILE', status=200, stream=True)  # noqa
 
-    with pytest.raises(BadZipFile, message='File is not a zip file'):
+    with pytest.raises(BadZipFile, match='File is not a zip file'):
         taskcluster.download_artifact(
             os.path.join(tmpdir.strpath, 'windows_reftest-6_code-coverage-grcov.zip'),
             'FBdocjnAQOW_GJDOfmgjxw',
