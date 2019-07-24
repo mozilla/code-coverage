@@ -14,9 +14,9 @@ def covdir_get(report, path):
 
 
 def test_report_invalid_output_format(grcov_artifact):
-    with pytest.raises(AssertionError, message='Unsupported output format'):
+    with pytest.raises(AssertionError, match='Unsupported output format'):
         grcov.report([grcov_artifact], out_format='UNSUPPORTED')
-    with pytest.raises(AssertionError, message='Unsupported output format'):
+    with pytest.raises(AssertionError, match='Unsupported output format'):
         grcov.report([grcov_artifact], out_format='coveralls')
 
 

@@ -72,7 +72,7 @@ def test_get_coverage_artifacts(FAKE_ARTIFACTS_DIR):
         'linux_xpcshell-7_code-coverage-grcov.zip'
     ])
 
-    with pytest.raises(Exception, message='suite and chunk can\'t both have a value'):
+    with pytest.raises(Exception, match='suite and chunk can\'t both have a value'):
         a.get(chunk='xpcshell-7', suite='mochitest')
 
 
