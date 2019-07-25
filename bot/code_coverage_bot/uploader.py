@@ -42,7 +42,7 @@ def gcp(repository, revision, report):
     logger.info('Uploaded {} on {}'.format(path, bucket))
 
     # Trigger ingestion on backend
-    retry(lambda: gcp_ingest(repository, revision), retries=5)
+    retry(lambda: gcp_ingest(repository, revision), retries=10, wait_between_retries=60)
 
     return blob
 
@@ -69,9 +69,10 @@ def gcp_ingest(repository, revision):
         'changeset': revision,
     }
     backend_host = secrets[secrets.BACKEND_HOST]
+    logger.info('Ingesting report on backend', host=backend_host, repository=repository, revision=revision)
     resp = requests.get('{}/v2/path'.format(backend_host), params=params)
     resp.raise_for_status()
-    logger.info('Ingested report on backend', host=backend_host, repository=repository, revision=revision)
+    logger.info('Successfully ingested report on backend !')
     return resp
 
 
