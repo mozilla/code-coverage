@@ -16,7 +16,8 @@ async function graphHistory(history, path) {
 
   let dateStr = function(timestamp){
     let date = new Date(timestamp);
-    return date.getDate() + '/' + date.getMonth() + '/' + date.getFullYear();
+    let month = date.getMonth() + 1;
+    return date.getDate() + '/' + month + '/' + date.getFullYear();
   }
 
   var data = {
