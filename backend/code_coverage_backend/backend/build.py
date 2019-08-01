@@ -34,12 +34,12 @@ TALISMAN_CONFIG = dict(
     strict_transport_security_max_age=flask_talisman.talisman.ONE_YEAR_IN_SECS,
     strict_transport_security_include_subdomains=True,
     content_security_policy={
-        'default-src': '\'none\'',
+        'default-src': "'none'",
         # unsafe-inline is needed for the Swagger UI
-        'script-src': '\'self\' \'unsafe-inline\'',
-        'style-src': '\'self\' \'unsafe-inline\'',
-        'img-src': '\'self\'',
-        'connect-src': '\'self\'',
+        'script-src': "'self' 'unsafe-inline'",
+        'style-src': "'self' 'unsafe-inline'",
+        'img-src': "'self'",
+        'connect-src': "'self'",
     },
     content_security_policy_report_uri=None,
     content_security_policy_report_only=False,
