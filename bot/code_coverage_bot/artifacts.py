@@ -39,7 +39,7 @@ class ArtifactsHandler(object):
         files = os.listdir(self.parent_dir)
 
         if suite is not None and chunk is not None:
-            raise Exception('suite and chunk can\'t both have a value')
+            raise Exception("suite and chunk can't both have a value")
 
         # Filter artifacts according to platform, suite and chunk.
         filtered_files = []

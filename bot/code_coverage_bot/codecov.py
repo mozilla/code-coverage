@@ -229,4 +229,4 @@ class CodeCov(object):
         elif self.repository == MOZILLA_CENTRAL_REPOSITORY:
             self.go_from_trigger_mozilla_central()
         else:
-            assert False, 'We shouldn\'t be here!'
+            assert False, "We shouldn't be here!"

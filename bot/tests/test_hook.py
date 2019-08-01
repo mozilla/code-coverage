@@ -32,14 +32,14 @@ payloads = [
 ]
 
 
-@pytest.mark.parametrize("payload", payloads)
+@pytest.mark.parametrize('payload', payloads)
 def test_hook_syntax(payload):
     '''
     Validate the Taskcluster hook syntax
     '''
     assert os.path.exists(HOOK)
 
-    with open(HOOK, "r") as f:
+    with open(HOOK, 'r') as f:
         # Patch the hook as in the taskboot deployment
         content = f.read()
         content = content.replace('REVISION', 'deadbeef1234')
@@ -48,6 +48,6 @@ def test_hook_syntax(payload):
         # Now parse it as json
         hook_content = json.loads(content)
 
-    jsonschema.validate(instance=payload, schema=hook_content["triggerSchema"])
+    jsonschema.validate(instance=payload, schema=hook_content['triggerSchema'])
 
     jsone.render(hook_content, context=payload)

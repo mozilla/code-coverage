@@ -56,7 +56,7 @@ def run_check(command, **kwargs):
     assert isinstance(command, list)
 
     if len(command) == 0:
-        raise RunException('Can\'t run an empty command.')
+        raise RunException("Can't run an empty command.")
 
     _kwargs = dict(
         stdin=subprocess.DEVNULL,  # no interactions
