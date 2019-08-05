@@ -12,20 +12,19 @@ We currently have several endpoints implemented:
 * `/v2/path` provides the code coverage information for a directory or file in a repository, at a given revision.
 
 
-## Setup instructions for developpers
+## Setup instructions for developers
 
 ```shell
 mkvirtualenv -p /usr/bin/python3 ccov-backend
 cd backend/
-pip install -r requirements.txt -r requirements-dev.txt 
+pip install -r requirements.txt -r requirements-dev.txt
 pip install -e .
 ```
 
 You should now be able to run tests and linting:
 
 ```shell
-pytest 
-flake8 
+pre-commit run -a
 ```
 
 ## Run a redis instance through docker

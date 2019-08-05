@@ -15,31 +15,28 @@ __stats = None
 
 
 def get_stats():
-    '''
+    """
     Configure a shared ThreadStats instance for datadog
-    '''
+    """
     global __stats
 
     if __stats is not None:
         return __stats
 
-    app_channel = taskcluster.secrets['APP_CHANNEL']
+    app_channel = taskcluster.secrets["APP_CHANNEL"]
 
-    if taskcluster.secrets['DATADOG_API_KEY']:
+    if taskcluster.secrets["DATADOG_API_KEY"]:
         datadog.initialize(
-            api_key=taskcluster.secrets['DATADOG_API_KEY'],
-            host_name=f'coverage.{app_channel}.moz.tools',
+            api_key=taskcluster.secrets["DATADOG_API_KEY"],
+            host_name=f"coverage.{app_channel}.moz.tools",
         )
     else:
-        logger.info('No datadog credentials')
+        logger.info("No datadog credentials")
 
     # Must be instantiated after initialize
     # https://datadogpy.readthedocs.io/en/latest/#datadog-threadstats-module
     __stats = datadog.ThreadStats(
-        constant_tags=[
-            config.PROJECT_NAME,
-            f'channel:{app_channel}',
-        ],
+        constant_tags=[config.PROJECT_NAME, f"channel:{app_channel}"]
     )
     __stats.start(flush_in_thread=True)
     return __stats

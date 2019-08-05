@@ -5,4 +5,4 @@
 
 import os
 
-DEBUG = bool(os.environ.get('DEBUG', False))
+DEBUG = bool(os.environ.get("DEBUG", False))
