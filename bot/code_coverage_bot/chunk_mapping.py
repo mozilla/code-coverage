@@ -18,7 +18,7 @@ ACTIVEDATA_QUERY_URL = "http://activedata.allizom.org/query"
 
 PLATFORMS = ["linux", "windows"]
 IGNORED_SUITE_PREFIXES = ["awsy", "talos", "test-coverage", "test-coverage-wpt"]
-# TODO: Calculate this dinamically when https://github.com/klahnakoski/ActiveData-ETL/issues/40 is fixed.
+# TODO: Calculate this dynamically when https://github.com/klahnakoski/ActiveData-ETL/issues/40 is fixed.
 TEST_COVERAGE_SUITES = [
     "reftest",
     "web-platform",

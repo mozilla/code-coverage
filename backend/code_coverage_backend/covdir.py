@@ -29,7 +29,7 @@ def open_report(report_path):
 
 def get_path_coverage(report, object_path, max_depth=1):
     """
-    Recursively format the paths encountered, adding informations relative
+    Recursively format the paths encountered, adding information relative
     to file type (file|directory)
     """
     assert isinstance(report, dict)

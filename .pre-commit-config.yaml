@@ -33,6 +33,7 @@ repos:
     rev: v1.15.0
     hooks:
       - id: codespell
+        args: ['--exclude-file=bot/tests/fixtures/activedata_chunk_to_tests.json']
   - repo: https://github.com/marco-c/taskcluster_yml_validator
     rev: v0.0.2
     hooks:

@@ -168,7 +168,7 @@ class GCPCache(object):
         """
         Download and extract a json+zstd covdir report
         """
-        # Chek the report is available on remote storage
+        # Check the report is available on remote storage
         path = "{}/{}.json.zstd".format(repository, changeset)
         blob = self.bucket.blob(path)
         if not blob.exists():
@@ -343,7 +343,7 @@ class GCPCache(object):
                 continue
             changeset = match.group(1)
 
-            # Get extra informations from HGMO
+            # Get extra information from HGMO
             push_id, date = hgmo_revision_details(repository, changeset)
             logger.info("Found report", changeset=changeset, push=push_id)
 
