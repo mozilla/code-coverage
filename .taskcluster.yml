@@ -32,6 +32,15 @@ tasks:
         else: 'dev'
       else: 'dev'
 
+    bucket_channel:
+      # Special case for the frontend upload on AWS S3, where the production bucket is named 'prod'
+      $if: 'tasks_for == "github-push"'
+      then:
+        $if: 'event.ref == "refs/heads/production"'
+        then: 'prod'
+        else: ${event.ref[11:]}
+      else: 'dev'
+
     taskboot_image: "mozilla/taskboot:0.1.9"
   in:
     - taskId: {$eval: as_slugid("bot_check_lint")}
@@ -340,5 +349,37 @@ tasks:
         metadata:
           name: "Code Coverage Bot hook update (${channel})"
           description: Update Taskcluster hook triggering the code-coverage tasks
+          owner: bastien@mozilla.com
+          source: https://github.com/mozilla/code-coverage
+
+    - $if: 'channel in ["testing", "production"]'
+      then:
+        taskId: {$eval: as_slugid("frontend_deploy")}
+        created: {$fromNow: ''}
+        deadline: {$fromNow: '1 hour'}
+        provisionerId: aws-provisioner-v1
+        workerType: github-worker
+        dependencies:
+          - {$eval: as_slugid("frontend_build")}
+        payload:
+          features:
+            # Needed for access to secret
+            taskclusterProxy: true
+          maxRunTime: 3600
+          image: "${taskboot_image}"
+          env:
+            TASKCLUSTER_SECRET: "project/relman/code-coverage/deploy-${channel}"
+          command:
+            - taskboot
+            - deploy-s3
+            - --artifact-folder
+            - public/frontend
+            - --bucket
+            - "codecoverage-${bucket_channel}-site-static-website"
+        scopes:
+          - "secrets:get:project/relman/code-coverage/deploy-${channel}"
+        metadata:
+          name: "Code Coverage Frontend deploy (${channel})"
+          description: Deploy frontend build on environment
           owner: bastien@mozilla.com
           source: https://github.com/mozilla/code-coverage
