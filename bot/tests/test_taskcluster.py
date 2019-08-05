@@ -123,7 +123,7 @@ def test_get_tasks_in_group(GROUP_TASKS_1, GROUP_TASKS_2):
     )  # noqa
     responses.add(
         responses.GET,
-        "https://queue.taskcluster.net/v1/task-group/aPt9FbIdQwmhwDIPDYLuaw/list?continuationToken=1%2132%21YVB0OUZiSWRRd21od0RJUERZTHVhdw--~1%2132%21ZnJVcGRRT0VTalN0Nm9Ua1Ztcy04UQ--&limit=200",
+        "https://queue.taskcluster.net/v1/task-group/aPt9FbIdQwmhwDIPDYLuaw/list?continuationToken=1%2132%21YVB0OUZiSWRRd21od0RJUERZTHVhdw--~1%2132%21ZnJVcGRRT0VTalN0Nm9Ua1Ztcy04UQ--&limit=200",  # noqa
         json=GROUP_TASKS_2,
         status=200,
         match_querystring=True,
@@ -222,15 +222,15 @@ def test_get_platform():
 def test_download_artifact_forbidden(mocked_sleep, tmpdir):
     responses.add(
         responses.GET,
-        "https://queue.taskcluster.net/v1/task/FBdocjnAQOW_GJDOfmgjxw/artifacts/public/test_info/code-coverage-grcov.zip",
+        "https://queue.taskcluster.net/v1/task/FBdocjnAQOW_GJDOfmgjxw/artifacts/public/test_info/code-coverage-grcov.zip",  # noqa
         body="xml error...",
         status=403,
-    )  # noqa
+    )
 
     with pytest.raises(
         requests.exceptions.HTTPError,
-        match="403 Client Error: Forbidden for url: https://queue.taskcluster.net/v1/task/FBdocjnAQOW_GJDOfmgjxw/artifacts/public/test_info/code-coverage-grcov.zip",
-    ):  # noqa
+        match="403 Client Error: Forbidden for url: https://queue.taskcluster.net/v1/task/FBdocjnAQOW_GJDOfmgjxw/artifacts/public/test_info/code-coverage-grcov.zip",  # noqa
+    ):
         taskcluster.download_artifact(
             os.path.join(tmpdir.strpath, "windows_reftest-6_code-coverage-grcov.zip"),
             "FBdocjnAQOW_GJDOfmgjxw",
@@ -245,11 +245,11 @@ def test_download_artifact_forbidden(mocked_sleep, tmpdir):
 def test_download_artifact_badzip(mocked_sleep, tmpdir):
     responses.add(
         responses.GET,
-        "https://queue.taskcluster.net/v1/task/FBdocjnAQOW_GJDOfmgjxw/artifacts/public/test_info/code-coverage-grcov.zip",
+        "https://queue.taskcluster.net/v1/task/FBdocjnAQOW_GJDOfmgjxw/artifacts/public/test_info/code-coverage-grcov.zip",  # noqa
         body="NOT A ZIP FILE",
         status=200,
         stream=True,
-    )  # noqa
+    )
 
     with pytest.raises(BadZipFile, match="File is not a zip file"):
         taskcluster.download_artifact(
