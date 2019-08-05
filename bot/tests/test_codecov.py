@@ -4,4 +4,4 @@ from code_coverage_bot import codecov
 
 
 def test_ok():
-    assert(codecov)
+    assert codecov

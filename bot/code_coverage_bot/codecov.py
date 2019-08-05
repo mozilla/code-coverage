@@ -28,35 +28,34 @@ from code_coverage_bot.zero_coverage import ZeroCov
 logger = structlog.get_logger(__name__)
 
 
-HG_BASE = 'https://hg.mozilla.org/'
-MOZILLA_CENTRAL_REPOSITORY = '{}mozilla-central'.format(HG_BASE)
-TRY_REPOSITORY = '{}try'.format(HG_BASE)
+HG_BASE = "https://hg.mozilla.org/"
+MOZILLA_CENTRAL_REPOSITORY = "{}mozilla-central".format(HG_BASE)
+TRY_REPOSITORY = "{}try".format(HG_BASE)
 
 
 class CodeCov(object):
-
     def __init__(self, repository, revision, task_name_filter, cache_root):
         # List of test-suite, sorted alphabetically.
         # This way, the index of a suite in the array should be stable enough.
-        self.suites = [
-            'web-platform-tests',
-        ]
+        self.suites = ["web-platform-tests"]
 
         self.cache_root = cache_root
 
         temp_dir = tempfile.mkdtemp()
-        self.artifacts_dir = os.path.join(temp_dir, 'ccov-artifacts')
-        self.ccov_reports_dir = os.path.join(temp_dir, 'code-coverage-reports')
+        self.artifacts_dir = os.path.join(temp_dir, "ccov-artifacts")
+        self.ccov_reports_dir = os.path.join(temp_dir, "code-coverage-reports")
 
-        self.index_service = taskcluster_config.get_service('index')
+        self.index_service = taskcluster_config.get_service("index")
 
         if revision is None:
             # Retrieve latest ingested revision
             self.repository = MOZILLA_CENTRAL_REPOSITORY
             try:
-                self.revision = uploader.gcp_latest('mozilla-central')[0]['revision']
+                self.revision = uploader.gcp_latest("mozilla-central")[0]["revision"]
             except Exception as e:
-                logger.warn('Failed to retrieve the latest reports ingested: {}'.format(e))
+                logger.warn(
+                    "Failed to retrieve the latest reports ingested: {}".format(e)
+                )
                 raise
             self.from_pulse = False
         else:
@@ -64,15 +63,17 @@ class CodeCov(object):
             self.revision = revision
             self.from_pulse = True
 
-        self.branch = self.repository[len(HG_BASE):]
+        self.branch = self.repository[len(HG_BASE) :]
 
-        assert os.path.isdir(cache_root), 'Cache root {} is not a dir.'.format(cache_root)
+        assert os.path.isdir(cache_root), "Cache root {} is not a dir.".format(
+            cache_root
+        )
         self.repo_dir = os.path.join(cache_root, self.branch)
 
-        logger.info('Mercurial revision', revision=self.revision)
+        logger.info("Mercurial revision", revision=self.revision)
 
         task_ids = {}
-        for platform in ['linux', 'windows', 'android-test', 'android-emulator']:
+        for platform in ["linux", "windows", "android-test", "android-emulator"]:
             task = taskcluster.get_task(self.branch, self.revision, platform)
 
             # On try, developers might have requested to run only one platform, and we trust them.
@@ -80,20 +81,27 @@ class CodeCov(object):
             # as they are unstable).
             if task is not None:
                 task_ids[platform] = task
-            elif self.repository == MOZILLA_CENTRAL_REPOSITORY and not platform.startswith('android'):
-                raise Exception('Code coverage build failed and was not indexed.')
+            elif (
+                self.repository == MOZILLA_CENTRAL_REPOSITORY
+                and not platform.startswith("android")
+            ):
+                raise Exception("Code coverage build failed and was not indexed.")
 
-        self.artifactsHandler = ArtifactsHandler(task_ids, self.artifacts_dir, task_name_filter)
+        self.artifactsHandler = ArtifactsHandler(
+            task_ids, self.artifacts_dir, task_name_filter
+        )
 
     def clone_repository(self, repository, revision):
-        cmd = hglib.util.cmdbuilder('robustcheckout',
-                                    repository,
-                                    self.repo_dir,
-                                    purge=True,
-                                    sharebase='hg-shared',
-                                    upstream='https://hg.mozilla.org/mozilla-unified',
-                                    revision=revision,
-                                    networkattempts=7)
+        cmd = hglib.util.cmdbuilder(
+            "robustcheckout",
+            repository,
+            self.repo_dir,
+            purge=True,
+            sharebase="hg-shared",
+            upstream="https://hg.mozilla.org/mozilla-unified",
+            revision=revision,
+            networkattempts=7,
+        )
 
         cmd.insert(0, hglib.HGPATH)
 
@@ -102,7 +110,7 @@ class CodeCov(object):
         if proc.returncode:
             raise hglib.error.CommandError(cmd, proc.returncode, out, err)
 
-        logger.info('{} cloned'.format(repository))
+        logger.info("{} cloned".format(repository))
 
     def retrieve_source_and_artifacts(self):
         with ThreadPoolExecutorResult(max_workers=2) as executor:
@@ -113,22 +121,20 @@ class CodeCov(object):
             executor.submit(self.clone_repository, self.repository, self.revision)
 
     def generate_covdir(self):
-        '''
+        """
         Build the covdir report using current artifacts
-        '''
+        """
         output = grcov.report(
-            self.artifactsHandler.get(),
-            source_dir=self.repo_dir,
-            out_format='covdir',
+            self.artifactsHandler.get(), source_dir=self.repo_dir, out_format="covdir"
         )
-        logger.info('Covdir report generated successfully')
+        logger.info("Covdir report generated successfully")
         return json.loads(output)
 
     # This function is executed when the bot is triggered at the end of a mozilla-central build.
     def go_from_trigger_mozilla_central(self):
         # Check the covdir report does not already exists
         if uploader.gcp_covdir_exists(self.branch, self.revision):
-            logger.warn('Covdir report already on GCP')
+            logger.warn("Covdir report already on GCP")
             return
 
         self.retrieve_source_and_artifacts()
@@ -136,37 +142,48 @@ class CodeCov(object):
         # Check that all JavaScript files present in the coverage artifacts actually exist.
         # If they don't, there might be a bug in the LCOV rewriter.
         for artifact in self.artifactsHandler.get():
-            if 'jsvm' not in artifact:
+            if "jsvm" not in artifact:
                 continue
 
-            with zipfile.ZipFile(artifact, 'r') as zf:
+            with zipfile.ZipFile(artifact, "r") as zf:
                 for file_name in zf.namelist():
-                    with zf.open(file_name, 'r') as fl:
-                        source_files = [line[3:].decode('utf-8').rstrip() for line in fl if line.startswith(b'SF:')]
-                        missing_files = [f for f in source_files if not os.path.exists(os.path.join(self.repo_dir, f))]
+                    with zf.open(file_name, "r") as fl:
+                        source_files = [
+                            line[3:].decode("utf-8").rstrip()
+                            for line in fl
+                            if line.startswith(b"SF:")
+                        ]
+                        missing_files = [
+                            f
+                            for f in source_files
+                            if not os.path.exists(os.path.join(self.repo_dir, f))
+                        ]
                         if len(missing_files) != 0:
-                            logger.warn(f'{missing_files} are present in coverage reports, but missing from the repository')
+                            logger.warn(
+                                f"{missing_files} are present in coverage reports, but missing from the repository"
+                            )
 
         report = self.generate_covdir()
 
         paths = uploader.covdir_paths(report)
-        expected_extensions = ['.js', '.cpp']
+        expected_extensions = [".js", ".cpp"]
         for extension in expected_extensions:
-            assert any(path.endswith(extension) for path in paths), \
-                'No {} file in the generated report'.format(extension)
+            assert any(
+                path.endswith(extension) for path in paths
+            ), "No {} file in the generated report".format(extension)
 
         # Get pushlog and ask the backend to generate the coverage by changeset
         # data, which will be cached.
         with hgmo.HGMO(self.repo_dir) as hgmo_server:
             changesets = hgmo_server.get_automation_relevance_changesets(self.revision)
 
-        logger.info('Upload changeset coverage data to Phabricator')
+        logger.info("Upload changeset coverage data to Phabricator")
         phabricatorUploader = PhabricatorUploader(self.repo_dir, self.revision)
         changesets_coverage = phabricatorUploader.upload(report, changesets)
 
         uploader.gcp(self.branch, self.revision, report)
 
-        logger.info('Build uploaded on GCP')
+        logger.info("Build uploaded on GCP")
         notify_email(self.revision, changesets, changesets_coverage)
 
     # This function is executed when the bot is triggered at the end of a try build.
@@ -176,49 +193,61 @@ class CodeCov(object):
         with hgmo.HGMO(server_address=TRY_REPOSITORY) as hgmo_server:
             changesets = hgmo_server.get_automation_relevance_changesets(self.revision)
 
-        if not any(parse_revision_id(changeset['desc']) is not None for changeset in changesets):
-            logger.info('None of the commits in the try push are linked to a Phabricator revision')
+        if not any(
+            parse_revision_id(changeset["desc"]) is not None for changeset in changesets
+        ):
+            logger.info(
+                "None of the commits in the try push are linked to a Phabricator revision"
+            )
             return
 
         self.retrieve_source_and_artifacts()
 
         report = self.generate_covdir()
 
-        logger.info('Upload changeset coverage data to Phabricator')
+        logger.info("Upload changeset coverage data to Phabricator")
         phabricatorUploader.upload(report, changesets)
 
     # This function is executed when the bot is triggered via cron.
     def go_from_cron(self):
         self.retrieve_source_and_artifacts()
 
-        logger.info('Generating suite reports')
+        logger.info("Generating suite reports")
         os.makedirs(self.ccov_reports_dir, exist_ok=True)
-        suite_reports.generate(self.suites, self.artifactsHandler, self.ccov_reports_dir, self.repo_dir)
+        suite_reports.generate(
+            self.suites, self.artifactsHandler, self.ccov_reports_dir, self.repo_dir
+        )
 
-        logger.info('Generating zero coverage reports')
+        logger.info("Generating zero coverage reports")
         zc = ZeroCov(self.repo_dir)
         zc.generate(self.artifactsHandler.get(), self.revision)
 
-        logger.info('Generating chunk mapping')
+        logger.info("Generating chunk mapping")
         chunk_mapping.generate(self.repo_dir, self.revision, self.artifactsHandler)
 
         # Index the task in the TaskCluster index at the given revision and as "latest".
         # Given that all tasks have the same rank, the latest task that finishes will
         # overwrite the "latest" entry.
         namespaces = [
-            'project.releng.services.project.{}.code_coverage_bot.{}'.format(secrets[secrets.APP_CHANNEL], self.revision),
-            'project.releng.services.project.{}.code_coverage_bot.latest'.format(secrets[secrets.APP_CHANNEL]),
+            "project.releng.services.project.{}.code_coverage_bot.{}".format(
+                secrets[secrets.APP_CHANNEL], self.revision
+            ),
+            "project.releng.services.project.{}.code_coverage_bot.latest".format(
+                secrets[secrets.APP_CHANNEL]
+            ),
         ]
 
         for namespace in namespaces:
             self.index_service.insertTask(
                 namespace,
                 {
-                    'taskId': os.environ['TASK_ID'],
-                    'rank': 0,
-                    'data': {},
-                    'expires': (datetime.utcnow() + timedelta(180)).strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
-                }
+                    "taskId": os.environ["TASK_ID"],
+                    "rank": 0,
+                    "data": {},
+                    "expires": (datetime.utcnow() + timedelta(180)).strftime(
+                        "%Y-%m-%dT%H:%M:%S.%fZ"
+                    ),
+                },
             )
 
     def go(self):
@@ -229,4 +258,4 @@ class CodeCov(object):
         elif self.repository == MOZILLA_CENTRAL_REPOSITORY:
             self.go_from_trigger_mozilla_central()
         else:
-            assert False, 'We shouldn\'t be here!'
+            assert False, "We shouldn't be here!"

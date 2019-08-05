@@ -9,49 +9,46 @@ from flask import abort
 from code_coverage_backend.config import COVERAGE_EXTENSIONS
 from code_coverage_backend.gcp import load_cache
 
-DEFAULT_REPOSITORY = 'mozilla-central'
+DEFAULT_REPOSITORY = "mozilla-central"
 logger = structlog.get_logger(__name__)
 
 
 def coverage_supported_extensions():
-    '''
+    """
     List all the file extensions we currently support
-    '''
+    """
     return COVERAGE_EXTENSIONS
 
 
 def coverage_latest(repository=DEFAULT_REPOSITORY):
-    '''
+    """
     List the last 10 reports available on the server
-    '''
+    """
     gcp = load_cache()
     if gcp is None:
-        logger.error('No GCP cache available')
+        logger.error("No GCP cache available")
         abort(500)
 
     try:
         return [
-            {
-                'revision': revision,
-                'push': push_id,
-            }
+            {"revision": revision, "push": push_id}
             for revision, push_id in gcp.list_reports(repository, 10)
         ]
     except Exception as e:
-        logger.warn('Failed to retrieve latest reports: {}'.format(e))
+        logger.warn("Failed to retrieve latest reports: {}".format(e))
         abort(404)
 
 
-def coverage_for_path(path='', changeset=None, repository=DEFAULT_REPOSITORY):
-    '''
+def coverage_for_path(path="", changeset=None, repository=DEFAULT_REPOSITORY):
+    """
     Aggregate coverage for a path, regardless of its type:
     * file, gives its coverage percent
     * directory, gives coverage percent for its direct sub elements
       files and folders (recursive average)
-    '''
+    """
     gcp = load_cache()
     if gcp is None:
-        logger.error('No GCP cache available')
+        logger.error("No GCP cache available")
         abort(500)
 
     try:
@@ -62,28 +59,41 @@ def coverage_for_path(path='', changeset=None, repository=DEFAULT_REPOSITORY):
             # Fallback to latest report
             changeset, _ = gcp.find_report(repository)
     except Exception as e:
-        logger.warn('Failed to retrieve report: {}'.format(e))
+        logger.warn("Failed to retrieve report: {}".format(e))
         abort(404)
 
     # Load tests data from GCP
     try:
         return gcp.get_coverage(repository, changeset, path)
     except Exception as e:
-        logger.warn('Failed to load coverage', repo=repository, changeset=changeset, path=path, error=str(e))
+        logger.warn(
+            "Failed to load coverage",
+            repo=repository,
+            changeset=changeset,
+            path=path,
+            error=str(e),
+        )
         abort(400)
 
 
-def coverage_history(repository=DEFAULT_REPOSITORY, path='', start=None, end=None):
-    '''
+def coverage_history(repository=DEFAULT_REPOSITORY, path="", start=None, end=None):
+    """
     List overall coverage from ingested reports over a period of time
-    '''
+    """
     gcp = load_cache()
     if gcp is None:
-        logger.error('No GCP cache available')
+        logger.error("No GCP cache available")
         abort(500)
 
     try:
         return gcp.get_history(repository, path=path, start=start, end=end)
     except Exception as e:
-        logger.warn('Failed to load history', repo=repository, path=path, start=start, end=end, error=str(e))
+        logger.warn(
+            "Failed to load history",
+            repo=repository,
+            path=path,
+            start=start,
+            end=end,
+            error=str(e),
+        )
         abort(400)
