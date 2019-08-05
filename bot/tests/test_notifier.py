@@ -3,11 +3,11 @@ import responses
 
 from code_coverage_bot.notifier import notify_email
 from code_coverage_bot.phabricator import PhabricatorUploader
+from conftest import add_file
+from conftest import changesets
+from conftest import commit
+from conftest import copy_pushlog_database
 from conftest import covdir_report
-from mercurial import add_file
-from mercurial import changesets
-from mercurial import commit
-from mercurial import copy_pushlog_database
 
 
 @responses.activate

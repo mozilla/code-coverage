@@ -17,6 +17,40 @@ import responses
 FIXTURES_DIR = os.path.join(os.path.dirname(__file__), "fixtures")
 
 
+def copy_pushlog_database(remote, local):
+    shutil.copyfile(
+        os.path.join(remote, ".hg/pushlog2.db"), os.path.join(local, ".hg/pushlog2.db")
+    )
+
+
+def add_file(hg, repo_dir, name, contents):
+    path = os.path.join(repo_dir, name)
+
+    with open(path, "w") as f:
+        f.write(contents)
+
+    hg.add(files=[bytes(path, "ascii")])
+
+
+def commit(hg, diff_rev=None):
+    commit_message = "Commit {}".format(hg.status())
+    if diff_rev is not None:
+        commit_message += "Differential Revision: https://phabricator.services.mozilla.com/D{}".format(
+            diff_rev
+        )
+
+    i, revision = hg.commit(message=commit_message, user="Moz Illa <milla@mozilla.org>")
+
+    return str(revision, "ascii")
+
+
+def changesets(repo_dir, revision):
+    from code_coverage_bot import hgmo
+
+    with hgmo.HGMO(repo_dir) as hgmo_server:
+        return hgmo_server.get_automation_relevance_changesets(revision)
+
+
 def load_file(path):
     with open(os.path.join(FIXTURES_DIR, path)) as f:
         return f.read()
