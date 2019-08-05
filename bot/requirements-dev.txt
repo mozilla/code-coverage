@@ -1,6 +1,5 @@
-flake8==3.7.8
-flake8-isort==2.7.0
 jsonschema==3.0.2
 json-e==3.0.0
+pre-commit==1.18.0
 pytest==5.0.1
 responses==0.10.6

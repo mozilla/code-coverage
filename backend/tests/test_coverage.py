@@ -8,10 +8,24 @@ import json
 
 def test_coverage_supported_extensions_api(client):
     # List supported extensions for coverage analysis through the API
-    resp = client.get('/v2/extensions')
+    resp = client.get("/v2/extensions")
     assert resp.status_code == 200
-    data = json.loads(resp.data.decode('utf-8'))
-    assert set(data) == set([
-        'c', 'h', 'cpp', 'cc', 'cxx', 'hh', 'hpp',
-        'hxx', 'js', 'jsm', 'xul', 'xml', 'html', 'xhtml',
-    ])
+    data = json.loads(resp.data.decode("utf-8"))
+    assert set(data) == set(
+        [
+            "c",
+            "h",
+            "cpp",
+            "cc",
+            "cxx",
+            "hh",
+            "hpp",
+            "hxx",
+            "js",
+            "jsm",
+            "xul",
+            "xml",
+            "html",
+            "xhtml",
+        ]
+    )

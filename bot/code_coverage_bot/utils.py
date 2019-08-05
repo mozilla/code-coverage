@@ -12,16 +12,14 @@ log = structlog.get_logger(__name__)
 
 
 class RunException(Exception):
-    '''
+    """
     Exception used to stop retrying
-    '''
+    """
 
 
-def retry(operation,
-          retries=5,
-          wait_between_retries=30,
-          exception_to_break=RunException,
-          ):
+def retry(
+    operation, retries=5, wait_between_retries=30, exception_to_break=RunException
+):
     while True:
         try:
             return operation()
@@ -36,9 +34,9 @@ def retry(operation,
 
 def hide_secrets(text, secrets):
     if type(text) is bytes:
-        encode_secret, xxx = lambda x: bytes(x, encoding='utf-8'), b'XXX'
+        encode_secret, xxx = lambda x: bytes(x, encoding="utf-8"), b"XXX"
     elif type(text) is str:
-        encode_secret, xxx = lambda x: x, 'XXX'
+        encode_secret, xxx = lambda x: x, "XXX"
     else:
         return text
 
@@ -50,13 +48,13 @@ def hide_secrets(text, secrets):
 
 
 def run_check(command, **kwargs):
-    '''
+    """
     Run a command through subprocess and check for output
-    '''
+    """
     assert isinstance(command, list)
 
     if len(command) == 0:
-        raise RunException('Can\'t run an empty command.')
+        raise RunException("Can't run an empty command.")
 
     _kwargs = dict(
         stdin=subprocess.DEVNULL,  # no interactions
@@ -65,19 +63,19 @@ def run_check(command, **kwargs):
     )
     _kwargs.update(kwargs)
 
-    log.debug('Running command', command=' ' .join(command), kwargs=_kwargs)
+    log.debug("Running command", command=" ".join(command), kwargs=_kwargs)
 
     with subprocess.Popen(command, **_kwargs) as proc:
         output, error = proc.communicate()
 
     if proc.returncode != 0:
         log.info(
-            f'Command failed with code: {proc.returncode}',
-            command=' ' .join(command),
+            f"Command failed with code: {proc.returncode}",
+            command=" ".join(command),
             output=output,
             error=error,
         )
-        raise RunException(f'`{command[0]}` failed with code: {proc.returncode}.')
+        raise RunException(f"`{command[0]}` failed with code: {proc.returncode}.")
 
     return output
 

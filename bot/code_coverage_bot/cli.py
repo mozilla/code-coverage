@@ -14,41 +14,27 @@ from code_coverage_tools.log import init_logger
 
 
 def parse_cli():
-    '''
+    """
     Setup CLI options parser
-    '''
-    parser = argparse.ArgumentParser(description='Mozilla Code Coverage Bot')
+    """
+    parser = argparse.ArgumentParser(description="Mozilla Code Coverage Bot")
+    parser.add_argument("--repository", default=os.environ.get("REPOSITORY"))
+    parser.add_argument("--revision", default=os.environ.get("REVISION"))
     parser.add_argument(
-        '--repository',
-        default=os.environ.get('REPOSITORY'),
+        "--cache-root", required=True, help="Cache root, used to pull changesets"
     )
     parser.add_argument(
-        '--revision',
-        default=os.environ.get('REVISION'),
+        "--task-name-filter",
+        default="*",
+        help="Filter Taskcluster tasks using a glob expression",
     )
     parser.add_argument(
-        '--cache-root',
-        required=True,
-        help='Cache root, used to pull changesets'
+        "--taskcluster-secret",
+        help="Taskcluster Secret path",
+        default=os.environ.get("TASKCLUSTER_SECRET"),
     )
-    parser.add_argument(
-        '--task-name-filter',
-        default='*',
-        help='Filter Taskcluster tasks using a glob expression',
-    )
-    parser.add_argument(
-        '--taskcluster-secret',
-        help='Taskcluster Secret path',
-        default=os.environ.get('TASKCLUSTER_SECRET')
-    )
-    parser.add_argument(
-        '--taskcluster-client-id',
-        help='Taskcluster Client ID',
-    )
-    parser.add_argument(
-        '--taskcluster-access-token',
-        help='Taskcluster Access token',
-    )
+    parser.add_argument("--taskcluster-client-id", help="Taskcluster Client ID")
+    parser.add_argument("--taskcluster-access-token", help="Taskcluster Access token")
     return parser.parse_args()
 
 
@@ -61,15 +47,16 @@ def main():
     # Then load secrets
     secrets.load(args.taskcluster_secret)
 
-    init_logger(config.PROJECT_NAME,
-                PAPERTRAIL_HOST=secrets.get('PAPERTRAIL_HOST'),
-                PAPERTRAIL_PORT=secrets.get('PAPERTRAIL_PORT'),
-                SENTRY_DSN=secrets.get('SENTRY_DSN'),
-                )
+    init_logger(
+        config.PROJECT_NAME,
+        PAPERTRAIL_HOST=secrets.get("PAPERTRAIL_HOST"),
+        PAPERTRAIL_PORT=secrets.get("PAPERTRAIL_PORT"),
+        SENTRY_DSN=secrets.get("SENTRY_DSN"),
+    )
 
     c = CodeCov(args.repository, args.revision, args.task_name_filter, args.cache_root)
     c.go()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

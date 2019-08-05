@@ -43,7 +43,7 @@ tasks:
 
     taskboot_image: "mozilla/taskboot:0.1.9"
   in:
-    - taskId: {$eval: as_slugid("bot_check_lint")}
+    - taskId: {$eval: as_slugid("check_lint")}
       provisionerId: aws-provisioner-v1
       workerType: github-worker
       created: {$fromNow: ''}
@@ -57,31 +57,11 @@ tasks:
           - "git clone --quiet ${repository} /src && cd /src && git checkout ${head_rev} -b checks &&
             cd /src/tools && python setup.py install &&
             cd /src/bot && pip install --quiet . && pip install --quiet -r requirements-dev.txt &&
-            flake8"
-      metadata:
-        name: "Code Coverage Bot checks: linting"
-        description: Check python code style with flake8
-        owner: bastien@mozilla.com
-        source: https://github.com/mozilla/code-coverage
-
-    - taskId: {$eval: as_slugid("backend_check_lint")}
-      provisionerId: aws-provisioner-v1
-      workerType: github-worker
-      created: {$fromNow: ''}
-      deadline: {$fromNow: '1 hour'}
-      payload:
-        maxRunTime: 3600
-        image: python:3
-        command:
-          - sh
-          - -lxce
-          - "git clone --quiet ${repository} /src && cd /src && git checkout ${head_rev} -b checks &&
-            cd /src/tools && python setup.py install &&
             cd /src/backend && pip install --quiet . && pip install --quiet -r requirements-dev.txt &&
-            flake8"
+            cd /src && pre-commit run -a"
       metadata:
-        name: "Code Coverage Backend checks: linting"
-        description: Check python code style with flake8
+        name: "Code Coverage checks: linting"
+        description: Check code style with pre-commit hooks
         owner: bastien@mozilla.com
         source: https://github.com/mozilla/code-coverage
 
@@ -134,7 +114,7 @@ tasks:
       provisionerId: aws-provisioner-v1
       workerType: releng-svc
       dependencies:
-        - {$eval: as_slugid("backend_check_lint")}
+        - {$eval: as_slugid("check_lint")}
         - {$eval: as_slugid("backend_check_tests")}
       payload:
         capabilities:
@@ -175,7 +155,7 @@ tasks:
       provisionerId: aws-provisioner-v1
       workerType: releng-svc
       dependencies:
-        - {$eval: as_slugid("bot_check_lint")}
+        - {$eval: as_slugid("check_lint")}
         - {$eval: as_slugid("bot_check_tests")}
       payload:
         capabilities:
