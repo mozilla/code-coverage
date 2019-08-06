@@ -49,10 +49,7 @@ def assert_file_to_test(c, source_path, test_path):
 def assert_file_to_chunk(c, path, expected_results):
     c.execute("SELECT platform, chunk FROM file_to_chunk WHERE path=?", (path,))
     results = c.fetchall()
-    assert len(results) == len(expected_results)
-    for result, expected_result in zip(results, expected_results):
-        assert result[0] == expected_result[0]
-        assert result[1] == expected_result[1]
+    assert set(results) == set(expected_results)
 
 
 def assert_chunk_to_test(c, platform, chunk, tests):
