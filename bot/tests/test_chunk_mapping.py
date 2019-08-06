@@ -191,7 +191,11 @@ def test_zero_coverage(tmpdir, fake_artifacts_handler, fake_hg_repo_with_content
     with sqlite3.connect(os.path.join(tmp_path, "per_chunk_mapping.sqlite")) as conn:
         c = conn.cursor()
 
-        assert_file_to_chunk(c, "js/src/jit/BitSet.cpp", [("linux", "chunk1"), ("linux", "mochitest"), ("windows", "mochitest")])
+        assert_file_to_chunk(
+            c,
+            "js/src/jit/BitSet.cpp",
+            [("linux", "chunk1"), ("linux", "mochitest"), ("windows", "mochitest")],
+        )
         assert_file_to_chunk(
             c, "toolkit/components/osfile/osfile.jsm", [("linux", "chunk2")]
         )
