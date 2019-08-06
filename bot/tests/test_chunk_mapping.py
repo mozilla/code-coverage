@@ -22,7 +22,7 @@ def fake_artifacts_handler(
             pass
 
         def get_chunks(self, platform):
-            return {"chunk1", "chunk2"}
+            return {"chunk1", "chunk2", "mochitest"}
 
         def get(self, platform=None, suite=None, chunk=None):
             if platform == "linux" and chunk == "chunk1":
@@ -33,6 +33,8 @@ def fake_artifacts_handler(
                 return [grcov_existing_file_artifact]  # code_coverage_bot/cli.py
             elif platform == "windows" and chunk == "chunk2":
                 return [grcov_uncovered_function_artifact]  # js/src/jit/JIT.cpp
+            elif platform in ["linux", "windows"] and chunk == "mochitest":
+                return [grcov_artifact]  # js/src/jit/BitSet.cpp
 
     return FakeArtifactsHandler()
 
@@ -44,12 +46,13 @@ def assert_file_to_test(c, source_path, test_path):
     assert results[0][0] == test_path
 
 
-def assert_file_to_chunk(c, path, platform, chunk):
+def assert_file_to_chunk(c, path, expected_results):
     c.execute("SELECT platform, chunk FROM file_to_chunk WHERE path=?", (path,))
     results = c.fetchall()
-    assert len(results) == 1
-    assert results[0][0] == platform
-    assert results[0][1] == chunk
+    assert len(results) == len(expected_results)
+    for result, expected_result in zip(results, expected_results):
+        assert result[0] == expected_result[0]
+        assert result[1] == expected_result[1]
 
 
 def assert_chunk_to_test(c, platform, chunk, tests):
@@ -172,12 +175,28 @@ def test_zero_coverage(tmpdir, fake_artifacts_handler, fake_hg_repo_with_content
             "netwerk/test/unit/test_substituting_protocol_handler.js",
         )
 
-        assert_file_to_chunk(c, "js/src/jit/BitSet.cpp", "linux", "chunk1")
+        assert_file_to_chunk(c, "js/src/jit/BitSet.cpp", [("linux", "chunk1")])
         assert_file_to_chunk(
-            c, "toolkit/components/osfile/osfile.jsm", "linux", "chunk2"
+            c, "toolkit/components/osfile/osfile.jsm", [("linux", "chunk2")]
         )
-        assert_file_to_chunk(c, "code_coverage_bot/cli.py", "windows", "chunk1")
-        assert_file_to_chunk(c, "js/src/jit/JIT.cpp", "windows", "chunk2")
+        assert_file_to_chunk(c, "code_coverage_bot/cli.py", [("windows", "chunk1")])
+        assert_file_to_chunk(c, "js/src/jit/JIT.cpp", [("windows", "chunk2")])
+
+        assert_chunk_to_test(c, "linux", "marionette-headless", ["marionette-test1"])
+        assert_chunk_to_test(c, "windows", "marionette", ["marionette-test2"])
+
+    with tarfile.open(os.path.join(tmp_path, "per_chunk_mapping.tar.xz")) as t:
+        t.extract("per_chunk_mapping.sqlite", tmp_path)
+
+    with sqlite3.connect(os.path.join(tmp_path, "per_chunk_mapping.sqlite")) as conn:
+        c = conn.cursor()
+
+        assert_file_to_chunk(c, "js/src/jit/BitSet.cpp", [("linux", "chunk1"), ("linux", "mochitest"), ("windows", "mochitest")])
+        assert_file_to_chunk(
+            c, "toolkit/components/osfile/osfile.jsm", [("linux", "chunk2")]
+        )
+        assert_file_to_chunk(c, "code_coverage_bot/cli.py", [("windows", "chunk1")])
+        assert_file_to_chunk(c, "js/src/jit/JIT.cpp", [("windows", "chunk2")])
 
         assert_chunk_to_test(c, "linux", "marionette-headless", ["marionette-test1"])
         assert_chunk_to_test(c, "windows", "marionette", ["marionette-test2"])
