@@ -70,9 +70,9 @@ def run_check(command, **kwargs):
 
     if proc.returncode != 0:
         if isinstance(output, bytes):
-            output = output.decode('utf-8')
+            output = output.decode("utf-8")
         if isinstance(error, bytes):
-            error = error.decode('utf-8')
+            error = error.decode("utf-8")
 
         # Use error to send log to sentry
         log.error(

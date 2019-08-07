@@ -12,7 +12,6 @@ import raven.handlers.logbook
 import structlog
 
 
-
 class UnstructuredRenderer(structlog.processors.KeyValueRenderer):
     def __call__(self, logger, method_name, event_dict):
         event = None
@@ -51,19 +50,14 @@ def setup_sentry(name, channel, dsn):
     """
 
     # Detect environment
-    if 'TASK_ID' in os.environ:
-        site = 'taskcluster'
-    elif 'DYNO' in os.environ:
-        site = 'heroku'
+    if "TASK_ID" in os.environ:
+        site = "taskcluster"
+    elif "DYNO" in os.environ:
+        site = "heroku"
     else:
-        site = 'unknown'
+        site = "unknown"
 
-    sentry_client = raven.Client(
-        dsn=dsn,
-        site=site,
-        name=name,
-        environment=channel,
-    )
+    sentry_client = raven.Client(dsn=dsn, site=site, name=name, environment=channel)
 
     sentry_handler = raven.handlers.logbook.SentryHandler(
         sentry_client, level=logbook.WARNING, bubble=True

@@ -49,7 +49,7 @@ def main():
 
     init_logger(
         config.PROJECT_NAME,
-        channel=secrets.get('APP_CHANNEL', 'dev'),
+        channel=secrets.get("APP_CHANNEL", "dev"),
         PAPERTRAIL_HOST=secrets.get("PAPERTRAIL_HOST"),
         PAPERTRAIL_PORT=secrets.get("PAPERTRAIL_PORT"),
         sentry_dsn=secrets.get("SENTRY_DSN"),
