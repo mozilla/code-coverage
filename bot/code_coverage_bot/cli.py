@@ -49,9 +49,10 @@ def main():
 
     init_logger(
         config.PROJECT_NAME,
+        channel=secrets.get('APP_CHANNEL', 'dev'),
         PAPERTRAIL_HOST=secrets.get("PAPERTRAIL_HOST"),
         PAPERTRAIL_PORT=secrets.get("PAPERTRAIL_PORT"),
-        SENTRY_DSN=secrets.get("SENTRY_DSN"),
+        sentry_dsn=secrets.get("SENTRY_DSN"),
     )
 
     c = CodeCov(args.repository, args.revision, args.task_name_filter, args.cache_root)

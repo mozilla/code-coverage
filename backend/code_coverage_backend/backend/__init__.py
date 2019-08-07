@@ -30,7 +30,7 @@ def create_app():
         code_coverage_backend.config.PROJECT_NAME,
         PAPERTRAIL_HOST=taskcluster.secrets.get("PAPERTRAIL_HOST"),
         PAPERTRAIL_PORT=taskcluster.secrets.get("PAPERTRAIL_PORT"),
-        SENTRY_DSN=taskcluster.secrets.get("SENTRY_DSN"),
+        sentry_dsn=taskcluster.secrets.get("SENTRY_DSN"),
     )
     logger = structlog.get_logger(__name__)
 
