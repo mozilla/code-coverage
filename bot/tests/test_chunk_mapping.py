@@ -112,7 +112,7 @@ def test_zero_coverage(tmpdir, fake_artifacts_handler, fake_hg_repo_with_content
                     requested_suite = payload["where"]["and"][2]["eq"][
                         "run.suite.fullname"
                     ]
-                    if requested_suite == "gtest":
+                    if requested_suite in ["gtest", "talos"]:
                         data = {}
                     elif requested_suite == "marionette":
                         prefix = payload["where"]["and"][3]["prefix"]["run.key"]

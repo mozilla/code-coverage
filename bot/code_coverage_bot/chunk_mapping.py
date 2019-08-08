@@ -222,9 +222,6 @@ def _inner_generate(
 
         logger.info("Populating chunk_to_test table for {}.".format(platform))
         for suite in get_suites(revision):
-            if not is_chunk_only_suite(suite):
-                continue
-
             tests_data = get_tests_chunks(revision, platform, suite)
             if len(tests_data) == 0:
                 logger.warn(
