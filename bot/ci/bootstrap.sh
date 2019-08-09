@@ -1,5 +1,5 @@
 #!/bin/bash -ex
-GRCOV_VERSION="v0.5.2"
+GRCOV_VERSION="v0.5.3"
 MERCURIAL_VERSION="4.8"
 
 apt-get update
