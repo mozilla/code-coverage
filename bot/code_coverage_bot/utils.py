@@ -69,12 +69,18 @@ def run_check(command, **kwargs):
         output, error = proc.communicate()
 
     if proc.returncode != 0:
-        log.info(
+        output = output and output.decode("utf-8") or ""
+        error = error and error.decode("utf-8") or ""
+
+        # Use error to send log to sentry
+        log.error(
             f"Command failed with code: {proc.returncode}",
+            exit=proc.returncode,
             command=" ".join(command),
             output=output,
             error=error,
         )
+
         raise RunException(f"`{command[0]}` failed with code: {proc.returncode}.")
 
     return output
