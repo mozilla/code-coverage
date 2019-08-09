@@ -57,6 +57,10 @@
                             "path": "/chunk_mapping.tar.xz",
                             "type": "file"
                         },
+                        "public/per_chunk_mapping.tar.xz": {
+                            "path": "/per_chunk_mapping.tar.xz",
+                            "type": "file"
+                        },
                         "public/zero_coverage_report.json": {
                             "path": "/zero_coverage_report.json",
                             "type": "file"
