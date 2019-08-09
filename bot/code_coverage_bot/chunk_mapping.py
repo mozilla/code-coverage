@@ -173,90 +173,139 @@ def is_chunk_only_suite(suite):
     return True
 
 
-def generate(repo_dir, revision, artifactsHandler, out_dir="."):
-    logger.info("Generating chunk mapping...")
-    sqlite_file = os.path.join(out_dir, "chunk_mapping.sqlite")
-    tarxz_file = os.path.join(out_dir, "chunk_mapping.tar.xz")
+def _inner_generate(
+    repo_dir, revision, artifactsHandler, per_test_cursor, per_chunk_cursor, executor
+):
+    per_test_cursor.execute(
+        "CREATE TABLE file_to_chunk (path text, platform text, chunk text)"
+    )
+    per_test_cursor.execute(
+        "CREATE TABLE chunk_to_test (platform text, chunk text, path text)"
+    )
+    per_test_cursor.execute("CREATE TABLE file_to_test (source text, test text)")
 
-    with sqlite3.connect(sqlite_file) as conn:
-        logger.info("Creating tables.")
-        c = conn.cursor()
-        c.execute("CREATE TABLE file_to_chunk (path text, platform text, chunk text)")
-        c.execute("CREATE TABLE chunk_to_test (platform text, chunk text, path text)")
-        c.execute("CREATE TABLE file_to_test (source text, test text)")
+    per_chunk_cursor.execute(
+        "CREATE TABLE file_to_chunk (path text, platform text, chunk text)"
+    )
+    per_chunk_cursor.execute(
+        "CREATE TABLE chunk_to_test (platform text, chunk text, path text)"
+    )
 
-        logger.info("Populating file_to_test table.")
-        test_coverage_suites = get_test_coverage_suites()
-        logger.info("Found {} test suites.".format(len(test_coverage_suites)))
-        for suites in group_by_20k(test_coverage_suites):
-            test_coverage_tests = get_test_coverage_tests(suites)
-            for tests in group_by_20k(test_coverage_tests):
-                tests_files_data = get_test_coverage_files(tests)
+    logger.info("Populating file_to_test table.")
+    test_coverage_suites = get_test_coverage_suites()
+    logger.info("Found {} test suites.".format(len(test_coverage_suites)))
+    for suites in group_by_20k(test_coverage_suites):
+        test_coverage_tests = get_test_coverage_tests(suites)
+        for tests in group_by_20k(test_coverage_tests):
+            tests_files_data = get_test_coverage_files(tests)
 
-                source_names = tests_files_data["source.file.name"]
-                test_iter = enumerate(tests_files_data["test.name"])
-                source_test_iter = ((source_names[i], test) for i, test in test_iter)
+            source_names = tests_files_data["source.file.name"]
+            test_iter = enumerate(tests_files_data["test.name"])
+            source_test_iter = ((source_names[i], test) for i, test in test_iter)
 
-                c.executemany("INSERT INTO file_to_test VALUES (?,?)", source_test_iter)
+            per_test_cursor.executemany(
+                "INSERT INTO file_to_test VALUES (?,?)", source_test_iter
+            )
 
-        with ThreadPoolExecutor(max_workers=4) as executor:
-            futures = {}
-            for platform in PLATFORMS:
-                logger.info("Reading chunk coverage artifacts for {}.".format(platform))
-                for chunk in artifactsHandler.get_chunks(platform):
-                    suite = taskcluster.get_suite(chunk)
-                    if not is_chunk_only_suite(suite):
-                        continue
+    futures = {}
+    for platform in PLATFORMS:
+        logger.info("Reading chunk coverage artifacts for {}.".format(platform))
+        for chunk in artifactsHandler.get_chunks(platform):
+            assert chunk.strip() != "", "chunk can not be an empty string"
 
-                    assert chunk.strip() != "", "chunk can not be an empty string"
+            artifacts = artifactsHandler.get(platform=platform, chunk=chunk)
 
-                    artifacts = artifactsHandler.get(platform=platform, chunk=chunk)
+            assert len(artifacts) > 0, "There should be at least one artifact"
 
-                    assert len(artifacts) > 0, "There should be at least one artifact"
+            future = executor.submit(grcov.files_list, artifacts, source_dir=repo_dir)
+            futures[future] = (platform, chunk)
 
-                    future = executor.submit(
-                        grcov.files_list, artifacts, source_dir=repo_dir
+        logger.info("Populating chunk_to_test table for {}.".format(platform))
+        for suite in get_suites(revision):
+            tests_data = get_tests_chunks(revision, platform, suite)
+            if len(tests_data) == 0:
+                logger.warn(
+                    "No tests found for platform {} and suite {}.".format(
+                        platform, suite
                     )
-                    futures[future] = (platform, chunk)
+                )
+                continue
 
-                logger.info("Populating chunk_to_test table for {}.".format(platform))
-                for suite in get_suites(revision):
-                    if not is_chunk_only_suite(suite):
-                        continue
+            logger.info(
+                "Adding tests for platform {} and suite {}".format(platform, suite)
+            )
+            task_names = tests_data["run.key"]
 
-                    tests_data = get_tests_chunks(revision, platform, suite)
-                    if len(tests_data) == 0:
-                        logger.warn(
-                            "No tests found for platform {} and suite {}.".format(
-                                platform, suite
-                            )
-                        )
-                        continue
-
-                    logger.info(
-                        "Adding tests for platform {} and suite {}".format(
-                            platform, suite
-                        )
-                    )
-                    task_names = tests_data["run.key"]
-                    test_iter = enumerate(tests_data["result.test"])
-                    chunk_test_iter = (
-                        (platform, taskcluster.get_chunk(task_names[i]), test)
-                        for i, test in test_iter
-                    )
-                    c.executemany(
-                        "INSERT INTO chunk_to_test VALUES (?,?,?)", chunk_test_iter
-                    )
-
-            logger.info("Populating file_to_chunk table.")
-            for future in concurrent.futures.as_completed(futures):
-                (platform, chunk) = futures[future]
-                files = future.result()
-                c.executemany(
-                    "INSERT INTO file_to_chunk VALUES (?,?,?)",
-                    ((f, platform, chunk) for f in files),
+            def chunk_test_iter():
+                test_iter = enumerate(tests_data["result.test"])
+                return (
+                    (platform, taskcluster.get_chunk(task_names[i]), test)
+                    for i, test in test_iter
                 )
 
-    logger.info("Writing the chunk mapping archive at {}.".format(tarxz_file))
-    with tarfile.open(tarxz_file, "w:xz") as tar:
-        tar.add(sqlite_file, os.path.basename(sqlite_file))
+            if is_chunk_only_suite(suite):
+                per_test_cursor.executemany(
+                    "INSERT INTO chunk_to_test VALUES (?,?,?)", chunk_test_iter()
+                )
+
+            per_chunk_cursor.executemany(
+                "INSERT INTO chunk_to_test VALUES (?,?,?)", chunk_test_iter()
+            )
+
+    logger.info("Populating file_to_chunk table.")
+    for future in concurrent.futures.as_completed(futures):
+        (platform, chunk) = futures[future]
+        files = future.result()
+
+        suite = taskcluster.get_suite(chunk)
+        if is_chunk_only_suite(suite):
+            per_test_cursor.executemany(
+                "INSERT INTO file_to_chunk VALUES (?,?,?)",
+                ((f, platform, chunk) for f in files),
+            )
+
+        per_chunk_cursor.executemany(
+            "INSERT INTO file_to_chunk VALUES (?,?,?)",
+            ((f, platform, chunk) for f in files),
+        )
+
+
+def generate(repo_dir, revision, artifactsHandler, out_dir="."):
+    logger.info("Generating chunk mapping...")
+
+    # TODO: Change chunk_mapping to test_mapping, but the name should be synced in mozilla-central
+    # in the coverage selector!
+    per_test_sqlite_file = os.path.join(out_dir, "chunk_mapping.sqlite")
+    per_test_tarxz_file = os.path.join(out_dir, "chunk_mapping.tar.xz")
+
+    per_chunk_sqlite_file = os.path.join(out_dir, "per_chunk_mapping.sqlite")
+    per_chunk_tarxz_file = os.path.join(out_dir, "per_chunk_mapping.tar.xz")
+
+    logger.info("Creating tables.")
+    with sqlite3.connect(per_test_sqlite_file) as per_test_conn:
+        per_test_cursor = per_test_conn.cursor()
+
+        with sqlite3.connect(per_chunk_sqlite_file) as per_chunk_conn:
+            per_chunk_cursor = per_chunk_conn.cursor()
+
+            with ThreadPoolExecutor(max_workers=4) as executor:
+                _inner_generate(
+                    repo_dir,
+                    revision,
+                    artifactsHandler,
+                    per_test_cursor,
+                    per_chunk_cursor,
+                    executor,
+                )
+
+    logger.info(
+        "Writing the per-test mapping archive at {}.".format(per_test_tarxz_file)
+    )
+    with tarfile.open(per_test_tarxz_file, "w:xz") as tar:
+        tar.add(per_test_sqlite_file, os.path.basename(per_test_sqlite_file))
+
+    logger.info(
+        "Writing the per-chunk mapping archive at {}.".format(per_chunk_tarxz_file)
+    )
+    with tarfile.open(per_chunk_tarxz_file, "w:xz") as tar:
+        tar.add(per_chunk_sqlite_file, os.path.basename(per_chunk_sqlite_file))
