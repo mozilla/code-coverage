@@ -109,48 +109,45 @@ def download_artifact(artifact_path, task_id, artifact_name):
     retry(perform_download)
 
 
-BUILD_PLATFORMS = [
-    "build-linux64-ccov/debug",
-    "build-win64-ccov/debug",
-    "build-android-test-ccov/opt",
-]
-
-
-TEST_PLATFORMS = [
-    "test-linux64-ccov/debug",
-    "test-windows10-64-ccov/debug",
-    "test-android-em-4.3-arm7-api-16-ccov/debug",
-] + BUILD_PLATFORMS
-
-
 def is_coverage_task(task):
-    return any(task["task"]["metadata"]["name"].startswith(t) for t in TEST_PLATFORMS)
+    return get_suite(task) != "build"
 
 
-def get_chunk(name):
-    # Some tests are run on build machines, we define a placeholder chunk for those.
-    if name in BUILD_PLATFORMS:
+def get_chunk(task):
+    suite = get_suite(task)
+    chunks = task["extra"].get("chunks", {})
+    if "current" in chunks:
+        return f'{suite}-{chunks["current"]}'
+    return suite
+
+
+def get_suite(task):
+    assert isinstance(task, dict)
+    tags = task["tags"]
+    extra = task["extra"]
+    treeherder = extra.get("treeherder", {})
+
+    if treeherder.get("jobKind") == "build":
         return "build"
-
-    for t in TEST_PLATFORMS:
-        if name.startswith(t):
-            name = name[len(t) + 1 :]
-            break
-    return "-".join([p for p in name.split("-") if p != "e10s"])
-
-
-def get_suite(chunk_name):
-    return "-".join([p for p in chunk_name.split("-") if not p.isdigit()])
-
-
-def get_platform(name):
-    if "linux" in name:
-        return "linux"
-    elif "win" in name:
-        return "windows"
-    elif "android-test" in name:
-        return "android-test"
-    elif "android-em" in name:
-        return "android-emulator"
+    elif "suite" in extra:
+        if isinstance(extra["suite"], dict):
+            return extra["suite"]["name"]
+        return extra["suite"]
     else:
+        return tags.get("test-type")
+
+    raise Exception("Unknown chunk")
+
+
+def get_platform(task):
+    assert isinstance(task, dict)
+    tags = task.get("tags", {})
+    platform = tags.get("os")
+    if not platform:
         raise Exception("Unknown platform")
+
+    # Weird case for android build on Linux docker
+    if platform == "linux" and tags.get("android-stuff"):
+        return "android"
+
+    return platform

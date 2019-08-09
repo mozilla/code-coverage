@@ -1,0 +1,163 @@
+{
+    "created": "2019-08-07T21:54:28.511Z",
+    "deadline": "2019-08-08T21:54:28.511Z",
+    "dependencies": [
+        "Cs2T4_a0R8iH8ehZwDKkNg",
+        "Gk89DrymQw-mUJsTOKwiUQ",
+        "LFxhtjbxTg6AwyCP8Wk0Vw",
+        "T9HmXbrnT4y-fk7ikXyalw",
+        "WtlBHsaBQni-PcKdJD7FwQ",
+        "aRGv3xq8S2-B0iqD2A9zVA",
+        "bTuzhPGaRkObDO1CbPNpRA",
+        "cYYO3myCSG6HvQ5AU_59vA",
+        "eSvT_7mITMGkjllEwe2ZRw",
+        "PUZr6C8WR9Cmw3LeL9qotw"
+    ],
+    "expires": "2020-08-06T21:54:28.511Z",
+    "extra": {
+        "chainOfTrust": {
+            "inputs": {
+                "docker-image": "LFxhtjbxTg6AwyCP8Wk0Vw"
+            }
+        },
+        "index": {
+            "rank": 0
+        },
+        "parent": "PUZr6C8WR9Cmw3LeL9qotw",
+        "treeherder": {
+            "collection": {
+                "debug": true
+            },
+            "jobKind": "build",
+            "machine": {
+                "platform": "linux64-ccov"
+            },
+            "symbol": "B",
+            "tier": 2
+        },
+        "treeherder-platform": "linux64-ccov/debug"
+    },
+    "metadata": {
+        "description": "Linux64-CCov Debug ([Treeherder push](https://treeherder.mozilla.org/#/jobs?repo=mozilla-central&revision=3a71baea939144b4ec37805a932f0250c74986b1))",
+        "name": "build-linux64-ccov/debug",
+        "owner": "shindli@mozilla.com",
+        "source": "https://hg.mozilla.org/mozilla-central/file/3a71baea939144b4ec37805a932f0250c74986b1/taskcluster/ci/build"
+    },
+    "payload": {
+        "artifacts": {
+            "public/build": {
+                "expires": "2020-08-06T21:54:28.511Z",
+                "path": "/builds/worker/artifacts/",
+                "type": "directory"
+            },
+            "public/code-coverage-grcov.zip": {
+                "expires": "2020-08-06T21:54:28.511Z",
+                "path": "/builds/worker/workspace/build/src/obj-firefox/code-coverage-grcov.zip",
+                "type": "file"
+            },
+            "public/logs": {
+                "expires": "2020-08-06T21:54:28.511Z",
+                "path": "/builds/worker/logs/",
+                "type": "directory"
+            }
+        },
+        "cache": {
+            "gecko-level-3-checkouts-v3-dfc53bf3da270f670474": "/builds/worker/checkouts",
+            "gecko-level-3-mozilla-central-build-linux64-ccov-debug-workspace-v3-dfc53bf3da270f670474": "/builds/worker/workspace",
+            "gecko-level-3-tooltool-cache-v3-dfc53bf3da270f670474": "/builds/worker/tooltool-cache"
+        },
+        "command": [
+            "/builds/worker/bin/run-task",
+            "--gecko-checkout=/builds/worker/workspace/build/src",
+            "--fetch-hgfingerprint",
+            "--",
+            "/builds/worker/workspace/build/src/taskcluster/scripts/builder/build-linux.sh"
+        ],
+        "env": {
+            "ACCEPTED_MAR_CHANNEL_IDS": "firefox-mozilla-central",
+            "EXTRA_MOZHARNESS_CONFIG": "{\"update_channel\": \"nightly\", \"mozconfig_variant\": \"code-coverage-debug\"}",
+            "FORCE_GCC": "1",
+            "GECKO_BASE_REPOSITORY": "https://hg.mozilla.org/mozilla-unified",
+            "GECKO_HEAD_REPOSITORY": "https://hg.mozilla.org/mozilla-central",
+            "GECKO_HEAD_REV": "3a71baea939144b4ec37805a932f0250c74986b1",
+            "GECKO_PATH": "/builds/worker/workspace/build/src",
+            "HG_STORE_PATH": "/builds/worker/checkouts/hg-store",
+            "MAR_CHANNEL_ID": "firefox-mozilla-central",
+            "MH_BRANCH": "mozilla-central",
+            "MH_BUILD_POOL": "taskcluster",
+            "MH_CUSTOM_BUILD_VARIANT_CFG": "code-coverage-debug",
+            "MOZHARNESS_ACTIONS": "get-secrets build check-test",
+            "MOZHARNESS_CONFIG": "builds/releng_base_firefox.py builds/releng_base_linux_64_builds.py",
+            "MOZHARNESS_SCRIPT": "mozharness/scripts/fx_desktop_build.py",
+            "MOZ_AUTOMATION": "1",
+            "MOZ_BUILD_DATE": "20190807215212",
+            "MOZ_DISABLE_FULL_SYMBOLS": "1",
+            "MOZ_FETCHES": "[{\"artifact\": \"public/build/grcov.tar.xz\", \"extract\": true, \"task\": \"Cs2T4_a0R8iH8ehZwDKkNg\"}]",
+            "MOZ_FETCHES_DIR": "fetches",
+            "MOZ_SCM_LEVEL": "3",
+            "MOZ_SOURCE_CHANGESET": "3a71baea939144b4ec37805a932f0250c74986b1",
+            "MOZ_SOURCE_REPO": "https://hg.mozilla.org/mozilla-central",
+            "MOZ_TOOLCHAINS": "public/build/clang.tar.xz@aRGv3xq8S2-B0iqD2A9zVA public/build/rustc.tar.xz@Gk89DrymQw-mUJsTOKwiUQ public/build/gcc.tar.xz@eSvT_7mITMGkjllEwe2ZRw public/build/cbindgen.tar.xz@bTuzhPGaRkObDO1CbPNpRA public/build/sccache.tar.xz@cYYO3myCSG6HvQ5AU_59vA public/build/nasm.tar.bz2@T9HmXbrnT4y-fk7ikXyalw public/build/node.tar.xz@WtlBHsaBQni-PcKdJD7FwQ",
+            "NEED_XVFB": "true",
+            "PYTHONUNBUFFERED": "1",
+            "SCCACHE_IDLE_TIMEOUT": "0",
+            "TASKCLUSTER_CACHES": "/builds/worker/checkouts;/builds/worker/tooltool-cache;/builds/worker/workspace",
+            "TASKCLUSTER_VOLUMES": "/builds/worker/checkouts;/builds/worker/tooltool-cache;/builds/worker/workspace",
+            "TOOLTOOL_CACHE": "/builds/worker/tooltool-cache",
+            "UPLOAD_DIR": "/builds/worker/artifacts/",
+            "USE_SCCACHE": "1"
+        },
+        "features": {
+            "chainOfTrust": true,
+            "taskclusterProxy": true
+        },
+        "image": {
+            "path": "public/image.tar.zst",
+            "taskId": "LFxhtjbxTg6AwyCP8Wk0Vw",
+            "type": "task-image"
+        },
+        "maxRunTime": 7200,
+        "onExitStatus": {
+            "purgeCaches": [
+                72
+            ],
+            "retry": [
+                4,
+                72
+            ]
+        }
+    },
+    "priority": "medium",
+    "provisionerId": "aws-provisioner-v1",
+    "requires": "all-completed",
+    "retries": 5,
+    "routes": [
+        "index.gecko.v2.mozilla-central.latest.firefox.linux64-ccov-debug",
+        "index.gecko.v2.mozilla-central.pushdate.2019.08.07.20190807215212.firefox.linux64-ccov-debug",
+        "index.gecko.v2.mozilla-central.pushlog-id.36406.firefox.linux64-ccov-debug",
+        "index.gecko.v2.mozilla-central.revision.3a71baea939144b4ec37805a932f0250c74986b1.firefox.linux64-ccov-debug",
+        "index.gecko.v2.trunk.revision.3a71baea939144b4ec37805a932f0250c74986b1.firefox.linux64-ccov-debug",
+        "tc-treeherder.v2.mozilla-central.3a71baea939144b4ec37805a932f0250c74986b1.36406"
+    ],
+    "schedulerId": "gecko-level-3",
+    "scopes": [
+        "secrets:get:project/releng/gecko/build/level-3/*",
+        "secrets:get:project/taskcluster/gecko/hgfingerprint",
+        "secrets:get:project/taskcluster/gecko/hgmointernal",
+        "project:releng:services/tooltool/api/download/public",
+        "assume:project:taskcluster:gecko:level-3-sccache-buckets",
+        "docker-worker:cache:gecko-level-3-mozilla-central-build-linux64-ccov-debug-workspace-v3-dfc53bf3da270f670474",
+        "docker-worker:cache:gecko-level-3-checkouts-v3-dfc53bf3da270f670474",
+        "docker-worker:cache:gecko-level-3-tooltool-cache-v3-dfc53bf3da270f670474"
+    ],
+    "tags": {
+        "createdForUser": "shindli@mozilla.com",
+        "kind": "build",
+        "label": "build-linux64-ccov/debug",
+        "os": "linux",
+        "retrigger": "false",
+        "worker-implementation": "docker-worker"
+    },
+    "taskGroupId": "PUZr6C8WR9Cmw3LeL9qotw",
+    "workerType": "gecko-3-b-linux"
+}

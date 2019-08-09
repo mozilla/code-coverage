@@ -1,0 +1,159 @@
+{
+  "provisionerId": "aws-provisioner-v1",
+  "workerType": "gecko-3-b-android",
+  "schedulerId": "gecko-level-3",
+  "taskGroupId": "Mu6w3n-dS9GOfrv6wGOtvg",
+  "dependencies": [
+    "CGQi0Z1nQhizLPmm9d3wYQ",
+    "L0gYcGJ1QgeMRebLMme27Q",
+    "RZMFIeVKTqekWYEP91wu8w",
+    "SDBWKWVPTC6SI4o4cNXn0w",
+    "fn4N8jQtRZWbuUAjlqXFLA",
+    "Mu6w3n-dS9GOfrv6wGOtvg"
+  ],
+  "requires": "all-completed",
+  "routes": [
+    "index.gecko.v2.mozilla-central.latest.mobile.android-test-ccov",
+    "index.gecko.v2.mozilla-central.pushdate.2019.03.28.20190328173141.mobile.android-test-ccov",
+    "index.gecko.v2.mozilla-central.pushlog-id.35772.mobile.android-test-ccov",
+    "index.gecko.v2.mozilla-central.revision.e31357c7759379d2279b6883cb09c91997bfaa5d.mobile.android-test-ccov",
+    "index.gecko.v2.trunk.revision.e31357c7759379d2279b6883cb09c91997bfaa5d.mobile.android-test-ccov",
+    "tc-treeherder.v2.mozilla-central.e31357c7759379d2279b6883cb09c91997bfaa5d.35772"
+  ],
+  "priority": "medium",
+  "retries": 5,
+  "created": "2019-03-28T17:38:38.640Z",
+  "deadline": "2019-03-29T17:38:38.640Z",
+  "expires": "2020-03-27T17:38:38.640Z",
+  "scopes": [
+    "queue:get-artifact:project/gecko/android-sdk/*",
+    "secrets:get:project/taskcluster/gecko/hgfingerprint",
+    "docker-worker:relengapi-proxy:tooltool.download.public",
+    "docker-worker:relengapi-proxy:tooltool.download.internal",
+    "secrets:get:project/releng/gecko/build/level-3/*",
+    "docker-worker:cache:gecko-level-3-mozilla-central-build-android-test-ccov-opt-workspace-v3-33ea6ead87f10b63cd64",
+    "docker-worker:cache:gecko-level-3-checkouts-v3-33ea6ead87f10b63cd64",
+    "docker-worker:cache:gecko-level-3-tooltool-cache-v3-33ea6ead87f10b63cd64"
+  ],
+  "payload": {
+    "onExitStatus": {
+      "retry": [
+        4,
+        72
+      ],
+      "purgeCaches": [
+        72
+      ]
+    },
+    "maxRunTime": 7200,
+    "image": {
+      "path": "public/image.tar.zst",
+      "type": "task-image",
+      "taskId": "fn4N8jQtRZWbuUAjlqXFLA"
+    },
+    "cache": {
+      "gecko-level-3-tooltool-cache-v3-33ea6ead87f10b63cd64": "/builds/worker/tooltool-cache",
+      "gecko-level-3-checkouts-v3-33ea6ead87f10b63cd64": "/builds/worker/checkouts",
+      "gecko-level-3-mozilla-central-build-android-test-ccov-opt-workspace-v3-33ea6ead87f10b63cd64": "/builds/worker/workspace"
+    },
+    "artifacts": {
+      "public/logs": {
+        "path": "/builds/worker/logs/",
+        "expires": "2020-03-27T17:38:38.640Z",
+        "type": "directory"
+      },
+      "public/build": {
+        "path": "/builds/worker/artifacts/",
+        "expires": "2020-03-27T17:38:38.640Z",
+        "type": "directory"
+      },
+      "public/code-coverage-grcov.zip": {
+        "path": "/builds/worker/workspace/build/src/obj-firefox/code-coverage-grcov.zip",
+        "expires": "2020-03-27T17:38:38.640Z",
+        "type": "file"
+      }
+    },
+    "command": [
+      "/builds/worker/bin/run-task",
+      "--gecko-checkout",
+      "/builds/worker/workspace/build/src",
+      "--",
+      "/builds/worker/workspace/build/src/taskcluster/scripts/builder/build-linux.sh"
+    ],
+    "env": {
+      "MOZ_AUTOMATION": "1",
+      "MOZ_SOURCE_CHANGESET": "e31357c7759379d2279b6883cb09c91997bfaa5d",
+      "MOZ_FETCHES": "[{\"artifact\": \"public/build/grcov.tar.xz\", \"extract\": true, \"task\": \"CGQi0Z1nQhizLPmm9d3wYQ\"}]",
+      "PERFHERDER_EXTRA_OPTIONS": "android-test-ccov",
+      "TOOLTOOL_CACHE": "/builds/worker/tooltool-cache",
+      "PYTHONUNBUFFERED": "1",
+      "MOZ_FETCHES_DIR": "/builds/worker/fetches",
+      "MOZHARNESS_SCRIPT": "mozharness/scripts/fx_desktop_build.py",
+      "MOZ_BUILD_DATE": "20190328173141",
+      "MH_BUILD_POOL": "taskcluster",
+      "HG_STORE_PATH": "/builds/worker/checkouts/hg-store",
+      "MH_CUSTOM_BUILD_VARIANT_CFG": "android-test-ccov",
+      "MOZHARNESS_ACTIONS": "get-secrets build",
+      "GECKO_PATH": "/builds/worker/workspace/build/src",
+      "GECKO_HEAD_REPOSITORY": "https://hg.mozilla.org/mozilla-central",
+      "EXTRA_MOZHARNESS_CONFIG": "{\"update_channel\": \"nightly\"}",
+      "SCCACHE_DISABLE": "1",
+      "MOZ_TOOLCHAINS": "public/build/android-gradle-dependencies.tar.xz@RZMFIeVKTqekWYEP91wu8w project/gecko/android-sdk/android-sdk-linux.tar.xz@L0gYcGJ1QgeMRebLMme27Q public/build/node.tar.xz@SDBWKWVPTC6SI4o4cNXn0w",
+      "MOZ_SOURCE_REPO": "https://hg.mozilla.org/mozilla-central",
+      "GECKO_HEAD_REV": "e31357c7759379d2279b6883cb09c91997bfaa5d",
+      "MH_BRANCH": "mozilla-central",
+      "MOZ_SCM_LEVEL": "3",
+      "GECKO_BASE_REPOSITORY": "https://hg.mozilla.org/mozilla-unified",
+      "NEED_XVFB": "false",
+      "MOZ_DISABLE_FULL_SYMBOLS": "1",
+      "TASKCLUSTER_CACHES": "/builds/worker/checkouts;/builds/worker/tooltool-cache;/builds/worker/workspace",
+      "GRADLE_USER_HOME": "/builds/worker/workspace/build/src/mobile/android/gradle/dotgradle-offline",
+      "TASKCLUSTER_VOLUMES": "/builds/worker/checkouts;/builds/worker/tooltool-cache;/builds/worker/workspace",
+      "MOZHARNESS_CONFIG": "builds/releng_base_android_64_builds.py"
+    },
+    "features": {
+      "taskclusterProxy": true,
+      "relengAPIProxy": true,
+      "chainOfTrust": true
+    }
+  },
+  "metadata": {
+    "owner": "opoprus@mozilla.com",
+    "source": "https://hg.mozilla.org/mozilla-central/file/e31357c7759379d2279b6883cb09c91997bfaa5d/taskcluster/ci/build",
+    "description": "Android armv7 unit test coverage report ([Treeherder push](https://treeherder.mozilla.org/#/jobs?repo=mozilla-central&revision=e31357c7759379d2279b6883cb09c91997bfaa5d))",
+    "name": "build-android-test-ccov/opt"
+  },
+  "tags": {
+    "kind": "build",
+    "worker-implementation": "docker-worker",
+    "createdForUser": "opoprus@mozilla.com",
+    "label": "build-android-test-ccov/opt",
+    "os": "linux",
+    "android-stuff": "true"
+  },
+  "extra": {
+    "index": {
+      "rank": 1553794301
+    },
+    "chainOfTrust": {
+      "inputs": {
+        "docker-image": "fn4N8jQtRZWbuUAjlqXFLA"
+      }
+    },
+    "treeherder": {
+      "jobKind": "build",
+      "groupSymbol": "A",
+      "collection": {
+        "opt": true
+      },
+      "machine": {
+        "platform": "android-4-0-armv7-api16"
+      },
+      "groupName": "Android Gradle tests",
+      "tier": 1,
+      "symbol": "test-ccov"
+    },
+    "treeherder-platform": "android-4-0-armv7-api16/opt",
+    "parent": "Mu6w3n-dS9GOfrv6wGOtvg"
+  }
+}

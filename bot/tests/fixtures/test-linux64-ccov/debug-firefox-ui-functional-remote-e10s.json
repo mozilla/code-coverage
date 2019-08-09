@@ -1,0 +1,150 @@
+{
+    "created": "2019-08-07T21:54:50.966Z",
+    "deadline": "2019-08-08T21:54:50.966Z",
+    "dependencies": [
+        "Cs2T4_a0R8iH8ehZwDKkNg",
+        "I8yOrSoxTby-wIwdThZZZw",
+        "OvM-EZLZQgSyXr67GhKKCw"
+    ],
+    "expires": "2020-08-06T21:54:50.966Z",
+    "extra": {
+        "chunks": {
+            "current": 1,
+            "total": 1
+        },
+        "index": {
+            "rank": 0
+        },
+        "parent": "PUZr6C8WR9Cmw3LeL9qotw",
+        "suite": "firefox-ui-functional-remote",
+        "treeherder": {
+            "collection": {
+                "debug": true
+            },
+            "groupName": "Firefox functional tests (remote)",
+            "groupSymbol": "Fxfn-r",
+            "jobKind": "test",
+            "machine": {
+                "platform": "linux64-ccov"
+            },
+            "symbol": "en-US",
+            "tier": 2
+        },
+        "treeherder-platform": "linux64-ccov/debug"
+    },
+    "metadata": {
+        "description": "Firefox-ui-tests functional run ([Treeherder push](https://treeherder.mozilla.org/#/jobs?repo=mozilla-central&revision=3a71baea939144b4ec37805a932f0250c74986b1))",
+        "name": "test-linux64-ccov/debug-firefox-ui-functional-remote-e10s",
+        "owner": "shindli@mozilla.com",
+        "source": "https://hg.mozilla.org/mozilla-central/file/3a71baea939144b4ec37805a932f0250c74986b1/taskcluster/ci/test"
+    },
+    "payload": {
+        "artifacts": {
+            "public/logs/": {
+                "expires": "2020-08-06T21:54:50.966Z",
+                "path": "/builds/worker/workspace/logs/",
+                "type": "directory"
+            },
+            "public/test": {
+                "expires": "2020-08-06T21:54:50.966Z",
+                "path": "/builds/worker/artifacts/",
+                "type": "directory"
+            },
+            "public/test_info/": {
+                "expires": "2020-08-06T21:54:50.966Z",
+                "path": "/builds/worker/workspace/build/blobber_upload_dir/",
+                "type": "directory"
+            }
+        },
+        "cache": {
+            "gecko-level-3-checkouts-v3-dfc53bf3da270f670474": "/builds/worker/checkouts",
+            "gecko-level-3-tooltool-cache-v3-dfc53bf3da270f670474": "/builds/worker/tooltool-cache"
+        },
+        "command": [
+            "/builds/worker/bin/run-task",
+            "--fetch-hgfingerprint",
+            "--",
+            "/builds/worker/bin/test-linux.sh",
+            "--tag",
+            "remote",
+            "--code-coverage",
+            "--setpref=media.peerconnection.mtransport_process=false",
+            "--setpref=network.process.enabled=false",
+            "--allow-software-gl-layers",
+            "--download-symbols=true"
+        ],
+        "env": {
+            "ENABLE_E10S": "true",
+            "EXTRA_MOZHARNESS_CONFIG": "{\"test_packages_url\": \"https://queue.taskcluster.net/v1/task/OvM-EZLZQgSyXr67GhKKCw/artifacts/public/build/target.test_packages.json\", \"installer_url\": \"https://queue.taskcluster.net/v1/task/OvM-EZLZQgSyXr67GhKKCw/artifacts/public/build/target.tar.bz2\"}",
+            "GECKO_BASE_REPOSITORY": "https://hg.mozilla.org/mozilla-unified",
+            "GECKO_HEAD_REPOSITORY": "https://hg.mozilla.org/mozilla-central",
+            "GECKO_HEAD_REV": "3a71baea939144b4ec37805a932f0250c74986b1",
+            "GECKO_PATH": "/builds/worker/checkouts/gecko",
+            "HG_STORE_PATH": "/builds/worker/checkouts/hg-store",
+            "MOZHARNESS_CONFIG": "firefox_ui_tests/taskcluster.py remove_executables.py",
+            "MOZHARNESS_SCRIPT": "firefox_ui_tests/functional.py",
+            "MOZHARNESS_URL": "https://queue.taskcluster.net/v1/task/OvM-EZLZQgSyXr67GhKKCw/artifacts/public/build/mozharness.zip",
+            "MOZILLA_BUILD_URL": "https://queue.taskcluster.net/v1/task/OvM-EZLZQgSyXr67GhKKCw/artifacts/public/build/target.tar.bz2",
+            "MOZ_AUTOMATION": "1",
+            "MOZ_FETCHES": "[{\"artifact\": \"public/build/grcov.tar.xz\", \"extract\": true, \"task\": \"Cs2T4_a0R8iH8ehZwDKkNg\"}]",
+            "MOZ_FETCHES_DIR": "fetches",
+            "MOZ_NODE_PATH": "/usr/local/bin/node",
+            "MOZ_SCM_LEVEL": "3",
+            "NEED_COMPIZ": "true",
+            "NEED_PULSEAUDIO": "true",
+            "NEED_WINDOW_MANAGER": "true",
+            "SCCACHE_DISABLE": "1",
+            "TASKCLUSTER_CACHES": "/builds/worker/checkouts;/builds/worker/tooltool-cache",
+            "TASKCLUSTER_VOLUMES": "/builds/worker/.cache;/builds/worker/checkouts;/builds/worker/tooltool-cache;/builds/worker/workspace",
+            "TOOLTOOL_CACHE": "/builds/worker/tooltool-cache",
+            "WORKING_DIR": "/builds/worker"
+        },
+        "features": {
+            "allowPtrace": true,
+            "taskclusterProxy": true
+        },
+        "image": {
+            "path": "public/image.tar.zst",
+            "taskId": "I8yOrSoxTby-wIwdThZZZw",
+            "type": "task-image"
+        },
+        "maxRunTime": 5400,
+        "onExitStatus": {
+            "purgeCaches": [
+                72
+            ],
+            "retry": [
+                4,
+                72
+            ]
+        },
+        "supersederUrl": "https://coalesce.mozilla-releng.net/v1/list/3600/5/mozilla-central.2b645a937bdbb303542e"
+    },
+    "priority": "medium",
+    "provisionerId": "aws-provisioner-v1",
+    "requires": "all-completed",
+    "retries": 5,
+    "routes": [
+        "tc-treeherder.v2.mozilla-central.3a71baea939144b4ec37805a932f0250c74986b1.36406",
+        "coalesce.v1.mozilla-central.2b645a937bdbb303542e"
+    ],
+    "schedulerId": "gecko-level-3",
+    "scopes": [
+        "secrets:get:project/taskcluster/gecko/hgfingerprint",
+        "secrets:get:project/taskcluster/gecko/hgmointernal",
+        "project:releng:services/tooltool/api/download/public",
+        "docker-worker:feature:allowPtrace",
+        "docker-worker:cache:gecko-level-3-checkouts-v3-dfc53bf3da270f670474",
+        "docker-worker:cache:gecko-level-3-tooltool-cache-v3-dfc53bf3da270f670474"
+    ],
+    "tags": {
+        "createdForUser": "shindli@mozilla.com",
+        "kind": "test",
+        "label": "test-linux64-ccov/debug-firefox-ui-functional-remote-e10s",
+        "os": "linux",
+        "retrigger": "true",
+        "worker-implementation": "docker-worker"
+    },
+    "taskGroupId": "PUZr6C8WR9Cmw3LeL9qotw",
+    "workerType": "gecko-t-linux-xlarge"
+}

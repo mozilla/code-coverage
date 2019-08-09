@@ -1,0 +1,144 @@
+{
+    "created": "2019-08-07T21:54:27.031Z",
+    "deadline": "2019-08-08T21:54:27.031Z",
+    "dependencies": [
+        "AR2tD98sRXO3qlHtZIhAFA",
+        "DVFc3YzHTc2jWwVfyXDVQw",
+        "M94-BZ6ZQM6rgBI2K3U4mA",
+        "OBb8ONVkRf265Aq145ikeQ",
+        "WfFJLWbiSimhm-Eq_6St_g",
+        "bVpuwUYmQCqjPY-Ynu1YZQ",
+        "dPnEY7lxSl-gzcC7X83PjA",
+        "ezPFOE87TraJEHbAaZrnHg",
+        "PUZr6C8WR9Cmw3LeL9qotw"
+    ],
+    "expires": "2020-08-06T21:54:27.031Z",
+    "extra": {
+        "index": {
+            "rank": 0
+        },
+        "parent": "PUZr6C8WR9Cmw3LeL9qotw",
+        "treeherder": {
+            "collection": {
+                "ccov": true
+            },
+            "jobKind": "build",
+            "machine": {
+                "platform": "windows2012-64"
+            },
+            "symbol": "B",
+            "tier": 2
+        },
+        "treeherder-platform": "windows2012-64/ccov"
+    },
+    "metadata": {
+        "description": "Win64 Debug Code Coverage ([Treeherder push](https://treeherder.mozilla.org/#/jobs?repo=mozilla-central&revision=3a71baea939144b4ec37805a932f0250c74986b1))",
+        "name": "build-win64-ccov/debug",
+        "owner": "shindli@mozilla.com",
+        "source": "https://hg.mozilla.org/mozilla-central/file/3a71baea939144b4ec37805a932f0250c74986b1/taskcluster/ci/build"
+    },
+    "payload": {
+        "artifacts": [
+            {
+                "name": "public/code-coverage-grcov.zip",
+                "path": "build\\src\\obj-firefox\\code-coverage-grcov.zip",
+                "type": "file"
+            },
+            {
+                "name": "public/logs",
+                "path": "logs",
+                "type": "directory"
+            },
+            {
+                "name": "public/build",
+                "path": "public/build",
+                "type": "directory"
+            }
+        ],
+        "command": [
+            ":: sccache currently uses the full compiler commandline as input to the\n:: cache hash key, so create a symlink to the task dir and build from\n:: the symlink dir to get consistent paths.\nif exist z:\\build rmdir z:\\build",
+            "mklink /d z:\\build %cd%",
+            "icacls z:\\build /grant *S-1-1-0:D /L",
+            "cd /d z:\\build",
+            "C:/mozilla-build/python3/python3.exe run-task --gecko-checkout=./build/src -- c:/mozilla-build/python/python.exe %GECKO_PATH%/testing/mozharness/scripts/fx_desktop_build.py --config builds/releng_base_firefox.py --config builds/taskcluster_base_windows.py --config builds/taskcluster_base_win64.py --config builds/taskcluster_sub_win64/ccov_debug.py --branch mozilla-central --work-dir %cd:Z:=z:%\\build --append-env-variables-from-configs"
+        ],
+        "env": {
+            "ACCEPTED_MAR_CHANNEL_IDS": "firefox-mozilla-central",
+            "EXTRA_MOZHARNESS_CONFIG": "{\"update_channel\": \"nightly\", \"mozconfig_variant\": \"code-coverage\"}",
+            "GECKO_BASE_REPOSITORY": "https://hg.mozilla.org/mozilla-unified",
+            "GECKO_HEAD_REPOSITORY": "https://hg.mozilla.org/mozilla-central",
+            "GECKO_HEAD_REV": "3a71baea939144b4ec37805a932f0250c74986b1",
+            "GECKO_PATH": "./build/src",
+            "HG_STORE_PATH": "y:/hg-shared",
+            "MAR_CHANNEL_ID": "firefox-mozilla-central",
+            "MH_BRANCH": "mozilla-central",
+            "MOZ_AUTOMATION": "1",
+            "MOZ_BUILD_DATE": "20190807215212",
+            "MOZ_DISABLE_FULL_SYMBOLS": "1",
+            "MOZ_FETCHES": "[{\"artifact\": \"public/build/grcov.tar.bz2\", \"extract\": true, \"task\": \"bVpuwUYmQCqjPY-Ynu1YZQ\"}]",
+            "MOZ_FETCHES_DIR": "fetches",
+            "MOZ_SCM_LEVEL": "3",
+            "MOZ_SIMPLE_PACKAGE_NAME": "target",
+            "MOZ_SOURCE_CHANGESET": "3a71baea939144b4ec37805a932f0250c74986b1",
+            "MOZ_SOURCE_REPO": "https://hg.mozilla.org/mozilla-central",
+            "MOZ_TOOLCHAINS": "public/build/clang.tar.bz2@dPnEY7lxSl-gzcC7X83PjA public/build/rustc.tar.xz@ezPFOE87TraJEHbAaZrnHg public/build/rust-size.tar.bz2@DVFc3YzHTc2jWwVfyXDVQw public/build/cbindgen.tar.bz2@M94-BZ6ZQM6rgBI2K3U4mA public/build/sccache.tar.bz2@AR2tD98sRXO3qlHtZIhAFA public/build/nasm.tar.bz2@OBb8ONVkRf265Aq145ikeQ public/build/node.tar.bz2@WfFJLWbiSimhm-Eq_6St_g",
+            "PYTHONPATH": "./build/src/testing/mozbase/manifestparser;./build/src/testing/mozbase/mozinfo;./build/src/testing/mozbase/mozfile;./build/src/testing/mozbase/mozprocess;./build/src/third_party/python/six",
+            "SCCACHE_IDLE_TIMEOUT": "0",
+            "TOOLTOOL_MANIFEST": "browser/config/tooltool-manifests/win64/releng.manifest",
+            "USE_SCCACHE": "1"
+        },
+        "features": {
+            "chainOfTrust": true,
+            "taskclusterProxy": true
+        },
+        "maxRunTime": 7200,
+        "mounts": [
+            {
+                "content": {
+                    "url": "https://hg.mozilla.org/mozilla-central/raw-file/3a71baea939144b4ec37805a932f0250c74986b1/taskcluster/scripts/run-task"
+                },
+                "file": "./run-task"
+            },
+            {
+                "content": {
+                    "url": "https://hg.mozilla.org/mozilla-central/raw-file/3a71baea939144b4ec37805a932f0250c74986b1/taskcluster/scripts/misc/fetch-content"
+                },
+                "file": "./fetch-content"
+            }
+        ],
+        "onExitStatus": {
+            "retry": [
+                1073807364,
+                3221225786
+            ]
+        }
+    },
+    "priority": "medium",
+    "provisionerId": "aws-provisioner-v1",
+    "requires": "all-completed",
+    "retries": 5,
+    "routes": [
+        "index.gecko.v2.mozilla-central.latest.firefox.win64-ccov-debug",
+        "index.gecko.v2.mozilla-central.pushdate.2019.08.07.20190807215212.firefox.win64-ccov-debug",
+        "index.gecko.v2.mozilla-central.pushlog-id.36406.firefox.win64-ccov-debug",
+        "index.gecko.v2.mozilla-central.revision.3a71baea939144b4ec37805a932f0250c74986b1.firefox.win64-ccov-debug",
+        "index.gecko.v2.trunk.revision.3a71baea939144b4ec37805a932f0250c74986b1.firefox.win64-ccov-debug",
+        "tc-treeherder.v2.mozilla-central.3a71baea939144b4ec37805a932f0250c74986b1.36406"
+    ],
+    "schedulerId": "gecko-level-3",
+    "scopes": [
+        "secrets:get:project/releng/gecko/build/level-3/*",
+        "secrets:get:project/taskcluster/gecko/hgfingerprint",
+        "secrets:get:project/taskcluster/gecko/hgmointernal"
+    ],
+    "tags": {
+        "createdForUser": "shindli@mozilla.com",
+        "kind": "build",
+        "label": "build-win64-ccov/debug",
+        "os": "windows",
+        "retrigger": "false",
+        "worker-implementation": "generic-worker"
+    },
+    "taskGroupId": "PUZr6C8WR9Cmw3LeL9qotw",
+    "workerType": "gecko-3-b-win2012"
+}
