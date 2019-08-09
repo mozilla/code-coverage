@@ -7,6 +7,8 @@ import os
 
 import logbook
 import logbook.more
+import raven
+import raven.handlers.logbook
 import structlog
 
 
@@ -42,24 +44,20 @@ def setup_papertrail(project_name, channel, PAPERTRAIL_HOST, PAPERTRAIL_PORT):
     papertrail.push_application()
 
 
-def setup_sentry(project_name, channel, SENTRY_DSN):
+def setup_sentry(name, channel, dsn):
     """
     Setup sentry account using taskcluster secrets
     """
 
-    import raven
-    import raven.handlers.logbook
+    # Detect environment
+    if "TASK_ID" in os.environ:
+        site = "taskcluster"
+    elif "DYNO" in os.environ:
+        site = "heroku"
+    else:
+        site = "unknown"
 
-    sentry_client = raven.Client(
-        dsn=SENTRY_DSN,
-        site=project_name,
-        name="mozilla/release-services",
-        environment=channel,
-        # TODO:
-        # release=read(VERSION) we need to promote that as well via secrets
-        # tags=...
-        # repos=...
-    )
+    sentry_client = raven.Client(dsn=dsn, site=site, name=name, environment=channel)
 
     sentry_handler = raven.handlers.logbook.SentryHandler(
         sentry_client, level=logbook.WARNING, bubble=True
@@ -73,7 +71,7 @@ def init_logger(
     level=logbook.INFO,
     PAPERTRAIL_HOST=None,
     PAPERTRAIL_PORT=None,
-    SENTRY_DSN=None,
+    sentry_dsn=None,
 ):
 
     if not channel:
@@ -89,8 +87,8 @@ def init_logger(
         setup_papertrail(project_name, channel, PAPERTRAIL_HOST, PAPERTRAIL_PORT)
 
     # Log to senty
-    if channel and SENTRY_DSN:
-        setup_sentry(project_name, channel, SENTRY_DSN)
+    if channel and sentry_dsn:
+        setup_sentry(project_name, channel, sentry_dsn)
 
     def logbook_factory(*args, **kwargs):
         # Logger given to structlog
