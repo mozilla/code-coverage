@@ -13,7 +13,6 @@ import structlog
 from code_coverage_bot import chunk_mapping
 from code_coverage_bot import grcov
 from code_coverage_bot import hgmo
-from code_coverage_bot import suite_reports
 from code_coverage_bot import taskcluster
 from code_coverage_bot import uploader
 from code_coverage_bot.artifacts import ArtifactsHandler
@@ -43,7 +42,6 @@ class CodeCov(object):
 
         temp_dir = tempfile.mkdtemp()
         self.artifacts_dir = os.path.join(temp_dir, "ccov-artifacts")
-        self.ccov_reports_dir = os.path.join(temp_dir, "code-coverage-reports")
 
         self.index_service = taskcluster_config.get_service("index")
 
@@ -211,12 +209,6 @@ class CodeCov(object):
     # This function is executed when the bot is triggered via cron.
     def go_from_cron(self):
         self.retrieve_source_and_artifacts()
-
-        logger.info("Generating suite reports")
-        os.makedirs(self.ccov_reports_dir, exist_ok=True)
-        suite_reports.generate(
-            self.suites, self.artifactsHandler, self.ccov_reports_dir, self.repo_dir
-        )
 
         logger.info("Generating zero coverage reports")
         zc = ZeroCov(self.repo_dir)
