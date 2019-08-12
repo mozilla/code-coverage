@@ -147,14 +147,53 @@ def test_get_tasks_in_group(GROUP_TASKS_1, GROUP_TASKS_2):
         ("test-windows10-64-ccov/debug-mochitest-1", True),
         ("test-windows10-64-ccov/debug-mochitest-e10s-7", True),
         ("test-windows10-64-ccov/debug-cppunit", True),
-        ("build-linux64-ccov/debug", False),
-        ("build-android-test-ccov/opt", False),
-        ("build-win64-ccov/debug", False),
+        ("build-linux64-ccov/debug", True),
+        ("build-android-test-ccov/opt", True),
+        ("build-win64-ccov/debug", True),
+        ("test-linux64/debug-mochitest-1", False),
+        ("test-windows10-64/debug-cppunit", False),
+        ("build-win64/debug", False),
     ],
 )
 def test_is_coverage_task(task_name, expected):
     task = json.load(open(os.path.join(FIXTURES_DIR, f"{task_name}.json")))
     assert taskcluster.is_coverage_task(task) is expected
+
+
+@pytest.mark.parametrize(
+    "task_name, expected",
+    [
+        ("test-linux64-ccov/debug-mochitest-1", "mochitest-1"),
+        ("test-linux64-ccov/debug-mochitest-e10s-7", "mochitest-7"),
+        ("test-linux64-ccov/debug-cppunit", "cppunit"),
+        (
+            "test-linux64-ccov/debug-firefox-ui-functional-remote-e10s",
+            "firefox-ui-functional-remote",
+        ),
+        ("test-windows10-64-ccov/debug-mochitest-1", "mochitest-1"),
+        ("test-windows10-64-ccov/debug-mochitest-e10s-7", "mochitest-7"),
+        ("test-windows10-64-ccov/debug-cppunit", "cppunit"),
+        ("build-linux64-ccov/debug", "build"),
+        ("build-android-test-ccov/opt", "build"),
+        ("build-win64-ccov/debug", "build"),
+    ],
+)
+def test_name_to_chunk(task_name, expected):
+    assert taskcluster.name_to_chunk(task_name) == expected
+
+
+@pytest.mark.parametrize(
+    "chunk, expected",
+    [
+        ("mochitest-1", "mochitest"),
+        ("mochitest-7", "mochitest"),
+        ("cppunit", "cppunit"),
+        ("firefox-ui-functional-remote", "firefox-ui-functional-remote"),
+        ("build", "build"),
+    ],
+)
+def test_chunk_to_suite(chunk, expected):
+    assert taskcluster.chunk_to_suite(chunk) == expected
 
 
 @pytest.mark.parametrize(

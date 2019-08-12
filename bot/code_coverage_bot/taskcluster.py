@@ -109,11 +109,54 @@ def download_artifact(artifact_path, task_id, artifact_name):
     retry(perform_download)
 
 
+BUILD_PLATFORMS = [
+    "build-linux64-ccov/debug",
+    "build-win64-ccov/debug",
+    "build-android-test-ccov/opt",
+]
+
+TEST_PLATFORMS = [
+    "test-linux64-ccov/debug",
+    "test-windows10-64-ccov/debug",
+    "test-android-em-4.3-arm7-api-16-ccov/debug",
+] + BUILD_PLATFORMS
+
+
 def is_coverage_task(task):
-    return get_suite(task) != "build"
+    return any(task["metadata"]["name"].startswith(t) for t in TEST_PLATFORMS)
+
+
+def name_to_chunk(name):
+    """
+    Helper to convert a task naem to a chunk
+    Used by chunk mapping
+    """
+    assert isinstance(name, str)
+
+    # Some tests are run on build machines, we define a placeholder chunk for those.
+    if name in BUILD_PLATFORMS:
+        return "build"
+
+    for t in TEST_PLATFORMS:
+        if name.startswith(t):
+            name = name[len(t) + 1 :]
+            break
+    return "-".join([p for p in name.split("-") if p != "e10s"])
+
+
+def chunk_to_suite(chunk):
+    """
+    Helper to convert a chunk to a suite (no numbers)
+    Used by chunk mapping
+    """
+    assert isinstance(chunk, str)
+    return "-".join([p for p in chunk.split("-") if not p.isdigit()])
 
 
 def get_chunk(task):
+    """
+    Build clean chunk name from a Taskcluster task
+    """
     suite = get_suite(task)
     chunks = task["extra"].get("chunks", {})
     if "current" in chunks:
@@ -122,6 +165,9 @@ def get_chunk(task):
 
 
 def get_suite(task):
+    """
+    Build clean suite name from a Taskcluster task
+    """
     assert isinstance(task, dict)
     tags = task["tags"]
     extra = task["extra"]
@@ -140,6 +186,10 @@ def get_suite(task):
 
 
 def get_platform(task):
+    """
+    Build clean platform from a Taskcluster task
+    """
+    assert isinstance(task, dict)
     assert isinstance(task, dict)
     tags = task.get("tags", {})
     platform = tags.get("os")

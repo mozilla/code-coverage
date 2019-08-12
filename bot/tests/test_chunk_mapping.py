@@ -68,7 +68,9 @@ def test_zero_coverage(tmpdir, fake_artifacts_handler, fake_hg_repo_with_content
     def request_callback(request):
         payload = json.loads(request.body.decode("utf-8"))
 
-        print(payload)
+        from pprint import pprint
+
+        pprint(payload)
 
         if payload["from"] == "coverage":
             if "groupby" in payload:
