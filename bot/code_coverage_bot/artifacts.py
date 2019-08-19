@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
+import collections
 import fnmatch
+import itertools
 import os
 import time
 
@@ -9,6 +11,9 @@ from code_coverage_bot import taskcluster
 from code_coverage_bot.utils import ThreadPoolExecutorResult
 
 logger = structlog.get_logger(__name__)
+
+
+Artifact = collections.namedtuple("Artifact", "path, task_id, platform, suite, chunk")
 
 
 SUITES_TO_IGNORE = [
@@ -25,6 +30,7 @@ class ArtifactsHandler(object):
         self.task_ids = task_ids
         self.parent_dir = parent_dir
         self.task_name_filter = task_name_filter
+        self.artifacts = []
 
     def generate_path(self, platform, chunk, artifact):
         file_name = "%s_%s_%s" % (platform, chunk, os.path.basename(artifact["name"]))
@@ -32,34 +38,57 @@ class ArtifactsHandler(object):
 
     def get_chunks(self, platform):
         return set(
-            f.split("_")[1]
-            for f in os.listdir(self.parent_dir)
-            if os.path.basename(f).startswith(f"{platform}_")
+            artifact.chunk
+            for artifact in self.artifacts
+            if artifact.platform == platform
         )
 
-    def get(self, platform=None, suite=None, chunk=None):
-        files = os.listdir(self.parent_dir)
+    def get_suites(self):
+        # Group by suite first
+        suites = itertools.groupby(
+            sorted(self.artifacts, key=lambda a: a.suite), lambda a: a.suite
+        )
 
+        out = {}
+        for suite, artifacts in suites:
+            artifacts = list(artifacts)
+
+            # List all available platforms
+            platforms = {a.platform for a in artifacts}
+            platforms.add("all")
+
+            # And list all possible permutations
+            for platform in platforms:
+                out[(platform, suite)] = [
+                    artifact.path
+                    for artifact in artifacts
+                    if platform == "all" or artifact.platform == platform
+                ]
+
+        return out
+
+    def get(self, platform=None, suite=None, chunk=None):
         if suite is not None and chunk is not None:
             raise Exception("suite and chunk can't both have a value")
 
         # Filter artifacts according to platform, suite and chunk.
         filtered_files = []
-        for fname in files:
-            if platform is not None and not fname.startswith("%s_" % platform):
+        for artifact in self.artifacts:
+            if platform is not None and artifact.platform != platform:
                 continue
 
-            if suite is not None and suite not in fname:
+            if suite is not None and artifact.suite != suite:
                 continue
 
-            if chunk is not None and ("%s_code-coverage" % chunk) not in fname:
+            if chunk is not None and artifact.chunk != chunk:
                 continue
 
-            filtered_files.append(os.path.join(self.parent_dir, fname))
+            filtered_files.append(artifact.path)
 
         return filtered_files
 
     def download(self, test_task):
+        suite = taskcluster.get_suite(test_task["task"])
         chunk_name = taskcluster.get_chunk(test_task["task"])
         platform_name = taskcluster.get_platform(test_task["task"])
         test_task_id = test_task["status"]["taskId"]
@@ -74,6 +103,10 @@ class ArtifactsHandler(object):
             artifact_path = self.generate_path(platform_name, chunk_name, artifact)
             taskcluster.download_artifact(artifact_path, test_task_id, artifact["name"])
             logger.info("%s artifact downloaded" % artifact_path)
+
+            self.artifacts.append(
+                Artifact(artifact_path, test_task_id, platform_name, suite, chunk_name)
+            )
 
     def is_filtered_task(self, task):
         """
