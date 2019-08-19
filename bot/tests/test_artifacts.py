@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-
+import hashlib
 import itertools
 import os
 from unittest import mock
@@ -7,6 +7,7 @@ from unittest import mock
 import pytest
 import responses
 
+from code_coverage_bot.artifacts import Artifact
 from code_coverage_bot.artifacts import ArtifactsHandler
 
 FILES = [
@@ -21,14 +22,28 @@ FILES = [
 
 
 @pytest.fixture
-def FAKE_ARTIFACTS_DIR(tmpdir):
-    for f in FILES:
-        open(os.path.join(tmpdir.strpath, f), "w")
-    return tmpdir.strpath
+def fake_artifacts(tmpdir):
+    def name_to_artifact(name):
+        """
+        Touch the fake artifact & build instance
+        """
+        path = os.path.join(tmpdir.strpath, name)
+        open(path, "w")
+
+        platform, chunk, _ = name.split("_")
+        return Artifact(
+            path,
+            hashlib.md5(name.encode("utf-8")).hexdigest()[:10],
+            platform,
+            chunk[: chunk.rindex("-")] if "-" in chunk else chunk,
+            chunk,
+        )
+
+    return [name_to_artifact(f) for f in FILES]
 
 
-def test_generate_path(FAKE_ARTIFACTS_DIR):
-    a = ArtifactsHandler([], parent_dir=FAKE_ARTIFACTS_DIR)
+def test_generate_path(fake_artifacts):
+    a = ArtifactsHandler([])
     artifact_jsvm = {"name": "code-coverage-jsvm.info"}
     artifact_grcov = {"name": "code-coverage-grcov.zip"}
     assert os.path.join(
@@ -39,8 +54,9 @@ def test_generate_path(FAKE_ARTIFACTS_DIR):
     ) == a.generate_path("windows", "cppunit", artifact_grcov)
 
 
-def test_get_chunks(FAKE_ARTIFACTS_DIR):
-    a = ArtifactsHandler([], parent_dir=FAKE_ARTIFACTS_DIR)
+def test_get_chunks(fake_artifacts):
+    a = ArtifactsHandler([])
+    a.artifacts = fake_artifacts
     assert a.get_chunks("windows") == {"mochitest-1", "xpcshell-7", "cppunit"}
     assert a.get_chunks("linux") == {
         "mochitest-2",
@@ -50,11 +66,56 @@ def test_get_chunks(FAKE_ARTIFACTS_DIR):
     }
 
 
-def test_get_coverage_artifacts(FAKE_ARTIFACTS_DIR):
+def test_get_suites(tmpdir, fake_artifacts):
     def add_dir(files):
-        return set([os.path.join(FAKE_ARTIFACTS_DIR, f) for f in files])
+        return [os.path.join(tmpdir.strpath, f) for f in files]
 
-    a = ArtifactsHandler([], parent_dir=FAKE_ARTIFACTS_DIR)
+    a = ArtifactsHandler([])
+    a.artifacts = fake_artifacts
+    assert a.get_suites() == {
+        ("all", "cppunit"): add_dir(["windows_cppunit_code-coverage-grcov.zip"]),
+        ("windows", "cppunit"): add_dir(["windows_cppunit_code-coverage-grcov.zip"]),
+        ("all", "firefox-ui-functional"): add_dir(
+            ["linux_firefox-ui-functional-remote_code-coverage-jsvm.info"]
+        ),
+        ("linux", "firefox-ui-functional"): add_dir(
+            ["linux_firefox-ui-functional-remote_code-coverage-jsvm.info"]
+        ),
+        ("all", "mochitest"): add_dir(
+            [
+                "windows_mochitest-1_code-coverage-jsvm.info",
+                "linux_mochitest-2_code-coverage-grcov.zip",
+            ]
+        ),
+        ("linux", "mochitest"): add_dir(["linux_mochitest-2_code-coverage-grcov.zip"]),
+        ("windows", "mochitest"): add_dir(
+            ["windows_mochitest-1_code-coverage-jsvm.info"]
+        ),
+        ("all", "xpcshell"): add_dir(
+            [
+                "windows_xpcshell-7_code-coverage-jsvm.info",
+                "linux_xpcshell-7_code-coverage-grcov.zip",
+                "linux_xpcshell-3_code-coverage-grcov.zip",
+            ]
+        ),
+        ("linux", "xpcshell"): add_dir(
+            [
+                "linux_xpcshell-7_code-coverage-grcov.zip",
+                "linux_xpcshell-3_code-coverage-grcov.zip",
+            ]
+        ),
+        ("windows", "xpcshell"): add_dir(
+            ["windows_xpcshell-7_code-coverage-jsvm.info"]
+        ),
+    }
+
+
+def test_get_coverage_artifacts(tmpdir, fake_artifacts):
+    def add_dir(files):
+        return set([os.path.join(tmpdir.strpath, f) for f in files])
+
+    a = ArtifactsHandler([])
+    a.artifacts = fake_artifacts
     assert set(a.get()) == add_dir(FILES)
     assert set(a.get(suite="mochitest")) == add_dir(
         [
@@ -174,7 +235,7 @@ def _group_tasks():
 
 @responses.activate
 def test_download_all(
-    LINUX_TASK_ID, LINUX_TASK, GROUP_TASKS_1, GROUP_TASKS_2, FAKE_ARTIFACTS_DIR
+    LINUX_TASK_ID, LINUX_TASK, GROUP_TASKS_1, GROUP_TASKS_2, fake_artifacts
 ):
     responses.add(
         responses.GET,
@@ -190,7 +251,7 @@ def test_download_all(
             status=200,
         )
 
-        a = ArtifactsHandler({"linux": LINUX_TASK_ID}, parent_dir=FAKE_ARTIFACTS_DIR)
+        a = ArtifactsHandler({"linux": LINUX_TASK_ID})
 
         downloaded = set()
 

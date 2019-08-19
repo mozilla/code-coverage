@@ -120,13 +120,37 @@ class CodeCov(object):
 
     def generate_covdir(self):
         """
-        Build the covdir report using current artifacts
+        Build the full covdir report using current artifacts
         """
         output = grcov.report(
             self.artifactsHandler.get(), source_dir=self.repo_dir, out_format="covdir"
         )
         logger.info("Covdir report generated successfully")
         return json.loads(output)
+
+    def build_suites(self):
+        """
+        Build all the detailed covdir reports using current artifacts
+        and upload them directly on GCP
+        """
+        for (platform, suite), artifacts in self.artifactsHandler.get_suites().items():
+
+            # Generate covdir report for that suite & platform
+            logger.info(
+                "Building covdir suite report",
+                suite=suite,
+                platform=platform,
+                artifacts=len(artifacts),
+            )
+            output = grcov.report(
+                artifacts, source_dir=self.repo_dir, out_format="covdir"
+            )
+
+            # Then upload on GCP
+            report = json.loads(output)
+            uploader.gcp(
+                self.branch, self.revision, report, suite=suite, platform=platform
+            )
 
     # This function is executed when the bot is triggered at the end of a mozilla-central build.
     def go_from_trigger_mozilla_central(self):
@@ -180,8 +204,9 @@ class CodeCov(object):
         changesets_coverage = phabricatorUploader.upload(report, changesets)
 
         uploader.gcp(self.branch, self.revision, report)
+        logger.info("Main Build uploaded on GCP")
 
-        logger.info("Build uploaded on GCP")
+        self.build_suites()
         notify_email(self.revision, changesets, changesets_coverage)
 
     # This function is executed when the bot is triggered at the end of a try build.

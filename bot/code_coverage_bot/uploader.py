@@ -12,10 +12,10 @@ from code_coverage_bot.utils import retry
 from code_coverage_tools.gcp import get_bucket
 
 logger = structlog.get_logger(__name__)
-GCP_COVDIR_PATH = "{repository}/{revision}.json.zstd"
+GCP_COVDIR_PATH = "{repository}/{revision}/{name}.json.zstd"
 
 
-def gcp(repository, revision, report):
+def gcp(repository, revision, report, platform=None, suite=None):
     """
     Upload a grcov raw report on Google Cloud Storage
     * Compress with zstandard
@@ -30,7 +30,12 @@ def gcp(repository, revision, report):
     archive = compressor.compress(json.dumps(report).encode("utf-8"))
 
     # Upload archive
-    path = GCP_COVDIR_PATH.format(repository=repository, revision=revision)
+    if platform and suite:
+        name = f"{platform}:{suite}"
+    else:
+        name = "full"
+
+    path = GCP_COVDIR_PATH.format(repository=repository, revision=revision, name=name)
     blob = bucket.blob(path)
     blob.upload_from_string(archive)
 
@@ -42,7 +47,13 @@ def gcp(repository, revision, report):
     logger.info("Uploaded {} on {}".format(path, bucket))
 
     # Trigger ingestion on backend
-    retry(lambda: gcp_ingest(repository, revision), retries=10, wait_between_retries=60)
+    # TODO: support suite ingestion
+    if suite is None:
+        retry(
+            lambda: gcp_ingest(repository, revision),
+            retries=10,
+            wait_between_retries=60,
+        )
 
     return blob
 
