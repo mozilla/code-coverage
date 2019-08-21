@@ -59,8 +59,9 @@ function cache_set(cache, key, value) {
 }
 
 let path_coverage_cache = {};
-export async function get_path_coverage(path, changeset) {
-  let data = cache_get(path_coverage_cache, `${changeset}_${path}`);
+export async function get_path_coverage(path, changeset, platform, suite) {
+  let cache_key = `${changeset}_${path}_${platform}_${suite}`;
+  let data = cache_get(path_coverage_cache, cache_key);
   if (data) {
     return data;
   }
@@ -69,33 +70,47 @@ export async function get_path_coverage(path, changeset) {
   if (changeset && changeset !== REV_LATEST) {
     params += `&changeset=${changeset}`;
   }
+  if (platform && platform !== 'all') {
+    params += `&platform=${platform}`;
+  }
+  if (suite && suite !== 'all') {
+    params += `&suite=${suite}`;
+  }
   let response = await fetch(`${COVERAGE_BACKEND_HOST}/v2/path?${params}`).catch(alert);
   if (response.status !== 200) {
     throw new Error(response.status + ' - ' + response.statusText);
   }
   data = await response.json();
 
-  cache_set(path_coverage_cache, `${changeset}_${path}`, data);
+  cache_set(path_coverage_cache, cache_key, data);
 
   return data;
 }
 
 let history_cache = {};
-export async function get_history(path) {
+export async function get_history(path, platform, suite) {
   // Backend needs path without trailing /
   if (path && path.endsWith('/')) {
     path = path.substring(0, path.length-1);
   }
 
-  let data = cache_get(history_cache, path);
+  let cache_key = `${path}_${platform}_${suite}`;
+  let data = cache_get(history_cache, cache_key);
   if (data) {
     return data;
   }
 
-  let response = await fetch(`${COVERAGE_BACKEND_HOST}/v2/history?path=${path}`);
+  let params = `path=${path}`;
+  if (platform && platform !== 'all') {
+    params += `&platform=${platform}`;
+  }
+  if (suite && suite !== 'all') {
+    params += `&suite=${suite}`;
+  }
+  let response = await fetch(`${COVERAGE_BACKEND_HOST}/v2/history?${params}`);
   data = await response.json();
 
-  cache_set(history_cache, path, data);
+  cache_set(history_cache, cache_key, data);
 
   // Check data has coverage values
   // These values are missing when going above 2 levels right now
@@ -121,6 +136,22 @@ export async function get_zero_coverage_data() {
   data = await response.json();
 
   cache_set(zero_coverage_cache, '', data);
+
+  return data;
+}
+
+
+let filters_cache = {};
+export async function get_filters() {
+  let data = cache_get(filters_cache, '');
+  if (data) {
+    return data;
+  }
+
+  let response = await fetch(`${COVERAGE_BACKEND_HOST}/v2/filters`);
+  data = await response.json();
+
+  cache_set(filters_cache, '', data);
 
   return data;
 }

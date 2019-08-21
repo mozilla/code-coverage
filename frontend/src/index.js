@@ -1,4 +1,4 @@
-import {REV_LATEST, DOM_READY, main, show, hide, message, get_path_coverage, get_history, get_zero_coverage_data, build_navbar, render, get_source} from './common.js';
+import {REV_LATEST, DOM_READY, main, show, hide, message, get_path_coverage, get_history, get_zero_coverage_data, build_navbar, render, get_source, get_filters} from './common.js';
 import {buildRoute, readRoute, updateRoute} from './route.js';
 import {zero_coverage_display, zero_coverage_menu} from './zero_coverage_report.js';
 import './style.css';
@@ -10,9 +10,21 @@ const VIEW_ZERO_COVERAGE = 'zero';
 const VIEW_BROWSER = 'browser';
 
 
-function browser_menu(revision) {
+function browser_menu(revision, filters, route) {
   let context = {
     revision,
+    platforms: filters.platforms.map((p) => {
+      return {
+        'name': p,
+        'selected': p == route.platform,
+      }
+    }),
+    suites: filters.suites.map((s) => {
+      return {
+        'name': s,
+        'selected': s == route.suite,
+      }
+    }),
   };
   render('menu_browser', context, 'menu');
 }
@@ -159,9 +171,10 @@ async function load() {
   }
 
   try {
-    var [coverage, history] = await Promise.all([
-      get_path_coverage(route.path, route.revision),
-      get_history(route.path),
+    var [coverage, history, filters] = await Promise.all([
+      get_path_coverage(route.path, route.revision, route.platform, route.suite),
+      get_history(route.path, route.platform, route.suite),
+      get_filters(),
     ]);
   } catch (err) {
     console.warn('Failed to load coverage', err);
@@ -177,6 +190,7 @@ async function load() {
     route,
     coverage,
     history,
+    filters,
   };
 }
 
@@ -187,7 +201,7 @@ async function display(data) {
     await zero_coverage_display(data.zero_coverage, data.path);
 
   } else if (data.view === VIEW_BROWSER) {
-    browser_menu(data.revision);
+    browser_menu(data.revision, data.filters, data.route);
 
     if (data.coverage.type === 'directory') {
       hide('message');

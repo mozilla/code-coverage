@@ -106,6 +106,19 @@
   <a href="#view=zero&third_party=on&cpp=on&js=on=java=on&rust=on">View the zero coverage report</a>
   &bull;
   <input type="text" name="revision" placeholder="Mercurial revision" value="{{revision}}"></input>
+  &bull;
+  <select name="platform">
+    <option value="all">All platforms</option>
+    {{#platforms}}
+    <option {{#selected}}selected="selected"{{/selected}} value="{{name}}">{{name}}</option>
+    {{/platforms}}
+  </select>
+  <select name="suite">
+    <option value="all">All test suites</option>
+    {{#suites}}
+    <option {{#selected}}selected="selected"{{/selected}} value="{{name}}">{{name}}</option>
+    {{/suites}}
+  </select>
 </script>
 
 <script id="menu_zero" type="x-tmpl-mustache">
