@@ -1,5 +1,6 @@
-import {REV_LATEST, DOM_READY, main, show, hide, message, get_path_coverage, get_history, get_zero_coverage_data, build_navbar, render, get_source} from './common.js';
-import {zero_coverage_display} from './zero_coverage_report.js';
+import {REV_LATEST, DOM_READY, main, show, hide, message, get_path_coverage, get_history, get_zero_coverage_data, build_navbar, render, get_source, get_filters, STORE} from './common.js';
+import {buildRoute, readRoute, updateRoute} from './route.js';
+import {zero_coverage_display, zero_coverage_menu} from './zero_coverage_report.js';
 import './style.css';
 import Prism from 'prismjs';
 import Chartist from 'chartist';
@@ -7,6 +8,26 @@ import 'chartist/dist/chartist.css';
 
 const VIEW_ZERO_COVERAGE = 'zero';
 const VIEW_BROWSER = 'browser';
+
+
+function browser_menu(revision, filters, route) {
+  let context = {
+    revision,
+    platforms: filters.platforms.map((p) => {
+      return {
+        'name': p,
+        'selected': p == route.platform,
+      }
+    }),
+    suites: filters.suites.map((s) => {
+      return {
+        'name': s,
+        'selected': s == route.suite,
+      }
+    }),
+  };
+  render('menu_browser', context, 'menu');
+}
 
 async function graphHistory(history, path) {
   if (history === null) {
@@ -53,7 +74,7 @@ async function graphHistory(history, path) {
       // Load revision from graph when a point is clicked
       let revision = history[evt.index].changeset;
       evt.element._node.onclick = function(){
-        updateHash(revision, path);
+        updateRoute({revision});
       };
 
       // Display revision from graph when a point is overed
@@ -71,7 +92,12 @@ async function graphHistory(history, path) {
 async function showDirectory(dir, revision, files) {
   let context = {
     navbar: build_navbar(dir, revision),
-    files: files,
+    files: files.map(file => {
+      file.route = buildRoute({
+        path: file.path
+      });
+      return file;
+    }),
     revision: revision || REV_LATEST,
     file_name: function(){
       // Build filename relative to current dir
@@ -125,49 +151,30 @@ async function showFile(file, revision) {
   Prism.highlightAll(output);
 }
 
-function readHash() {
-  // Reads changeset & path from current URL hash
-  let hash = window.location.hash.substring(1);
-  let pos = hash.indexOf(':');
-  if (pos === -1) {
-    return ['', ''];
-  }
-  return [
-    hash.substring(0, pos),
-    hash.substring(pos+1),
-  ]
-}
-
-function updateHash(newChangeset, newPath) {
-  // Set the URL hash with both changeset & path
-  let [changeset, path] = readHash();
-  changeset = newChangeset || changeset || REV_LATEST;
-  path = newPath || path || '';
-  window.location.hash = '#' + changeset + ':' + path;
-}
-
 async function load() {
-  let [revision, path] = readHash();
+  let route = readRoute();
 
   // Reset display, dom-safe
   hide('history');
   hide('output');
-  message('loading', 'Loading coverage data for ' + (path || 'mozilla-central') + ' @ ' + (revision || REV_LATEST));
+  message('loading', 'Loading coverage data for ' + (route.path || 'mozilla-central') + ' @ ' + (route.revision || REV_LATEST));
 
   // Load only zero coverage for that specific view
-  if (revision === VIEW_ZERO_COVERAGE) {
+  if (route.view === VIEW_ZERO_COVERAGE) {
     let zero_coverage = await get_zero_coverage_data();
     return {
       view: VIEW_ZERO_COVERAGE,
-      path,
+      path: route.path,
       zero_coverage,
+      route,
     }
   }
 
   try {
-    var [coverage, history] = await Promise.all([
-      get_path_coverage(path, revision),
-      get_history(path),
+    var [coverage, history, filters] = await Promise.all([
+      get_path_coverage(route.path, route.revision, route.platform, route.suite),
+      get_history(route.path, route.platform, route.suite),
+      get_filters(),
     ]);
   } catch (err) {
     console.warn('Failed to load coverage', err);
@@ -178,54 +185,39 @@ async function load() {
 
   return {
     view: VIEW_BROWSER,
-    path,
-    revision,
+    path: route.path,
+    revision: route.revision,
+    route,
     coverage,
     history,
+    filters,
   };
 }
 
 async function display(data) {
 
-  // Toggle menu per views
-  if (data.view === VIEW_BROWSER) {
-    show('menu_browser');
-    hide('menu_zero');
-  } else if (data.view === VIEW_ZERO_COVERAGE) {
-    show('menu_zero');
-    hide('menu_browser');
+  if (data.view === VIEW_ZERO_COVERAGE ) {
+    await zero_coverage_menu(data.route);
+    await zero_coverage_display(data.zero_coverage, data.path);
+
+  } else if (data.view === VIEW_BROWSER) {
+    browser_menu(data.revision, data.filters, data.route);
+
+    if (data.coverage.type === 'directory') {
+      hide('message');
+      await graphHistory(data.history, data.path);
+      await showDirectory(data.path, data.revision, data.coverage.children);
+
+    } else if (data.coverage.type === 'file') {
+      await showFile(data.coverage, data.revision);
+
+    } else {
+      message('error', 'Invalid file type: ' + data.coverate.type);
+    }
+
   } else {
     message('error', 'Invalid view : ' + data.view);
   }
-
-  // Revision input management
-  const revision = document.getElementById('revision');
-  revision.onkeydown = async function(evt){
-    if(evt.keyCode === 13) {
-      updateHash(data.revision.value);
-    }
-  };
-
-  // Also update the revision element
-  if (data.revision && data.revision != REV_LATEST) {
-    let input = document.getElementById('revision');
-    input.value = data.revision;
-  }
-
-  if (data.view === VIEW_ZERO_COVERAGE ) {
-    await zero_coverage_display(data.zero_coverage, data.path);
-
-  } else if (data.view === VIEW_BROWSER && data.coverage.type === 'directory') {
-    hide('message');
-    await graphHistory(data.history, data.path);
-    await showDirectory(data.path, data.revision, data.coverage.children);
-
-  } else if (data.view === VIEW_BROWSER && data.coverage.type === 'file') {
-    await showFile(data.coverage, data.revision);
-
-  } else {
-    message('error', 'Invalid file type: ' + data.coverage.type);
-  }
 }
 
-main(load, display, ['third_party', 'headers', 'completely_uncovered', 'cpp', 'js', 'java', 'rust', 'last_push'])
+main(load, display);

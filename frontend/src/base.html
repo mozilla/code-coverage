@@ -10,7 +10,7 @@
   <h2>
     <nav>
       {{#navbar}}
-      <a href="#{{ path }}">{{ name }}</a>
+      <a href="{{ route }}">{{ name }}</a>
       {{/navbar}}
     </nav>
     <span> : {{ total }} files</span>
@@ -47,7 +47,7 @@
   <h2>
     <nav>
       {{#navbar}}
-      <a href="#{{ revision }}:{{ path }}">{{ name }}</a>
+      <a href="{{ route }}">{{ name }}</a>
       {{/navbar}}
     </nav>
   </h2>
@@ -73,7 +73,7 @@
   <h2>
     <nav>
       {{#navbar}}
-      <a href="#{{ revision }}:{{ path }}">{{ name }}</a>
+      <a href="{{ route }}">{{ name }}</a>
       {{/navbar}}
     </nav>
     <span> : {{ files.length }} files</span>
@@ -88,7 +88,7 @@
 
     {{#files}}
     <div class="row">
-      <span class="filename"><a href="#{{ revision }}:{{ path }}">{{ file_name }}</a></span>
+      <span class="filename"><a href="{{ route }}">{{ file_name }}</a></span>
       <span>{{ children }}</span>
       <span>{{ coveragePercent }} %</span>
     </div>
@@ -102,29 +102,39 @@
   <span>Revision <samp>{{ revision }}</samp> from {{ date }}</span>
 </script>
 
-<header>
-  <div id="menu_browser">
-    <a href="#zero:">View the zero coverage report</a>
-    &bull;
-    <input type="text" id="revision" placeholder="Mercurial revision" </input>
-  </div>
+<script id="menu_browser" type="x-tmpl-mustache">
+  <a href="#view=zero&third_party=on&cpp=on&js=on=java=on&rust=on">View the zero coverage report</a>
+  &bull;
+  <input type="text" name="revision" placeholder="Mercurial revision" value="{{revision}}"></input>
+  &bull;
+  <select name="platform">
+    <option value="all">All platforms</option>
+    {{#platforms}}
+    <option {{#selected}}selected="selected"{{/selected}} value="{{name}}">{{name}}</option>
+    {{/platforms}}
+  </select>
+  <select name="suite">
+    <option value="all">All test suites</option>
+    {{#suites}}
+    <option {{#selected}}selected="selected"{{/selected}} value="{{name}}">{{name}}</option>
+    {{/suites}}
+  </select>
+</script>
 
-  <div id="menu_zero">
-    <input type="checkbox" name="third_party" id="third_party" checked="checked"><label for="third_party">Show third-party files</label>
-    <input type="checkbox" name="headers" id="headers"><label for="headers">Show headers</label>
-    <input type="checkbox" name="completely_uncovered" id="completely_uncovered"><label for="completely_uncovered">Show completely uncovered files only</label>
-    <input type="checkbox" name="cpp" id="cpp" checked="checked"><label for="cpp">C/C++</label>
-    <input type="checkbox" name="js" id="js" checked="checked"><label for="js">JavaScript</label>
-    <input type="checkbox" name="java" id="java" checked="checked"><label for="java">Java</label>
-    <input type="checkbox" name="rust" id="rust" checked="checked"><label for="rust">Rust</label>
-    <select id="last_push">
-      <option value="all">All</option>
-      <option value="one_year">0 &lt; 1 year</option>
-      <option value="two_years">1 &lt; 2 years</option>
-      <option value="older_than_two_years">Older than 2 years</option>
-    </select>
-  </div>
-</header>
+<script id="menu_zero" type="x-tmpl-mustache">
+  {{#filters}}
+  <input type="checkbox" name="{{ key }}" id="{{ key }}" {{#checked}}checked="checked"{{/checked}}>
+  <label for="{{ key }}">{{ message }}</label>
+  {{/filters}}
+
+  <select name="last_push" id="last_push">
+    {{#last_pushes}}
+    <option {{#selected}}selected="selected"{{/selected}} value="{{value}}">{{message}}</option>
+    {{/last_pushes}}
+  </select>
+</script>
+
+<header id="menu"></header>
 
 <main id="main">
   <div id="message" class="message loading">Loading...</div>

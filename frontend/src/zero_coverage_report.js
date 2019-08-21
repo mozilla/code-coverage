@@ -1,4 +1,42 @@
 import {hide, message, build_navbar, render, filter_third_party, filter_languages, filter_headers, filter_completely_uncovered, filter_last_push_date} from './common.js';
+import {buildRoute} from './route.js';
+
+const ZERO_COVERAGE_FILTERS = {
+  'third_party': "Show third-party files",
+  'headers': 'Show headers',
+  'completely_uncovered': 'Show completely uncovered files only',
+  'cpp': 'C/C++',
+  'js': 'JavaScript',
+  'java': 'Java',
+  'rust': 'Rust',
+};
+const ZERO_COVERAGE_PUSHES = {
+  'all': 'All',
+  'one_year': '0 &lt; 1 year',
+  'two_years': '1 &lt; 2 years',
+  'older_than_two_years': 'Older than 2 years',
+}
+
+
+export function zero_coverage_menu(route){
+  let context = {
+    filters: Object.entries(ZERO_COVERAGE_FILTERS).map(([key, message]) => {
+      return {
+        key,
+        message,
+        checked: route[key] === 'on',
+      }
+    }),
+    last_pushes: Object.entries(ZERO_COVERAGE_PUSHES).map(([value, message]) => {
+      return {
+        value,
+        message,
+        selected: route['last_push'] === value,
+      }
+    }),
+  };
+  render('menu_zero', context, 'menu');
+}
 
 
 function sort_entries(entries) {
@@ -104,9 +142,13 @@ export async function zero_coverage_display(data, dir) {
     entry_url : function() {
       let path = dir + this.dir;
       if (this.stats.children != 0) {
-        return `#zero:${path}`;
+        return buildRoute({
+          view: 'zero',
+          path,
+        })
       } else {
-        return `#${revision}:${path}`;
+        // Fully reset the url when moving back to browser view
+        return `#view=browser&revision=${revision}&path=${path}`;
       }
     },
     navbar: build_navbar(dir),
