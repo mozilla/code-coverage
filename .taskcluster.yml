@@ -41,6 +41,14 @@ tasks:
         else: ${event.ref[11:]}
       else: 'dev'
 
+    backend_url:
+      $if: 'tasks_for == "github-push"'
+      then:
+        $if: 'event.ref == "refs/heads/testing"'
+        then: 'https://api.coverage.moz.tools'
+        else: 'https://api.coverage.testing.moz.tools'
+      else: 'dev'
+
     taskboot_image: "mozilla/taskboot:0.1.9"
   in:
     - taskId: {$eval: as_slugid("check_lint")}
@@ -226,6 +234,8 @@ tasks:
       payload:
         maxRunTime: 3600
         image: node
+        env:
+          BACKEND_URL: "${backend_url}"
         command:
           - sh
           - -lxce
