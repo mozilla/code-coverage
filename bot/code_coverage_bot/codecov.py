@@ -155,7 +155,7 @@ class CodeCov(object):
     # This function is executed when the bot is triggered at the end of a mozilla-central build.
     def go_from_trigger_mozilla_central(self):
         # Check the covdir report does not already exists
-        if uploader.gcp_covdir_exists(self.branch, self.revision):
+        if uploader.gcp_covdir_exists(self.branch, self.revision, "full"):
             logger.warn("Covdir report already on GCP")
             return
 

@@ -49,7 +49,7 @@ class ArtifactsHandler(object):
             sorted(self.artifacts, key=lambda a: a.suite), lambda a: a.suite
         )
 
-        out = {}
+        out = collections.defaultdict(list)
         for suite, artifacts in suites:
             artifacts = list(artifacts)
 
@@ -57,8 +57,15 @@ class ArtifactsHandler(object):
             platforms = {a.platform for a in artifacts}
             platforms.add("all")
 
-            # And list all possible permutations
+            # And list all possible permutations with suite + platform
+            out[("all", suite)] += [artifact.path for artifact in artifacts]
             for platform in platforms:
+                if platform != "all":
+                    out[(platform, "all")] += [
+                        artifact.path
+                        for artifact in artifacts
+                        if artifact.platform == platform
+                    ]
                 out[(platform, suite)] = [
                     artifact.path
                     for artifact in artifacts

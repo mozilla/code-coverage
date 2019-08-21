@@ -47,28 +47,26 @@ def gcp(repository, revision, report, platform=None, suite=None):
     logger.info("Uploaded {} on {}".format(path, bucket))
 
     # Trigger ingestion on backend
-    # TODO: support suite ingestion
-    if suite is None:
-        retry(
-            lambda: gcp_ingest(repository, revision),
-            retries=10,
-            wait_between_retries=60,
-        )
+    retry(
+        lambda: gcp_ingest(repository, revision, platform, suite),
+        retries=10,
+        wait_between_retries=60,
+    )
 
     return blob
 
 
-def gcp_covdir_exists(repository, revision):
+def gcp_covdir_exists(repository, revision, name):
     """
     Check if a covdir report exists on the Google Cloud Storage bucket
     """
     bucket = get_bucket(secrets[secrets.GOOGLE_CLOUD_STORAGE])
-    path = GCP_COVDIR_PATH.format(repository=repository, revision=revision)
+    path = GCP_COVDIR_PATH.format(repository=repository, revision=revision, name=name)
     blob = bucket.blob(path)
     return blob.exists()
 
 
-def gcp_ingest(repository, revision):
+def gcp_ingest(repository, revision, platform, suite):
     """
     The GCP report ingestion is triggered remotely on a backend
     by making a simple HTTP request on the /v2/path endpoint
@@ -76,12 +74,18 @@ def gcp_ingest(repository, revision):
     will download automatically the new report.
     """
     params = {"repository": repository, "changeset": revision}
+    if platform:
+        params["platform"] = platform
+    if suite:
+        params["suite"] = suite
     backend_host = secrets[secrets.BACKEND_HOST]
     logger.info(
         "Ingesting report on backend",
         host=backend_host,
         repository=repository,
         revision=revision,
+        platform=platform,
+        suite=suite,
     )
     resp = requests.get("{}/v2/path".format(backend_host), params=params)
     resp.raise_for_status()
