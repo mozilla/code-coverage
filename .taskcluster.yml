@@ -45,9 +45,9 @@ tasks:
       $if: 'tasks_for == "github-push"'
       then:
         $if: 'event.ref == "refs/heads/testing"'
-        then: 'https://api.coverage.moz.tools'
-        else: 'https://api.coverage.testing.moz.tools'
-      else: 'dev'
+        then: 'https://api.coverage.testing.moz.tools'
+        else: 'https://api.coverage.moz.tools'
+      else: 'https://api.coverage.moz.tools'
 
     taskboot_image: "mozilla/taskboot:0.1.9"
   in:
