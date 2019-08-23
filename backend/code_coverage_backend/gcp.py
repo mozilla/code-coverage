@@ -78,11 +78,12 @@ class GCPCache(object):
             for report in self.list_reports(repo, nb=1):
                 self.download_report(report)
 
-    def ingest_pushes(self, repository, min_push_id=None, nb_pages=3):
+    def ingest_pushes(self, repository, platform, suite, min_push_id=None, nb_pages=3):
         """
         Ingest HGMO changesets and pushes into our Redis Cache
         The pagination goes from oldest to newest, starting from the optional min_push_id
         """
+        ingested = False
         for push_id, push in hgmo_pushes(repository, min_push_id, nb_pages):
             for changeset in push["changesets"]:
                 # TODO: look all neighboring reports on GCP
@@ -90,27 +91,33 @@ class GCPCache(object):
                     self.reports_dir,
                     repository,
                     changeset,
+                    platform,
+                    suite,
                     push_id=push_id,
                     date=push["date"],
                 )
-                if self.ingest_report(report):
+
+                # Always link changeset to push to find closest available report
+                self.redis.hmset(
+                    KEY_CHANGESET.format(
+                        repository=report.repository, changeset=report.changeset
+                    ),
+                    {"push": report.push_id, "date": report.date},
+                )
+
+                if not ingested and self.ingest_report(report):
                     logger.info(
                         "Found report in that push", push_id=push_id, report=str(report)
                     )
+
+                    # Only ingest first report found in a push in order to stay below 30s response time
+                    ingested = True
 
     def ingest_report(self, report):
         """
         When a report exist for a changeset, download it and update redis data
         """
         assert isinstance(report, Report)
-
-        # Always link changeset to push to find closest available report
-        self.redis.hmset(
-            KEY_CHANGESET.format(
-                repository=report.repository, changeset=report.changeset
-            ),
-            {"push": report.push_id, "date": report.date},
-        )
 
         # Download the report
         if not self.download_report(report):
@@ -228,7 +235,9 @@ class GCPCache(object):
             push_id, _ = hgmo_revision_details(repository, changeset)
 
             # Ingest pushes as we clearly don't have it in cache
-            self.ingest_pushes(repository, min_push_id=push_id - 1, nb_pages=1)
+            self.ingest_pushes(
+                repository, platform, suite, min_push_id=push_id - 1, nb_pages=1
+            )
 
         # Load report from that push
         return self.find_report(
