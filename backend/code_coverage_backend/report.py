@@ -69,12 +69,9 @@ class Report(object):
 
     @property
     def name(self):
-        if self.suite == DEFAULT_FILTER and self.platform == DEFAULT_FILTER:
-            return "{}/{}/full".format(self.repository, self.changeset)
-        else:
-            return "{}/{}/{}:{}".format(
-                self.repository, self.changeset, self.platform, self.suite
-            )
+        return "{}/{}/{}:{}".format(
+            self.repository, self.changeset, self.platform, self.suite
+        )
 
     @property
     def path(self):
