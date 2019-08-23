@@ -73,6 +73,17 @@ def test_get_suites(tmpdir, fake_artifacts):
     a = ArtifactsHandler([])
     a.artifacts = fake_artifacts
     assert dict(a.get_suites()) == {
+        ("all", "all"): add_dir(
+            [
+                "windows_mochitest-1_code-coverage-jsvm.info",
+                "linux_mochitest-2_code-coverage-grcov.zip",
+                "windows_xpcshell-7_code-coverage-jsvm.info",
+                "linux_xpcshell-7_code-coverage-grcov.zip",
+                "linux_xpcshell-3_code-coverage-grcov.zip",
+                "windows_cppunit_code-coverage-grcov.zip",
+                "linux_firefox-ui-functional-remote_code-coverage-jsvm.info",
+            ]
+        ),
         ("linux", "all"): add_dir(
             [
                 "linux_firefox-ui-functional-remote_code-coverage-jsvm.info",
