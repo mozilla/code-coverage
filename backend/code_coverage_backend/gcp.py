@@ -114,6 +114,7 @@ class GCPCache(object):
 
         # Download the report
         if not self.download_report(report):
+            logger.info("Report not available", report=str(report))
             return False
 
         # Read overall coverage for history
@@ -351,7 +352,9 @@ class GCPCache(object):
         """
         assert isinstance(repository, str)
 
-        REGEX_BLOB = re.compile(r"^{}/(\w+)/([\w\:\-]+).json.zstd$".format(repository))
+        REGEX_BLOB = re.compile(
+            r"^{}/(\w+)/([\w\-]+):([\w\-]+).json.zstd$".format(repository)
+        )
         for blob in self.bucket.list_blobs(prefix=repository):
 
             # Get changeset from blob name
@@ -360,12 +363,9 @@ class GCPCache(object):
                 logger.warn("Invalid blob found {}".format(blob.name))
                 continue
             changeset = match.group(1)
-            variant = match.group(2)
+            platform = match.group(2)
+            suite = match.group(3)
 
             # Build report instance and ingest it
-            if variant is None or variant == "full":
-                platform, suite = DEFAULT_FILTER, DEFAULT_FILTER
-            else:
-                platform, suite = variant.split(":")
             report = Report(self.reports_dir, repository, changeset, platform, suite)
             self.ingest_report(report)

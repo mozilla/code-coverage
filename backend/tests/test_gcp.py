@@ -13,16 +13,18 @@ def test_download_report(mock_cache):
     """
     Test base method to download a report & store it on local FS
     """
-    mock_cache.bucket.add_mock_blob("myrepo/deadbeef123/full.json.zstd")
+    mock_cache.bucket.add_mock_blob("myrepo/deadbeef123/all:all.json.zstd")
 
     # Does not exist
     report = Report(mock_cache.reports_dir, "myrepo", "missing", date=1, push_id=1)
     assert mock_cache.download_report(report) is False
 
     archive = os.path.join(
-        mock_cache.reports_dir, "myrepo", "deadbeef123", "full.json.zstd"
+        mock_cache.reports_dir, "myrepo", "deadbeef123", "all:all.json.zstd"
     )
-    payload = os.path.join(mock_cache.reports_dir, "myrepo", "deadbeef123", "full.json")
+    payload = os.path.join(
+        mock_cache.reports_dir, "myrepo", "deadbeef123", "all:all.json"
+    )
     assert not os.path.exists(archive)
     assert not os.path.exists(payload)
 
@@ -46,9 +48,9 @@ def test_ingestion(mock_cache):
     Test ingestion of several reports and their retrieval through Redis index
     """
     # Setup blobs
-    mock_cache.bucket.add_mock_blob("myrepo/rev1/full.json.zstd", coverage=0.1)
-    mock_cache.bucket.add_mock_blob("myrepo/rev2/full.json.zstd", coverage=0.2)
-    mock_cache.bucket.add_mock_blob("myrepo/rev10/full.json.zstd", coverage=1.0)
+    mock_cache.bucket.add_mock_blob("myrepo/rev1/all:all.json.zstd", coverage=0.1)
+    mock_cache.bucket.add_mock_blob("myrepo/rev2/all:all.json.zstd", coverage=0.2)
+    mock_cache.bucket.add_mock_blob("myrepo/rev10/all:all.json.zstd", coverage=1.0)
 
     # No reports at first
     assert mock_cache.redis.zcard(b"reports:myrepo") == 0
@@ -67,13 +69,13 @@ def test_ingestion(mock_cache):
     assert mock_cache.redis.zcard(b"reports:myrepo:all:all") == 3
     assert mock_cache.redis.zcard(b"history:myrepo") == 3
     assert os.path.exists(
-        os.path.join(mock_cache.reports_dir, "myrepo", "rev1", "full.json")
+        os.path.join(mock_cache.reports_dir, "myrepo", "rev1", "all:all.json")
     )
     assert os.path.exists(
-        os.path.join(mock_cache.reports_dir, "myrepo", "rev2", "full.json")
+        os.path.join(mock_cache.reports_dir, "myrepo", "rev2", "all:all.json")
     )
     assert os.path.exists(
-        os.path.join(mock_cache.reports_dir, "myrepo", "rev10", "full.json")
+        os.path.join(mock_cache.reports_dir, "myrepo", "rev10", "all:all.json")
     )
 
     # Reports are exposed, and sorted by push
@@ -87,7 +89,7 @@ def test_ingestion(mock_cache):
     ]
 
     # Even if we add a smaller one later on, reports are still sorted
-    mock_cache.bucket.add_mock_blob("myrepo/rev5/full.json.zstd", coverage=0.5)
+    mock_cache.bucket.add_mock_blob("myrepo/rev5/all:all.json.zstd", coverage=0.5)
     report_5 = Report(mock_cache.reports_dir, "myrepo", "rev5", date=5000, push_id=5)
     mock_cache.ingest_report(report_5)
     assert mock_cache.list_reports("myrepo") == [
@@ -114,7 +116,7 @@ def test_ingest_hgmo(mock_cache, mock_hgmo):
     # Add a report on push 995
     rev = hashlib.md5(b"995").hexdigest()
     mock_cache.bucket.add_mock_blob(
-        "myrepo/{}/full.json.zstd".format(rev), coverage=0.5
+        "myrepo/{}/all:all.json.zstd".format(rev), coverage=0.5
     )
 
     # Ingest last pushes
@@ -149,7 +151,7 @@ def test_closest_report(mock_cache, mock_hgmo):
     # Add a report on 994, 2 pushes after our revision
     report_rev = hashlib.md5(b"994").hexdigest()
     mock_cache.bucket.add_mock_blob(
-        "myrepo/{}/full.json.zstd".format(report_rev), coverage=0.5
+        "myrepo/{}/all:all.json.zstd".format(report_rev), coverage=0.5
     )
     report_994 = Report(
         mock_cache.reports_dir, "myrepo", report_rev, push_id=1, date=994
@@ -158,7 +160,7 @@ def test_closest_report(mock_cache, mock_hgmo):
     # Add a report on 990, 2 pushes before our revision
     base_rev = hashlib.md5(b"990").hexdigest()
     mock_cache.bucket.add_mock_blob(
-        "myrepo/{}/full.json.zstd".format(base_rev), coverage=0.4
+        "myrepo/{}/all:all.json.zstd".format(base_rev), coverage=0.4
     )
     report_990 = Report(mock_cache.reports_dir, "myrepo", base_rev, push_id=1, date=990)
 
@@ -197,10 +199,10 @@ def test_get_coverage(mock_cache):
     report = Report(mock_cache.reports_dir, "myrepo", "myhash", push_id=1, date=1)
     with pytest.raises(AssertionError) as e:
         mock_cache.get_coverage(report, "")
-    assert str(e.value) == "Missing report myrepo/myhash/full"
+    assert str(e.value) == "Missing report myrepo/myhash/all:all"
 
     # Report available online
-    mock_cache.bucket.add_mock_blob("myrepo/myhash/full.json.zstd")
+    mock_cache.bucket.add_mock_blob("myrepo/myhash/all:all.json.zstd")
 
     # Coverage available
     coverage = mock_cache.get_coverage(report, "")
@@ -213,7 +215,7 @@ def test_get_coverage(mock_cache):
     }
 
     # Remove local file
-    path = os.path.join(mock_cache.reports_dir, "myrepo", "myhash", "full.json")
+    path = os.path.join(mock_cache.reports_dir, "myrepo", "myhash", "all:all.json")
     assert os.path.exists(path)
     os.unlink(path)
 
