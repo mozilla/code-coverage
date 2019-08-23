@@ -42,6 +42,7 @@ class CodeCov(object):
 
         temp_dir = tempfile.mkdtemp()
         self.artifacts_dir = os.path.join(temp_dir, "ccov-artifacts")
+        self.reports_dir = os.path.join(temp_dir, "ccov-reports")
 
         self.index_service = taskcluster_config.get_service("index")
 
@@ -118,22 +119,17 @@ class CodeCov(object):
             # Thread 2 - Clone repository.
             executor.submit(self.clone_repository, self.repository, self.revision)
 
-    def generate_covdir(self):
+    def build_reports(self, only=None):
         """
-        Build the full covdir report using current artifacts
+        Build all the possible covdir reports using current artifacts
         """
-        output = grcov.report(
-            self.artifactsHandler.get(), source_dir=self.repo_dir, out_format="covdir"
-        )
-        logger.info("Covdir report generated successfully")
-        return json.loads(output)
+        os.makedirs(self.reports_dir, exist_ok=True)
 
-    def build_suites(self):
-        """
-        Build all the detailed covdir reports using current artifacts
-        and upload them directly on GCP
-        """
+        reports = {}
         for (platform, suite), artifacts in self.artifactsHandler.get_suites().items():
+
+            if only is not None and (platform, suite) not in only:
+                continue
 
             # Generate covdir report for that suite & platform
             logger.info(
@@ -146,27 +142,33 @@ class CodeCov(object):
                 artifacts, source_dir=self.repo_dir, out_format="covdir"
             )
 
-            # Then upload on GCP
-            report = json.loads(output)
+            # Write output on FS
+            path = os.path.join(self.reports_dir, f"{platform}.{suite}.json")
+            with open(path, "wb") as f:
+                f.write(output)
+
+            reports[(platform, suite)] = path
+
+        return reports
+
+    def upload_reports(self, reports):
+        """
+        Upload all provided covdir reports on GCP
+        """
+        for (platform, suite), path in reports.items():
+            report = json.load(open(path))
             uploader.gcp(
                 self.branch, self.revision, report, suite=suite, platform=platform
             )
 
-    # This function is executed when the bot is triggered at the end of a mozilla-central build.
-    def go_from_trigger_mozilla_central(self):
-        # Check the covdir report does not already exists
-        if uploader.gcp_covdir_exists(self.branch, self.revision, "full"):
-            logger.warn("Covdir report already on GCP")
-            return
-
-        self.retrieve_source_and_artifacts()
-
-        # Check that all JavaScript files present in the coverage artifacts actually exist.
-        # If they don't, there might be a bug in the LCOV rewriter.
+    def check_javascript_files(self):
+        """
+        Check that all JavaScript files present in the coverage artifacts actually exist.
+        If they don't, there might be a bug in the LCOV rewriter.
+        """
         for artifact in self.artifactsHandler.get():
             if "jsvm" not in artifact:
                 continue
-
             with zipfile.ZipFile(artifact, "r") as zf:
                 for file_name in zf.namelist():
                     with zf.open(file_name, "r") as fl:
@@ -185,7 +187,25 @@ class CodeCov(object):
                                 f"{missing_files} are present in coverage reports, but missing from the repository"
                             )
 
-        report = self.generate_covdir()
+    # This function is executed when the bot is triggered at the end of a mozilla-central build.
+    def go_from_trigger_mozilla_central(self):
+        # Check the covdir report does not already exists
+        if uploader.gcp_covdir_exists(self.branch, self.revision, "all", "all"):
+            logger.warn("Full covdir report already on GCP")
+            return
+
+        self.retrieve_source_and_artifacts()
+
+        # TODO: restore that check
+        # self.check_javascript_files()
+
+        reports = self.build_reports()
+        logger.info("Built all covdir reports", nb=len(reports))
+
+        # Retrieve the full report
+        full_path = reports.get(("all", "all"))
+        assert full_path is not None, "Missing full report (all:all)"
+        report = json.load(open(full_path))
 
         paths = uploader.covdir_paths(report)
         expected_extensions = [".js", ".cpp"]
@@ -193,6 +213,9 @@ class CodeCov(object):
             assert any(
                 path.endswith(extension) for path in paths
             ), "No {} file in the generated report".format(extension)
+
+        self.upload_reports(reports)
+        logger.info("Uploaded all covdir reports", nb=len(reports))
 
         # Get pushlog and ask the backend to generate the coverage by changeset
         # data, which will be cached.
@@ -203,10 +226,6 @@ class CodeCov(object):
         phabricatorUploader = PhabricatorUploader(self.repo_dir, self.revision)
         changesets_coverage = phabricatorUploader.upload(report, changesets)
 
-        uploader.gcp(self.branch, self.revision, report)
-        logger.info("Main Build uploaded on GCP")
-
-        self.build_suites()
         notify_email(self.revision, changesets, changesets_coverage)
 
     # This function is executed when the bot is triggered at the end of a try build.
@@ -226,7 +245,10 @@ class CodeCov(object):
 
         self.retrieve_source_and_artifacts()
 
-        report = self.generate_covdir()
+        reports = self.build_reports(only=("all", "all"))
+        full_path = reports.get(("all", "all"))
+        assert full_path is not None, "Missing full report (all:all)"
+        report = json.load(open(full_path))
 
         logger.info("Upload changeset coverage data to Phabricator")
         phabricatorUploader.upload(report, changesets)

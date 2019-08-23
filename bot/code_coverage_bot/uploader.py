@@ -12,10 +12,10 @@ from code_coverage_bot.utils import retry
 from code_coverage_tools.gcp import get_bucket
 
 logger = structlog.get_logger(__name__)
-GCP_COVDIR_PATH = "{repository}/{revision}/{name}.json.zstd"
+GCP_COVDIR_PATH = "{repository}/{revision}/{platform}:{suite}.json.zstd"
 
 
-def gcp(repository, revision, report, platform=None, suite=None):
+def gcp(repository, revision, report, platform, suite):
     """
     Upload a grcov raw report on Google Cloud Storage
     * Compress with zstandard
@@ -23,6 +23,8 @@ def gcp(repository, revision, report, platform=None, suite=None):
     * Trigger ingestion on channel's backend
     """
     assert isinstance(report, dict)
+    assert isinstance(platform, str)
+    assert isinstance(suite, str)
     bucket = get_bucket(secrets[secrets.GOOGLE_CLOUD_STORAGE])
 
     # Compress report
@@ -30,12 +32,9 @@ def gcp(repository, revision, report, platform=None, suite=None):
     archive = compressor.compress(json.dumps(report).encode("utf-8"))
 
     # Upload archive
-    if platform and suite:
-        name = f"{platform}:{suite}"
-    else:
-        name = "full"
-
-    path = GCP_COVDIR_PATH.format(repository=repository, revision=revision, name=name)
+    path = GCP_COVDIR_PATH.format(
+        repository=repository, revision=revision, platform=platform, suite=suite
+    )
     blob = bucket.blob(path)
     blob.upload_from_string(archive)
 
@@ -56,12 +55,14 @@ def gcp(repository, revision, report, platform=None, suite=None):
     return blob
 
 
-def gcp_covdir_exists(repository, revision, name):
+def gcp_covdir_exists(repository, revision, platform, suite):
     """
     Check if a covdir report exists on the Google Cloud Storage bucket
     """
     bucket = get_bucket(secrets[secrets.GOOGLE_CLOUD_STORAGE])
-    path = GCP_COVDIR_PATH.format(repository=repository, revision=revision, name=name)
+    path = GCP_COVDIR_PATH.format(
+        repository=repository, revision=revision, platform=platform, suite=suite
+    )
     blob = bucket.blob(path)
     return blob.exists()
 

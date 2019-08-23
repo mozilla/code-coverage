@@ -44,12 +44,14 @@ class ArtifactsHandler(object):
         )
 
     def get_suites(self):
+        # Add the full report
+        out = collections.defaultdict(list)
+        out[("all", "all")] = [artifact.path for artifact in self.artifacts]
+
         # Group by suite first
         suites = itertools.groupby(
             sorted(self.artifacts, key=lambda a: a.suite), lambda a: a.suite
         )
-
-        out = collections.defaultdict(list)
         for suite, artifacts in suites:
             artifacts = list(artifacts)
 
