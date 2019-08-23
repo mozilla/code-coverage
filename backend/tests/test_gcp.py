@@ -122,7 +122,7 @@ def test_ingest_hgmo(mock_cache, mock_hgmo):
     # Ingest last pushes
     assert mock_cache.list_reports("myrepo") == []
     assert len(mock_cache.redis.keys("changeset:myrepo:*")) == 0
-    mock_cache.ingest_pushes("myrepo")
+    mock_cache.ingest_pushes("myrepo", "all", "all")
     assert len(mock_cache.redis.keys("changeset:myrepo:*")) > 0
     assert mock_cache.list_reports("myrepo") == [
         Report(mock_cache.reports_dir, "myrepo", rev, push_id=1, date=995)
