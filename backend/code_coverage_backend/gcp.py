@@ -229,6 +229,20 @@ class GCPCache(object):
         if push_id:
             # Redis lib uses bytes for all output
             push_id = int(push_id.decode("utf-8"))
+            date = self.redis.hget(key, "date").decode("utf-8")
+
+            # Check the report variant is available locally
+            report = Report(
+                self.reports_dir,
+                repository,
+                changeset,
+                platform,
+                suite,
+                push_id=push_id,
+                date=date,
+            )
+            if not os.path.exists(report.path):
+                self.ingest_report(report)
         else:
 
             # Lookup push from HGMO (slow)
