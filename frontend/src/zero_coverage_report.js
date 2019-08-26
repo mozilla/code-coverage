@@ -1,7 +1,9 @@
-import {hide, message, build_navbar, render, filter_third_party, filter_languages, filter_headers, filter_completely_uncovered, filter_last_push_date} from './common.js';
+import {hide, message, buildNavbar, render, filterThirdParty, filterLanguages,
+  filterHeaders, filterCompletelyUncovered, filterLastPushDate} from './common.js';
 import {buildRoute} from './route.js';
 
 const ZERO_COVERAGE_FILTERS = {
+  // eslint-disable-next-line quotes
   'third_party': "Show third-party files",
   'headers': 'Show headers',
   'completely_uncovered': 'Show completely uncovered files only',
@@ -15,31 +17,31 @@ const ZERO_COVERAGE_PUSHES = {
   'one_year': '0 &lt; 1 year',
   'two_years': '1 &lt; 2 years',
   'older_than_two_years': 'Older than 2 years',
-}
+};
 
 
-export function zero_coverage_menu(route){
-  let context = {
+export function zeroCoverageMenu(route) {
+  const context = {
     filters: Object.entries(ZERO_COVERAGE_FILTERS).map(([key, message]) => {
       return {
         key,
         message,
         checked: route[key] === 'on',
-      }
+      };
     }),
     last_pushes: Object.entries(ZERO_COVERAGE_PUSHES).map(([value, message]) => {
       return {
         value,
         message,
         selected: route['last_push'] === value,
-      }
+      };
     }),
   };
   render('menu_zero', context, 'menu');
 }
 
 
-function sort_entries(entries) {
+function sortEntries(entries) {
   return entries.sort(([dir1, stats1], [dir2, stats2]) => {
     if (stats1.children != stats2.children) {
       return stats1.children < stats2.children;
@@ -50,12 +52,12 @@ function sort_entries(entries) {
     }
 
     return dir1 > dir2;
-  }).map(([dir , stats]) => {
+  }).map(([dir, stats]) => {
     return {stats, dir};
   });
 }
 
-function get_min_date(oldDate, newDate) {
+function getMinDate(oldDate, newDate) {
   if (!oldDate) {
     return newDate;
   }
@@ -68,11 +70,11 @@ function get_min_date(oldDate, newDate) {
 
 function getBaseStats(file, children) {
   return {'children': children,
-          'funcs': file.funcs,
-          'first_push_date': file.first_push_date,
-          'last_push_date': file.last_push_date,
-          'size': file.size,
-          'commits': file.commits};
+    'funcs': file.funcs,
+    'first_push_date': file.first_push_date,
+    'last_push_date': file.last_push_date,
+    'size': file.size,
+    'commits': file.commits};
 }
 
 function cumStats(prevStats, newStats) {
@@ -80,20 +82,11 @@ function cumStats(prevStats, newStats) {
   prevStats.funcs += newStats.funcs;
   prevStats.size += newStats.size;
   prevStats.commits += newStats.commits;
-  prevStats.first_push_date = get_min_date(prevStats.first_push_date, newStats.first_push_date);
-  prevStats.last_push_date = get_min_date(prevStats.last_push_date, newStats.last_push_date);
+  prevStats.first_push_date = getMinDate(prevStats.first_push_date, newStats.first_push_date);
+  prevStats.last_push_date = getMinDate(prevStats.last_push_date, newStats.last_push_date);
 }
 
-function getFileSize(size) {
-  if (size >= 1e6) {
-    return (size / 1e6).toFixed(2) + 'M';
-  } else if (size >= 1e3) {
-    return (size / 1e3).toFixed(1) + 'K';
-  }
-  return size;
-}
-
-export async function zero_coverage_display(data, dir) {
+export async function zeroCoverageDisplay(data, dir) {
   hide('output');
   hide('history');
   message('loading', 'Loading zero coverage report for ' + (dir || 'mozilla-central'));
@@ -104,20 +97,20 @@ export async function zero_coverage_display(data, dir) {
     dir = '';
   }
 
-  let files = data['files'].filter(file => file.name.startsWith(dir));
+  let files = data['files'].filter((file) => file.name.startsWith(dir));
   // TODO: Do this in the backend directly!
-  files.forEach(file => {
+  files.forEach((file) => {
     file.path = file.name;
   });
-  files = await filter_third_party(files);
-  files = filter_languages(files);
-  files = filter_headers(files);
-  files = filter_completely_uncovered(files);
-  files = filter_last_push_date(files);
+  files = await filterThirdParty(files);
+  files = filterLanguages(files);
+  files = filterHeaders(files);
+  files = filterCompletelyUncovered(files);
+  files = filterLastPushDate(files);
 
-  let map = new Map();
+  const map = new Map();
 
-  for (let file of files) {
+  for (const file of files) {
     let rest = file.path.substring(dir.lastIndexOf('/') + 1);
 
     if (rest.includes('/')) {
@@ -136,22 +129,22 @@ export async function zero_coverage_display(data, dir) {
   }
 
   const revision = data['hg_revision'];
-  let context = {
+  const context = {
     current_dir: dir,
-    entries: sort_entries(Array.from(map.entries())),
-    entry_url : function() {
-      let path = dir + this.dir;
+    entries: sortEntries(Array.from(map.entries())),
+    entry_url: function() {
+      const path = dir + this.dir;
       if (this.stats.children != 0) {
         return buildRoute({
           view: 'zero',
           path,
-        })
+        });
       } else {
         // Fully reset the url when moving back to browser view
         return `#view=browser&revision=${revision}&path=${path}`;
       }
     },
-    navbar: build_navbar(dir),
+    navbar: buildNavbar(dir),
     total: files.length,
   };
 
