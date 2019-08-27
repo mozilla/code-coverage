@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import argparse
-import asyncio
 import os
 
 import structlog
@@ -9,7 +8,7 @@ from libmozevent.bus import MessageBus
 from libmozevent.log import init_logger
 from libmozevent.monitoring import Monitoring
 from libmozevent.pulse import PulseListener
-from libmozevent.pulse import run_consumer
+from libmozevent.utils import run_tasks
 
 from code_coverage_events import QUEUE_MONITORING
 from code_coverage_events import QUEUE_PULSE
@@ -77,7 +76,7 @@ class Events(object):
         ]
 
         # Run all tasks concurrently
-        run_consumer(asyncio.gather(*consumers))
+        run_tasks(consumers)
 
 
 def main():
