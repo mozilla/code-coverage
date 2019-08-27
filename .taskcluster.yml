@@ -116,6 +116,26 @@ tasks:
         owner: bastien@mozilla.com
         source: https://github.com/mozilla/code-coverage
 
+    - taskId: {$eval: as_slugid("events_check_tests")}
+      provisionerId: aws-provisioner-v1
+      workerType: github-worker
+      created: {$fromNow: ''}
+      deadline: {$fromNow: '1 hour'}
+      payload:
+        maxRunTime: 3600
+        image: python:3
+        command:
+          - sh
+          - -lxce
+          - "git clone --quiet ${repository} /src && cd /src && git checkout ${head_rev} -b checks &&
+            cd /src/events && pip install --quiet . && pip install --quiet -r requirements-dev.txt &&
+            pytest -v"
+      metadata:
+        name: "Code Coverage Events checks: unit tests"
+        description: Check python code with pytest
+        owner: bastien@mozilla.com
+        source: https://github.com/mozilla/code-coverage
+
     - taskId: {$eval: as_slugid("backend_build")}
       created: {$fromNow: ''}
       deadline: {$fromNow: '1 hour'}
