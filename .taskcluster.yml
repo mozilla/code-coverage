@@ -218,6 +218,47 @@ tasks:
         owner: bastien@mozilla.com
         source: https://github.com/mozilla/code-coverage
 
+    - taskId: {$eval: as_slugid("events_build")}
+      created: {$fromNow: ''}
+      deadline: {$fromNow: '1 hour'}
+      provisionerId: aws-provisioner-v1
+      workerType: releng-svc
+      dependencies:
+        - {$eval: as_slugid("check_lint")}
+        - {$eval: as_slugid("events_check_tests")}
+      payload:
+        capabilities:
+          privileged: true
+        maxRunTime: 3600
+        image: "${taskboot_image}"
+        env:
+          GIT_REPOSITORY: ${repository}
+          GIT_REVISION: ${head_rev}
+        command:
+          - taskboot
+          - build
+          - --image
+          - mozilla/code-coverage
+          - --tag
+          - "events-${channel}"
+          - --tag
+          - "events-${head_rev}"
+          - --write
+          - /events.tar
+          - events/Dockerfile
+        artifacts:
+          public/code-coverage-events.tar:
+            expires: {$fromNow: '2 weeks'}
+            path: /events.tar
+            type: file
+      scopes:
+        - docker-worker:capability:privileged
+      metadata:
+        name: Code Coverage Events docker build
+        description: Build docker image with taskboot
+        owner: bastien@mozilla.com
+        source: https://github.com/mozilla/code-coverage
+
     - taskId: {$eval: as_slugid("addon_build")}
       provisionerId: aws-provisioner-v1
       workerType: github-worker
@@ -298,6 +339,36 @@ tasks:
           - "secrets:get:project/relman/code-coverage/deploy-${channel}"
         metadata:
           name: "Code Coverage Backend deployment (${channel})"
+          description: Deploy docker image on Heroku
+          owner: bastien@mozilla.com
+          source: https://github.com/mozilla/code-coverage
+
+    - $if: 'channel in ["testing", "production"]'
+      then:
+        taskId: {$eval: as_slugid("events_deploy")}
+        created: {$fromNow: ''}
+        deadline: {$fromNow: '1 hour'}
+        provisionerId: aws-provisioner-v1
+        workerType: github-worker
+        dependencies:
+          - {$eval: as_slugid("events_build")}
+        payload:
+          features:
+            taskclusterProxy: true
+          maxRunTime: 3600
+          image: "${taskboot_image}"
+          command:
+            - taskboot
+            - deploy-heroku
+            - --heroku-app
+            - "code-coverage-events-${channel}"
+            - worker:public/code-coverage-events.tar
+          env:
+            TASKCLUSTER_SECRET: "project/relman/code-coverage/deploy-${channel}"
+        scopes:
+          - "secrets:get:project/relman/code-coverage/deploy-${channel}"
+        metadata:
+          name: "Code Coverage Events deployment (${channel})"
           description: Deploy docker image on Heroku
           owner: bastien@mozilla.com
           source: https://github.com/mozilla/code-coverage
