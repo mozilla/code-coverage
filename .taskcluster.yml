@@ -128,7 +128,7 @@ tasks:
           - sh
           - -lxce
           - "git clone --quiet ${repository} /src && cd /src && git checkout ${head_rev} -b checks &&
-            cd /src/events && pip install --quiet . && pip install --quiet -r requirements-dev.txt &&
+            cd /src/events && pip install -q -r requirements.txt && pip install --quiet . && pip install --quiet -r requirements-dev.txt &&
             pytest -v"
       metadata:
         name: "Code Coverage Events checks: unit tests"
