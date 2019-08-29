@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+import asyncio
+
 import requests
 import structlog
 from libmozevent import taskcluster_config
@@ -35,7 +37,7 @@ class CodeCoverage(object):
             payload = await self.bus.receive(QUEUE_PULSE)
 
             # Parse the payload to extract a new task's environment
-            envs = self.parse(payload)
+            envs = await self.parse(payload)
             if envs is None:
                 continue
 
@@ -56,7 +58,7 @@ class CodeCoverage(object):
             for s in ["build-linux64-ccov", "build-win64-ccov"]
         )
 
-    def get_build_task_in_group(self, group_id):
+    async def get_build_task_in_group(self, group_id):
         if group_id in self.triggered_groups:
             logger.info(
                 "Received duplicated groupResolved notification", group=group_id
@@ -64,6 +66,9 @@ class CodeCoverage(object):
             return None
 
         def maybe_trigger(tasks):
+            logger.info(
+                "Checking code coverage tasks", group_id=group_id, nb=len(tasks)
+            )
             for task in tasks:
                 if self.is_coverage_task(task):
                     self.triggered_groups.add(group_id)
@@ -71,30 +76,36 @@ class CodeCoverage(object):
 
             return None
 
-        def retrieve_coverage_task(limit=200):
-            reply = self.queue.listTaskGroup(group_id, limit=limit)
-            task = maybe_trigger(reply["tasks"])
+        def load_tasks(limit=200, continuationToken=None):
+            query = {"limit": limit}
+            if continuationToken is not None:
+                query["continuationToken"] = continuationToken
+            reply = retry(lambda: self.queue.listTaskGroup(group_id, query=query))
+            return maybe_trigger(reply["tasks"]), reply.get("continuationToken")
 
-            while task is None and reply.get("continuationToken") is not None:
-                reply = self.queue.listTaskGroup(
-                    group_id, limit=limit, continuationToken=reply["continuationToken"]
-                )
-                task = maybe_trigger(reply["tasks"])
+        async def retrieve_coverage_task():
+            task, token = load_tasks()
+
+            while task is None and token is not None:
+                task, token = load_tasks(continuationToken=token)
+
+                # Let other tasks run on long batches
+                await asyncio.sleep(2)
 
             return task
 
         try:
-            return retry(retrieve_coverage_task)
+            return await retrieve_coverage_task()
         except requests.exceptions.HTTPError:
             return None
 
-    def parse(self, body):
+    async def parse(self, body):
         """
         Extract revisions from payload
         """
         taskGroupId = body["taskGroupId"]
 
-        build_task = self.get_build_task_in_group(taskGroupId)
+        build_task = await self.get_build_task_in_group(taskGroupId)
         if build_task is None:
             return None
 
