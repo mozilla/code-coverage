@@ -4,7 +4,7 @@ MERCURIAL_VERSION="5.1"
 VERSION_CONTROL_TOOLS_REV="709c897f2444"
 
 apt-get update
-apt-get install --no-install-recommends -y curl lcov bzip2 python2-minimal python-bz2file python-dev
+apt-get install --no-install-recommends -y curl bzip2 python2-minimal python-bz2file python-dev
 
 # Setup mercurial from its own website, without install pip2 which has a lot of dependencies
 curl -L https://www.mercurial-scm.org/release/mercurial-$MERCURIAL_VERSION.tar.gz | tar -C /opt -xvz
