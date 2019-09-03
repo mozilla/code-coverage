@@ -1,0 +1,112 @@
+{
+  "provisionerId": "aws-provisioner-v1",
+  "workerType": "gecko-3-b-win2012",
+  "schedulerId": "gecko-level-3",
+  "taskGroupId": "Mu6w3n-dS9GOfrv6wGOtvg",
+  "dependencies": [
+    "A2glmsCuQP6RKiZ2b64GWw",
+    "A2x8ujDgTjiUU55Ym0vKFg",
+    "GpEX9Ol1RRKqxoUtKaEe3Q",
+    "HdSEPz7vQTCG528C4aPYLA",
+    "HeAtunPjSe6ovqMjikX_cQ",
+    "LebTjyemRzylVAXC0W52jA",
+    "cz8EDILrTYinz5bdpsJUxQ",
+    "Mu6w3n-dS9GOfrv6wGOtvg"
+  ],
+  "requires": "all-completed",
+  "routes": [
+    "index.gecko.v2.mozilla-central.latest.firefox.win64-debug",
+    "index.gecko.v2.mozilla-central.pushdate.2019.03.28.20190328173141.firefox.win64-debug",
+    "index.gecko.v2.mozilla-central.pushlog-id.35772.firefox.win64-debug",
+    "index.gecko.v2.mozilla-central.revision.e31357c7759379d2279b6883cb09c91997bfaa5d.firefox.win64-debug",
+    "index.gecko.v2.trunk.revision.e31357c7759379d2279b6883cb09c91997bfaa5d.firefox.win64-debug",
+    "tc-treeherder.v2.mozilla-central.e31357c7759379d2279b6883cb09c91997bfaa5d.35772"
+  ],
+  "priority": "medium",
+  "retries": 5,
+  "created": "2019-03-28T17:38:38.226Z",
+  "deadline": "2019-03-29T17:38:38.226Z",
+  "expires": "2020-03-27T17:38:38.226Z",
+  "scopes": [
+    "secrets:get:project/releng/gecko/build/level-3/*",
+    "secrets:get:project/taskcluster/gecko/hgfingerprint"
+  ],
+  "payload": {
+    "maxRunTime": 7200,
+    "artifacts": [
+      {
+        "path": "logs",
+        "type": "directory",
+        "name": "public/logs"
+      },
+      {
+        "path": "public/build",
+        "type": "directory",
+        "name": "public/build"
+      }
+    ],
+    "command": [
+      ":: sccache currently uses the full compiler commandline as input to the\n:: cache hash key, so create a symlink to the task dir and build from\n:: the symlink dir to get consistent paths.\nif exist z:\\build rmdir z:\\build",
+      "mklink /d z:\\build %cd%",
+      "icacls z:\\build /grant *S-1-1-0:D /L",
+      "cd /d z:\\build",
+      "\"c:\\Program Files\\Mercurial\\hg.exe\" robustcheckout --sharebase y:\\hg-shared --purge --upstream https://hg.mozilla.org/mozilla-unified --revision e31357c7759379d2279b6883cb09c91997bfaa5d https://hg.mozilla.org/mozilla-central .\\build\\src",
+      ":: TinderboxPrint:<a href=https://hg.mozilla.org/mozilla-central/rev/e31357c7759379d2279b6883cb09c91997bfaa5d title='Built from mozilla-central revision e31357c7759379d2279b6883cb09c91997bfaa5d'>e31357c7759379d2279b6883cb09c91997bfaa5d</a>\n",
+      "c:\\mozilla-build\\python\\python.exe .\\build\\src\\testing\\mozharness\\scripts\\fx_desktop_build.py --config builds\\releng_base_firefox.py --config builds\\taskcluster_base_windows.py --config builds\\taskcluster_base_win64.py --config builds\\taskcluster_sub_win64\\debug.py --branch mozilla-central --work-dir %cd:Z:=z:%\\build --append-env-variables-from-configs"
+    ],
+    "features": {
+      "taskclusterProxy": true,
+      "chainOfTrust": true
+    },
+    "env": {
+      "MOZ_SOURCE_CHANGESET": "e31357c7759379d2279b6883cb09c91997bfaa5d",
+      "MOZ_BUILD_DATE": "20190328173141",
+      "MOZ_SOURCE_REPO": "https://hg.mozilla.org/mozilla-central",
+      "HG_STORE_PATH": "y:/hg-shared",
+      "GECKO_HEAD_REV": "e31357c7759379d2279b6883cb09c91997bfaa5d",
+      "MH_BRANCH": "mozilla-central",
+      "GECKO_PATH": "./build/src",
+      "MOZ_SCM_LEVEL": "3",
+      "EXTRA_MOZHARNESS_CONFIG": "{\"update_channel\": \"nightly\", \"mozconfig_variant\": \"debug\"}",
+      "MOZ_TOOLCHAINS": "public/build/clang.tar.bz2@HdSEPz7vQTCG528C4aPYLA public/build/rustc.tar.bz2@cz8EDILrTYinz5bdpsJUxQ public/build/rust-size.tar.bz2@HeAtunPjSe6ovqMjikX_cQ public/build/cbindgen.tar.bz2@A2glmsCuQP6RKiZ2b64GWw public/build/sccache2.tar.bz2@GpEX9Ol1RRKqxoUtKaEe3Q public/build/nasm.tar.bz2@A2x8ujDgTjiUU55Ym0vKFg public/build/node.tar.bz2@LebTjyemRzylVAXC0W52jA",
+      "MOZ_SIMPLE_PACKAGE_NAME": "target",
+      "SCCACHE_IDLE_TIMEOUT": "0",
+      "GECKO_HEAD_REPOSITORY": "https://hg.mozilla.org/mozilla-central",
+      "TOOLTOOL_MANIFEST": "browser/config/tooltool-manifests/win64/releng.manifest",
+      "USE_SCCACHE": "1",
+      "MOZ_AUTOMATION": "1",
+      "GECKO_BASE_REPOSITORY": "https://hg.mozilla.org/mozilla-unified"
+    }
+  },
+  "metadata": {
+    "owner": "opoprus@mozilla.com",
+    "source": "https://hg.mozilla.org/mozilla-central/file/e31357c7759379d2279b6883cb09c91997bfaa5d/taskcluster/ci/build",
+    "description": "Win64 Debug ([Treeherder push](https://treeherder.mozilla.org/#/jobs?repo=mozilla-central&revision=e31357c7759379d2279b6883cb09c91997bfaa5d))",
+    "name": "build-win64/debug"
+  },
+  "tags": {
+    "os": "windows",
+    "createdForUser": "opoprus@mozilla.com",
+    "worker-implementation": "generic-worker",
+    "kind": "build",
+    "label": "build-win64/debug"
+  },
+  "extra": {
+    "index": {
+      "rank": 1553794301
+    },
+    "treeherder": {
+      "machine": {
+        "platform": "windows2012-64"
+      },
+      "tier": 1,
+      "symbol": "B",
+      "jobKind": "build",
+      "collection": {
+        "debug": true
+      }
+    },
+    "treeherder-platform": "windows2012-64/debug",
+    "parent": "Mu6w3n-dS9GOfrv6wGOtvg"
+  }
+}

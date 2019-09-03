@@ -142,9 +142,18 @@ def _group_tasks():
     def build_task(task_state):
         task_name = task_state[0]
         state = task_state[1]
+        platform, test = task_name.split("/")
+        suite = test.rstrip("debug-")
+        platform = platform.lstrip("test-").rstrip("-ccov")
+        print(suite, platform)
         return {
             "status": {"taskId": task_name + "-" + state, "state": state},
-            "task": {"metadata": {"name": task_name}},
+            "task": {
+                "metadata": {"name": task_name},
+                "env": {},
+                "extra": {"suite": suite},
+                "tags": {"os": platform},
+            },
         }
 
     # Generate all possible permutations of task_name - state.

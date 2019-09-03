@@ -1,0 +1,157 @@
+{
+  "provisionerId": "aws-provisioner-v1",
+  "workerType": "gecko-t-linux-xlarge",
+  "schedulerId": "gecko-level-3",
+  "taskGroupId": "Mu6w3n-dS9GOfrv6wGOtvg",
+  "dependencies": [
+    "CGQi0Z1nQhizLPmm9d3wYQ",
+    "Ni08JmJYSd2ORiKH5wvxgA",
+    "VJu-1z_6RWqaheqWJvI2IQ"
+  ],
+  "requires": "all-completed",
+  "routes": [
+    "tc-treeherder.v2.mozilla-central.e31357c7759379d2279b6883cb09c91997bfaa5d.35772",
+    "coalesce.v1.mozilla-central.72a408b230326a5f5576"
+  ],
+  "priority": "medium",
+  "retries": 5,
+  "created": "2019-03-28T17:39:11.229Z",
+  "deadline": "2019-03-29T17:39:11.229Z",
+  "expires": "2020-03-27T17:39:11.229Z",
+  "scopes": [
+    "docker-worker:relengapi-proxy:tooltool.download.public",
+    "secrets:get:project/taskcluster/gecko/hgfingerprint",
+    "docker-worker:feature:allowPtrace",
+    "docker-worker:capability:device:loopbackVideo",
+    "docker-worker:cache:gecko-level-3-tooltool-cache-v3-33ea6ead87f10b63cd64",
+    "docker-worker:cache:gecko-level-3-checkouts-v3-33ea6ead87f10b63cd64"
+  ],
+  "payload": {
+    "supersederUrl": "https://coalesce.mozilla-releng.net/v1/list/3600/5/mozilla-central.72a408b230326a5f5576",
+    "onExitStatus": {
+      "retry": [
+        4,
+        72
+      ],
+      "purgeCaches": [
+        72
+      ]
+    },
+    "maxRunTime": 5400,
+    "image": {
+      "path": "public/image.tar.zst",
+      "type": "task-image",
+      "taskId": "Ni08JmJYSd2ORiKH5wvxgA"
+    },
+    "cache": {
+      "gecko-level-3-tooltool-cache-v3-33ea6ead87f10b63cd64": "/builds/worker/tooltool-cache",
+      "gecko-level-3-checkouts-v3-33ea6ead87f10b63cd64": "/builds/worker/checkouts"
+    },
+    "capabilities": {
+      "devices": {
+        "loopbackVideo": true
+      }
+    },
+    "artifacts": {
+      "public/logs/": {
+        "path": "/builds/worker/workspace/logs/",
+        "expires": "2020-03-27T17:39:11.229Z",
+        "type": "directory"
+      },
+      "public/test": {
+        "path": "/builds/worker/artifacts/",
+        "expires": "2020-03-27T17:39:11.229Z",
+        "type": "directory"
+      },
+      "public/test_info/": {
+        "path": "/builds/worker/workspace/build/blobber_upload_dir/",
+        "expires": "2020-03-27T17:39:11.229Z",
+        "type": "directory"
+      }
+    },
+    "command": [
+      "/builds/worker/bin/run-task",
+      "--",
+      "/builds/worker/bin/test-linux.sh",
+      "--installer-url=https://queue.taskcluster.net/v1/task/VJu-1z_6RWqaheqWJvI2IQ/artifacts/public/build/target.tar.bz2",
+      "--test-packages-url=https://queue.taskcluster.net/v1/task/VJu-1z_6RWqaheqWJvI2IQ/artifacts/public/build/target.test_packages.json",
+      "--mochitest-suite=plain-chunked",
+      "--code-coverage",
+      "--e10s",
+      "--total-chunk=16",
+      "--this-chunk=1",
+      "--download-symbols=true"
+    ],
+    "env": {
+      "MOZ_AUTOMATION": "1",
+      "MOCHITEST_FLAVOR": "plain",
+      "TOOLTOOL_CACHE": "/builds/worker/tooltool-cache",
+      "MOZ_FETCHES_DIR": "/builds/worker/fetches",
+      "MOZHARNESS_SCRIPT": "desktop_unittest.py",
+      "MOZ_NODE_PATH": "/usr/local/bin/node",
+      "HG_STORE_PATH": "/builds/worker/checkouts/hg-store",
+      "MOZILLA_BUILD_URL": "https://queue.taskcluster.net/v1/task/VJu-1z_6RWqaheqWJvI2IQ/artifacts/public/build/target.tar.bz2",
+      "GECKO_PATH": "/builds/worker/checkouts/gecko",
+      "GECKO_HEAD_REPOSITORY": "https://hg.mozilla.org/mozilla-central",
+      "SCCACHE_DISABLE": "1",
+      "GECKO_HEAD_REV": "e31357c7759379d2279b6883cb09c91997bfaa5d",
+      "TASKCLUSTER_VOLUMES": "/builds/worker/.cache;/builds/worker/checkouts;/builds/worker/tooltool-cache;/builds/worker/workspace",
+      "MOZHARNESS_URL": "https://queue.taskcluster.net/v1/task/VJu-1z_6RWqaheqWJvI2IQ/artifacts/public/build/mozharness.zip",
+      "GECKO_BASE_REPOSITORY": "https://hg.mozilla.org/mozilla-unified",
+      "MOZ_FETCHES": "[{\"artifact\": \"public/build/grcov.tar.xz\", \"extract\": true, \"task\": \"CGQi0Z1nQhizLPmm9d3wYQ\"}]",
+      "TASKCLUSTER_CACHES": "/builds/worker/checkouts;/builds/worker/tooltool-cache",
+      "WORKING_DIR": "/builds/worker",
+      "NEED_PULSEAUDIO": "true",
+      "ENABLE_E10S": "true",
+      "NEED_WINDOW_MANAGER": "true",
+      "MOZHARNESS_CONFIG": "unittests/linux_unittest.py remove_executables.py"
+    },
+    "features": {
+      "taskclusterProxy": true,
+      "allowPtrace": true,
+      "relengAPIProxy": true
+    }
+  },
+  "metadata": {
+    "owner": "opoprus@mozilla.com",
+    "source": "https://hg.mozilla.org/mozilla-central/file/e31357c7759379d2279b6883cb09c91997bfaa5d/taskcluster/ci/test",
+    "description": "Mochitest plain run ([Treeherder push](https://treeherder.mozilla.org/#/jobs?repo=mozilla-central&revision=e31357c7759379d2279b6883cb09c91997bfaa5d))",
+    "name": "test-linux64-ccov/debug-mochitest-e10s-1"
+  },
+  "tags": {
+    "kind": "test",
+    "worker-implementation": "docker-worker",
+    "createdForUser": "opoprus@mozilla.com",
+    "label": "test-linux64-ccov/debug-mochitest-e10s-1",
+    "test-type": "mochitest",
+    "os": "linux"
+  },
+  "extra": {
+    "index": {
+      "rank": 0
+    },
+    "parent": "Mu6w3n-dS9GOfrv6wGOtvg",
+    "chunks": {
+      "current": 1,
+      "total": 16
+    },
+    "suite": {
+      "flavor": "plain-chunked",
+      "name": "mochitest"
+    },
+    "treeherder": {
+      "jobKind": "test",
+      "groupSymbol": "M-e10s",
+      "collection": {
+        "debug": true
+      },
+      "machine": {
+        "platform": "linux64-ccov"
+      },
+      "groupName": "Mochitests with e10s",
+      "tier": 2,
+      "symbol": "1"
+    },
+    "treeherder-platform": "linux64-ccov/debug"
+  }
+}

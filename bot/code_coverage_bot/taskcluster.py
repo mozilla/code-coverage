@@ -115,7 +115,6 @@ BUILD_PLATFORMS = [
     "build-android-test-ccov/opt",
 ]
 
-
 TEST_PLATFORMS = [
     "test-linux64-ccov/debug",
     "test-windows10-64-ccov/debug",
@@ -124,10 +123,16 @@ TEST_PLATFORMS = [
 
 
 def is_coverage_task(task):
-    return any(task["task"]["metadata"]["name"].startswith(t) for t in TEST_PLATFORMS)
+    return any(task["metadata"]["name"].startswith(t) for t in TEST_PLATFORMS)
 
 
-def get_chunk(name):
+def name_to_chunk(name):
+    """
+    Helper to convert a task name to a chunk
+    Used by chunk mapping
+    """
+    assert isinstance(name, str)
+
     # Some tests are run on build machines, we define a placeholder chunk for those.
     if name in BUILD_PLATFORMS:
         return "build"
@@ -139,18 +144,60 @@ def get_chunk(name):
     return "-".join([p for p in name.split("-") if p != "e10s"])
 
 
-def get_suite(chunk_name):
-    return "-".join([p for p in chunk_name.split("-") if not p.isdigit()])
+def chunk_to_suite(chunk):
+    """
+    Helper to convert a chunk to a suite (no numbers)
+    Used by chunk mapping
+    """
+    assert isinstance(chunk, str)
+    return "-".join([p for p in chunk.split("-") if not p.isdigit()])
 
 
-def get_platform(name):
-    if "linux" in name:
-        return "linux"
-    elif "win" in name:
-        return "windows"
-    elif "android-test" in name:
-        return "android-test"
-    elif "android-em" in name:
-        return "android-emulator"
+def get_chunk(task):
+    """
+    Build clean chunk name from a Taskcluster task
+    """
+    suite = get_suite(task)
+    chunks = task["extra"].get("chunks", {})
+    if "current" in chunks:
+        return f'{suite}-{chunks["current"]}'
+    return suite
+
+
+def get_suite(task):
+    """
+    Build clean suite name from a Taskcluster task
+    """
+    assert isinstance(task, dict)
+    tags = task["tags"]
+    extra = task["extra"]
+    treeherder = extra.get("treeherder", {})
+
+    if treeherder.get("jobKind") == "build":
+        return "build"
+    elif "suite" in extra:
+        if isinstance(extra["suite"], dict):
+            return extra["suite"]["name"]
+        return extra["suite"]
     else:
+        return tags.get("test-type")
+
+    raise Exception("Unknown chunk")
+
+
+def get_platform(task):
+    """
+    Build clean platform from a Taskcluster task
+    """
+    assert isinstance(task, dict)
+    assert isinstance(task, dict)
+    tags = task.get("tags", {})
+    platform = tags.get("os")
+    if not platform:
         raise Exception("Unknown platform")
+
+    # Weird case for android build on Linux docker
+    if platform == "linux" and tags.get("android-stuff"):
+        return "android"
+
+    return platform

@@ -62,6 +62,8 @@ def get_tests_chunks(revision, platform, suite):
         run_key_prefix = "test-linux64-ccov"
     elif platform == "windows":
         run_key_prefix = "test-windows10-64-ccov"
+    else:
+        raise Exception("Unsupported platform {}".format(platform))
 
     r = requests.post(
         ACTIVEDATA_QUERY_URL,
@@ -239,7 +241,7 @@ def _inner_generate(
             def chunk_test_iter():
                 test_iter = enumerate(tests_data["result.test"])
                 return (
-                    (platform, taskcluster.get_chunk(task_names[i]), test)
+                    (platform, taskcluster.name_to_chunk(task_names[i]), test)
                     for i, test in test_iter
                 )
 
@@ -257,7 +259,7 @@ def _inner_generate(
         (platform, chunk) = futures[future]
         files = future.result()
 
-        suite = taskcluster.get_suite(chunk)
+        suite = taskcluster.chunk_to_suite(chunk)
         if is_chunk_only_suite(suite):
             per_test_cursor.executemany(
                 "INSERT INTO file_to_chunk VALUES (?,?,?)",

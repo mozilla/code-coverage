@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import json
 import os
 from unittest import mock
 from zipfile import BadZipFile
@@ -9,6 +10,7 @@ import requests
 import responses
 
 from code_coverage_bot import taskcluster
+from conftest import FIXTURES_DIR
 
 
 @responses.activate
@@ -135,42 +137,32 @@ def test_get_tasks_in_group(GROUP_TASKS_1, GROUP_TASKS_2):
     )
 
 
-def test_is_coverage_task():
-    assert taskcluster.is_coverage_task(
-        {"task": {"metadata": {"name": "test-linux64-ccov/debug-mochitest-1"}}}
-    )
-
-    assert not taskcluster.is_coverage_task(
-        {"task": {"metadata": {"name": "test-linux64/debug-mochitest-1"}}}
-    )
-
-    assert taskcluster.is_coverage_task(
-        {"task": {"metadata": {"name": "test-windows10-64-ccov/debug-cppunit"}}}
-    )
-
-    assert not taskcluster.is_coverage_task(
-        {"task": {"metadata": {"name": "test-windows10-64/debug-cppunit"}}}
-    )
-
-    assert taskcluster.is_coverage_task(
-        {"task": {"metadata": {"name": "build-win64-ccov/debug"}}}
-    )
-
-    assert not taskcluster.is_coverage_task(
-        {"task": {"metadata": {"name": "build-win64/debug"}}}
-    )
-
-    assert taskcluster.is_coverage_task(
-        {"task": {"metadata": {"name": "build-linux64-ccov/debug"}}}
-    )
-
-    assert not taskcluster.is_coverage_task(
-        {"task": {"metadata": {"name": "build-linux64/debug"}}}
-    )
+@pytest.mark.parametrize(
+    "task_name, expected",
+    [
+        ("test-linux64-ccov/debug-mochitest-1", True),
+        ("test-linux64-ccov/debug-mochitest-e10s-7", True),
+        ("test-linux64-ccov/debug-cppunit", True),
+        ("test-linux64-ccov/debug-firefox-ui-functional-remote-e10s", True),
+        ("test-windows10-64-ccov/debug-mochitest-1", True),
+        ("test-windows10-64-ccov/debug-mochitest-e10s-7", True),
+        ("test-windows10-64-ccov/debug-cppunit", True),
+        ("build-linux64-ccov/debug", True),
+        ("build-android-test-ccov/opt", True),
+        ("build-win64-ccov/debug", True),
+        ("test-linux64/debug-mochitest-1", False),
+        ("test-windows10-64/debug-cppunit", False),
+        ("build-win64/debug", False),
+    ],
+)
+def test_is_coverage_task(task_name, expected):
+    task = json.load(open(os.path.join(FIXTURES_DIR, f"{task_name}.json")))
+    assert taskcluster.is_coverage_task(task) is expected
 
 
-def test_get_chunk():
-    tests = [
+@pytest.mark.parametrize(
+    "task_name, expected",
+    [
         ("test-linux64-ccov/debug-mochitest-1", "mochitest-1"),
         ("test-linux64-ccov/debug-mochitest-e10s-7", "mochitest-7"),
         ("test-linux64-ccov/debug-cppunit", "cppunit"),
@@ -184,37 +176,90 @@ def test_get_chunk():
         ("build-linux64-ccov/debug", "build"),
         ("build-android-test-ccov/opt", "build"),
         ("build-win64-ccov/debug", "build"),
-    ]
+    ],
+)
+def test_name_to_chunk(task_name, expected):
+    assert taskcluster.name_to_chunk(task_name) == expected
 
-    for (name, chunk) in tests:
-        assert taskcluster.get_chunk(name) == chunk
 
-
-def test_get_suite():
-    tests = [
+@pytest.mark.parametrize(
+    "chunk, expected",
+    [
         ("mochitest-1", "mochitest"),
         ("mochitest-7", "mochitest"),
         ("cppunit", "cppunit"),
         ("firefox-ui-functional-remote", "firefox-ui-functional-remote"),
         ("build", "build"),
-    ]
+    ],
+)
+def test_chunk_to_suite(chunk, expected):
+    assert taskcluster.chunk_to_suite(chunk) == expected
 
-    for (chunk, suite) in tests:
-        assert taskcluster.get_suite(chunk) == suite
+
+@pytest.mark.parametrize(
+    "task_name, expected",
+    [
+        ("test-linux64-ccov/debug-mochitest-1", "mochitest-1"),
+        ("test-linux64-ccov/debug-mochitest-e10s-7", "mochitest-plain-chunked-7"),
+        ("test-linux64-ccov/debug-cppunit", "cppunittest-1"),
+        (
+            "test-linux64-ccov/debug-firefox-ui-functional-remote-e10s",
+            "firefox-ui-functional-remote-1",
+        ),
+        ("test-windows10-64-ccov/debug-mochitest-1", "mochitest-1"),
+        ("test-windows10-64-ccov/debug-mochitest-e10s-7", "mochitest-plain-chunked-7"),
+        ("test-windows10-64-ccov/debug-cppunit", "cppunittest-1"),
+        ("build-linux64-ccov/debug", "build"),
+        ("build-android-test-ccov/opt", "build"),
+        ("build-win64-ccov/debug", "build"),
+    ],
+)
+def test_get_chunk(task_name, expected):
+    task = json.load(open(os.path.join(FIXTURES_DIR, f"{task_name}.json")))
+    assert taskcluster.get_chunk(task) == expected
 
 
-def test_get_platform():
-    tests = [
+@pytest.mark.parametrize(
+    "task_name, expected",
+    [
+        ("test-linux64-ccov/debug-mochitest-1", "mochitest"),
+        ("test-linux64-ccov/debug-mochitest-e10s-7", "mochitest-plain-chunked"),
+        ("test-linux64-ccov/debug-cppunit", "cppunittest"),
+        (
+            "test-linux64-ccov/debug-firefox-ui-functional-remote-e10s",
+            "firefox-ui-functional-remote",
+        ),
+        ("test-windows10-64-ccov/debug-mochitest-1", "mochitest"),
+        ("test-windows10-64-ccov/debug-mochitest-e10s-7", "mochitest-plain-chunked"),
+        ("test-windows10-64-ccov/debug-cppunit", "cppunittest"),
+        ("build-linux64-ccov/debug", "build"),
+        ("build-android-test-ccov/opt", "build"),
+        ("build-win64-ccov/debug", "build"),
+    ],
+)
+def test_get_suite(task_name, expected):
+    task = json.load(open(os.path.join(FIXTURES_DIR, f"{task_name}.json")))
+    assert taskcluster.get_suite(task) == expected
+
+
+@pytest.mark.parametrize(
+    "task_name, expected",
+    [
         ("test-linux64-ccov/debug-mochitest-1", "linux"),
+        ("test-linux64-ccov/debug-mochitest-e10s-7", "linux"),
+        ("test-linux64-ccov/debug-cppunit", "linux"),
+        ("test-linux64-ccov/debug-firefox-ui-functional-remote-e10s", "linux"),
         ("test-windows10-64-ccov/debug-mochitest-1", "windows"),
+        ("test-windows10-64-ccov/debug-mochitest-e10s-7", "windows"),
+        ("test-windows10-64-ccov/debug-cppunit", "windows"),
         ("build-linux64-ccov/debug", "linux"),
+        ("build-android-test-ccov/opt", "android"),
         ("build-win64-ccov/debug", "windows"),
-        ("build-android-test-ccov/opt", "android-test"),
-        ("test-android-em-4.3-arm7-api-16-ccov/debug-robocop-2", "android-emulator"),
-    ]
-
-    for (name, platform) in tests:
-        assert taskcluster.get_platform(name) == platform
+    ],
+)
+def test_get_platform(task_name, expected):
+    task = json.load(open(os.path.join(FIXTURES_DIR, f"{task_name}.json")))
+    assert taskcluster.get_platform(task) == expected
 
 
 @mock.patch("time.sleep")

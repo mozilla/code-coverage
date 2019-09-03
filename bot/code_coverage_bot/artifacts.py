@@ -60,8 +60,8 @@ class ArtifactsHandler(object):
         return filtered_files
 
     def download(self, test_task):
-        chunk_name = taskcluster.get_chunk(test_task["task"]["metadata"]["name"])
-        platform_name = taskcluster.get_platform(test_task["task"]["metadata"]["name"])
+        chunk_name = taskcluster.get_chunk(test_task["task"])
+        platform_name = taskcluster.get_platform(test_task["task"])
         test_task_id = test_task["status"]["taskId"]
 
         for artifact in taskcluster.get_task_artifacts(test_task_id):
@@ -104,7 +104,8 @@ class ArtifactsHandler(object):
             task
             for group in groups
             for task in taskcluster.get_tasks_in_group(group)
-            if taskcluster.is_coverage_task(task) and not self.is_filtered_task(task)
+            if taskcluster.is_coverage_task(task["task"])
+            and not self.is_filtered_task(task)
         ]
         logger.info("Downloading artifacts from {} tasks".format(len(test_tasks)))
 
@@ -130,10 +131,8 @@ class ArtifactsHandler(object):
                 status
             )
 
-            chunk_name = taskcluster.get_chunk(test_task["task"]["metadata"]["name"])
-            platform_name = taskcluster.get_platform(
-                test_task["task"]["metadata"]["name"]
-            )
+            chunk_name = taskcluster.get_chunk(test_task["task"])
+            platform_name = taskcluster.get_platform(test_task["task"])
 
             if any(to_ignore in chunk_name for to_ignore in SUITES_TO_IGNORE):
                 continue

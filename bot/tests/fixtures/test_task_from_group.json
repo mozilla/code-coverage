@@ -121,10 +121,7 @@
             "current": 4,
             "total": 8
           },
-          "suite": {
-            "flavor": "mochitest-devtools-chrome-chunked",
-            "name": "mochitest"
-          },
+          "suite": "mochitest-devtools-chrome",
           "treeherder": {
             "jobKind": "test",
             "groupSymbol": "M-e10s",
