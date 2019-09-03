@@ -36,7 +36,7 @@ export async function main(load, display, opts) {
 
 // Coverage retrieval.
 
-const COVERAGE_BACKEND_HOST = 'https://api.coverage.moz.tools';
+const COVERAGE_BACKEND_HOST = process.env.BACKEND_URL;
 
 function cache_get(cache, key) {
   if (key in cache) {

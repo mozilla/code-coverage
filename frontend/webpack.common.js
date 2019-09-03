@@ -1,4 +1,5 @@
 const path = require('path');
+const webpack = require('webpack');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
@@ -17,6 +18,9 @@ module.exports = {
     }),
     new MiniCssExtractPlugin({
       filename: 'coverage-[hash].css',
+    }),
+    new webpack.EnvironmentPlugin({
+      BACKEND_URL: 'http://localhost:8000',
     }),
   ],
   module: {
