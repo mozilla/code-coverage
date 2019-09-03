@@ -20,4 +20,5 @@ ln -s /src/bot/ci/hgrc $HOME/.hgrc
 
 # Cleanup
 apt-get autoremove -y
+rm -rf /var/lib/apt/lists/*
 rm -rf /src/version-control-tools/.hg
