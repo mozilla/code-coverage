@@ -22,4 +22,4 @@ ln -s /src/bot/ci/hgrc $HOME/.hgrc
 # Cleanup
 apt-get autoremove -y
 rm -rf /var/lib/apt/lists/*
-rm -rf /src/version-control-tools/.hg
+rm -rf /src/version-control-tools/.hg /src/version-control-tools/ansible /src/version-control-tools/docs /src/version-control-tools/testing
