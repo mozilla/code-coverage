@@ -1,6 +1,7 @@
 #!/bin/bash -ex
 GRCOV_VERSION="v0.5.3"
 MERCURIAL_VERSION="5.1"
+VERSION_CONTROL_TOOLS_REV="709c897f2444"
 
 apt-get update
 apt-get install --no-install-recommends -y curl lcov bzip2 python2-minimal python-bz2file python-dev
@@ -15,7 +16,7 @@ curl -L https://github.com/mozilla/grcov/releases/download/$GRCOV_VERSION/grcov-
 chmod +x /usr/bin/grcov
 
 # Setup mercurial with needed extensions
-hg clone https://hg.mozilla.org/hgcustom/version-control-tools /src/version-control-tools/
+hg clone -r $VERSION_CONTROL_TOOLS_REV https://hg.mozilla.org/hgcustom/version-control-tools /src/version-control-tools/
 ln -s /src/bot/ci/hgrc $HOME/.hgrc
 
 # Cleanup
