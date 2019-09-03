@@ -28,10 +28,3 @@ def test_grcov():
     Test grcov is available on the system
     """
     assert shutil.which("grcov"), "Missing grcov"
-
-
-def test_genhtml():
-    """
-    Test genhtml is available on the system
-    """
-    assert shutil.which("genhtml"), "Missing genhtml"

@@ -1,9 +1,10 @@
 #!/bin/bash -ex
 GRCOV_VERSION="v0.5.3"
 MERCURIAL_VERSION="5.1"
+VERSION_CONTROL_TOOLS_REV="709c897f2444"
 
 apt-get update
-apt-get install --no-install-recommends -y curl lcov bzip2 python2-minimal python-bz2file python-dev
+apt-get install --no-install-recommends -y gcc curl bzip2 python2-minimal python-bz2file python-dev
 
 # Setup mercurial from its own website, without install pip2 which has a lot of dependencies
 curl -L https://www.mercurial-scm.org/release/mercurial-$MERCURIAL_VERSION.tar.gz | tar -C /opt -xvz
@@ -15,9 +16,11 @@ curl -L https://github.com/mozilla/grcov/releases/download/$GRCOV_VERSION/grcov-
 chmod +x /usr/bin/grcov
 
 # Setup mercurial with needed extensions
-hg clone https://hg.mozilla.org/hgcustom/version-control-tools /src/version-control-tools/
+hg clone -r $VERSION_CONTROL_TOOLS_REV https://hg.mozilla.org/hgcustom/version-control-tools /src/version-control-tools/
 ln -s /src/bot/ci/hgrc $HOME/.hgrc
 
 # Cleanup
+apt-get purge -y gcc curl python-dev
 apt-get autoremove -y
-rm -rf /src/version-control-tools/.hg
+rm -rf /var/lib/apt/lists/*
+rm -rf /src/version-control-tools/.hg /src/version-control-tools/ansible /src/version-control-tools/docs /src/version-control-tools/testing
