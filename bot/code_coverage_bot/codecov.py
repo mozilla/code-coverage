@@ -245,7 +245,7 @@ class CodeCov(object):
 
         self.retrieve_source_and_artifacts()
 
-        reports = self.build_reports(only=("all", "all"))
+        reports = self.build_reports(only=[("all", "all")])
         full_path = reports.get(("all", "all"))
         assert full_path is not None, "Missing full report (all:all)"
         report = json.load(open(full_path))
