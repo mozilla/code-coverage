@@ -128,7 +128,7 @@ def is_coverage_task(task):
 
 def name_to_chunk(name):
     """
-    Helper to convert a task naem to a chunk
+    Helper to convert a task name to a chunk
     Used by chunk mapping
     """
     assert isinstance(name, str)
