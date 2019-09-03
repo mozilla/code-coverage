@@ -4,7 +4,7 @@ datadog==0.29.3
 Flask==1.1.1
 Flask-Cors==3.0.8
 flask-talisman==0.7.0
-google-cloud-storage==1.18.0
+google-cloud-storage==1.19.0
 gunicorn==19.9.0
 python-dateutil==2.8.0
 pytoml==0.1.21
