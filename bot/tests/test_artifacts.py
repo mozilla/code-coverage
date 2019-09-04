@@ -66,13 +66,13 @@ def test_get_chunks(fake_artifacts):
     }
 
 
-def test_get_suites(tmpdir, fake_artifacts):
+def test_get_combinations(tmpdir, fake_artifacts):
     def add_dir(files):
         return [os.path.join(tmpdir.strpath, f) for f in files]
 
     a = ArtifactsHandler([])
     a.artifacts = fake_artifacts
-    assert dict(a.get_suites()) == {
+    assert dict(a.get_combinations()) == {
         ("all", "all"): add_dir(
             [
                 "windows_mochitest-1_code-coverage-jsvm.info",

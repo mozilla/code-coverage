@@ -126,7 +126,10 @@ class CodeCov(object):
         os.makedirs(self.reports_dir, exist_ok=True)
 
         reports = {}
-        for (platform, suite), artifacts in self.artifactsHandler.get_suites().items():
+        for (
+            (platform, suite),
+            artifacts,
+        ) in self.artifactsHandler.get_combinations().items():
 
             if only is not None and (platform, suite) not in only:
                 continue
@@ -169,6 +172,7 @@ class CodeCov(object):
         for artifact in self.artifactsHandler.get():
             if "jsvm" not in artifact:
                 continue
+
             with zipfile.ZipFile(artifact, "r") as zf:
                 for file_name in zf.namelist():
                     with zf.open(file_name, "r") as fl:
@@ -196,8 +200,7 @@ class CodeCov(object):
 
         self.retrieve_source_and_artifacts()
 
-        # TODO: restore that check
-        # self.check_javascript_files()
+        self.check_javascript_files()
 
         reports = self.build_reports()
         logger.info("Built all covdir reports", nb=len(reports))

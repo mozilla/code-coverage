@@ -43,7 +43,7 @@ class ArtifactsHandler(object):
             if artifact.platform == platform
         )
 
-    def get_suites(self):
+    def get_combinations(self):
         # Add the full report
         out = collections.defaultdict(list)
         out[("all", "all")] = [artifact.path for artifact in self.artifacts]
