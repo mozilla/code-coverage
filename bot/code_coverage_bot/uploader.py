@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import itertools
-import json
 import os.path
 
 import requests
@@ -12,25 +11,29 @@ from code_coverage_bot.utils import retry
 from code_coverage_tools.gcp import get_bucket
 
 logger = structlog.get_logger(__name__)
-GCP_COVDIR_PATH = "{repository}/{revision}.json.zstd"
+GCP_COVDIR_PATH = "{repository}/{revision}/{platform}:{suite}.json.zstd"
 
 
-def gcp(repository, revision, report):
+def gcp(repository, revision, report, platform, suite):
     """
     Upload a grcov raw report on Google Cloud Storage
     * Compress with zstandard
     * Upload on bucket using revision in name
     * Trigger ingestion on channel's backend
     """
-    assert isinstance(report, dict)
+    assert isinstance(report, bytes)
+    assert isinstance(platform, str)
+    assert isinstance(suite, str)
     bucket = get_bucket(secrets[secrets.GOOGLE_CLOUD_STORAGE])
 
     # Compress report
     compressor = zstd.ZstdCompressor()
-    archive = compressor.compress(json.dumps(report).encode("utf-8"))
+    archive = compressor.compress(report)
 
     # Upload archive
-    path = GCP_COVDIR_PATH.format(repository=repository, revision=revision)
+    path = GCP_COVDIR_PATH.format(
+        repository=repository, revision=revision, platform=platform, suite=suite
+    )
     blob = bucket.blob(path)
     blob.upload_from_string(archive)
 
@@ -42,22 +45,28 @@ def gcp(repository, revision, report):
     logger.info("Uploaded {} on {}".format(path, bucket))
 
     # Trigger ingestion on backend
-    retry(lambda: gcp_ingest(repository, revision), retries=10, wait_between_retries=60)
+    retry(
+        lambda: gcp_ingest(repository, revision, platform, suite),
+        retries=10,
+        wait_between_retries=60,
+    )
 
     return blob
 
 
-def gcp_covdir_exists(repository, revision):
+def gcp_covdir_exists(repository, revision, platform, suite):
     """
     Check if a covdir report exists on the Google Cloud Storage bucket
     """
     bucket = get_bucket(secrets[secrets.GOOGLE_CLOUD_STORAGE])
-    path = GCP_COVDIR_PATH.format(repository=repository, revision=revision)
+    path = GCP_COVDIR_PATH.format(
+        repository=repository, revision=revision, platform=platform, suite=suite
+    )
     blob = bucket.blob(path)
     return blob.exists()
 
 
-def gcp_ingest(repository, revision):
+def gcp_ingest(repository, revision, platform, suite):
     """
     The GCP report ingestion is triggered remotely on a backend
     by making a simple HTTP request on the /v2/path endpoint
@@ -65,12 +74,18 @@ def gcp_ingest(repository, revision):
     will download automatically the new report.
     """
     params = {"repository": repository, "changeset": revision}
+    if platform:
+        params["platform"] = platform
+    if suite:
+        params["suite"] = suite
     backend_host = secrets[secrets.BACKEND_HOST]
     logger.info(
         "Ingesting report on backend",
         host=backend_host,
         repository=repository,
         revision=revision,
+        platform=platform,
+        suite=suite,
     )
     resp = requests.get("{}/v2/path".format(backend_host), params=params)
     resp.raise_for_status()
