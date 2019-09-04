@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 import itertools
-import json
 import os.path
 
 import requests
@@ -22,14 +21,14 @@ def gcp(repository, revision, report, platform, suite):
     * Upload on bucket using revision in name
     * Trigger ingestion on channel's backend
     """
-    assert isinstance(report, dict)
+    assert isinstance(report, bytes)
     assert isinstance(platform, str)
     assert isinstance(suite, str)
     bucket = get_bucket(secrets[secrets.GOOGLE_CLOUD_STORAGE])
 
     # Compress report
     compressor = zstd.ZstdCompressor()
-    archive = compressor.compress(json.dumps(report).encode("utf-8"))
+    archive = compressor.compress(report)
 
     # Upload archive
     path = GCP_COVDIR_PATH.format(

@@ -159,7 +159,7 @@ class CodeCov(object):
         Upload all provided covdir reports on GCP
         """
         for (platform, suite), path in reports.items():
-            report = json.load(open(path))
+            report = open(path, "rb").read()
             uploader.gcp(
                 self.branch, self.revision, report, suite=suite, platform=platform
             )
