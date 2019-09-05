@@ -1,4 +1,4 @@
-fakeredis==1.0.4
+fakeredis==1.0.5
 pre-commit==1.18.3
 pytest==5.1.2
 responses==0.10.6
