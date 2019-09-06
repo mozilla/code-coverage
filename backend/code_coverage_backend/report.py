@@ -90,7 +90,7 @@ class Report(object):
 
     @property
     def key_overall(self):
-        """Redis key to store the overall coverage data for that report"""
+        """Redis key to store the overall coverage data for this report"""
         platform = self.platform or "all"
         suite = self.suite or "all"
         return f"overall:{self.repository}:{self.changeset}:{platform}:{suite}"
