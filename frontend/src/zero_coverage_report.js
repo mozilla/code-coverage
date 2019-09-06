@@ -2,6 +2,7 @@ import {
   hide,
   message,
   buildNavbar,
+  isEnabled,
   render,
   filterThirdParty,
   filterLanguages,
@@ -54,7 +55,7 @@ export function zeroCoverageMenu(route) {
       return {
         key,
         message: filter.name,
-        checked: route[key] === "on"
+        checked: isEnabled(key)
       };
     }),
     last_pushes: Object.entries(ZERO_COVERAGE_PUSHES).map(

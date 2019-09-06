@@ -139,7 +139,7 @@ export async function getZeroCoverageData() {
   }
 
   const response = await fetch(
-    "https://index.taskcluster.net/v1/task/project.releng.services.project.production.code_coverage_bot.latest/artifacts/public/zeroCoverage_report.json"
+    "https://index.taskcluster.net/v1/task/project.releng.services.project.production.code_coverage_bot.latest/artifacts/public/zero_coverage_report.json"
   );
   data = await response.json();
 
