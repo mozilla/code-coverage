@@ -8,6 +8,7 @@ from flask import abort
 
 from code_coverage_backend.config import COVERAGE_EXTENSIONS
 from code_coverage_backend.gcp import load_cache
+from code_coverage_backend.report import DEFAULT_FILTER
 
 DEFAULT_REPOSITORY = "mozilla-central"
 logger = structlog.get_logger(__name__)
@@ -39,7 +40,13 @@ def coverage_latest(repository=DEFAULT_REPOSITORY):
         abort(404)
 
 
-def coverage_for_path(path="", changeset=None, repository=DEFAULT_REPOSITORY):
+def coverage_for_path(
+    path="",
+    changeset=None,
+    repository=DEFAULT_REPOSITORY,
+    platform=DEFAULT_FILTER,
+    suite=DEFAULT_FILTER,
+):
     """
     Aggregate coverage for a path, regardless of its type:
     * file, gives its coverage percent
@@ -54,17 +61,17 @@ def coverage_for_path(path="", changeset=None, repository=DEFAULT_REPOSITORY):
     try:
         if changeset:
             # Find closest report matching this changeset
-            changeset, _ = gcp.find_closest_report(repository, changeset)
+            report = gcp.find_closest_report(repository, changeset, platform, suite)
         else:
             # Fallback to latest report
-            changeset, _ = gcp.find_report(repository)
+            report = gcp.find_report(repository, platform, suite)
     except Exception as e:
         logger.warn("Failed to retrieve report: {}".format(e))
         abort(404)
 
     # Load tests data from GCP
     try:
-        return gcp.get_coverage(repository, changeset, path)
+        return gcp.get_coverage(report, path)
     except Exception as e:
         logger.warn(
             "Failed to load coverage",
@@ -76,7 +83,14 @@ def coverage_for_path(path="", changeset=None, repository=DEFAULT_REPOSITORY):
         abort(400)
 
 
-def coverage_history(repository=DEFAULT_REPOSITORY, path="", start=None, end=None):
+def coverage_history(
+    repository=DEFAULT_REPOSITORY,
+    path="",
+    start=None,
+    end=None,
+    platform=DEFAULT_FILTER,
+    suite=DEFAULT_FILTER,
+):
     """
     List overall coverage from ingested reports over a period of time
     """
@@ -86,7 +100,7 @@ def coverage_history(repository=DEFAULT_REPOSITORY, path="", start=None, end=Non
         abort(500)
 
     try:
-        return gcp.get_history(repository, path=path, start=start, end=end)
+        return gcp.get_history(repository, path, start, end, platform, suite)
     except Exception as e:
         logger.warn(
             "Failed to load history",
@@ -96,4 +110,23 @@ def coverage_history(repository=DEFAULT_REPOSITORY, path="", start=None, end=Non
             end=end,
             error=str(e),
         )
+        abort(400)
+
+
+def coverage_filters(repository=DEFAULT_REPOSITORY):
+    """
+    List all available filters for that repository
+    """
+    gcp = load_cache()
+    if gcp is None:
+        logger.error("No GCP cache available")
+        abort(500)
+
+    try:
+        return {
+            "platforms": gcp.get_platforms(repository),
+            "suites": gcp.get_suites(repository),
+        }
+    except Exception as e:
+        logger.warn("Failed to load filters", repo=repository, error=str(e))
         abort(400)

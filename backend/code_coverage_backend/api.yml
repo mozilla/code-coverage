@@ -42,6 +42,16 @@ paths:
         description: Mozilla repository for this changeset (default to mozilla-central)
         required: false
         type: string
+      - name: suite
+        in: query
+        description: Filter the coverage using this test suite
+        required: false
+        type: string
+      - name: platform
+        in: query
+        description: Filter the coverage using this platform
+        required: false
+        type: string
       responses:
         200:
           description: Code coverage information for a given file or directory at a given changeset
@@ -72,6 +82,16 @@ paths:
         description: Path of the repository folder to get coverage info on.
         required: false
         type: string
+      - name: suite
+        in: query
+        description: Filter the coverage using this test suite
+        required: false
+        type: string
+      - name: platform
+        in: query
+        description: Filter the coverage using this platform
+        required: false
+        type: string
       responses:
         200:
           description: Overall coverage of specified path over a period of time
@@ -84,5 +104,20 @@ paths:
       responses:
         200:
           description: File extensions supported for code coverage
+      tags:
+        - v2
+
+  /v2/filters:
+    get:
+      operationId: "code_coverage_backend.api.coverage_filters"
+      parameters:
+      - name: repository
+        in: query
+        description: Mozilla repository for these reports (default to mozilla-central)
+        required: false
+        type: string
+      responses:
+        200:
+          description: Available filters on the endpoints
       tags:
         - v2
