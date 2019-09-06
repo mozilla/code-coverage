@@ -81,7 +81,7 @@ class Report(object):
     @property
     def archive_path(self):
         """Local path on FS, compressed"""
-        return os.path.join(self.base_dir, f"{self.name}.json.zstd")
+        return f"{self.path}.zstd"
 
     @property
     def gcp_path(self):
