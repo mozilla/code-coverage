@@ -1,0 +1,19 @@
+env:
+  browser: true
+  es6: true
+plugins:
+  - prettier
+  - mozilla
+extends:
+  - standard
+  - prettier
+  - plugin:mozilla/recommended
+globals:
+  Atomics: readonly
+  SharedArrayBuffer: readonly
+parserOptions:
+  ecmaVersion: 2018
+  sourceType: module
+rules:
+  max-len: off
+  prettier/prettier: "error"
