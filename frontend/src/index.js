@@ -5,18 +5,18 @@ import {
   show,
   hide,
   message,
-  get_path_coverage,
-  get_history,
-  get_zero_coverage_data,
-  build_navbar,
+  getPathCoverage,
+  getHistory,
+  getZeroCoverageData,
+  buildNavbar,
   render,
-  get_source,
-  get_filters
+  getSource,
+  getFilters
 } from "./common.js";
 import { buildRoute, readRoute, updateRoute } from "./route.js";
 import {
-  zero_coverage_display,
-  zero_coverage_menu
+  zeroCoverageDisplay,
+  zeroCoverageMenu
 } from "./zero_coverage_report.js";
 import "./style.css";
 import Prism from "prismjs";
@@ -26,7 +26,7 @@ import "chartist/dist/chartist.css";
 const VIEW_ZERO_COVERAGE = "zero";
 const VIEW_BROWSER = "browser";
 
-function browser_menu(revision, filters, route) {
+function browserMenu(revision, filters, route) {
   const context = {
     revision,
     platforms: filters.platforms.map(p => {
@@ -107,7 +107,7 @@ async function graphHistory(history, path) {
 
 async function showDirectory(dir, revision, files) {
   const context = {
-    navbar: build_navbar(dir, revision),
+    navbar: buildNavbar(dir, revision),
     files: files.map(file => {
       file.route = buildRoute({
         path: file.path
@@ -124,7 +124,7 @@ async function showDirectory(dir, revision, files) {
 }
 
 async function showFile(file, revision) {
-  const source = await get_source(file.path);
+  const source = await getSource(file.path);
 
   let language;
   if (file.path.endsWith("cpp") || file.path.endsWith("h")) {
@@ -142,19 +142,19 @@ async function showFile(file, revision) {
   }
 
   const context = {
-    navbar: build_navbar(file.path, revision),
+    navbar: buildNavbar(file.path, revision),
     revision: revision || REV_LATEST,
     language,
     lines: source.split("\n").map((line, nb) => {
       const coverage = file.coverage[nb];
-      let css_class = "";
+      let cssClass = "";
       if (coverage !== -1) {
-        css_class = coverage > 0 ? "covered" : "uncovered";
+        cssClass = coverage > 0 ? "covered" : "uncovered";
       }
       return {
         nb,
         line: line || " ",
-        covered: css_class
+        covered: cssClass
       };
     })
   };
@@ -183,25 +183,20 @@ async function load() {
 
   // Load only zero coverage for that specific view
   if (route.view === VIEW_ZERO_COVERAGE) {
-    const zero_coverage = await get_zero_coverage_data();
+    const zeroCoverage = await getZeroCoverageData();
     return {
       view: VIEW_ZERO_COVERAGE,
       path: route.path,
-      zero_coverage,
+      zeroCoverage,
       route
     };
   }
 
   try {
     var [coverage, history, filters] = await Promise.all([
-      get_path_coverage(
-        route.path,
-        route.revision,
-        route.platform,
-        route.suite
-      ),
-      get_history(route.path, route.platform, route.suite),
-      get_filters()
+      getPathCoverage(route.path, route.revision, route.platform, route.suite),
+      getHistory(route.path, route.platform, route.suite),
+      getFilters()
     ]);
   } catch (err) {
     console.warn("Failed to load coverage", err);
@@ -223,10 +218,10 @@ async function load() {
 
 async function display(data) {
   if (data.view === VIEW_ZERO_COVERAGE) {
-    await zero_coverage_menu(data.route);
-    await zero_coverage_display(data.zero_coverage, data.path);
+    await zeroCoverageMenu(data.route);
+    await zeroCoverageDisplay(data.zeroCoverage, data.path);
   } else if (data.view === VIEW_BROWSER) {
-    browser_menu(data.revision, data.filters, data.route);
+    browserMenu(data.revision, data.filters, data.route);
 
     if (data.coverage.type === "directory") {
       hide("message");
