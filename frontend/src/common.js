@@ -40,6 +40,7 @@ function cacheGet(cache, key) {
   if (key in cache) {
     return cache[key].val;
   }
+  return null;
 }
 
 function cacheSet(cache, key, value) {
@@ -209,7 +210,7 @@ export async function getSource(file) {
   const response = await fetch(
     `https://hg.mozilla.org/mozilla-central/raw-file/tip/${file}`
   );
-  return await response.text();
+  return response.text();
 }
 
 // Filtering.
@@ -377,7 +378,7 @@ export function hide(id) {
 
 export function show(id, node) {
   if (!canDisplay()) {
-    return;
+    return null;
   }
 
   const box = document.getElementById(id);
@@ -389,12 +390,16 @@ export function show(id, node) {
 }
 
 export function render(template, data, target) {
-  var output = Mustache.render(
+  const output = Mustache.render(
     document.getElementById(template).innerHTML,
     data
   );
   const box = document.getElementById(target);
+
+  // The innerHTML check is disabled because we trust Mustache output
+  // eslint-disable-next-line no-unsanitized/property
   box.innerHTML = output;
+
   box.style.display = "block";
   return box;
 }

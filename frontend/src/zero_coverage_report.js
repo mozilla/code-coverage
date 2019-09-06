@@ -125,15 +125,6 @@ function cumStats(prevStats, newStats) {
   );
 }
 
-function getFileSize(size) {
-  if (size >= 1e6) {
-    return (size / 1e6).toFixed(2) + "M";
-  } else if (size >= 1e3) {
-    return (size / 1e3).toFixed(1) + "K";
-  }
-  return size;
-}
-
 export async function zeroCoverageDisplay(data, dir) {
   hide("output");
   hide("history");
