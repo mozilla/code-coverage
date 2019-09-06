@@ -24,11 +24,6 @@ header #browser input {
   font-family: monospace;
 }
 
-header > div {
-  /* By default do not display any menu : managed by JS */
-  display: none;
-}
-
 #main {
   background-color: white;
   border-top: 1px solid darkgray;
