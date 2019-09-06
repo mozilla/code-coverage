@@ -32,13 +32,13 @@ function browser_menu(revision, filters, route) {
     platforms: filters.platforms.map(p => {
       return {
         name: p,
-        selected: p == route.platform
+        selected: p === route.platform
       };
     }),
     suites: filters.suites.map(s => {
       return {
         name: s,
-        selected: s == route.suite
+        selected: s === route.suite
       };
     })
   };

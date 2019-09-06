@@ -179,7 +179,7 @@ function monitor_options() {
   // Monitor input & select changes
   const fields = document.querySelectorAll("input, select");
   for (const field of fields) {
-    if (field.type == "text") {
+    if (field.type === "text") {
       // React on enter
       field.onkeydown = async evt => {
         if (evt.keyCode === 13) {
@@ -192,7 +192,7 @@ function monitor_options() {
       // React on change
       field.onchange = async evt => {
         let value = evt.target.value;
-        if (evt.target.type == "checkbox") {
+        if (evt.target.type === "checkbox") {
           value = evt.target.checked ? "on" : "off";
         }
         const params = {};
@@ -219,7 +219,7 @@ const get_third_party_paths = (function() {
   return async function() {
     if (!paths) {
       const response = await get_source("tools/rewriting/ThirdPartyPaths.txt");
-      paths = response.split("\n").filter(path => path != "");
+      paths = response.split("\n").filter(path => path !== "");
     }
 
     return paths;
@@ -266,7 +266,7 @@ export function filter_languages(files) {
   const rust_extensions = ["rs"];
 
   return files.filter(file => {
-    if (file.type == "directory") {
+    if (file.type === "directory") {
       return true;
     } else if (cpp_extensions.find(ext => file.path.endsWith("." + ext))) {
       return cpp;
@@ -303,12 +303,12 @@ export function filter_last_push_date(files) {
   const upper_limit = new Date();
   let lower_limit = new Date();
 
-  if (elem.value == "one_year") {
+  if (elem.value === "one_year") {
     lower_limit.setFullYear(upper_limit.getFullYear() - 1);
-  } else if (elem.value == "two_years") {
+  } else if (elem.value === "two_years") {
     upper_limit.setFullYear(upper_limit.getFullYear() - 1);
     lower_limit.setFullYear(lower_limit.getFullYear() - 2);
-  } else if (elem.value == "older_than_two_years") {
+  } else if (elem.value === "older_than_two_years") {
     upper_limit.setFullYear(upper_limit.getFullYear() - 2);
     lower_limit = new Date("1970-01-01T00:00:00Z");
   } else {
@@ -352,7 +352,7 @@ export function build_navbar(path, revision) {
 
 // Display helpers
 function canDisplay() {
-  return document.readyState == "complete";
+  return document.readyState === "complete";
 }
 
 export function message(cssClass, message) {

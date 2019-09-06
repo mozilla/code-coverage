@@ -73,11 +73,11 @@ export function zero_coverage_menu(route) {
 function sort_entries(entries) {
   return entries
     .sort(([dir1, stats1], [dir2, stats2]) => {
-      if (stats1.children != stats2.children) {
+      if (stats1.children !== stats2.children) {
         return stats1.children < stats2.children;
       }
 
-      if (stats1.funcs != stats2.funcs) {
+      if (stats1.funcs !== stats2.funcs) {
         return stats1.funcs < stats2.funcs;
       }
 
@@ -146,7 +146,7 @@ export async function zero_coverage_display(data, dir) {
     dir = dir.substring(0, dir.length - 1);
   }
   dir += "/";
-  if (dir == "/") {
+  if (dir === "/") {
     dir = "";
   }
 
@@ -187,7 +187,7 @@ export async function zero_coverage_display(data, dir) {
     entries: sort_entries(Array.from(map.entries())),
     entry_url() {
       const path = dir + this.dir;
-      if (this.stats.children != 0) {
+      if (this.stats.children !== 0) {
         return buildRoute({
           view: "zero",
           path
