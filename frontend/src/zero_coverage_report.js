@@ -1,30 +1,51 @@
-import {hide, message, build_navbar, render, filter_third_party, filter_languages, filter_headers, filter_completely_uncovered, filter_last_push_date} from './common.js';
+import {hide, message, build_navbar, render, filter_third_party, filter_languages, filter_headers, filter_completely_uncovered, filter_last_push_date, is_enabled} from './common.js';
 import {buildRoute} from './route.js';
 
-const ZERO_COVERAGE_FILTERS = {
-  'third_party': "Show third-party files",
-  'headers': 'Show headers',
-  'completely_uncovered': 'Show completely uncovered files only',
-  'cpp': 'C/C++',
-  'js': 'JavaScript',
-  'java': 'Java',
-  'rust': 'Rust',
+export const ZERO_COVERAGE_FILTERS = {
+  'third_party': {
+    name: "Show third-party files",
+    default_value: 'on',
+  },
+  'headers': {
+    name: 'Show headers',
+    default_value: 'off',
+  },
+  'completely_uncovered': {
+    name: 'Show completely uncovered files only',
+    default_value: 'off',
+  },
+  'cpp': {
+    name: 'C/C++',
+    default_value: 'on',
+  },
+  'js': {
+    name: 'JavaScript',
+    default_value: 'on',
+  },
+  'java': {
+    name: 'Java',
+    default_value: 'on',
+  },
+  'rust': {
+    name: 'Rust',
+    default_value: 'on',
+  },
 };
 const ZERO_COVERAGE_PUSHES = {
   'all': 'All',
-  'one_year': '0 &lt; 1 year',
-  'two_years': '1 &lt; 2 years',
+  'one_year': '0 < 1 year',
+  'two_years': '1 < 2 years',
   'older_than_two_years': 'Older than 2 years',
 }
 
 
 export function zero_coverage_menu(route){
   let context = {
-    filters: Object.entries(ZERO_COVERAGE_FILTERS).map(([key, message]) => {
+    filters: Object.entries(ZERO_COVERAGE_FILTERS).map(([key, filter]) => {
       return {
         key,
-        message,
-        checked: route[key] === 'on',
+        message: filter.name,
+        checked: is_enabled(key),
       }
     }),
     last_pushes: Object.entries(ZERO_COVERAGE_PUSHES).map(([value, message]) => {

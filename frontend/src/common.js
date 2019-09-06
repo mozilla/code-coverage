@@ -1,5 +1,6 @@
 import Mustache from 'mustache';
 import { buildRoute, readRoute, updateRoute } from './route.js';
+import {ZERO_COVERAGE_FILTERS} from './zero_coverage_report.js';
 
 export const REV_LATEST = 'latest';
 
@@ -159,9 +160,15 @@ export async function get_filters() {
 
 // Option handling.
 
-function is_enabled(opt) {
+export function is_enabled(opt) {
   let route = readRoute();
-  return route[opt] === 'on';
+  let value = 'off';
+  if (route[opt]) {
+    value = route[opt];
+  } else if (ZERO_COVERAGE_FILTERS[opt]) {
+    value = ZERO_COVERAGE_FILTERS[opt].default_value;
+  }
+  return value === 'on';
 }
 
 function monitor_options() {

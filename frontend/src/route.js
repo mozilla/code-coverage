@@ -20,6 +20,7 @@ export function readRoute() {
   if (!out.path) {
     out.path = '';
   }
+
   return out;
 }
 
