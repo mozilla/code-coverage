@@ -86,7 +86,6 @@ class GCPCache(object):
         ingested = False
         for push_id, push in hgmo_pushes(repository, min_push_id, nb_pages):
             for changeset in push["changesets"]:
-                # TODO: look all neighboring reports on GCP
                 report = Report(
                     self.reports_dir,
                     repository,
