@@ -1,38 +1,33 @@
 import Mustache from 'mustache';
+import { buildRoute, readRoute, updateRoute } from './route.js';
 
 export const REV_LATEST = 'latest';
-
-function assert(condition, message) {
-  if (!condition) {
-    throw new Error(message || "Assertion failed");
-  }
-}
 
 function domContentLoaded() {
   return new Promise(resolve => document.addEventListener('DOMContentLoaded', resolve));
 }
 export const DOM_READY = domContentLoaded();
 
-export async function main(load, display, opts) {
-  // Immediately listen to DOM event
-
+export async function main(load, display) {
   // Load initial data before DOM is available
   let data = await load();
 
   // Wait for DOM to be ready before displaying
   await DOM_READY;
   await display(data);
+  monitor_options();
 
   // Full workflow, loading then displaying data
   // used for following updates
   let full = async function() {
     let data = await load();
     await display(data);
+    monitor_options();
   };
-  monitor_options(opts, full);
+
+  // React to url changes
   window.onhashchange = full;
 }
-
 
 // Coverage retrieval.
 
@@ -134,17 +129,37 @@ export async function get_zero_coverage_data() {
 // Option handling.
 
 function is_enabled(opt) {
-  let elem = document.getElementById(opt);
-  return elem.checked;
+  let route = readRoute();
+  return route[opt] === 'on';
 }
 
-function monitor_options(opts, callback) {
-  for (let opt of opts) {
-    let elem = document.getElementById(opt);
-    elem.onchange = callback;
+function monitor_options() {
+  // Monitor input & select changes
+  let fields = document.querySelectorAll('input, select');
+  for(let field of fields) {
+    if (field.type == 'text') {
+      // React on enter
+      field.onkeydown = async (evt) => {
+        if(evt.keyCode === 13) {
+          let params = {};
+          params[evt.target.name] = evt.target.value;
+          updateRoute(params);
+        }
+      }
+    } else {
+      // React on change
+      field.onchange = async (evt) => {
+        let value = evt.target.value;
+        if (evt.target.type == 'checkbox') {
+          value = evt.target.checked ? 'on' : 'off';
+        }
+        let params = {};
+        params[evt.target.name] = value;
+        updateRoute(params);
+      }
+    }
   }
 }
-
 
 // hgmo.
 
@@ -267,14 +282,14 @@ export function build_navbar(path, revision) {
   let links = [
     {
       'name': 'mozilla-central',
-      'path': '',
+      'route': buildRoute({path: '', revision})
     }
   ];
   return links.concat(path.split('/').map(file => {
     base += (base ? '/' : '') + file;
     return {
       'name': file,
-      'path': base,
+      'route': buildRoute({path: base, revision})
     };
   }));
 }
