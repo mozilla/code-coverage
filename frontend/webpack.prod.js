@@ -6,6 +6,11 @@ const TerserJSPlugin = require('terser-webpack-plugin');
 module.exports = merge(common, {
   mode: 'production',
   optimization: {
-    minimizer: [new TerserJSPlugin({}), new OptimizeCSSAssetsPlugin({})],
+    minimizer: [
+      new TerserJSPlugin({
+        extractComments: false,
+      }),
+      new OptimizeCSSAssetsPlugin({})
+    ],
   },
 });
