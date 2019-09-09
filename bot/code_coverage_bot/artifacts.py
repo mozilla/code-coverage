@@ -153,17 +153,15 @@ class ArtifactsHandler(object):
 
         for test_task in test_tasks:
             status = test_task["status"]["state"]
+            task_id = test_task["status"]["taskId"]
             while status not in FINISHED_STATUSES:
                 assert status in ALL_STATUSES, "State '{}' not recognized".format(
                     status
                 )
-                logger.info(
-                    "Waiting for task {} to finish...".format(
-                        test_task["status"]["taskId"]
-                    )
-                )
+                logger.info(f"Waiting for task {task_id} to finish...")
                 time.sleep(60)
-                status = taskcluster.get_task_status(test_task["status"]["taskId"])
+                task_status = taskcluster.get_task_status(task_id)
+                status = task_status["status"]["state"]
 
         # Choose best tasks to download (e.g. 'completed' is better than 'failed')
         download_tasks = {}
