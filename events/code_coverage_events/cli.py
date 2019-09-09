@@ -4,15 +4,9 @@ import os
 
 import structlog
 from libmozevent import taskcluster_config
-from libmozevent.bus import MessageBus
 from libmozevent.log import init_logger
-from libmozevent.monitoring import Monitoring
-from libmozevent.pulse import PulseListener
-from libmozevent.utils import run_tasks
 
-from code_coverage_events import QUEUE_MONITORING
-from code_coverage_events import QUEUE_PULSE
-from code_coverage_events.workflow import CodeCoverage
+from code_coverage_events.workflow import Events
 
 logger = structlog.get_logger(__name__)
 
@@ -30,53 +24,6 @@ def parse_cli():
     parser.add_argument("--taskcluster-client-id", help="Taskcluster Client ID")
     parser.add_argument("--taskcluster-access-token", help="Taskcluster Access token")
     return parser.parse_args()
-
-
-class Events(object):
-    """
-    Listen to pulse events and trigger new code coverage tasks
-    """
-
-    def __init__(self):
-        # Create message bus shared amongst process
-        self.bus = MessageBus()
-
-        # Build code coverage workflow
-        self.workflow = CodeCoverage(
-            taskcluster_config.secrets["hook_id"],
-            taskcluster_config.secrets["hook_group_id"],
-            self.bus,
-        )
-
-        # Setup monitoring for newly created tasks
-        self.monitoring = Monitoring(
-            QUEUE_MONITORING, taskcluster_config.secrets["admins"], 7 * 3600
-        )
-        self.monitoring.register(self.bus)
-
-        # Create pulse listener for code coverage
-        self.pulse = PulseListener(
-            QUEUE_PULSE,
-            "exchange/taskcluster-queue/v1/task-group-resolved",
-            "#",
-            taskcluster_config.secrets["pulse_user"],
-            taskcluster_config.secrets["pulse_password"],
-        )
-        self.pulse.register(self.bus)
-
-    def run(self):
-
-        consumers = [
-            # Code coverage main workflow
-            self.workflow.run(),
-            # Add monitoring task
-            self.monitoring.run(),
-            # Add pulse task
-            self.pulse.run(),
-        ]
-
-        # Run all tasks concurrently
-        run_tasks(consumers)
 
 
 def main():
