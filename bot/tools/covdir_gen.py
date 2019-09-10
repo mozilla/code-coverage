@@ -77,9 +77,15 @@ def main():
     # Read the history file
     history = json.load(args.history)
 
+    # Load initial dates from our history
+    history_dates = {
+        item["changeset"]: datetime.fromtimestamp(item["date"]).date()
+        for item in history
+    }
+    dates = [history_dates[commit] for commit in commits if commit in history_dates]
+
     # Trigger a task for each commit
     nb = 0
-    dates = []
     for commit in history:
         date = datetime.fromtimestamp(commit["date"])
         if nb >= args.nb_tasks:
