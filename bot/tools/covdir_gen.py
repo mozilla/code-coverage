@@ -77,21 +77,37 @@ def main():
     # Read the history file
     history = json.load(args.history)
 
+    # Load initial dates from our history
+    history_dates = {
+        item["changeset"]: datetime.fromtimestamp(item["date"]).date()
+        for item in history
+    }
+    dates = [history_dates[commit] for commit in commits if commit in history_dates]
+
     # Trigger a task for each commit
     nb = 0
     for commit in history:
+        date = datetime.fromtimestamp(commit["date"])
         if nb >= args.nb_tasks:
             break
-        if commit in commits:
-            print("Skipping {commit {changeset} from {date}".format(**commit))
+        if commit["changeset"] in commits:
+            print(
+                f"Skipping commit {commit['changeset']} from {date} : already processed"
+            )
             continue
-        print("Triggering commit {changeset} from {date}".format(**commit))
+
+        if date.date() in dates:
+            print(f"Skipping commit {commit['changeset']} from {date} : same day")
+            continue
+
+        print(f"Triggering commit {commit['changeset']} from {date}")
         if args.dry_run:
             print(">>> No trigger on dry run")
         else:
             out = trigger_task(args.group, commit)
             print(">>>", out["status"]["taskId"])
         nb += 1
+        dates.append(date.date())
 
 
 if __name__ == "__main__":
