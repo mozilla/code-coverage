@@ -32,8 +32,10 @@ tasks:
         else: 'dev'
       else: 'dev'
 
-    bucket_channel:
-      # Special case for the frontend upload on AWS S3, where the production bucket is named 'prod'
+    channel_short:
+      # Special case where naming is limited:
+      # * for the frontend upload on AWS S3, where the production bucket is named 'prod'
+      # * on Heroku for the events runtime, where the production app is named 'prod'
       $if: 'tasks_for == "github-push"'
       then:
         $if: 'event.ref == "refs/heads/production"'
@@ -361,7 +363,7 @@ tasks:
             - taskboot
             - deploy-heroku
             - --heroku-app
-            - "code-coverage-events-${channel}"
+            - "code-coverage-events-${channel_short}"
             - worker:public/code-coverage-events.tar
           env:
             TASKCLUSTER_SECRET: "project/relman/code-coverage/deploy-${channel}"
@@ -456,7 +458,7 @@ tasks:
             - --artifact-folder
             - public/frontend
             - --bucket
-            - "codecoverage-${bucket_channel}-site-static-website"
+            - "codecoverage-${channel_short}-site-static-website"
         scopes:
           - "secrets:get:project/relman/code-coverage/deploy-${channel}"
         metadata:
