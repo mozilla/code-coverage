@@ -79,19 +79,29 @@ def main():
 
     # Trigger a task for each commit
     nb = 0
+    dates = []
     for commit in history:
+        date = datetime.fromtimestamp(commit["date"])
         if nb >= args.nb_tasks:
             break
-        if commit in commits:
-            print("Skipping {commit {changeset} from {date}".format(**commit))
+        if commit["changeset"] in commits:
+            print(
+                f"Skipping commit {commit['changeset']} from {date} : already processed"
+            )
             continue
-        print("Triggering commit {changeset} from {date}".format(**commit))
+
+        if date.date() in dates:
+            print(f"Skipping commit {commit['changeset']} from {date} : same day")
+            continue
+
+        print(f"Triggering commit {commit['changeset']} from {date}")
         if args.dry_run:
             print(">>> No trigger on dry run")
         else:
             out = trigger_task(args.group, commit)
             print(">>>", out["status"]["taskId"])
         nb += 1
+        dates.append(date.date())
 
 
 if __name__ == "__main__":
