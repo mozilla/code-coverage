@@ -4,3 +4,6 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 PROJECT_NAME = "code-coverage-bot"
+HG_BASE = "https://hg.mozilla.org/"
+MOZILLA_CENTRAL_REPOSITORY = "{}mozilla-central".format(HG_BASE)
+TRY_REPOSITORY = "{}try".format(HG_BASE)
