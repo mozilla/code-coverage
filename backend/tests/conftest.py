@@ -18,6 +18,7 @@ import responses
 import zstandard as zstd
 
 import code_coverage_backend.backend
+import code_coverage_backend.gcp
 
 FIXTURES_DIR = os.path.join(os.path.dirname(__file__), "fixtures")
 
@@ -113,7 +114,7 @@ def mock_bucket(mock_secrets):
 
 
 @pytest.fixture
-def mock_cache(mock_secrets, mock_bucket, tmpdir):
+def mock_cache(mock_secrets, mock_bucket, tmpdir, monkeypatch):
     """
     Mock a GCPCache instance, using fakeredis and a mocked GCP bucket
     """
@@ -125,7 +126,12 @@ def mock_cache(mock_secrets, mock_bucket, tmpdir):
             self.reports_dir = tmpdir.mkdtemp()
             self.bucket = mock_bucket
 
-    return MockCache()
+    cache = MockCache()
+
+    # Set global cache too
+    monkeypatch.setattr(code_coverage_backend.gcp, "__cache", cache)
+
+    return cache
 
 
 @pytest.fixture

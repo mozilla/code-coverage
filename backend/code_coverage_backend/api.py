@@ -32,8 +32,8 @@ def coverage_latest(repository=DEFAULT_REPOSITORY):
 
     try:
         return [
-            {"revision": revision, "push": push_id}
-            for revision, push_id in gcp.list_reports(repository, 10)
+            {"revision": report.changeset, "push": report.push_id}
+            for report in gcp.list_reports(repository, nb=10)
         ]
     except Exception as e:
         logger.warn("Failed to retrieve latest reports: {}".format(e))
