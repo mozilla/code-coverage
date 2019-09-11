@@ -6,7 +6,7 @@ import jsone
 import jsonschema
 import pytest
 
-HOOK = os.path.join(os.path.dirname(__file__), "../taskcluster-hook.json")
+HOOK = os.path.join(os.path.dirname(__file__), "../taskcluster-hook-repo.json")
 
 payloads = [
     # Trigger by interface or API
