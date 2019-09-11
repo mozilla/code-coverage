@@ -12,19 +12,44 @@ import structlog
 from code_coverage_bot import config
 from code_coverage_bot import hgmo
 from code_coverage_bot import uploader
+from code_coverage_bot.cli import setup_cli
 from code_coverage_bot.hooks.base import Hook
 from code_coverage_bot.notifier import notify_email
 from code_coverage_bot.phabricator import PhabricatorUploader
+from code_coverage_bot.phabricator import parse_revision_id
 
 logger = structlog.get_logger(__name__)
 
 
-class MozillaCentralHook(Hook):
+REPOSITORIES = {
+    config.MOZILLA_CENTRAL_REPOSITORY: {
+        # Will build all the reports possible
+        "build_reports": None,
+        "gcp_upload": True,
+        "send_low_coverage_email": True,
+    },
+    config.TRY_REPOSITORY: {
+        # Only build the main report
+        "build_reports": [("all", "all")],
+        "gcp_upload": False,
+        "send_low_coverage_email": False,
+    },
+}
+
+
+class RepositoryHook(Hook):
     """
     This function is executed when the bot is triggered at the end of a mozilla-central build.
     """
 
-    repository = config.MOZILLA_CENTRAL_REPOSITORY
+    def __init__(self, repository, *args, **kwargs):
+        assert repository in REPOSITORIES, f"Unsupported repository {repository}"
+        self.config = REPOSITORIES[repository]
+
+        for key in ("build_reports", "gcp_upload", "send_low_coverage_email"):
+            assert key in self.config, f"Missing {key} in {repository} config"
+
+        super().__init__(repository, *args, **kwargs)
 
     def run(self):
         # Check the covdir report does not already exists
@@ -36,7 +61,7 @@ class MozillaCentralHook(Hook):
 
         self.check_javascript_files()
 
-        reports = self.build_reports()
+        reports = self.build_reports(only=self.config["build_reports"])
         logger.info("Built all covdir reports", nb=len(reports))
 
         # Retrieve the full report
@@ -51,19 +76,22 @@ class MozillaCentralHook(Hook):
                 path.endswith(extension) for path in paths
             ), "No {} file in the generated report".format(extension)
 
-        self.upload_reports(reports)
-        logger.info("Uploaded all covdir reports", nb=len(reports))
+        # Upload reports on GCP
+        if self.config["gcp_upload"]:
+            self.upload_reports(reports)
+            logger.info("Uploaded all covdir reports", nb=len(reports))
+        else:
+            logger.info("Skipping GCP upload")
 
-        # Get pushlog and ask the backend to generate the coverage by changeset
-        # data, which will be cached.
-        with hgmo.HGMO(self.repo_dir) as hgmo_server:
-            changesets = hgmo_server.get_automation_relevance_changesets(self.revision)
+        # Upload coverage on phabricator
+        changesets, coverage = self.upload_phabricator(report)
 
-        logger.info("Upload changeset coverage data to Phabricator")
-        phabricatorUploader = PhabricatorUploader(self.repo_dir, self.revision)
-        changesets_coverage = phabricatorUploader.upload(report, changesets)
-
-        notify_email(self.revision, changesets, changesets_coverage)
+        # Send an email on low coverage
+        if self.config["send_low_coverage_email"]:
+            notify_email(self.revision, changesets, coverage)
+            logger.info("Sent low coverage email notification")
+        else:
+            logger.info("Skipping low coverage email notification")
 
     def upload_reports(self, reports):
         """
@@ -101,3 +129,31 @@ class MozillaCentralHook(Hook):
                             logger.warn(
                                 f"{missing_files} are present in coverage reports, but missing from the repository"
                             )
+
+    def upload_phabricator(self, report):
+        phabricatorUploader = PhabricatorUploader(self.repo_dir, self.revision)
+
+        with hgmo.HGMO(server_address=config.TRY_REPOSITORY) as hgmo_server:
+            changesets = hgmo_server.get_automation_relevance_changesets(self.revision)
+
+        if not any(
+            parse_revision_id(changeset["desc"]) is not None for changeset in changesets
+        ):
+            logger.info(
+                "None of the commits in the try push are linked to a Phabricator revision"
+            )
+            return
+
+        logger.info("Upload changeset coverage data to Phabricator")
+        coverage = phabricatorUploader.upload(report, changesets)
+
+        return changesets, coverage
+
+
+def main():
+    logger.info("Starting code coverage bot for repository")
+    args = setup_cli()
+    hook = RepositoryHook(
+        args.repository, args.revision, args.task_name_filter, args.cache_root
+    )
+    hook.run()

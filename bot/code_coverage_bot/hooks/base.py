@@ -12,7 +12,6 @@ import structlog
 from code_coverage_bot import config
 from code_coverage_bot import grcov
 from code_coverage_bot import taskcluster
-from code_coverage_bot import uploader
 from code_coverage_bot.artifacts import ArtifactsHandler
 from code_coverage_bot.utils import ThreadPoolExecutorResult
 
@@ -20,7 +19,7 @@ logger = structlog.get_logger(__name__)
 
 
 class Hook(object):
-    def __init__(self, task_name_filter, cache_root, revision=None):
+    def __init__(self, repository, revision, task_name_filter, cache_root):
         temp_dir = tempfile.mkdtemp()
         self.artifacts_dir = os.path.join(temp_dir, "ccov-artifacts")
         self.reports_dir = os.path.join(temp_dir, "ccov-reports")
@@ -28,17 +27,9 @@ class Hook(object):
         assert os.path.isdir(cache_root), f"Cache root {cache_root} is not a dir."
         self.repo_dir = os.path.join(cache_root, self.branch)
 
-        if revision is None:
-            # Retrieve latest ingested revision
-            try:
-                self.revision = uploader.gcp_latest(self.branch)[0]["revision"]
-            except Exception as e:
-                logger.warn(
-                    "Failed to retrieve the latest reports ingested: {}".format(e)
-                )
-                raise
-        else:
-            self.revision = revision
+        self.revision = revision
+        self.repository = repository
+        assert self.revision and self.repository, "Missing repo/revision"
         logger.info(
             "Mercurial setup", repository=self.repository, revision=self.revision
         )

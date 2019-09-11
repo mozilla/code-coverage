@@ -6,12 +6,7 @@
 import argparse
 import os
 
-import structlog
-
 from code_coverage_bot import config
-from code_coverage_bot.hooks.cron import CronHook
-from code_coverage_bot.hooks.mc import MozillaCentralHook
-from code_coverage_bot.hooks.try_repo import TryHook
 from code_coverage_bot.secrets import secrets
 from code_coverage_bot.taskcluster import taskcluster_config
 from code_coverage_tools.log import init_logger
@@ -42,7 +37,7 @@ def parse_cli():
     return parser.parse_args()
 
 
-def main():
+def setup_cli():
     args = parse_cli()
 
     # Auth on Taskcluster
@@ -59,25 +54,4 @@ def main():
         sentry_dsn=secrets.get("SENTRY_DSN"),
     )
 
-    logger = structlog.get_logger(__name__)
-
-    if args.revision is None:
-        logger.info("Running cron hook")
-        hook = CronHook(args.task_name_filter, args.cache_root)
-
-    elif args.repository == config.MOZILLA_CENTRAL_REPOSITORY:
-        logger.info("Running Mozilla Central hook")
-        hook = MozillaCentralHook(args.task_name_filter, args.cache_root, args.revision)
-
-    elif args.repository == config.TRY_REPOSITORY:
-        logger.info("Running Try hook")
-        hook = TryHook(args.task_name_filter, args.cache_root, args.revision)
-
-    else:
-        raise Exception(f"Invalid configuration for {args.repository}/{args.revision}")
-
-    hook.run()
-
-
-if __name__ == "__main__":
-    main()
+    return args

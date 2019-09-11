@@ -46,6 +46,9 @@ setuptools.setup(
     zip_safe=False,
     license="MPL2",
     entry_points={
-        "console_scripts": ["code-coverage-bot = code_coverage_bot.cli:main"]
+        "console_scripts": [
+            "code-coverage-cron = code_coverage_bot.hooks.cron:main"
+            "code-coverage-repo = code_coverage_bot.hooks.repo:main"
+        ]
     },
 )
