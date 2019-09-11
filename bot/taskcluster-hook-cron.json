@@ -39,10 +39,10 @@
                     "description": "",
                     "name": {
                         "$if": "firedBy == 'triggerHook'",
-                        "else": "Code Coverage aggregation task (CHANNEL)",
+                        "else": "Code Coverage aggregation task - cron (CHANNEL)",
                         "then": {
                             "$if": "'taskName' in payload",
-                            "else": "Code Coverage aggregation task (CHANNEL)",
+                            "else": "Code Coverage aggregation task - cron (CHANNEL)",
                             "then": {
                                 "$eval": "payload.taskName"
                             }
@@ -71,7 +71,7 @@
                     },
                     "capabilities": {},
                     "command": [
-                        "code-coverage-bot",
+                        "code-coverage-cron",
                         "--taskcluster-secret",
                         "project/relman/code-coverage/runtime-CHANNEL",
                         "--cache-root",
@@ -97,7 +97,6 @@
                 "schedulerId": "-",
                 "scopes": [
                     "secrets:get:project/relman/code-coverage/runtime-CHANNEL",
-                    "notify:email:*",
                     "docker-worker:cache:code-coverage-bot-CHANNEL",
                     "index:insert-task:project.releng.services.project.CHANNEL.code_coverage_bot.*"
                 ],
