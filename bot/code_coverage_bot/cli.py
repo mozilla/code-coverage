@@ -12,13 +12,15 @@ from code_coverage_bot.taskcluster import taskcluster_config
 from code_coverage_tools.log import init_logger
 
 
-def parse_cli():
+def setup_cli(ask_repository=True, ask_revision=True):
     """
-    Setup CLI options parser
+    Setup CLI options parser and taskcluster bootstrap
     """
     parser = argparse.ArgumentParser(description="Mozilla Code Coverage Bot")
-    parser.add_argument("--repository", default=os.environ.get("REPOSITORY"))
-    parser.add_argument("--revision", default=os.environ.get("REVISION"))
+    if ask_repository:
+        parser.add_argument("--repository", default=os.environ.get("REPOSITORY"))
+    if ask_revision:
+        parser.add_argument("--revision", default=os.environ.get("REVISION"))
     parser.add_argument(
         "--cache-root", required=True, help="Cache root, used to pull changesets"
     )
@@ -34,11 +36,7 @@ def parse_cli():
     )
     parser.add_argument("--taskcluster-client-id", help="Taskcluster Client ID")
     parser.add_argument("--taskcluster-access-token", help="Taskcluster Access token")
-    return parser.parse_args()
-
-
-def setup_cli():
-    args = parse_cli()
+    args = parser.parse_args()
 
     # Auth on Taskcluster
     taskcluster_config.auth(args.taskcluster_client_id, args.taskcluster_access_token)

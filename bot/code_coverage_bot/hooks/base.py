@@ -24,15 +24,17 @@ class Hook(object):
         self.artifacts_dir = os.path.join(temp_dir, "ccov-artifacts")
         self.reports_dir = os.path.join(temp_dir, "ccov-reports")
 
-        assert os.path.isdir(cache_root), f"Cache root {cache_root} is not a dir."
-        self.repo_dir = os.path.join(cache_root, self.branch)
-
-        self.revision = revision
         self.repository = repository
-        assert self.revision and self.repository, "Missing repo/revision"
+        self.revision = revision
+        assert (
+            self.revision is not None and self.repository is not None
+        ), "Missing repo/revision"
         logger.info(
             "Mercurial setup", repository=self.repository, revision=self.revision
         )
+
+        assert os.path.isdir(cache_root), f"Cache root {cache_root} is not a dir."
+        self.repo_dir = os.path.join(cache_root, self.branch)
 
         task_ids = {}
         for platform in ["linux", "windows", "android-test", "android-emulator"]:
