@@ -53,7 +53,7 @@ class RepositoryHook(Hook):
 
     def run(self):
         # Check the covdir report does not already exists
-        if uploader.gcp_covdir_exists(self.branch, self.revision, "all", "all"):
+        if self.config["gcp_upload"] and uploader.gcp_covdir_exists(self.branch, self.revision, "all", "all"):
             logger.warn("Full covdir report already on GCP")
             return
 
