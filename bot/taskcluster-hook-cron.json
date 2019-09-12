@@ -71,5 +71,9 @@
         ],
         "tags": {},
         "workerType": "releng-svc-memory"
+    },
+    "triggerSchema": {
+        "additionalProperties": true,
+        "type": "object"
     }
 }
