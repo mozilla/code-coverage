@@ -23,13 +23,7 @@ PLATFORMS = ["linux", "windows", "android-test", "android-emulator"]
 
 class Hook(object):
     def __init__(
-        self,
-        repository,
-        revision,
-        task_name_filter,
-        cache_root,
-        fail,
-        required_platforms=[],
+        self, repository, revision, task_name_filter, cache_root, required_platforms=[]
     ):
         temp_dir = tempfile.mkdtemp()
         self.artifacts_dir = os.path.join(temp_dir, "ccov-artifacts")

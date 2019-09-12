@@ -58,7 +58,14 @@ class RepositoryHook(Hook):
         assert repository in REPOSITORIES, f"Unsupported repository {repository}"
         self.config = REPOSITORIES[repository]
 
-        for key in ("build_reports", "gcp_upload", "send_low_coverage_email"):
+        for key in (
+            "build_reports",
+            "gcp_upload",
+            "send_low_coverage_email",
+            "expected_extensions",
+            "hgmo_local",
+            "required_platforms",
+        ):
             assert key in self.config, f"Missing {key} in {repository} config"
 
         super().__init__(
