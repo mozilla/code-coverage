@@ -9,15 +9,11 @@
     "task": {
         "$merge": [
             {
-                "$if": "firedBy == 'triggerHook'",
+                "$if": "'taskGroupId' in payload",
                 "else": {},
                 "then": {
-                    "$if": "'taskGroupId' in payload",
-                    "else": {},
-                    "then": {
-                        "taskGroupId": {
-                            "$eval": "payload.taskGroupId"
-                        }
+                    "taskGroupId": {
+                        "$eval": "payload.taskGroupId"
                     }
                 }
             },
@@ -35,14 +31,10 @@
                 "metadata": {
                     "description": "",
                     "name": {
-                        "$if": "firedBy == 'triggerHook'",
+                        "$if": "'taskName' in payload",
                         "else": "Code Coverage aggregation task - repo (CHANNEL)",
                         "then": {
-                            "$if": "'taskName' in payload",
-                            "else": "Code Coverage aggregation task - repo (CHANNEL)",
-                            "then": {
-                                "$eval": "payload.taskName"
-                            }
+                            "$eval": "payload.taskName"
                         }
                     },
                     "owner": "mcastelluccio@mozilla.com",
@@ -61,11 +53,7 @@
                         "/cache"
                     ],
                     "env": {
-                        "$if": "firedBy == 'triggerHook'",
-                        "else": {},
-                        "then": {
-                            "$eval": "payload"
-                        }
+                        "$eval": "payload"
                     },
                     "features": {
                         "taskclusterProxy": true

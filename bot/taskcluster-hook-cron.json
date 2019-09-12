@@ -10,103 +10,66 @@
         "0 0 0 * * *"
     ],
     "task": {
-        "$merge": [
-            {
-                "$if": "firedBy == 'triggerHook'",
-                "else": {},
-                "then": {
-                    "$if": "'taskGroupId' in payload",
-                    "else": {},
-                    "then": {
-                        "taskGroupId": {
-                            "$eval": "payload.taskGroupId"
-                        }
-                    }
+        "created": {
+            "$fromNow": "0 seconds"
+        },
+        "deadline": {
+            "$fromNow": "4 hours"
+        },
+        "expires": {
+            "$fromNow": "1 month"
+        },
+        "extra": {},
+        "metadata": {
+            "description": "",
+            "name": "Code Coverage aggregation task - cron (CHANNEL)",
+            "owner": "mcastelluccio@mozilla.com",
+            "source": "https://github.com/mozilla/code-coverage"
+        },
+        "payload": {
+            "artifacts": {
+                "public/chunk_mapping.tar.xz": {
+                    "path": "/chunk_mapping.tar.xz",
+                    "type": "file"
+                },
+                "public/per_chunk_mapping.tar.xz": {
+                    "path": "/per_chunk_mapping.tar.xz",
+                    "type": "file"
+                },
+                "public/zero_coverage_report.json": {
+                    "path": "/zero_coverage_report.json",
+                    "type": "file"
                 }
             },
-            {
-                "created": {
-                    "$fromNow": "0 seconds"
-                },
-                "deadline": {
-                    "$fromNow": "4 hours"
-                },
-                "expires": {
-                    "$fromNow": "1 month"
-                },
-                "extra": {},
-                "metadata": {
-                    "description": "",
-                    "name": {
-                        "$if": "firedBy == 'triggerHook'",
-                        "else": "Code Coverage aggregation task - cron (CHANNEL)",
-                        "then": {
-                            "$if": "'taskName' in payload",
-                            "else": "Code Coverage aggregation task - cron (CHANNEL)",
-                            "then": {
-                                "$eval": "payload.taskName"
-                            }
-                        }
-                    },
-                    "owner": "mcastelluccio@mozilla.com",
-                    "source": "https://github.com/mozilla/code-coverage"
-                },
-                "payload": {
-                    "artifacts": {
-                        "public/chunk_mapping.tar.xz": {
-                            "path": "/chunk_mapping.tar.xz",
-                            "type": "file"
-                        },
-                        "public/per_chunk_mapping.tar.xz": {
-                            "path": "/per_chunk_mapping.tar.xz",
-                            "type": "file"
-                        },
-                        "public/zero_coverage_report.json": {
-                            "path": "/zero_coverage_report.json",
-                            "type": "file"
-                        }
-                    },
-                    "cache": {
-                        "code-coverage-bot-CHANNEL": "/cache"
-                    },
-                    "capabilities": {},
-                    "command": [
-                        "code-coverage-cron",
-                        "--taskcluster-secret",
-                        "project/relman/code-coverage/runtime-CHANNEL",
-                        "--cache-root",
-                        "/cache"
-                    ],
-                    "env": {
-                        "$if": "firedBy == 'triggerHook'",
-                        "else": {},
-                        "then": {
-                            "$eval": "payload"
-                        }
-                    },
-                    "features": {
-                        "taskclusterProxy": true
-                    },
-                    "image": "mozilla/code-coverage:bot-REVISION",
-                    "maxRunTime": 14400
-                },
-                "priority": "normal",
-                "provisionerId": "aws-provisioner-v1",
-                "retries": 5,
-                "routes": [],
-                "schedulerId": "-",
-                "scopes": [
-                    "secrets:get:project/relman/code-coverage/runtime-CHANNEL",
-                    "docker-worker:cache:code-coverage-bot-CHANNEL",
-                    "index:insert-task:project.releng.services.project.CHANNEL.code_coverage_bot.*"
-                ],
-                "tags": {},
-                "workerType": "releng-svc-memory"
-            }
-        ]
-    },
-    "triggerSchema": {
-        "additionalProperties": true,
-        "type": "object"
+            "cache": {
+                "code-coverage-bot-CHANNEL": "/cache"
+            },
+            "capabilities": {},
+            "command": [
+                "code-coverage-cron",
+                "--taskcluster-secret",
+                "project/relman/code-coverage/runtime-CHANNEL",
+                "--cache-root",
+                "/cache"
+            ],
+            "env": {},
+            "features": {
+                "taskclusterProxy": true
+            },
+            "image": "mozilla/code-coverage:bot-REVISION",
+            "maxRunTime": 14400
+        },
+        "priority": "normal",
+        "provisionerId": "aws-provisioner-v1",
+        "retries": 5,
+        "routes": [],
+        "schedulerId": "-",
+        "scopes": [
+            "secrets:get:project/relman/code-coverage/runtime-CHANNEL",
+            "docker-worker:cache:code-coverage-bot-CHANNEL",
+            "index:insert-task:project.releng.services.project.CHANNEL.code_coverage_bot.*"
+        ],
+        "tags": {},
+        "workerType": "releng-svc-memory"
     }
 }
