@@ -39,7 +39,7 @@ REPOSITORIES = {
 
 class RepositoryHook(Hook):
     """
-    This function is executed when the bot is triggered at the end of a mozilla-central build.
+    This function is executed when the bot is triggered at the end of a build and associated tests.
     """
 
     def __init__(self, repository, *args, **kwargs):
