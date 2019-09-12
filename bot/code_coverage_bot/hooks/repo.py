@@ -27,12 +27,14 @@ REPOSITORIES = {
         "build_reports": None,
         "gcp_upload": True,
         "send_low_coverage_email": True,
+        "expected_extensions": [".js", ".cpp"],
     },
     config.TRY_REPOSITORY: {
         # Only build the main report
         "build_reports": [("all", "all")],
         "gcp_upload": False,
         "send_low_coverage_email": False,
+        "expected_extensions": None,
     },
 }
 
@@ -71,12 +73,13 @@ class RepositoryHook(Hook):
         assert full_path is not None, "Missing full report (all:all)"
         report = json.load(open(full_path))
 
-        paths = uploader.covdir_paths(report)
-        expected_extensions = [".js", ".cpp"]
-        for extension in expected_extensions:
-            assert any(
-                path.endswith(extension) for path in paths
-            ), "No {} file in the generated report".format(extension)
+        # Check extensions
+        if self.config["expected_extensions"]:
+            paths = uploader.covdir_paths(report)
+            for extension in self.config["expected_extensions"]:
+                assert any(
+                    path.endswith(extension) for path in paths
+                ), "No {} file in the generated report".format(extension)
 
         # Upload reports on GCP
         if self.config["gcp_upload"]:
