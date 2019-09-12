@@ -28,6 +28,8 @@ REPOSITORIES = {
         "gcp_upload": True,
         "send_low_coverage_email": True,
         "expected_extensions": [".js", ".cpp"],
+        # Use local repo to load mercurial information
+        "hgmo_local": True,
     },
     config.TRY_REPOSITORY: {
         # Only build the main report
@@ -35,6 +37,9 @@ REPOSITORIES = {
         "gcp_upload": False,
         "send_low_coverage_email": False,
         "expected_extensions": None,
+        # Use remote try repo in order to return early if the
+        # try build is not linked to Phabricator
+        "hgmo_local": False,
     },
 }
 
@@ -138,7 +143,14 @@ class RepositoryHook(Hook):
     def upload_phabricator(self, report):
         phabricatorUploader = PhabricatorUploader(self.repo_dir, self.revision)
 
-        with hgmo.HGMO(server_address=config.TRY_REPOSITORY) as hgmo_server:
+        # Build HGMO config according to this repo's configuration
+        hgmo_config = {}
+        if self.config["hgmo_local"]:
+            hgmo_config["repo_dir"] = self.repo_dir
+        else:
+            hgmo_config["server_address"] = self.repository
+
+        with hgmo.HGMO(**hgmo_config) as hgmo_server:
             changesets = hgmo_server.get_automation_relevance_changesets(self.revision)
 
         if not any(
