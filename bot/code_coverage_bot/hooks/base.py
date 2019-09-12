@@ -18,8 +18,19 @@ from code_coverage_bot.utils import ThreadPoolExecutorResult
 logger = structlog.get_logger(__name__)
 
 
+PLATFORMS = ["linux", "windows", "android-test", "android-emulator"]
+
+
 class Hook(object):
-    def __init__(self, repository, revision, task_name_filter, cache_root):
+    def __init__(
+        self,
+        repository,
+        revision,
+        task_name_filter,
+        cache_root,
+        fail,
+        required_platforms=[],
+    ):
         temp_dir = tempfile.mkdtemp()
         self.artifacts_dir = os.path.join(temp_dir, "ccov-artifacts")
         self.reports_dir = os.path.join(temp_dir, "ccov-reports")
@@ -36,20 +47,18 @@ class Hook(object):
         assert os.path.isdir(cache_root), f"Cache root {cache_root} is not a dir."
         self.repo_dir = os.path.join(cache_root, self.branch)
 
-        task_ids = {}
-        for platform in ["linux", "windows", "android-test", "android-emulator"]:
-            task = taskcluster.get_task(self.branch, self.revision, platform)
+        # Load current coverage task for all platforms
+        task_ids = {
+            platform: taskcluster.get_task(self.branch, self.revision, platform)
+            for platform in PLATFORMS
+        }
 
-            # On try, developers might have requested to run only one platform, and we trust them.
-            # On mozilla-central, we want to assert that every platform was run (except for android platforms
-            # as they are unstable).
-            if task is not None:
-                task_ids[platform] = task
-            elif (
-                self.repository == config.MOZILLA_CENTRAL_REPOSITORY
-                and not platform.startswith("android")
-            ):
-                raise Exception("Code coverage build failed and was not indexed.")
+        # Check the required platforms are present
+        for platform in required_platforms:
+            if not task_ids[platform]:
+                raise Exception(
+                    f"Code coverage build on {platform} failed and was not indexed."
+                )
 
         self.artifactsHandler = ArtifactsHandler(
             task_ids, self.artifacts_dir, task_name_filter

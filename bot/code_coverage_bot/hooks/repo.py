@@ -30,6 +30,9 @@ REPOSITORIES = {
         "expected_extensions": [".js", ".cpp"],
         # Use local repo to load mercurial information
         "hgmo_local": True,
+        # On mozilla-central, we want to assert that every platform was run (except for android platforms
+        # as they are unstable).
+        "required_platforms": ["linux", "windows"],
     },
     config.TRY_REPOSITORY: {
         # Only build the main report
@@ -40,6 +43,8 @@ REPOSITORIES = {
         # Use remote try repo in order to return early if the
         # try build is not linked to Phabricator
         "hgmo_local": False,
+        # On try, developers might have requested to run only one platform, and we trust them.
+        "required_platforms": [],
     },
 }
 
@@ -56,7 +61,12 @@ class RepositoryHook(Hook):
         for key in ("build_reports", "gcp_upload", "send_low_coverage_email"):
             assert key in self.config, f"Missing {key} in {repository} config"
 
-        super().__init__(repository, *args, **kwargs)
+        super().__init__(
+            repository,
+            required_platforms=self.config["required_platforms"],
+            *args,
+            **kwargs,
+        )
 
     def run(self):
         # Check the covdir report does not already exists
