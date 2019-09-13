@@ -409,8 +409,10 @@ tasks:
         dependencies:
           - {$eval: as_slugid("bot_deploy")}
         scopes:
-          - "assume:hook-id:project-relman/code-coverage-${channel}"
-          - "hooks:modify-hook:project-relman/code-coverage-${channel}"
+          - "assume:hook-id:project-relman/code-coverage-repo-${channel}"
+          - "hooks:modify-hook:project-relman/code-coverage-repo-${channel}"
+          - "assume:hook-id:project-relman/code-coverage-cron-${channel}"
+          - "hooks:modify-hook:project-relman/code-coverage-cron-${channel}"
         created: {$fromNow: ''}
         deadline: {$fromNow: '5 hours'}
         provisionerId: aws-provisioner-v1
