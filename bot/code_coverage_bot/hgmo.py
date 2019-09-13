@@ -22,6 +22,9 @@ class HGMO(object):
         else:
             self.server_address = HGMO.SERVER_ADDRESS
         self.repo_dir = repo_dir
+        logger.info(
+            "Configured HGMO server", address=self.server_address, dir=self.repo_dir
+        )
         self.pid_file = os.path.join(os.getcwd(), HGMO.PID_FILE)
 
     def __get_pid(self):

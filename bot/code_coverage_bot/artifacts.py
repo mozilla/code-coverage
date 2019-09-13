@@ -140,6 +140,7 @@ class ArtifactsHandler(object):
             [
                 taskcluster.get_task_details(build_task_id)["taskGroupId"]
                 for build_task_id in self.task_ids.values()
+                if build_task_id is not None
             ]
         )
         test_tasks = [
