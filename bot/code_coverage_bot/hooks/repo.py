@@ -21,104 +21,10 @@ from code_coverage_bot.phabricator import parse_revision_id
 logger = structlog.get_logger(__name__)
 
 
-REPOSITORIES = {
-    config.MOZILLA_CENTRAL_REPOSITORY: {
-        # Will build all the reports possible
-        "build_reports": None,
-        "gcp_upload": True,
-        "send_low_coverage_email": True,
-        "expected_extensions": [".js", ".cpp"],
-        # Use local repo to load mercurial information
-        "hgmo_local": True,
-        # On mozilla-central, we want to assert that every platform was run (except for android platforms
-        # as they are unstable).
-        "required_platforms": ["linux", "windows"],
-    },
-    config.TRY_REPOSITORY: {
-        # Only build the main report
-        "build_reports": [("all", "all")],
-        "gcp_upload": False,
-        "send_low_coverage_email": False,
-        "expected_extensions": None,
-        # Use remote try repo in order to return early if the
-        # try build is not linked to Phabricator
-        "hgmo_local": False,
-        # On try, developers might have requested to run only one platform, and we trust them.
-        "required_platforms": [],
-    },
-}
-
-
 class RepositoryHook(Hook):
     """
-    This function is executed when the bot is triggered at the end of a build and associated tests.
+    Base class to support specific workflows per repository
     """
-
-    def __init__(self, repository, *args, **kwargs):
-        assert repository in REPOSITORIES, f"Unsupported repository {repository}"
-        self.config = REPOSITORIES[repository]
-
-        for key in (
-            "build_reports",
-            "gcp_upload",
-            "send_low_coverage_email",
-            "expected_extensions",
-            "hgmo_local",
-            "required_platforms",
-        ):
-            assert key in self.config, f"Missing {key} in {repository} config"
-
-        super().__init__(
-            repository,
-            required_platforms=self.config["required_platforms"],
-            *args,
-            **kwargs,
-        )
-
-    def run(self):
-        # Check the covdir report does not already exists
-        if self.config["gcp_upload"] and uploader.gcp_covdir_exists(
-            self.branch, self.revision, "all", "all"
-        ):
-            logger.warn("Full covdir report already on GCP")
-            return
-
-        self.retrieve_source_and_artifacts()
-
-        self.check_javascript_files()
-
-        reports = self.build_reports(only=self.config["build_reports"])
-        logger.info("Built all covdir reports", nb=len(reports))
-
-        # Retrieve the full report
-        full_path = reports.get(("all", "all"))
-        assert full_path is not None, "Missing full report (all:all)"
-        report = json.load(open(full_path))
-
-        # Check extensions
-        if self.config["expected_extensions"]:
-            paths = uploader.covdir_paths(report)
-            for extension in self.config["expected_extensions"]:
-                assert any(
-                    path.endswith(extension) for path in paths
-                ), "No {} file in the generated report".format(extension)
-
-        # Upload reports on GCP
-        if self.config["gcp_upload"]:
-            self.upload_reports(reports)
-            logger.info("Uploaded all covdir reports", nb=len(reports))
-        else:
-            logger.info("Skipping GCP upload")
-
-        # Upload coverage on phabricator
-        changesets, coverage = self.upload_phabricator(report)
-
-        # Send an email on low coverage
-        if self.config["send_low_coverage_email"]:
-            notify_email(self.revision, changesets, coverage)
-            logger.info("Sent low coverage email notification")
-        else:
-            logger.info("Skipping low coverage email notification")
 
     def upload_reports(self, reports):
         """
@@ -157,12 +63,12 @@ class RepositoryHook(Hook):
                                 f"{missing_files} are present in coverage reports, but missing from the repository"
                             )
 
-    def upload_phabricator(self, report):
+    def upload_phabricator(self, report, use_local_clone=True):
         phabricatorUploader = PhabricatorUploader(self.repo_dir, self.revision)
 
         # Build HGMO config according to this repo's configuration
         hgmo_config = {}
-        if self.config["hgmo_local"]:
+        if use_local_clone:
             hgmo_config["repo_dir"] = self.repo_dir
         else:
             hgmo_config["server_address"] = self.repository
@@ -184,10 +90,104 @@ class RepositoryHook(Hook):
         return changesets, coverage
 
 
+class MozillaCentralHook(RepositoryHook):
+    """
+    Code coverage hook for mozilla-central
+    * Check coverage artifacts content
+    * Build all covdir reports possible
+    * Upload all reports on GCP
+    * Upload main reports on Phabrictaor
+    * Send an email to admins on low coverage
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(
+            config.MOZILLA_CENTRAL_REPOSITORY,
+            # On mozilla-central, we want to assert that every platform was run (except for android platforms
+            # as they are unstable).
+            required_platforms=["linux", "windows"],
+            *args,
+            **kwargs,
+        )
+
+    def run(self):
+        # Check the covdir report does not already exists
+        if uploader.gcp_covdir_exists(self.branch, self.revision, "all", "all"):
+            logger.warn("Full covdir report already on GCP")
+            return
+
+        self.retrieve_source_and_artifacts()
+
+        self.check_javascript_files()
+
+        reports = self.build_reports()
+        logger.info("Built all covdir reports", nb=len(reports))
+
+        # Retrieve the full report
+        full_path = reports.get(("all", "all"))
+        assert full_path is not None, "Missing full report (all:all)"
+        report = json.load(open(full_path))
+
+        # Check extensions
+        paths = uploader.covdir_paths(report)
+        for extension in [".js", ".cpp"]:
+            assert any(
+                path.endswith(extension) for path in paths
+            ), "No {} file in the generated report".format(extension)
+
+        # Upload reports on GCP
+        self.upload_reports(reports)
+        logger.info("Uploaded all covdir reports", nb=len(reports))
+
+        # Upload coverage on phabricator
+        changesets, coverage = self.upload_phabricator(report)
+
+        # Send an email on low coverage
+        notify_email(self.revision, changesets, coverage)
+        logger.info("Sent low coverage email notification")
+
+
+class TryHook(RepositoryHook):
+    """
+    Code coverage hook for a try push
+    * Build only main covdir report
+    * Upload that report on Phabrictaor
+    """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(
+            config.TRY_REPOSITORY,
+            # On try, developers might have requested to run only one platform, and we trust them.
+            required_platforms=[],
+            *args,
+            **kwargs,
+        )
+
+    def run(self):
+        self.retrieve_source_and_artifacts()
+
+        reports = self.build_reports(only=[("all", "all")])
+        logger.info("Built all covdir reports", nb=len(reports))
+
+        # Retrieve the full report
+        full_path = reports.get(("all", "all"))
+        assert full_path is not None, "Missing full report (all:all)"
+        report = json.load(open(full_path))
+
+        # Upload coverage on phabricator
+        self.upload_phabricator(report, use_local_clone=False)
+
+
 def main():
     logger.info("Starting code coverage bot for repository")
     args = setup_cli()
-    hook = RepositoryHook(
-        args.repository, args.revision, args.task_name_filter, args.cache_root
-    )
+
+    hooks = {
+        config.MOZILLA_CENTRAL_REPOSITORY: MozillaCentralHook,
+        config.TRY_REPOSITORY: TryHook,
+    }
+    hook_class = hooks.get(args.repository)
+    assert hook_class is not None, f"Unsupported repository {args.repository}"
+
+    hook = hook_class(args.revision, args.task_name_filter, args.cache_root)
     hook.run()
