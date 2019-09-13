@@ -5,6 +5,8 @@
 
 import os
 import tempfile
+from datetime import datetime
+from datetime import timedelta
 
 import hglib
 import structlog
@@ -13,6 +15,7 @@ from code_coverage_bot import config
 from code_coverage_bot import grcov
 from code_coverage_bot import taskcluster
 from code_coverage_bot.artifacts import ArtifactsHandler
+from code_coverage_bot.taskcluster import taskcluster_config
 from code_coverage_bot.utils import ThreadPoolExecutorResult
 
 logger = structlog.get_logger(__name__)
@@ -125,3 +128,29 @@ class Hook(object):
             reports[(platform, suite)] = path
 
         return reports
+
+    def index_task(self, namespaces, ttl=180):
+        """
+        Index current task on Taskcluster Index
+        TTL is expressed in days
+        """
+        assert isinstance(ttl, int) and ttl > 0
+        task_id = os.environ.get("TASK_ID")
+        if task_id is None:
+            logger.warning("Skipping Taskcluster indexation, no task id found.")
+            return
+
+        index_service = taskcluster_config.get_service("index")
+
+        for namespace in namespaces:
+            index_service.insertTask(
+                namespace,
+                {
+                    "taskId": task_id,
+                    "rank": 0,
+                    "data": {},
+                    "expires": (datetime.utcnow() + timedelta(ttl)).strftime(
+                        "%Y-%m-%dT%H:%M:%S.%fZ"
+                    ),
+                },
+            )
