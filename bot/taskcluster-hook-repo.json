@@ -69,7 +69,8 @@
                 "scopes": [
                     "secrets:get:project/relman/code-coverage/runtime-CHANNEL",
                     "notify:email:*",
-                    "docker-worker:cache:code-coverage-bot-CHANNEL"
+                    "docker-worker:cache:code-coverage-bot-CHANNEL",
+                    "index:insert-task:project.relman.code-coverage.CHANNEL.repo.*"
                 ],
                 "tags": {},
                 "workerType": "releng-svc-memory"

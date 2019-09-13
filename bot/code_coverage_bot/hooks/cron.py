@@ -3,9 +3,6 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import os
-from datetime import datetime
-from datetime import timedelta
 
 import structlog
 
@@ -15,7 +12,6 @@ from code_coverage_bot import uploader
 from code_coverage_bot.cli import setup_cli
 from code_coverage_bot.hooks.base import Hook
 from code_coverage_bot.secrets import secrets
-from code_coverage_bot.taskcluster import taskcluster_config
 from code_coverage_bot.zero_coverage import ZeroCov
 
 logger = structlog.get_logger(__name__)
@@ -50,29 +46,22 @@ class CronHook(Hook):
         # Index the task in the TaskCluster index at the given revision and as "latest".
         # Given that all tasks have the same rank, the latest task that finishes will
         # overwrite the "latest" entry.
-        namespaces = [
-            "project.releng.services.project.{}.code_coverage_bot.{}".format(
-                secrets[secrets.APP_CHANNEL], self.revision
-            ),
-            "project.releng.services.project.{}.code_coverage_bot.latest".format(
-                secrets[secrets.APP_CHANNEL]
-            ),
-        ]
-
-        index_service = taskcluster_config.get_service("index")
-
-        for namespace in namespaces:
-            index_service.insertTask(
-                namespace,
-                {
-                    "taskId": os.environ["TASK_ID"],
-                    "rank": 0,
-                    "data": {},
-                    "expires": (datetime.utcnow() + timedelta(180)).strftime(
-                        "%Y-%m-%dT%H:%M:%S.%fZ"
-                    ),
-                },
-            )
+        self.index_task(
+            [
+                "project.releng.services.project.{}.code_coverage_bot.{}".format(
+                    secrets[secrets.APP_CHANNEL], self.revision
+                ),
+                "project.releng.services.project.{}.code_coverage_bot.latest".format(
+                    secrets[secrets.APP_CHANNEL]
+                ),
+                "project.relman.code-coverage.{}.cron.{}".format(
+                    secrets[secrets.APP_CHANNEL], self.revision
+                ),
+                "project.relman.code-coverage.{}.cron.latest".format(
+                    secrets[secrets.APP_CHANNEL]
+                ),
+            ]
+        )
 
 
 def main():

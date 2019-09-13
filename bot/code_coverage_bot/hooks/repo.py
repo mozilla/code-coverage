@@ -17,6 +17,7 @@ from code_coverage_bot.hooks.base import Hook
 from code_coverage_bot.notifier import notify_email
 from code_coverage_bot.phabricator import PhabricatorUploader
 from code_coverage_bot.phabricator import parse_revision_id
+from code_coverage_bot.secrets import secrets
 
 logger = structlog.get_logger(__name__)
 
@@ -142,6 +143,18 @@ class MozillaCentralHook(RepositoryHook):
         notify_email(self.revision, changesets, coverage)
         logger.info("Sent low coverage email notification")
 
+        # Index on Taskcluster
+        self.index_task(
+            [
+                "project.relman.code-coverage.{}.repo.mozilla-central.{}".format(
+                    secrets[secrets.APP_CHANNEL], self.revision
+                ),
+                "project.relman.code-coverage.{}.repo.mozilla-central.latest".format(
+                    secrets[secrets.APP_CHANNEL]
+                ),
+            ]
+        )
+
 
 class TryHook(RepositoryHook):
     """
@@ -182,6 +195,18 @@ class TryHook(RepositoryHook):
 
         # Upload coverage on phabricator
         self.upload_phabricator(report, changesets)
+
+        # Index on Taskcluster
+        self.index_task(
+            [
+                "project.relman.code-coverage.{}.repo.try.{}".format(
+                    secrets[secrets.APP_CHANNEL], self.revision
+                ),
+                "project.relman.code-coverage.{}.repo.try.latest".format(
+                    secrets[secrets.APP_CHANNEL]
+                ),
+            ]
+        )
 
 
 def main():
