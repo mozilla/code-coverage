@@ -63,10 +63,10 @@ class RepositoryHook(Hook):
                                 f"{missing_files} are present in coverage reports, but missing from the repository"
                             )
 
-    def upload_phabricator(self, report, use_local_clone=True):
-        phabricatorUploader = PhabricatorUploader(self.repo_dir, self.revision)
-
-        # Build HGMO config according to this repo's configuration
+    def get_hgmo_changesets(self, use_local_clone=True):
+        """
+        Build HGMO changesets according to this repo's configuration
+        """
         hgmo_config = {}
         if use_local_clone:
             hgmo_config["repo_dir"] = self.repo_dir
@@ -74,20 +74,15 @@ class RepositoryHook(Hook):
             hgmo_config["server_address"] = self.repository
 
         with hgmo.HGMO(**hgmo_config) as hgmo_server:
-            changesets = hgmo_server.get_automation_relevance_changesets(self.revision)
+            return hgmo_server.get_automation_relevance_changesets(self.revision)
 
-        if not any(
-            parse_revision_id(changeset["desc"]) is not None for changeset in changesets
-        ):
-            logger.info(
-                "None of the commits in the try push are linked to a Phabricator revision"
-            )
-            return
-
+    def upload_phabricator(self, report, changesets):
+        """
+        Helper to upload coverage report on Phabricator
+        """
+        phabricatorUploader = PhabricatorUploader(self.repo_dir, self.revision)
         logger.info("Upload changeset coverage data to Phabricator")
-        coverage = phabricatorUploader.upload(report, changesets)
-
-        return changesets, coverage
+        return phabricatorUploader.upload(report, changesets)
 
 
 class MozillaCentralHook(RepositoryHook):
@@ -140,7 +135,8 @@ class MozillaCentralHook(RepositoryHook):
         logger.info("Uploaded all covdir reports", nb=len(reports))
 
         # Upload coverage on phabricator
-        changesets, coverage = self.upload_phabricator(report)
+        changesets = self.get_hgmo_changesets()
+        coverage = self.upload_phabricator(report, changesets)
 
         # Send an email on low coverage
         notify_email(self.revision, changesets, coverage)
@@ -164,6 +160,16 @@ class TryHook(RepositoryHook):
         )
 
     def run(self):
+        changesets = self.get_hgmo_changesets(use_local_clone=False)
+
+        if not any(
+            parse_revision_id(changeset["desc"]) is not None for changeset in changesets
+        ):
+            logger.info(
+                "None of the commits in the try push are linked to a Phabricator revision"
+            )
+            return
+
         self.retrieve_source_and_artifacts()
 
         reports = self.build_reports(only=[("all", "all")])
@@ -175,7 +181,7 @@ class TryHook(RepositoryHook):
         report = json.load(open(full_path))
 
         # Upload coverage on phabricator
-        self.upload_phabricator(report, use_local_clone=False)
+        self.upload_phabricator(report, changesets)
 
 
 def main():
