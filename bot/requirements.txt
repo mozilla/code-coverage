@@ -3,4 +3,4 @@ google-cloud-storage==1.19.0
 libmozdata==0.1.58
 pytoml==0.1.21
 pytz==2019.2
-zstandard==0.11.1
+zstandard==0.12.0
