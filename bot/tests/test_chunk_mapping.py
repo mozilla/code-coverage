@@ -61,7 +61,6 @@ def assert_chunk_to_test(c, platform, chunk, tests):
     assert set([e[0] for e in results]) == set(tests)
 
 
-@responses.activate
 def test_zero_coverage(tmpdir, fake_artifacts_handler, fake_hg_repo_with_contents):
     tmp_path = tmpdir.strpath
 

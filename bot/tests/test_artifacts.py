@@ -259,7 +259,6 @@ def _group_tasks():
         }
 
 
-@responses.activate
 def test_download_all(
     LINUX_TASK_ID, LINUX_TASK, GROUP_TASKS_1, GROUP_TASKS_2, fake_artifacts
 ):
