@@ -13,7 +13,6 @@ from code_coverage_bot import taskcluster
 from conftest import FIXTURES_DIR
 
 
-@responses.activate
 def test_get_task_status(LINUX_TASK_ID, LINUX_TASK_STATUS):
     responses.add(
         responses.GET,
@@ -24,7 +23,6 @@ def test_get_task_status(LINUX_TASK_ID, LINUX_TASK_STATUS):
     assert taskcluster.get_task_status(LINUX_TASK_ID) == LINUX_TASK_STATUS
 
 
-@responses.activate
 def test_get_task_details(LINUX_TASK_ID, LINUX_TASK):
     responses.add(
         responses.GET,
@@ -35,7 +33,6 @@ def test_get_task_details(LINUX_TASK_ID, LINUX_TASK):
     assert taskcluster.get_task_details(LINUX_TASK_ID) == LINUX_TASK
 
 
-@responses.activate
 def test_get_task(LINUX_TASK_ID, LATEST_LINUX, WIN_TASK_ID, LATEST_WIN):
     responses.add(
         responses.GET,
@@ -64,7 +61,6 @@ def test_get_task(LINUX_TASK_ID, LATEST_LINUX, WIN_TASK_ID, LATEST_WIN):
     )
 
 
-@responses.activate
 def test_get_task_not_found(TASK_NOT_FOUND):
     responses.add(
         responses.GET,
@@ -81,7 +77,6 @@ def test_get_task_not_found(TASK_NOT_FOUND):
     )
 
 
-@responses.activate
 def test_get_task_failure(TASK_NOT_FOUND):
     err = TASK_NOT_FOUND.copy()
     err["code"] = "RandomError"
@@ -100,7 +95,6 @@ def test_get_task_failure(TASK_NOT_FOUND):
         )
 
 
-@responses.activate
 def test_get_task_artifacts(LINUX_TASK_ID, LINUX_TASK_ARTIFACTS):
     responses.add(
         responses.GET,
@@ -114,7 +108,6 @@ def test_get_task_artifacts(LINUX_TASK_ID, LINUX_TASK_ARTIFACTS):
     )
 
 
-@responses.activate
 def test_get_tasks_in_group(GROUP_TASKS_1, GROUP_TASKS_2):
     responses.add(
         responses.GET,
@@ -263,7 +256,6 @@ def test_get_platform(task_name, expected):
 
 
 @mock.patch("time.sleep")
-@responses.activate
 def test_download_artifact_forbidden(mocked_sleep, tmpdir):
     responses.add(
         responses.GET,
@@ -286,7 +278,6 @@ def test_download_artifact_forbidden(mocked_sleep, tmpdir):
 
 
 @mock.patch("time.sleep")
-@responses.activate
 def test_download_artifact_badzip(mocked_sleep, tmpdir):
     responses.add(
         responses.GET,

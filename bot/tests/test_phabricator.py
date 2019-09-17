@@ -14,7 +14,6 @@ from conftest import copy_pushlog_database
 from conftest import covdir_report
 
 
-@responses.activate
 def test_simple(mock_secrets, mock_phabricator, fake_hg_repo):
     hg, local, remote = fake_hg_repo
 
@@ -85,7 +84,6 @@ def test_simple(mock_secrets, mock_phabricator, fake_hg_repo):
     assert params["lint"] == []
 
 
-@responses.activate
 def test_file_with_no_coverage(mock_secrets, fake_hg_repo):
     hg, local, remote = fake_hg_repo
 
@@ -103,7 +101,6 @@ def test_file_with_no_coverage(mock_secrets, fake_hg_repo):
     assert results == {1: {}}
 
 
-@responses.activate
 def test_one_commit_without_differential(mock_secrets, fake_hg_repo):
     hg, local, remote = fake_hg_repo
 
@@ -127,7 +124,6 @@ def test_one_commit_without_differential(mock_secrets, fake_hg_repo):
     assert results == {}
 
 
-@responses.activate
 def test_two_commits_two_files(mock_secrets, fake_hg_repo):
     hg, local, remote = fake_hg_repo
 
@@ -169,7 +165,6 @@ def test_two_commits_two_files(mock_secrets, fake_hg_repo):
     }
 
 
-@responses.activate
 def test_changesets_overwriting(mock_secrets, fake_hg_repo):
     hg, local, remote = fake_hg_repo
 
@@ -195,7 +190,6 @@ def test_changesets_overwriting(mock_secrets, fake_hg_repo):
     }
 
 
-@responses.activate
 def test_changesets_displacing(mock_secrets, fake_hg_repo):
     hg, local, remote = fake_hg_repo
 
@@ -225,7 +219,6 @@ def test_changesets_displacing(mock_secrets, fake_hg_repo):
     }
 
 
-@responses.activate
 def test_changesets_reducing_size(mock_secrets, fake_hg_repo):
     hg, local, remote = fake_hg_repo
 
@@ -251,7 +244,6 @@ def test_changesets_reducing_size(mock_secrets, fake_hg_repo):
     }
 
 
-@responses.activate
 def test_changesets_overwriting_one_commit_without_differential(
     mock_secrets, fake_hg_repo
 ):
@@ -279,7 +271,6 @@ def test_changesets_overwriting_one_commit_without_differential(
     }
 
 
-@responses.activate
 def test_removed_file(mock_secrets, fake_hg_repo):
     hg, local, remote = fake_hg_repo
 
@@ -300,7 +291,6 @@ def test_removed_file(mock_secrets, fake_hg_repo):
     assert results == {1: {}}
 
 
-@responses.activate
 def test_backout_removed_file(mock_secrets, fake_hg_repo):
     hg, local, remote = fake_hg_repo
 

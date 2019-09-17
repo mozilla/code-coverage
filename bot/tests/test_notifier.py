@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-import responses
-
 from code_coverage_bot.notifier import notify_email
 from code_coverage_bot.phabricator import PhabricatorUploader
 from conftest import add_file
@@ -10,7 +8,6 @@ from conftest import copy_pushlog_database
 from conftest import covdir_report
 
 
-@responses.activate
 def test_notification(mock_secrets, mock_taskcluster, mock_phabricator, fake_hg_repo):
     hg, local, remote = fake_hg_repo
 

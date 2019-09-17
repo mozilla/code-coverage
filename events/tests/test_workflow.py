@@ -71,7 +71,6 @@ def run_async_parser(hook, group_id):
     return loop.run_until_complete(_check())
 
 
-@responses.activate
 def test_wrong_branch(mock_taskcluster):
     bus = MessageBus()
     hook = CodeCoverage("services-staging-codecoverage/bot", "project-test", bus)
@@ -79,7 +78,6 @@ def test_wrong_branch(mock_taskcluster):
     assert run_async_parser(hook, "bNq-VIT-Q12o6nXcaUmYNQ") is None
 
 
-@responses.activate
 def test_success(mock_taskcluster):
     bus = MessageBus()
     hook = CodeCoverage("services-staging-codecoverage/bot", "project-test", bus)
@@ -92,7 +90,6 @@ def test_success(mock_taskcluster):
     ]
 
 
-@responses.activate
 def test_success_windows(mock_taskcluster):
     bus = MessageBus()
     hook = CodeCoverage("services-staging-codecoverage/bot", "project-test", bus)
@@ -105,7 +102,6 @@ def test_success_windows(mock_taskcluster):
     ]
 
 
-@responses.activate
 def test_success_try(mock_taskcluster):
     bus = MessageBus()
     hook = CodeCoverage("services-staging-codecoverage/bot", "project-test", bus)
