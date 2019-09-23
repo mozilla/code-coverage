@@ -18,7 +18,9 @@ import {
   zeroCoverageDisplay,
   zeroCoverageMenu
 } from "./zero_coverage_report.js";
-import "./style.css";
+import "normalize.css/normalize.css";
+import "./style.scss";
+import "../assets/moz-logo-black.png";
 import Prism from "prismjs";
 import Chartist from "chartist";
 import "chartist/dist/chartist.css";
@@ -112,6 +114,9 @@ async function showDirectory(dir, revision, files) {
       file.route = buildRoute({
         path: file.path
       });
+
+      // Calc decimal range to make a nice coloration
+      file.range = parseInt(file.coveragePercent / 10) * 10;
       return file;
     }),
     revision: revision || REV_LATEST,
@@ -120,7 +125,7 @@ async function showDirectory(dir, revision, files) {
       return dir ? this.path.substring(dir.length + 1) : this.path;
     }
   };
-  render("browser", context, "output");
+  render("file_browser", context, "output");
 }
 
 async function showFile(file, revision) {

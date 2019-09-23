@@ -6,7 +6,7 @@
 </head>
 <body>
 <script id="zerocoverage" type="x-tmpl-mustache">
-<div class="directory">
+<div id="browser">
   <h2>
     <nav>
       {{#navbar}}
@@ -43,7 +43,7 @@
 </script>
 
 <script id="file_coverage" type="x-tmpl-mustache">
-<div class="file">
+<div id="file">
   <h2>
     <nav>
       {{#navbar}}
@@ -51,6 +51,12 @@
       {{/navbar}}
     </nav>
   </h2>
+
+  <div class="help">
+    <p class="no_data"><samp>&nbsp;</samp><span>Non-instrumentalized line</span></p>
+    <p class="uncovered"><samp>&nbsp;</samp><span>Uncovered line</span></p>
+    <p class="covered"><samp>&nbsp;</samp><span>Covered line</span></p>
+  </div>
 
   <table>
     <tbody>
@@ -68,8 +74,8 @@
 </div>
 </script>
 
-<script id="browser" type="x-tmpl-mustache">
-<div class="directory">
+<script id="file_browser" type="x-tmpl-mustache">
+<div id="browser">
   <h2>
     <nav>
       {{#navbar}}
@@ -90,7 +96,7 @@
     <div class="row">
       <span class="filename"><a href="{{ route }}">{{ file_name }}</a></span>
       <span>{{ children }}</span>
-      <span>{{ coveragePercent }} %</span>
+      <span class="coverage_{{ range }}">{{ coveragePercent }} %</span>
     </div>
     {{/files}}
   </div>
@@ -103,10 +109,8 @@
 </script>
 
 <script id="menu_browser" type="x-tmpl-mustache">
-  <a href="#view=zero">View the zero coverage report</a>
-  &bull;
-  <input type="text" name="revision" placeholder="Mercurial revision" value="{{revision}}"></input>
-  &bull;
+  <a class="item" href="#view=zero">View the zero coverage report</a>
+  <input class="revision" type="text" name="revision" placeholder="Mercurial revision" value="{{revision}}"></input>
   <select name="platform">
     <option value="all">All platforms</option>
     {{#platforms}}
@@ -134,7 +138,13 @@
   </select>
 </script>
 
-<header id="menu"></header>
+<header>
+  <div class="logo">
+    <img src="<%=require('../assets/moz-logo-black.png')%>" alt="Moz://a"/>
+    <a href="#view=browser">Code Coverage</a>
+  </div>
+  <div id="menu"></div>
+</header>
 
 <main id="main">
   <div id="message" class="message loading">Loading...</div>
@@ -146,9 +156,9 @@
 </main>
 
 <footer>
-  <a href="https://github.com/marco-c/code-coverage-reports/issues/new">Report an issue</a>
-  <a class="github-button" href="https://github.com/marco-c/code-coverage-reports/fork" data-icon="octicon-repo-forked" data-size="large"
-   data-show-count="true" aria-label="Fork marco-c/code-coverage-reports on GitHub">Fork</a>
+  <a target="_blank" href="https://github.com/mozilla/code-coverage/issues/new?labels=frontend,bug&title=Issue+with+the+frontend">Report an issue</a>
+  &bull;
+  <a target="_blank" href="https://github.com/mozilla/code-coverage/fork" aria-label="Fork mozilla/code-coverage on GitHub">Fork mozilla/code-coverage</a>
 </footer>
 
 </body>

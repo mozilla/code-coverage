@@ -364,7 +364,7 @@ export function message(cssClass, message) {
   const box = document.getElementById("message");
   box.className = "message " + cssClass;
   box.textContent = message;
-  box.style.display = "block";
+  box.style.display = "inherit";
 }
 
 export function hide(id) {
@@ -382,7 +382,7 @@ export function show(id, node) {
   }
 
   const box = document.getElementById(id);
-  box.style.display = "block";
+  box.style.display = "inherit";
   if (node) {
     box.replaceWith(node);
   }
@@ -400,6 +400,6 @@ export function render(template, data, target) {
   // eslint-disable-next-line no-unsanitized/property
   box.innerHTML = output;
 
-  box.style.display = "block";
+  box.style.display = "inherit";
   return box;
 }
