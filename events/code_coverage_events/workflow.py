@@ -108,6 +108,17 @@ class CodeCoverage(object):
         Extract revisions from payload
         """
         taskGroupId = body["taskGroupId"]
+        scheduler = body["schedulerId"]
+
+        # Check the scheduler name before loading all tasks in the group
+        # We are only interested in Mozilla gecko builds
+        if not scheduler.startswith("gecko-level-"):
+            logger.info(
+                "Skipping task, unsupported scheduler",
+                group_id=taskGroupId,
+                scheduler=scheduler,
+            )
+            return None
 
         build_task = await self.get_build_task_in_group(taskGroupId)
         if build_task is None:
