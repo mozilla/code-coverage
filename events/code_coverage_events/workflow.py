@@ -118,7 +118,7 @@ class CodeCoverage(object):
                 group_id=taskGroupId,
                 scheduler=scheduler,
             )
-            return
+            return None
 
         build_task = await self.get_build_task_in_group(taskGroupId)
         if build_task is None:
