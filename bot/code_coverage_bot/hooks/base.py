@@ -26,11 +26,25 @@ PLATFORMS = ["linux", "windows", "android-test", "android-emulator"]
 
 class Hook(object):
     def __init__(
-        self, repository, revision, task_name_filter, cache_root, required_platforms=[]
+        self,
+        repository,
+        revision,
+        task_name_filter,
+        cache_root,
+        working_dir=None,
+        required_platforms=[],
     ):
-        temp_dir = tempfile.mkdtemp()
-        self.artifacts_dir = os.path.join(temp_dir, "ccov-artifacts")
-        self.reports_dir = os.path.join(temp_dir, "ccov-reports")
+        if working_dir is None:
+            working_dir = tempfile.mkdtemp()
+        else:
+            os.makedirs(working_dir, exist_ok=True)
+        self.artifacts_dir = os.path.join(working_dir, "ccov-artifacts")
+        self.reports_dir = os.path.join(working_dir, "ccov-reports")
+        logger.info(
+            "Local storage initialized.",
+            artifacts=self.artifacts_dir,
+            reports=self.reports_dir,
+        )
 
         self.repository = repository
         self.revision = revision

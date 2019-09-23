@@ -220,5 +220,7 @@ def main():
     hook_class = hooks.get(args.repository)
     assert hook_class is not None, f"Unsupported repository {args.repository}"
 
-    hook = hook_class(args.revision, args.task_name_filter, args.cache_root)
+    hook = hook_class(
+        args.revision, args.task_name_filter, args.cache_root, args.working_dir
+    )
     hook.run()
