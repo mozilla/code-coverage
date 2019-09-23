@@ -45,7 +45,7 @@
                     "artifacts": {
                       "public/code-coverage-report.json": {
                         "expires": {"$fromNow": "2 weeks"},
-                        "path": "/build/ccov-reports/all:all.json",
+                        "path": "/build/ccov-reports/all.all.json",
                         "type": "file"
                       }
                     },
