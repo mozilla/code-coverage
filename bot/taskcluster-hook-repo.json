@@ -47,7 +47,7 @@
                         "expires": {"$fromNow": "2 weeks"},
                         "path": "/build/ccov-reports/all:all.json",
                         "type": "file"
-											}
+                      }
                     },
                     "cache": {
                         "code-coverage-bot-CHANNEL": "/cache"
