@@ -4,6 +4,7 @@ $link_color: #0081ad;
 $background_color: #eff7fc;
 $row_height: 1.8em;
 $header_height: 50px;
+$footer_height: 60px;
 $coverage_low: #d91a47;
 $coverage_warn: #ff9a36;
 $coverage_good: #438718;
@@ -79,11 +80,19 @@ header {
 
 footer {
   text-align: center;
-  background: $background_color;
+  background: darken($background_color, 60%);
+  min-height: $footer_height;
+  line-height: $footer_height;
   border-top: 1px solid darkgray;
 
+  img {
+    //padding-top: 0.2 * $footer_height;
+    vertical-align: middle;
+    max-height: 0.75 * $footer_height;
+  }
+
   a {
-    color: darken($link_color, 10%);
+    color: lighten($link_color, 50%);
   }
 }
 
