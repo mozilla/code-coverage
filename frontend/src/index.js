@@ -153,11 +153,19 @@ async function showFile(file, revision) {
     lines: source.split("\n").map((line, nb) => {
       const coverage = file.coverage[nb];
       let cssClass = "";
+      let coverageNice = false;
       if (coverage && coverage !== -1) {
         cssClass = coverage > 0 ? "covered" : "uncovered";
+
+        // Build a nicer coverage string for counts
+        if (coverage >= 1000) {
+          coverageNice = parseInt(coverage / 1000) + " k";
+        }
       }
       return {
         nb,
+        coverageNice,
+        coverage,
         line: line || " ",
         covered: cssClass
       };
