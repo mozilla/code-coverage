@@ -27,7 +27,8 @@ def create_app():
 
     # Configure logger
     init_logger(
-        code_coverage_backend.config.PROJECT_NAME,
+        "backend",
+        channel=taskcluster.secrets.get("APP_CHANNEL", "dev"),
         PAPERTRAIL_HOST=taskcluster.secrets.get("PAPERTRAIL_HOST"),
         PAPERTRAIL_PORT=taskcluster.secrets.get("PAPERTRAIL_PORT"),
         sentry_dsn=taskcluster.secrets.get("SENTRY_DSN"),
