@@ -67,5 +67,5 @@ class CronHook(Hook):
 def main():
     logger.info("Starting code coverage bot for cron")
     args = setup_cli(ask_revision=False, ask_repository=False)
-    hook = CronHook(args.task_name_filter, args.cache_root)
+    hook = CronHook(args.task_name_filter, args.cache_root, args.working_dir)
     hook.run()

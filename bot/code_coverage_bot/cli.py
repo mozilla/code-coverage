@@ -25,6 +25,11 @@ def setup_cli(ask_repository=True, ask_revision=True):
         "--cache-root", required=True, help="Cache root, used to pull changesets"
     )
     parser.add_argument(
+        "--working-dir",
+        required=True,
+        help="Working dir to download artifacts and build reports",
+    )
+    parser.add_argument(
         "--task-name-filter",
         default="*",
         help="Filter Taskcluster tasks using a glob expression",

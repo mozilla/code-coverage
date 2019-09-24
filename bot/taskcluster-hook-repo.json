@@ -41,6 +41,14 @@
                     "source": "https://github.com/mozilla/code-coverage"
                 },
                 "payload": {
+
+                    "artifacts": {
+                      "public/code-coverage-report.json": {
+                        "expires": {"$fromNow": "2 weeks"},
+                        "path": "/build/ccov-reports/all.all.json",
+                        "type": "file"
+                      }
+                    },
                     "cache": {
                         "code-coverage-bot-CHANNEL": "/cache"
                     },
@@ -50,7 +58,9 @@
                         "--taskcluster-secret",
                         "project/relman/code-coverage/runtime-CHANNEL",
                         "--cache-root",
-                        "/cache"
+                        "/cache",
+                        "--working-dir",
+                        "/build"
                     ],
                     "env": {
                         "$eval": "payload"

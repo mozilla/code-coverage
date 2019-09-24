@@ -50,7 +50,9 @@
                 "--taskcluster-secret",
                 "project/relman/code-coverage/runtime-CHANNEL",
                 "--cache-root",
-                "/cache"
+                "/cache",
+                "--working-dir",
+                "/build"
             ],
             "env": {},
             "features": {
