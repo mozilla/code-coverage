@@ -116,6 +116,7 @@ async function showDirectory(dir, revision, files) {
       });
 
       // Calc decimal range to make a nice coloration
+      file.coveragePercent = Math.floor(file.coveragePercent);
       file.range = parseInt(file.coveragePercent / 10) * 10;
       return file;
     }),
