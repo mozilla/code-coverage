@@ -20,7 +20,6 @@ import {
 } from "./zero_coverage_report.js";
 import "normalize.css/normalize.css";
 import "./style.scss";
-import "../assets/moz-logo-black.png";
 import Prism from "prismjs";
 import Chartist from "chartist";
 import "chartist/dist/chartist.css";
