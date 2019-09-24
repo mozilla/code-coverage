@@ -7,6 +7,7 @@ $header_height: 50px;
 $coverage_low: #d91a47;
 $coverage_warn: #ff9a36;
 $coverage_good: #438718;
+$small_screen: 1200px;
 
 body {
   // Setup base typography
@@ -50,6 +51,16 @@ header {
       line-height: $header_height;
       font-size: $header_height * 0.6;
       vertical-align: top;
+    }
+
+    // On smaller screens, hide "Code coverage" link & display a smaller logo
+    @media only screen and (max-width: $small_screen) {
+      img {
+        max-height: $header_height * 0.6;
+      }
+      a {
+        display: none;
+      }
     }
   }
 
@@ -115,6 +126,11 @@ nav {
 // Directory navigation
 #browser {
   margin: 1em 20%;
+
+  // On smaller screens, display table on full width
+  @media only screen and (max-width: $small_screen) {
+    margin: 0.5em;
+  }
 
   .table {
     display: table;
