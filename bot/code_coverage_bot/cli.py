@@ -6,7 +6,6 @@
 import argparse
 import os
 
-from code_coverage_bot import config
 from code_coverage_bot.secrets import secrets
 from code_coverage_bot.taskcluster import taskcluster_config
 from code_coverage_tools.log import init_logger
@@ -50,7 +49,7 @@ def setup_cli(ask_repository=True, ask_revision=True):
     secrets.load(args.taskcluster_secret)
 
     init_logger(
-        config.PROJECT_NAME,
+        "bot",
         channel=secrets.get("APP_CHANNEL", "dev"),
         PAPERTRAIL_HOST=secrets.get("PAPERTRAIL_HOST"),
         PAPERTRAIL_PORT=secrets.get("PAPERTRAIL_PORT"),
