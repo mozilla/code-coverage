@@ -4,7 +4,6 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import os
-import tempfile
 from datetime import datetime
 from datetime import timedelta
 
@@ -31,13 +30,10 @@ class Hook(object):
         revision,
         task_name_filter,
         cache_root,
-        working_dir=None,
+        working_dir,
         required_platforms=[],
     ):
-        if working_dir is None:
-            working_dir = tempfile.mkdtemp()
-        else:
-            os.makedirs(working_dir, exist_ok=True)
+        os.makedirs(working_dir, exist_ok=True)
         self.artifacts_dir = os.path.join(working_dir, "ccov-artifacts")
         self.reports_dir = os.path.join(working_dir, "ccov-reports")
         logger.info(

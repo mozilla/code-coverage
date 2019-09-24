@@ -26,7 +26,8 @@ def setup_cli(ask_repository=True, ask_revision=True):
     )
     parser.add_argument(
         "--working-dir",
-        help="Optional working dir to download artifacts and build reports",
+        required=True,
+        help="Working dir to download artifacts and build reports",
     )
     parser.add_argument(
         "--task-name-filter",
