@@ -37,12 +37,13 @@ a {
 header {
   background-color: $background_color;
   border-bottom: 1px solid darkgray;
-  height: $header_height;
+  min-height: $header_height;
 
   div.logo {
     display: inline-block;
     img {
-      max-height: $header_height;
+      margin: $header_height * 0.1;
+      max-height: $header_height * 0.8;
     }
     a {
       color: $default_color;
@@ -60,7 +61,7 @@ header {
   }
 
   input.revision {
-    min-width: 350px;
+    width: 170px;
     font-family: monospace;
   }
 }
