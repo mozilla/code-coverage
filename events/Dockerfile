@@ -1,7 +1,10 @@
 FROM python:3-slim
 
-ADD events /src
 
-RUN cd /src && pip install --disable-pip-version-check --no-cache-dir -r requirements.txt && python setup.py install
+ADD tools /src/tools
+ADD events /src/events
+
+RUN cd /src/tools && python setup.py install
+RUN cd /src/events && python setup.py install
 
 CMD ["code-coverage-events"]

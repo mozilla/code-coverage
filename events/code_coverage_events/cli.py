@@ -4,9 +4,9 @@ import os
 
 import structlog
 from libmozevent import taskcluster_config
-from libmozevent.log import init_logger
 
 from code_coverage_events.workflow import Events
+from code_coverage_tools.log import init_logger
 
 logger = structlog.get_logger(__name__)
 
@@ -37,10 +37,11 @@ def main():
     )
 
     init_logger(
-        "code_coverage_events",
+        "events",
+        channel=taskcluster_config.secrets.get("APP_CHANNEL", "dev"),
         PAPERTRAIL_HOST=taskcluster_config.secrets.get("PAPERTRAIL_HOST"),
         PAPERTRAIL_PORT=taskcluster_config.secrets.get("PAPERTRAIL_PORT"),
-        SENTRY_DSN=taskcluster_config.secrets.get("SENTRY_DSN"),
+        sentry_dsn=taskcluster_config.secrets.get("SENTRY_DSN"),
     )
 
     events = Events()
