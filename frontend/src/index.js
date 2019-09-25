@@ -153,23 +153,23 @@ async function showFile(file, revision) {
     lines: source.split("\n").map((line, nb) => {
       const coverage = file.coverage[nb];
       let cssClass = "";
-      let tests = null;
+      let hits = null;
       if (coverage !== undefined && coverage >= 0) {
         cssClass = coverage > 0 ? "covered" : "uncovered";
 
         // Build a nicer coverage string for counts
         if (coverage >= 1000000) {
-          tests = {
+          hits = {
             nb: parseInt(coverage / 1000000),
             unit: "M"
           };
         } else if (coverage >= 1000) {
-          tests = {
+          hits = {
             nb: parseInt(coverage / 1000),
             unit: "k"
           };
         } else if (coverage > 0) {
-          tests = {
+          hits = {
             nb: coverage,
             unit: ""
           };
@@ -177,7 +177,7 @@ async function showFile(file, revision) {
       }
       return {
         nb,
-        tests,
+        hits,
         coverage,
         line: line || " ",
         covered: cssClass
