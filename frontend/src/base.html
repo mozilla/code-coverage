@@ -67,6 +67,11 @@
         <td>
           <pre class="language-{{ language }}"><code>{{ line }}</code></pre>
         </td>
+        <td>
+          {{#hits}}
+          <span class="{{ hits.unit }}" title="That line is hit {{ coverage }} times.">{{ hits.nb }} {{ hits.unit }}</span>
+          {{/hits}}
+        </td>
       </tr>
       {{/lines}}
     </tbody>
