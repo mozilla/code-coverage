@@ -289,6 +289,7 @@ $samp_size: 20px;
 
       td {
         font-size: 0.9em;
+        background: $no_data_color;
       }
 
       pre {
@@ -299,6 +300,7 @@ $samp_size: 20px;
         background: $no_data_color;
       }
 
+      // Line number
       td:first-child {
         color: grey;
         font-size: 1em;
@@ -307,6 +309,28 @@ $samp_size: 20px;
         font-family: monospace;
         background: #f5f2f0;
         padding: 0 2px;
+      }
+
+      // Line coverage stats
+      td:last-child {
+        padding-right: 3px;
+        text-align: right;
+
+        span {
+          padding: 2px;
+          color: white;
+          font-size: 0.9em;
+          font-weight: bold;
+          border-radius: 3px;
+          background: #363636;
+
+          &.k {
+            background: #209cee;
+          }
+          &.M {
+            background: #3273dc;
+          }
+        }
       }
 
       &.covered {

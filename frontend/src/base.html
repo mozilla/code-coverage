@@ -68,9 +68,9 @@
           <pre class="language-{{ language }}"><code>{{ line }}</code></pre>
         </td>
         <td>
-          {{#coverageNice}}
-          <span title="That line is hit {{ coverage }} times.">{{ coverageNice }}</span>
-          {{/coverageNice}}
+          {{#tests}}
+          <span class="{{ tests.unit }}" title="That line is hit {{ coverage }} times.">{{ tests.nb }} {{ tests.unit }}</span>
+          {{/tests}}
         </td>
       </tr>
       {{/lines}}
