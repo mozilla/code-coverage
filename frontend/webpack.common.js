@@ -42,8 +42,22 @@ module.exports = {
         }
       },
       {
+        test: /\.s[ac]ss$/i,
+        use: [
+          MiniCssExtractPlugin.loader,
+          'css-loader',
+          'sass-loader',
+        ],
+      },
+      {
         test: /\.css$/i,
         use: [MiniCssExtractPlugin.loader, 'css-loader'],
+      },
+      {
+        test: /\.(png|svg|jpg|gif)$/,
+        use: [
+          'file-loader'
+        ]
       },
     ],
   },
@@ -55,6 +69,7 @@ module.exports = {
   resolve: {
     modules: [
       path.join(__dirname, 'node_modules'),
+      path.join(__dirname, 'assets'),
       path.join(__dirname, 'src'),
     ],
   },
