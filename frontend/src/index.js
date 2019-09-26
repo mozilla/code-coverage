@@ -13,7 +13,7 @@ import {
   getSource,
   getFilters
 } from "./common.js";
-import { buildRoute, readRoute, updateRoute } from "./route.js";
+import { buildRoute, monitorOptions, readRoute, updateRoute } from "./route.js";
 import {
   zeroCoverageDisplay,
   zeroCoverageMenu
@@ -130,7 +130,9 @@ async function showDirectory(dir, revision, files) {
   render("file_browser", context, "output");
 }
 
-async function showFile(source, file, revision) {
+async function showFile(source, file, revision, selectedLine) {
+  selectedLine = selectedLine !== undefined ? parseInt(selectedLine) : -1;
+
   let language;
   if (file.path.endsWith("cpp") || file.path.endsWith("h")) {
     language = "cpp";
@@ -174,12 +176,18 @@ async function showFile(source, file, revision) {
           };
         }
       }
+
+      // Override css class when selected
+      if (nb === selectedLine) {
+        cssClass = "selected";
+      }
       return {
         nb,
         hits,
         coverage,
         line: line || " ",
-        covered: cssClass
+        css_class: cssClass,
+        route: buildRoute({ line: nb })
       };
     })
   };
@@ -187,6 +195,15 @@ async function showFile(source, file, revision) {
   hide("message");
   hide("history");
   const output = render("file_coverage", context, "output");
+
+  // Scroll to line
+  if (selectedLine > 0) {
+    const line = output.querySelector("#l" + selectedLine);
+    line.scrollIntoView({
+      behavior: "smooth",
+      block: "center"
+    });
+  }
 
   // Highlight source code once displayed
   Prism.highlightAll(output);
@@ -249,7 +266,7 @@ async function load() {
   };
 }
 
-async function display(data) {
+export async function display(data) {
   if (data.view === VIEW_ZERO_COVERAGE) {
     await zeroCoverageMenu(data.route);
     await zeroCoverageDisplay(data.zeroCoverage, data.path);
@@ -260,10 +277,18 @@ async function display(data) {
     await showDirectory(data.path, data.revision, data.coverage.children);
   } else if (data.view === VIEW_FILE) {
     browserMenu(data.revision, data.filters, data.route);
-    await showFile(data.viewData, data.coverage, data.revision);
+    await showFile(
+      data.viewData,
+      data.coverage,
+      data.revision,
+      data.route.line
+    );
   } else {
     message("error", "Invalid view : " + data.view);
   }
+
+  // Always monitor options on newly rendered output
+  monitorOptions(data);
 }
 
 main(load, display);

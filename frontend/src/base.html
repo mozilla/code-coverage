@@ -62,8 +62,8 @@
   <table>
     <tbody>
       {{#lines}}
-      <tr class="{{covered}}">
-        <td>{{ nb }}</td>
+      <tr class="{{ css_class }}" id="l{{ nb }}">
+        <td><a class="scroll" href="{{ route }}">{{ nb }}</a></td>
         <td>
           <pre class="language-{{ language }}"><code>{{ line }}</code></pre>
         </td>

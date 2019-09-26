@@ -8,6 +8,7 @@ $footer_height: 60px;
 $coverage_low: #d91a47;
 $coverage_warn: #ff9a36;
 $coverage_good: #438718;
+$highlighted: #f7f448;
 $small_screen: 1900px;
 
 body {
@@ -350,6 +351,17 @@ $samp_size: 20px;
 
         pre {
           background: $uncovered_color;
+        }
+      }
+
+      &.selected {
+        font-weight: bold;
+        td {
+          background: $highlighted;
+        }
+
+        pre {
+          background: $highlighted;
         }
       }
     }
