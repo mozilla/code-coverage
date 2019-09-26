@@ -42,6 +42,7 @@ class RepositoryHook(Hook):
         Check that all JavaScript files present in the coverage artifacts actually exist.
         If they don't, there might be a bug in the LCOV rewriter.
         """
+        total = 0
         for artifact in self.artifactsHandler.get():
             if "jsvm" not in artifact:
                 continue
@@ -58,11 +59,15 @@ class RepositoryHook(Hook):
                             f
                             for f in source_files
                             if not os.path.exists(os.path.join(self.repo_dir, f))
+                            and not f.startswith("obj-")
                         ]
-                        if len(missing_files) != 0:
+                        nb = len(missing_files)
+                        if nb != 0:
                             logger.warn(
                                 f"{missing_files} are present in coverage reports, but missing from the repository"
                             )
+                            total += nb
+        return total
 
     def get_hgmo_changesets(self, use_local_clone=True):
         """
