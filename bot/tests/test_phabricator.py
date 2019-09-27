@@ -348,7 +348,6 @@ def test_supported_extensions(mock_secrets, fake_hg_repo):
     assert phabricator.is_supported_extension("requirements.txt") is False
     assert phabricator.is_supported_extension("tools/Cargo.toml") is False
     assert phabricator.is_supported_extension("tools/Cargo.lock") is False
-    assert phabricator.is_supported_extension("rust/code.rs") is False
     assert phabricator.is_supported_extension("dom/feature.idl") is False
     assert phabricator.is_supported_extension("dom/feature.webidl") is False
     assert phabricator.is_supported_extension("xpcom/moz.build") is False
@@ -375,3 +374,4 @@ def test_supported_extensions(mock_secrets, fake_hg_repo):
     assert phabricator.is_supported_extension("test.xml") is True
     assert phabricator.is_supported_extension("test.html") is True
     assert phabricator.is_supported_extension("test.xhtml") is True
+    assert phabricator.is_supported_extension("test.rs") is True

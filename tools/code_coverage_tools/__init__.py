@@ -18,4 +18,6 @@ COVERAGE_EXTENSIONS = [
     "xml",
     "html",
     "xhtml",
+    # Rust
+    "rs",
 ]
