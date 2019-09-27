@@ -25,6 +25,7 @@ def copy_pushlog_database(remote, local):
 
 def add_file(hg, repo_dir, name, contents):
     path = os.path.join(repo_dir, name)
+    os.makedirs(os.path.dirname(path), exist_ok=True)
 
     with open(path, "w") as f:
         f.write(contents)
