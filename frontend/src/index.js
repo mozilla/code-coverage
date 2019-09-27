@@ -25,7 +25,8 @@ import Chartist from "chartist";
 import "chartist/dist/chartist.css";
 
 const VIEW_ZERO_COVERAGE = "zero";
-const VIEW_BROWSER = "browser";
+const VIEW_DIRECTORY = "directory";
+const VIEW_FILE = "file";
 
 function browserMenu(revision, filters, route) {
   const context = {
@@ -111,7 +112,8 @@ async function showDirectory(dir, revision, files) {
     navbar: buildNavbar(dir, revision),
     files: files.map(file => {
       file.route = buildRoute({
-        path: file.path
+        path: file.path,
+        view: file.type
       });
 
       // Calc decimal range to make a nice coloration
@@ -128,9 +130,7 @@ async function showDirectory(dir, revision, files) {
   render("file_browser", context, "output");
 }
 
-async function showFile(file, revision) {
-  const source = await getSource(file.path, revision);
-
+async function showFile(source, file, revision) {
   let language;
   if (file.path.endsWith("cpp") || file.path.endsWith("h")) {
     language = "cpp";
@@ -148,7 +148,6 @@ async function showFile(file, revision) {
 
   const context = {
     navbar: buildNavbar(file.path, revision),
-    revision: revision || REV_LATEST,
     language,
     lines: source.map((line, nb) => {
       const coverage = file.coverage[nb];
@@ -218,11 +217,20 @@ async function load() {
     };
   }
 
+  // Default to directory view on home
+  if (!route.view) {
+    route.view = VIEW_DIRECTORY;
+  }
+
   try {
-    var [coverage, history, filters] = await Promise.all([
+    const viewContent =
+      route.view === VIEW_DIRECTORY
+        ? getHistory(route.path, route.platform, route.suite)
+        : getSource(route.path, route.revision);
+    var [coverage, filters, viewData] = await Promise.all([
       getPathCoverage(route.path, route.revision, route.platform, route.suite),
-      getHistory(route.path, route.platform, route.suite),
-      getFilters()
+      getFilters(),
+      viewContent
     ]);
   } catch (err) {
     console.warn("Failed to load coverage", err);
@@ -230,15 +238,14 @@ async function load() {
     message("error", "Failed to load coverage: " + err.message);
     throw err;
   }
-
   return {
-    view: VIEW_BROWSER,
+    view: route.view,
     path: route.path,
     revision: route.revision,
     route,
     coverage,
-    history,
-    filters
+    filters,
+    viewData
   };
 }
 
@@ -246,18 +253,14 @@ async function display(data) {
   if (data.view === VIEW_ZERO_COVERAGE) {
     await zeroCoverageMenu(data.route);
     await zeroCoverageDisplay(data.zeroCoverage, data.path);
-  } else if (data.view === VIEW_BROWSER) {
+  } else if (data.view === VIEW_DIRECTORY) {
+    hide("message");
     browserMenu(data.revision, data.filters, data.route);
-
-    if (data.coverage.type === "directory") {
-      hide("message");
-      await graphHistory(data.history, data.path);
-      await showDirectory(data.path, data.revision, data.coverage.children);
-    } else if (data.coverage.type === "file") {
-      await showFile(data.coverage, data.revision);
-    } else {
-      message("error", "Invalid file type: " + data.coverate.type);
-    }
+    await graphHistory(data.viewData, data.path);
+    await showDirectory(data.path, data.revision, data.coverage.children);
+  } else if (data.view === VIEW_FILE) {
+    browserMenu(data.revision, data.filters, data.route);
+    await showFile(data.viewData, data.coverage, data.revision);
   } else {
     message("error", "Invalid view : " + data.view);
   }
