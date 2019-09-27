@@ -205,12 +205,25 @@ function monitorOptions() {
 }
 
 // hgmo.
+const sourceCache = {};
+export async function getSource(file, revision) {
+  if (!revision || revision === "latest") {
+    revision = "tip";
+  }
+  const url = `https://hg.mozilla.org/mozilla-central/raw-file/${revision}/${file}`;
 
-export async function getSource(file) {
-  const response = await fetch(
-    `https://hg.mozilla.org/mozilla-central/raw-file/tip/${file}`
-  );
-  return response.text();
+  let source = cacheGet(sourceCache, url);
+  if (source) {
+    return source;
+  }
+
+  const response = await fetch(url);
+  source = await response.text();
+  source = source.split("\n");
+
+  cacheSet(sourceCache, url, source);
+
+  return source;
 }
 
 // Filtering.
