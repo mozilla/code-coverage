@@ -15,7 +15,7 @@ from code_coverage_tools import COVERAGE_EXTENSIONS
 logger = structlog.get_logger(__name__)
 
 PHABRICATOR_REVISION_REGEX = re.compile(
-    "Differential Revision: https://phabricator.services.mozilla.com/D([0-9]+)"
+    "Differential Revision: (https://phabricator.services.mozilla.com/D([0-9]+))"
 )
 
 
@@ -23,7 +23,14 @@ def parse_revision_id(desc):
     match = PHABRICATOR_REVISION_REGEX.search(desc)
     if not match:
         return None
-    return int(match.group(1))
+    return int(match.group(2))
+
+
+def parse_revision_url(desc):
+    match = PHABRICATOR_REVISION_REGEX.search(desc)
+    if not match:
+        return None
+    return match.group(1)
 
 
 class PhabricatorUploader(object):

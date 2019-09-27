@@ -2,6 +2,7 @@
 import structlog
 
 from code_coverage_bot.phabricator import parse_revision_id
+from code_coverage_bot.phabricator import parse_revision_url
 from code_coverage_bot.secrets import secrets
 from code_coverage_bot.taskcluster import taskcluster_config
 
@@ -21,8 +22,6 @@ def notify_email(revision, changesets, changesets_coverage):
         if any(text in desc for text in ["r=merge", "a=merge"]):
             continue
 
-        rev = changeset["node"]
-
         # Lookup changeset coverage from phabricator uploader
         rev_id = parse_revision_id(changeset["desc"])
         if rev_id is None:
@@ -37,9 +36,8 @@ def notify_email(revision, changesets, changesets_coverage):
         added = sum(c["lines_added"] for c in coverage.values())
 
         if covered < 0.2 * added:
-            content += "* [{}](https://firefox-code-coverage.herokuapp.com/#/changeset/{}): {} covered out of {} added.\n".format(
-                desc, rev, covered, added
-            )  # noqa
+            url = parse_revision_url(changeset["desc"])
+            content += f"* [{desc}]({url}): {covered} covered out of {added} added.\n"
 
     if content == "":
         return
