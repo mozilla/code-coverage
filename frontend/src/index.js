@@ -129,7 +129,7 @@ async function showDirectory(dir, revision, files) {
 }
 
 async function showFile(file, revision) {
-  const source = await getSource(file.path);
+  const source = await getSource(file.path, revision);
 
   let language;
   if (file.path.endsWith("cpp") || file.path.endsWith("h")) {
@@ -150,7 +150,7 @@ async function showFile(file, revision) {
     navbar: buildNavbar(file.path, revision),
     revision: revision || REV_LATEST,
     language,
-    lines: source.split("\n").map((line, nb) => {
+    lines: source.map((line, nb) => {
       const coverage = file.coverage[nb];
       let cssClass = "";
       let hits = null;
