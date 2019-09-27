@@ -317,3 +317,61 @@ def test_backout_removed_file(mock_secrets, fake_hg_repo):
         1: {"file": {"coverage": "NUCCCCU", "lines_added": 7, "lines_covered": 5}},
         2: {},
     }
+
+
+def test_third_party(mock_secrets, fake_hg_repo):
+    hg, local, remote = fake_hg_repo
+
+    add_file(hg, local, "tools/rewriting/ThirdPartyPaths.txt", "third_party\nsome/path")
+    revision = commit(hg, 1)
+
+    phabricator = PhabricatorUploader(local, revision)
+
+    assert phabricator.third_parties == ["third_party", "some/path"]
+
+    assert phabricator.is_third_party("js/src/xx.cpp") is False
+    assert phabricator.is_third_party("dom/media/yyy.h") is False
+    assert phabricator.is_third_party("third_party/test.cpp") is True
+    assert phabricator.is_third_party("some/test.cpp") is False
+    assert phabricator.is_third_party("some/path/test.cpp") is True
+
+
+def test_supported_extensions(mock_secrets, fake_hg_repo):
+    hg, local, remote = fake_hg_repo
+
+    add_file(hg, local, "file", "1\n2\n3\n4\n5\n6\n7\n")
+    revision = commit(hg, 1)
+
+    phabricator = PhabricatorUploader(local, revision)
+
+    assert phabricator.is_supported_extension("README") is False
+    assert phabricator.is_supported_extension("requirements.txt") is False
+    assert phabricator.is_supported_extension("tools/Cargo.toml") is False
+    assert phabricator.is_supported_extension("tools/Cargo.lock") is False
+    assert phabricator.is_supported_extension("rust/code.rs") is False
+    assert phabricator.is_supported_extension("dom/feature.idl") is False
+    assert phabricator.is_supported_extension("dom/feature.webidl") is False
+    assert phabricator.is_supported_extension("xpcom/moz.build") is False
+    assert phabricator.is_supported_extension("payload.json") is False
+    assert phabricator.is_supported_extension("inline.patch") is False
+    assert phabricator.is_supported_extension("README.mozilla") is False
+    assert phabricator.is_supported_extension("config.yml") is False
+    assert phabricator.is_supported_extension("config.yaml") is False
+    assert phabricator.is_supported_extension("config.ini") is False
+    assert phabricator.is_supported_extension("tooling.py") is False
+
+    assert phabricator.is_supported_extension("test.cpp") is True
+    assert phabricator.is_supported_extension("some/path/to/test.cpp") is True
+    assert phabricator.is_supported_extension("xxxYYY.h") is True
+    assert phabricator.is_supported_extension("test.c") is True
+    assert phabricator.is_supported_extension("test.cc") is True
+    assert phabricator.is_supported_extension("test.cxx") is True
+    assert phabricator.is_supported_extension("test.hh") is True
+    assert phabricator.is_supported_extension("test.hpp") is True
+    assert phabricator.is_supported_extension("test.hxx") is True
+    assert phabricator.is_supported_extension("test.js") is True
+    assert phabricator.is_supported_extension("test.jsm") is True
+    assert phabricator.is_supported_extension("test.xul") is True
+    assert phabricator.is_supported_extension("test.xml") is True
+    assert phabricator.is_supported_extension("test.html") is True
+    assert phabricator.is_supported_extension("test.xhtml") is True

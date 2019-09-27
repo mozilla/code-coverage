@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+import os
 import re
 
 import structlog
@@ -9,6 +10,7 @@ from libmozdata.phabricator import PhabricatorRevisionNotFoundException
 
 from code_coverage_bot import hgmo
 from code_coverage_bot.secrets import secrets
+from code_coverage_tools import COVERAGE_EXTENSIONS
 
 logger = structlog.get_logger(__name__)
 
@@ -29,6 +31,16 @@ class PhabricatorUploader(object):
         self.repo_dir = repo_dir
         self.revision = revision
 
+        # Read third party exclusion lists from repo
+        third_parties = os.path.join(
+            self.repo_dir, "tools/rewriting/ThirdPartyPaths.txt"
+        )
+        if os.path.exists(third_parties):
+            self.third_parties = [line.rstrip() for line in open(third_parties)]
+        else:
+            self.third_parties = []
+            logger.warn("Missing third party exclusion list", path=third_parties)
+
     def _find_coverage(self, report, path):
         """
         Find coverage value in a covdir report
@@ -38,7 +50,13 @@ class PhabricatorUploader(object):
         parts = path.split("/")
         for part in filter(None, parts):
             if part not in report["children"]:
-                logger.warn("Path {} not found in report".format(path))
+                # Only send warning for supported extensions
+                if self.is_supported_extension(path):
+                    logger.warn("Path {} not found in report".format(path))
+                else:
+                    logger.info(
+                        "Path not found in report for unsupported extension", path=path
+                    )
                 return
             report = report["children"][part]
 
@@ -95,6 +113,24 @@ class PhabricatorUploader(object):
 
         return phab_coverage_data
 
+    def is_third_party(self, path):
+        """
+        Check a file against known list of third party paths
+        """
+        for third_party in self.third_parties:
+            if path.startswith(third_party):
+                return True
+        return False
+
+    def is_supported_extension(self, path):
+        """
+        Check a file has a supported extension
+        """
+        _, ext = os.path.splitext(path)
+        if not ext:
+            return False
+        return ext[1:] in COVERAGE_EXTENSIONS
+
     def generate(self, report, changesets):
         results = {}
 
@@ -109,6 +145,12 @@ class PhabricatorUploader(object):
 
                 # For each file...
                 for path in changeset["files"]:
+
+                    # Skip third party files
+                    if self.is_third_party(path):
+                        logger.info("Skip third party path", path=path)
+                        continue
+
                     # Retrieve the coverage data.
                     coverage_record = self._find_coverage(report, path)
                     if coverage_record is None:
