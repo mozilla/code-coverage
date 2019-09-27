@@ -50,13 +50,15 @@ class PhabricatorUploader(object):
         parts = path.split("/")
         for part in filter(None, parts):
             if part not in report["children"]:
-                # Only send warning for supported extensions
-                if self.is_supported_extension(path):
-                    logger.warn("Path {} not found in report".format(path))
-                else:
+                # Only send warning for non 3rd party + supported extensions
+                if self.is_third_party(path):
+                    logger.info("Path not found in report for third party", path=path)
+                elif not self.is_supported_extension(path):
                     logger.info(
                         "Path not found in report for unsupported extension", path=path
                     )
+                else:
+                    logger.warn("Path not found in report", path=path)
                 return
             report = report["children"][part]
 
@@ -145,11 +147,6 @@ class PhabricatorUploader(object):
 
                 # For each file...
                 for path in changeset["files"]:
-
-                    # Skip third party files
-                    if self.is_third_party(path):
-                        logger.info("Skip third party path", path=path)
-                        continue
 
                     # Retrieve the coverage data.
                     coverage_record = self._find_coverage(report, path)
