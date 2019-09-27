@@ -1,5 +1,5 @@
 import Mustache from "mustache";
-import { buildRoute, readRoute, updateRoute } from "./route.js";
+import { buildRoute, readRoute } from "./route.js";
 import { ZERO_COVERAGE_FILTERS } from "./zero_coverage_report.js";
 
 export const REV_LATEST = "latest";
@@ -18,14 +18,12 @@ export async function main(load, display) {
   // Wait for DOM to be ready before displaying
   await DOM_READY;
   await display(data);
-  monitorOptions();
 
   // Full workflow, loading then displaying data
   // used for following updates
   const full = async function() {
     const data = await load();
     await display(data);
-    monitorOptions();
   };
 
   // React to url changes
@@ -174,34 +172,6 @@ export function isEnabled(opt) {
     value = ZERO_COVERAGE_FILTERS[opt].default_value;
   }
   return value === "on";
-}
-
-function monitorOptions() {
-  // Monitor input & select changes
-  const fields = document.querySelectorAll("input, select");
-  for (const field of fields) {
-    if (field.type === "text") {
-      // React on enter
-      field.onkeydown = async evt => {
-        if (evt.keyCode === 13) {
-          const params = {};
-          params[evt.target.name] = evt.target.value;
-          updateRoute(params);
-        }
-      };
-    } else {
-      // React on change
-      field.onchange = async evt => {
-        let value = evt.target.value;
-        if (evt.target.type === "checkbox") {
-          value = evt.target.checked ? "on" : "off";
-        }
-        const params = {};
-        params[evt.target.name] = value;
-        updateRoute(params);
-      };
-    }
-  }
 }
 
 // hgmo.
