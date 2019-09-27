@@ -147,7 +147,6 @@ class PhabricatorUploader(object):
 
                 # For each file...
                 for path in changeset["files"]:
-
                     # Retrieve the coverage data.
                     coverage_record = self._find_coverage(report, path)
                     if coverage_record is None:
