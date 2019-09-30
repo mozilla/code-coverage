@@ -260,18 +260,23 @@ def _group_tasks():
 
 
 def test_download_all(
-    LINUX_TASK_ID, LINUX_TASK, GROUP_TASKS_1, GROUP_TASKS_2, fake_artifacts
+    LINUX_TASK_ID,
+    LINUX_TASK,
+    GROUP_TASKS_1,
+    GROUP_TASKS_2,
+    fake_artifacts,
+    mock_taskcluster,
 ):
     responses.add(
         responses.GET,
-        f"https://queue.taskcluster.net/v1/task/{LINUX_TASK_ID}",
+        f"http://taskcluster.test/api/queue/v1/task/{LINUX_TASK_ID}",
         json=LINUX_TASK,
         status=200,
     )
     for group_tasks in _group_tasks():
         responses.add(
             responses.GET,
-            "https://queue.taskcluster.net/v1/task-group/aPt9FbIdQwmhwDIPDYLuaw/list",
+            "http://taskcluster.test/api/queue/v1/task-group/aPt9FbIdQwmhwDIPDYLuaw/list",
             json=group_tasks,
             status=200,
         )
