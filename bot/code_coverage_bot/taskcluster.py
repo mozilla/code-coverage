@@ -1,22 +1,14 @@
 # -*- coding: utf-8 -*-
 import os
-import shutil
 from zipfile import BadZipFile
 from zipfile import is_zipfile
 
-import requests
+import taskcluster
 
 from code_coverage_bot.utils import retry
 from code_coverage_tools.taskcluster import TaskclusterConfig
 
 taskcluster_config = TaskclusterConfig()
-
-index_base = "https://index.taskcluster.net/v1/"
-queue_base = "https://queue.taskcluster.net/v1/"
-
-
-class TaskclusterException(Exception):
-    pass
 
 
 def get_task(branch, revision, platform):
@@ -33,75 +25,63 @@ def get_task(branch, revision, platform):
         platform_name = "android-api-16-ccov-debug"
         product = "mobile"
     else:
-        raise TaskclusterException("Unsupported platform: %s" % platform)
+        raise Exception(f"Unsupported platform: {platform}")
 
-    r = requests.get(
-        index_base
-        + "task/gecko.v2.{}.revision.{}.{}.{}".format(
-            branch, revision, product, platform_name
-        )
-    )
-    task = r.json()
-    if r.status_code == requests.codes.ok:
-        return task["taskId"]
-    else:
-        if task["code"] == "ResourceNotFound":
+    route = f"gecko.v2.{branch}.revision.{revision}.{product}.{platform_name}"
+    index = taskcluster_config.get_service("index")
+    try:
+        return index.findTask(route)["taskId"]
+    except taskcluster.exceptions.TaskclusterRestFailure as e:
+        if e.status_code == 404:
             return None
-        else:
-            raise TaskclusterException("Unknown TaskCluster index error.")
+        raise
 
 
 def get_task_details(task_id):
-    r = requests.get(queue_base + "task/{}".format(task_id))
-    r.raise_for_status()
-    return r.json()
+    queue = taskcluster_config.get_service("queue")
+    return queue.task(task_id)
 
 
 def get_task_status(task_id):
-    r = requests.get(queue_base + "task/{}/status".format(task_id))
-    r.raise_for_status()
-    return r.json()
+    queue = taskcluster_config.get_service("queue")
+    return queue.status(task_id)
 
 
 def get_task_artifacts(task_id):
-    r = requests.get(queue_base + "task/{}/artifacts".format(task_id))
-    r.raise_for_status()
-    return r.json()["artifacts"]
+    queue = taskcluster_config.get_service("queue")
+    return queue.listLatestArtifacts(task_id)["artifacts"]
 
 
 def get_tasks_in_group(group_id):
-    list_url = queue_base + "task-group/{}/list".format(group_id)
+    queue = taskcluster_config.get_service("queue")
 
-    r = requests.get(list_url, params={"limit": 200})
-    r.raise_for_status()
-    reply = r.json()
-    tasks = reply["tasks"]
-    while "continuationToken" in reply:
-        r = requests.get(
-            list_url,
-            params={"limit": 200, "continuationToken": reply["continuationToken"]},
-        )
-        r.raise_for_status()
-        reply = r.json()
-        tasks += reply["tasks"]
-    return tasks
+    token = None
+    while True:
+        query = {"limit": 200}
+        if token is not None:
+            query["continuationToken"] = token
+
+        response = queue.listTaskGroup(group_id, query=query)
+
+        for task in response["tasks"]:
+            yield task
+
+        token = response.get("continuationToken")
+        if token is None:
+            break
 
 
 def download_artifact(artifact_path, task_id, artifact_name):
     if os.path.exists(artifact_path):
         return artifact_path
 
+    queue = taskcluster_config.get_service("queue")
+
     def perform_download():
-        r = requests.get(
-            queue_base + "task/{}/artifacts/{}".format(task_id, artifact_name),
-            stream=True,
-        )
-
-        r.raise_for_status()
-
+        response = queue.getLatestArtifact(task_id, artifact_name)
         with open(artifact_path, "wb") as f:
-            r.raw.decode_content = True
-            shutil.copyfileobj(r.raw, f)
+            content = response["response"].content
+            f.write(content)
 
         if artifact_path.endswith(".zip") and not is_zipfile(artifact_path):
             raise BadZipFile("File is not a zip file")
