@@ -63,8 +63,7 @@ def get_tasks_in_group(group_id):
 
         response = queue.listTaskGroup(group_id, query=query)
 
-        for task in response["tasks"]:
-            yield task
+        yield from response["tasks"]
 
         token = response.get("continuationToken")
         if token is None:
