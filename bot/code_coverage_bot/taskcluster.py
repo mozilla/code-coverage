@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 import os
+import shutil
 from zipfile import BadZipFile
 from zipfile import is_zipfile
 
+import requests
 import taskcluster
 
 from code_coverage_bot.utils import retry
@@ -74,13 +76,17 @@ def download_artifact(artifact_path, task_id, artifact_name):
     if os.path.exists(artifact_path):
         return artifact_path
 
+    # Build artifact public url
     queue = taskcluster_config.get_service("queue")
+    url = queue.buildUrl("getLatestArtifact", task_id, artifact_name)
 
     def perform_download():
-        response = queue.getLatestArtifact(task_id, artifact_name)
+        r = requests.get(url, stream=True)
+        r.raise_for_status()
+
         with open(artifact_path, "wb") as f:
-            content = response["response"].content
-            f.write(content)
+            r.raw.decode_content = True
+            shutil.copyfileobj(r.raw, f)
 
         if artifact_path.endswith(".zip") and not is_zipfile(artifact_path):
             raise BadZipFile("File is not a zip file")

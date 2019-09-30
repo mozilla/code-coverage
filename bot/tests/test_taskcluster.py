@@ -6,6 +6,7 @@ from unittest import mock
 from zipfile import BadZipFile
 
 import pytest
+import requests
 import responses
 from taskcluster.exceptions import TaskclusterRestFailure
 
@@ -264,7 +265,10 @@ def test_download_artifact_forbidden(mocked_sleep, mock_taskcluster, tmpdir):
         status=403,
     )
 
-    with pytest.raises(TaskclusterRestFailure):
+    with pytest.raises(
+        requests.exceptions.HTTPError,
+        match="403 Client Error: Forbidden for url: http://taskcluster.test/api/queue/v1/task/FBdocjnAQOW_GJDOfmgjxw/artifacts/public%2Ftest_info%2Fcode-coverage-grcov.zip",  # noqa
+    ):
         taskcluster.download_artifact(
             os.path.join(tmpdir.strpath, "windows_reftest-6_code-coverage-grcov.zip"),
             "FBdocjnAQOW_GJDOfmgjxw",
