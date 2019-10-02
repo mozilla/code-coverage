@@ -5,11 +5,13 @@ from zipfile import BadZipFile
 from zipfile import is_zipfile
 
 import requests
+import structlog
 import taskcluster
 
 from code_coverage_bot.utils import retry
 from code_coverage_tools.taskcluster import TaskclusterConfig
 
+logger = structlog.getLogger(__name__)
 taskcluster_config = TaskclusterConfig()
 
 
@@ -77,8 +79,11 @@ def download_artifact(artifact_path, task_id, artifact_name):
         return artifact_path
 
     # Build artifact public url
-    queue = taskcluster_config.get_service("queue")
+    # Use un-authenticated Taskcluster client to avoid taskcluster-proxy rewrite issue
+    # https://github.com/taskcluster/taskcluster-proxy/issues/44
+    queue = taskcluster.Queue({"rootUrl": "https://taskcluster.net"})
     url = queue.buildUrl("getLatestArtifact", task_id, artifact_name)
+    logger.debug("Downloading artifact", url=url)
 
     def perform_download():
         r = requests.get(url, stream=True)

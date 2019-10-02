@@ -260,14 +260,14 @@ def test_get_platform(task_name, expected):
 def test_download_artifact_forbidden(mocked_sleep, mock_taskcluster, tmpdir):
     responses.add(
         responses.GET,
-        "http://taskcluster.test/api/queue/v1/task/FBdocjnAQOW_GJDOfmgjxw/artifacts/public%2Ftest_info%2Fcode-coverage-grcov.zip",  # noqa
+        "https://queue.taskcluster.net/v1/task/FBdocjnAQOW_GJDOfmgjxw/artifacts/public%2Ftest_info%2Fcode-coverage-grcov.zip",  # noqa
         body="xml error...",
         status=403,
     )
 
     with pytest.raises(
         requests.exceptions.HTTPError,
-        match="403 Client Error: Forbidden for url: http://taskcluster.test/api/queue/v1/task/FBdocjnAQOW_GJDOfmgjxw/artifacts/public%2Ftest_info%2Fcode-coverage-grcov.zip",  # noqa
+        match="403 Client Error: Forbidden for url: https://queue.taskcluster.net/v1/task/FBdocjnAQOW_GJDOfmgjxw/artifacts/public%2Ftest_info%2Fcode-coverage-grcov.zip",  # noqa
     ):
         taskcluster.download_artifact(
             os.path.join(tmpdir.strpath, "windows_reftest-6_code-coverage-grcov.zip"),
@@ -282,7 +282,7 @@ def test_download_artifact_forbidden(mocked_sleep, mock_taskcluster, tmpdir):
 def test_download_artifact_badzip(mocked_sleep, mock_taskcluster, tmpdir):
     responses.add(
         responses.GET,
-        "http://taskcluster.test/api/queue/v1/task/FBdocjnAQOW_GJDOfmgjxw/artifacts/public%2Ftest_info%2Fcode-coverage-grcov.zip",  # noqa
+        "https://queue.taskcluster.net/v1/task/FBdocjnAQOW_GJDOfmgjxw/artifacts/public%2Ftest_info%2Fcode-coverage-grcov.zip",  # noqa
         body="NOT A ZIP FILE",
         status=200,
         stream=True,
