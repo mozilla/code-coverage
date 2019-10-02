@@ -70,7 +70,7 @@ class TaskclusterConfig(object):
 
         else:
             # with taskclusterProxy
-            root_url = f"http://taskcluster"
+            root_url = "http://taskcluster"
             logger.info("Taskcluster Proxy enabled", url=root_url)
             self.options["rootUrl"] = root_url
 
