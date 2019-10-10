@@ -73,7 +73,7 @@
             "index:insert-task:project.relman.code-coverage.CHANNEL.cron.*"
         ],
         "tags": {},
-        "workerType": "releng-svc-memory"
+        "workerType": "relman-svc-memory"
     },
     "triggerSchema": {
         "additionalProperties": true,

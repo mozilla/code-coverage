@@ -83,7 +83,7 @@
                     "index:insert-task:project.relman.code-coverage.CHANNEL.repo.*"
                 ],
                 "tags": {},
-                "workerType": "releng-svc-memory"
+                "workerType": "relman-svc-memory"
             }
         ]
     },
