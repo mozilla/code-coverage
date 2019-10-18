@@ -65,9 +65,8 @@ tasks:
           - sh
           - -lxce
           - "git clone --quiet ${repository} /src && cd /src && git checkout ${head_rev} -b checks &&
-            cd /src/tools && python setup.py install &&
-            cd /src/bot && pip install --quiet . && pip install --quiet -r requirements-dev.txt &&
-            cd /src/backend && pip install --quiet . && pip install --quiet -r requirements-dev.txt &&
+            cd /src/bot && pip install --quiet -r requirements-dev.txt &&
+            cd /src/backend && pip install --quiet -r requirements-dev.txt &&
             cd /src && pre-commit run -a"
       metadata:
         name: "Code Coverage checks: linting"
