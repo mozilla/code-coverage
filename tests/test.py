@@ -57,7 +57,7 @@ class Test(unittest.TestCase):
         os.remove("ccov-artifacts/%s_target.txt" % task_id)
 
         artifact_paths = codecoverage.download_coverage_artifacts(
-            task_id, "cppunit", None, "ccov-artifacts"
+            task_id, "cppunit-1proc", None, "ccov-artifacts"
         )
         self.assertEqual(
             len([a for a in os.listdir("ccov-artifacts") if "grcov" in a]), 2
