@@ -8,7 +8,7 @@ install:
   - ln -s /usr/bin/gcov-6 symlinks/gcov
 script:
   - export PATH=$PWD/symlinks:$PATH
-  - flake8 .
+  - pre-commit run --all-files
   - python -m unittest discover tests
   - python setup.py sdist bdist_wheel
   - pip install dist/firefox_code_coverage-1.0.0.tar.gz
