@@ -65,8 +65,8 @@ tasks:
           - sh
           - -lxce
           - "git clone --quiet ${repository} /src && cd /src && git checkout ${head_rev} -b checks &&
-            cd /src/bot && pip install --quiet -r requirements-dev.txt &&
-            cd /src/backend && pip install --quiet -r requirements-dev.txt &&
+            cd /src/bot && pip install --disable-pip-version-check --no-cache-dir --quiet -r requirements-dev.txt &&
+            cd /src/backend && pip install --disable-pip-version-check --no-cache-dir --quiet -r requirements-dev.txt &&
             cd /src && pre-commit run -a"
       metadata:
         name: "Code Coverage checks: linting"
@@ -88,7 +88,7 @@ tasks:
           - "git clone --quiet ${repository} /src && cd /src && git checkout ${head_rev} -b checks &&
             /src/bot/ci/bootstrap.sh &&
             cd /src/tools && python3 setup.py install &&
-            cd /src/bot && pip3 install --quiet . && pip3 install --quiet -r requirements-dev.txt &&
+            cd /src/bot && pip3 install --disable-pip-version-check --no-cache-dir --quiet . && pip3 install --disable-pip-version-check --no-cache-dir --quiet -r requirements-dev.txt &&
             pytest -v"
       metadata:
         name: "Code Coverage Bot checks: unit tests"
@@ -109,7 +109,7 @@ tasks:
           - -lxce
           - "git clone --quiet ${repository} /src && cd /src && git checkout ${head_rev} -b checks &&
             cd /src/tools && python setup.py install &&
-            cd /src/backend && pip install --quiet . && pip install --quiet -r requirements-dev.txt &&
+            cd /src/backend && pip install --disable-pip-version-check --no-cache-dir --quiet . && pip install --disable-pip-version-check --no-cache-dir --quiet -r requirements-dev.txt &&
             pytest -v"
       metadata:
         name: "Code Coverage Backend checks: unit tests"
@@ -129,7 +129,7 @@ tasks:
           - sh
           - -lxce
           - "git clone --quiet ${repository} /src && cd /src && git checkout ${head_rev} -b checks &&
-            cd /src/events && pip install -q -r requirements.txt && pip install --quiet . && pip install --quiet -r requirements-dev.txt &&
+            cd /src/events && pip install --disable-pip-version-check --no-cache-dir --quiet -q -r requirements.txt && pip install --disable-pip-version-check --no-cache-dir --quiet . && pip install --disable-pip-version-check --no-cache-dir --quiet -r requirements-dev.txt &&
             pytest -v"
       metadata:
         name: "Code Coverage Events checks: unit tests"
