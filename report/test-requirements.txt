@@ -1,3 +1,2 @@
-pre-commit==1.18.3
 setuptools==41.4.0
 wheel==0.33.6

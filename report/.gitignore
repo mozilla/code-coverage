@@ -1,7 +1,3 @@
-.pytest_cache/
-*.pyc
-
-# Distribution / packaging
 .Python
 build/
 develop-eggs/
@@ -22,3 +18,10 @@ share/python-wheels/
 *.egg
 MANIFEST
 cache/
+ccov-artifacts/
+grcov
+grcov_ver
+lcov-bin/
+lcov/
+output.info
+report/
