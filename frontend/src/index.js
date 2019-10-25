@@ -108,6 +108,9 @@ async function graphHistory(history, path) {
 }
 
 async function showDirectory(dir, revision, files) {
+  files.sort(function (file1, file2) {
+    return file1.coveragePercent - file2.coveragePercent
+  });
   const context = {
     navbar: buildNavbar(dir, revision),
     files: files.map(file => {
