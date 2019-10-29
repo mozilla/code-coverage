@@ -1,5 +1,5 @@
 -e ../tools #egg=code-coverage-tools
-connexion==2.3.0
+connexion==2.4.0
 datadog==0.30.0
 Flask==1.1.1
 Flask-Cors==3.0.8
