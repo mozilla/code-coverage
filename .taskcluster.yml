@@ -137,6 +137,25 @@ tasks:
         owner: bastien@mozilla.com
         source: https://github.com/mozilla/code-coverage
 
+    - taskId: {$eval: as_slugid("report_check_tests")}
+      provisionerId: aws-provisioner-v1
+      workerType: github-worker
+      created: {$fromNow: ''}
+      deadline: {$fromNow: '1 hour'}
+      payload:
+        maxRunTime: 3600
+        image: python:3.7
+        command:
+          - sh
+          - -lxce
+          - "git clone --quiet ${repository} /src && cd /src && git checkout ${head_rev} -b checks &&
+            cd /src/report && ./ci-test.sh"
+      metadata:
+        name: "Code Coverage Report checks: unit tests"
+        description: Check python code with unittest
+        owner: bastien@mozilla.com
+        source: https://github.com/mozilla/code-coverage
+
     - taskId: {$eval: as_slugid("backend_build")}
       created: {$fromNow: ''}
       deadline: {$fromNow: '1 hour'}
