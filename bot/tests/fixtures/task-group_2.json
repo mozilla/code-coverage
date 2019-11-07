@@ -68,7 +68,7 @@
           ],
           "maxRunTime": 3600,
           "command": [
-            "c:\\mozilla-build\\python\\python.exe -u mozharness\\scripts\\desktop_unittest.py --cfg mozharness\\configs\\unittests\\win_taskcluster_unittest.py --reftest-suite=reftest --e10s --no-read-buildbot-config --installer-url https://queue.taskcluster.net/v1/task/JOznx6cYQdK6RyBeomoZ7g/artifacts/public/build/target.zip --test-packages-url https://queue.taskcluster.net/v1/task/JOznx6cYQdK6RyBeomoZ7g/artifacts/public/build/target.test_packages.json --download-symbols ondemand --reftest-suite=reftest --e10s --total-chunk=32 --this-chunk=13"
+            "c:\\mozilla-build\\python\\python.exe -u mozharness\\scripts\\desktop_unittest.py --cfg mozharness\\configs\\unittests\\win_taskcluster_unittest.py --reftest-suite=reftest --e10s --no-read-buildbot-config --installer-url https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/JOznx6cYQdK6RyBeomoZ7g/artifacts/public/build/target.zip --test-packages-url https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/JOznx6cYQdK6RyBeomoZ7g/artifacts/public/build/target.test_packages.json --download-symbols ondemand --reftest-suite=reftest --e10s --total-chunk=32 --this-chunk=13"
           ],
           "osGroups": [],
           "mounts": [
@@ -311,7 +311,7 @@
           ],
           "maxRunTime": 3600,
           "command": [
-            "c:\\mozilla-build\\python\\python.exe -u mozharness\\scripts\\desktop_unittest.py --cfg mozharness\\configs\\unittests\\win_taskcluster_unittest.py --reftest-suite=crashtest --e10s --no-read-buildbot-config --installer-url https://queue.taskcluster.net/v1/task/R010rAsMSpef09QXWgsSaw/artifacts/public/build/target.zip --test-packages-url https://queue.taskcluster.net/v1/task/R010rAsMSpef09QXWgsSaw/artifacts/public/build/target.test_packages.json --download-symbols ondemand --reftest-suite=crashtest --e10s"
+            "c:\\mozilla-build\\python\\python.exe -u mozharness\\scripts\\desktop_unittest.py --cfg mozharness\\configs\\unittests\\win_taskcluster_unittest.py --reftest-suite=crashtest --e10s --no-read-buildbot-config --installer-url https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/R010rAsMSpef09QXWgsSaw/artifacts/public/build/target.zip --test-packages-url https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/R010rAsMSpef09QXWgsSaw/artifacts/public/build/target.test_packages.json --download-symbols ondemand --reftest-suite=crashtest --e10s"
           ],
           "osGroups": [],
           "mounts": [
@@ -435,7 +435,7 @@
           ],
           "maxRunTime": 3600,
           "command": [
-            "c:\\mozilla-build\\python\\python.exe -u mozharness\\scripts\\desktop_unittest.py --cfg mozharness\\configs\\unittests\\win_taskcluster_unittest.py --reftest-suite=reftest --e10s --no-read-buildbot-config --installer-url https://queue.taskcluster.net/v1/task/R010rAsMSpef09QXWgsSaw/artifacts/public/build/target.zip --test-packages-url https://queue.taskcluster.net/v1/task/R010rAsMSpef09QXWgsSaw/artifacts/public/build/target.test_packages.json --download-symbols ondemand --reftest-suite=reftest --e10s --total-chunk=32 --this-chunk=31"
+            "c:\\mozilla-build\\python\\python.exe -u mozharness\\scripts\\desktop_unittest.py --cfg mozharness\\configs\\unittests\\win_taskcluster_unittest.py --reftest-suite=reftest --e10s --no-read-buildbot-config --installer-url https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/R010rAsMSpef09QXWgsSaw/artifacts/public/build/target.zip --test-packages-url https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/R010rAsMSpef09QXWgsSaw/artifacts/public/build/target.test_packages.json --download-symbols ondemand --reftest-suite=reftest --e10s --total-chunk=32 --this-chunk=31"
           ],
           "osGroups": [],
           "mounts": [
@@ -559,7 +559,7 @@
           ],
           "maxRunTime": 5400,
           "command": [
-            "c:\\mozilla-build\\python\\python.exe -u mozharness\\scripts\\desktop_unittest.py --cfg mozharness\\configs\\unittests\\win_taskcluster_unittest.py --mochitest-suite=mochitest-devtools-chrome-chunked --e10s --no-read-buildbot-config --installer-url https://queue.taskcluster.net/v1/task/PqRbFBeDRCi5maoBCsBFaw/artifacts/public/build/target.zip --test-packages-url https://queue.taskcluster.net/v1/task/PqRbFBeDRCi5maoBCsBFaw/artifacts/public/build/target.test_packages.json --download-symbols true --mochitest-suite=mochitest-devtools-chrome-chunked --e10s --total-chunk=8 --this-chunk=4"
+            "c:\\mozilla-build\\python\\python.exe -u mozharness\\scripts\\desktop_unittest.py --cfg mozharness\\configs\\unittests\\win_taskcluster_unittest.py --mochitest-suite=mochitest-devtools-chrome-chunked --e10s --no-read-buildbot-config --installer-url https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/PqRbFBeDRCi5maoBCsBFaw/artifacts/public/build/target.zip --test-packages-url https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/PqRbFBeDRCi5maoBCsBFaw/artifacts/public/build/target.test_packages.json --download-symbols true --mochitest-suite=mochitest-devtools-chrome-chunked --e10s --total-chunk=8 --this-chunk=4"
           ],
           "osGroups": [],
           "mounts": [
@@ -716,8 +716,8 @@
             "--",
             "/builds/worker/bin/test-linux.sh",
             "--no-read-buildbot-config",
-            "--installer-url=https://queue.taskcluster.net/v1/task/NP_XYKXKQda0NjqgHuSd3g/artifacts/public/build/target.apk",
-            "--test-packages-url=https://queue.taskcluster.net/v1/task/NP_XYKXKQda0NjqgHuSd3g/artifacts/public/build/target.test_packages.json",
+            "--installer-url=https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/NP_XYKXKQda0NjqgHuSd3g/artifacts/public/build/target.apk",
+            "--test-packages-url=https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/NP_XYKXKQda0NjqgHuSd3g/artifacts/public/build/target.test_packages.json",
             "--test-suite=reftest",
             "--total-chunk=28",
             "--this-chunk=15",
@@ -731,7 +731,7 @@
             "MOZ_AUTOMATION": "1",
             "MOZHARNESS_ACTIONS": "get-secrets",
             "GECKO_HEAD_REPOSITORY": "https://hg.mozilla.org/mozilla-central",
-            "MOZHARNESS_URL": "https://queue.taskcluster.net/v1/task/NP_XYKXKQda0NjqgHuSd3g/artifacts/public/build/mozharness.zip",
+            "MOZHARNESS_URL": "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/NP_XYKXKQda0NjqgHuSd3g/artifacts/public/build/mozharness.zip",
             "NEED_PULSEAUDIO": "true",
             "TOOLTOOL_CACHE": "/builds/worker/tooltool-cache",
             "ENABLE_E10S": "false",
@@ -740,7 +740,7 @@
             "MOZHARNESS_CONFIG": "android/android_common.py android/androidarm_4_3.py",
             "MOZHARNESS_SCRIPT": "android_emulator_unittest.py",
             "GECKO_BASE_REPOSITORY": "https://hg.mozilla.org/mozilla-unified",
-            "MOZILLA_BUILD_URL": "https://queue.taskcluster.net/v1/task/NP_XYKXKQda0NjqgHuSd3g/artifacts/public/build/target.apk"
+            "MOZILLA_BUILD_URL": "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/NP_XYKXKQda0NjqgHuSd3g/artifacts/public/build/target.apk"
           },
           "features": {
             "taskclusterProxy": true,
@@ -891,8 +891,8 @@
             "--",
             "/builds/worker/bin/test-linux.sh",
             "--no-read-buildbot-config",
-            "--installer-url=https://queue.taskcluster.net/v1/task/J8fuSOrLR_mgy573ek9Ysw/artifacts/public/build/target.apk",
-            "--test-packages-url=https://queue.taskcluster.net/v1/task/J8fuSOrLR_mgy573ek9Ysw/artifacts/public/build/target.test_packages.json",
+            "--installer-url=https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/J8fuSOrLR_mgy573ek9Ysw/artifacts/public/build/target.apk",
+            "--test-packages-url=https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/J8fuSOrLR_mgy573ek9Ysw/artifacts/public/build/target.test_packages.json",
             "--test-suite=jsreftest",
             "--total-chunk=100",
             "--this-chunk=10",
@@ -906,7 +906,7 @@
             "MOZ_AUTOMATION": "1",
             "MOZHARNESS_ACTIONS": "get-secrets",
             "GECKO_HEAD_REPOSITORY": "https://hg.mozilla.org/mozilla-central",
-            "MOZHARNESS_URL": "https://queue.taskcluster.net/v1/task/J8fuSOrLR_mgy573ek9Ysw/artifacts/public/build/mozharness.zip",
+            "MOZHARNESS_URL": "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/J8fuSOrLR_mgy573ek9Ysw/artifacts/public/build/mozharness.zip",
             "NEED_PULSEAUDIO": "true",
             "TOOLTOOL_CACHE": "/builds/worker/tooltool-cache",
             "ENABLE_E10S": "false",
@@ -915,7 +915,7 @@
             "MOZHARNESS_CONFIG": "android/android_common.py android/androidarm_4_3.py",
             "MOZHARNESS_SCRIPT": "android_emulator_unittest.py",
             "GECKO_BASE_REPOSITORY": "https://hg.mozilla.org/mozilla-unified",
-            "MOZILLA_BUILD_URL": "https://queue.taskcluster.net/v1/task/J8fuSOrLR_mgy573ek9Ysw/artifacts/public/build/target.apk"
+            "MOZILLA_BUILD_URL": "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/J8fuSOrLR_mgy573ek9Ysw/artifacts/public/build/target.apk"
           },
           "features": {
             "taskclusterProxy": true,
@@ -1033,7 +1033,7 @@
           ],
           "maxRunTime": 3600,
           "command": [
-            "c:\\mozilla-build\\python\\python.exe -u mozharness\\scripts\\desktop_unittest.py --cfg mozharness\\configs\\unittests\\win_taskcluster_unittest.py --reftest-suite=reftest-gpu --e10s --no-read-buildbot-config --installer-url https://queue.taskcluster.net/v1/task/JOznx6cYQdK6RyBeomoZ7g/artifacts/public/build/target.zip --test-packages-url https://queue.taskcluster.net/v1/task/JOznx6cYQdK6RyBeomoZ7g/artifacts/public/build/target.test_packages.json --download-symbols ondemand --reftest-suite=reftest-gpu --e10s --total-chunk=32 --this-chunk=12"
+            "c:\\mozilla-build\\python\\python.exe -u mozharness\\scripts\\desktop_unittest.py --cfg mozharness\\configs\\unittests\\win_taskcluster_unittest.py --reftest-suite=reftest-gpu --e10s --no-read-buildbot-config --installer-url https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/JOznx6cYQdK6RyBeomoZ7g/artifacts/public/build/target.zip --test-packages-url https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/JOznx6cYQdK6RyBeomoZ7g/artifacts/public/build/target.test_packages.json --download-symbols ondemand --reftest-suite=reftest-gpu --e10s --total-chunk=32 --this-chunk=12"
           ],
           "osGroups": [],
           "mounts": [
@@ -1186,8 +1186,8 @@
             "--",
             "/builds/worker/bin/test-linux.sh",
             "--no-read-buildbot-config",
-            "--installer-url=https://queue.taskcluster.net/v1/task/ZBDaiffGQaW_KpZs8ejYMw/artifacts/public/build/target.tar.bz2",
-            "--test-packages-url=https://queue.taskcluster.net/v1/task/ZBDaiffGQaW_KpZs8ejYMw/artifacts/public/build/target.test_packages.json",
+            "--installer-url=https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/ZBDaiffGQaW_KpZs8ejYMw/artifacts/public/build/target.tar.bz2",
+            "--test-packages-url=https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/ZBDaiffGQaW_KpZs8ejYMw/artifacts/public/build/target.test_packages.json",
             "--mochitest-suite=a11y",
             "--allow-software-gl-layers",
             "--disable-stylo",
@@ -1202,7 +1202,7 @@
             "GECKO_HEAD_REPOSITORY": "https://hg.mozilla.org/mozilla-central",
             "MOCHITEST_FLAVOR": "a11y",
             "TASKCLUSTER_VOLUMES": "/builds/worker/.cache;/builds/worker/checkouts;/builds/worker/tooltool-cache;/builds/worker/workspace",
-            "MOZHARNESS_URL": "https://queue.taskcluster.net/v1/task/ZBDaiffGQaW_KpZs8ejYMw/artifacts/public/build/mozharness.zip",
+            "MOZHARNESS_URL": "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/ZBDaiffGQaW_KpZs8ejYMw/artifacts/public/build/mozharness.zip",
             "NEED_PULSEAUDIO": "true",
             "MOZ_AUTOMATION": "1",
             "NEED_WINDOW_MANAGER": "true",
@@ -1210,7 +1210,7 @@
             "ENABLE_E10S": "false",
             "MOZHARNESS_SCRIPT": "desktop_unittest.py",
             "GECKO_BASE_REPOSITORY": "https://hg.mozilla.org/mozilla-unified",
-            "MOZILLA_BUILD_URL": "https://queue.taskcluster.net/v1/task/ZBDaiffGQaW_KpZs8ejYMw/artifacts/public/build/target.tar.bz2"
+            "MOZILLA_BUILD_URL": "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/ZBDaiffGQaW_KpZs8ejYMw/artifacts/public/build/target.tar.bz2"
           },
           "features": {
             "taskclusterProxy": true,
@@ -1360,8 +1360,8 @@
             "--",
             "/builds/worker/bin/test-linux.sh",
             "--no-read-buildbot-config",
-            "--installer-url=https://queue.taskcluster.net/v1/task/J8fuSOrLR_mgy573ek9Ysw/artifacts/public/build/target.apk",
-            "--test-packages-url=https://queue.taskcluster.net/v1/task/J8fuSOrLR_mgy573ek9Ysw/artifacts/public/build/target.test_packages.json",
+            "--installer-url=https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/J8fuSOrLR_mgy573ek9Ysw/artifacts/public/build/target.apk",
+            "--test-packages-url=https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/J8fuSOrLR_mgy573ek9Ysw/artifacts/public/build/target.test_packages.json",
             "--test-suite=reftest",
             "--total-chunk=56",
             "--this-chunk=36",
@@ -1375,7 +1375,7 @@
             "MOZ_AUTOMATION": "1",
             "MOZHARNESS_ACTIONS": "get-secrets",
             "GECKO_HEAD_REPOSITORY": "https://hg.mozilla.org/mozilla-central",
-            "MOZHARNESS_URL": "https://queue.taskcluster.net/v1/task/J8fuSOrLR_mgy573ek9Ysw/artifacts/public/build/mozharness.zip",
+            "MOZHARNESS_URL": "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/J8fuSOrLR_mgy573ek9Ysw/artifacts/public/build/mozharness.zip",
             "NEED_PULSEAUDIO": "true",
             "TOOLTOOL_CACHE": "/builds/worker/tooltool-cache",
             "ENABLE_E10S": "false",
@@ -1384,7 +1384,7 @@
             "MOZHARNESS_CONFIG": "android/android_common.py android/androidarm_4_3.py",
             "MOZHARNESS_SCRIPT": "android_emulator_unittest.py",
             "GECKO_BASE_REPOSITORY": "https://hg.mozilla.org/mozilla-unified",
-            "MOZILLA_BUILD_URL": "https://queue.taskcluster.net/v1/task/J8fuSOrLR_mgy573ek9Ysw/artifacts/public/build/target.apk"
+            "MOZILLA_BUILD_URL": "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/J8fuSOrLR_mgy573ek9Ysw/artifacts/public/build/target.apk"
           },
           "features": {
             "taskclusterProxy": true,
