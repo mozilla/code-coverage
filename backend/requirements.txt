@@ -10,5 +10,5 @@ python-dateutil==2.8.0
 pytoml==0.1.21
 fakeredis==1.0.5
 redis==3.3.11
-swagger-ui-bundle==0.0.5
+swagger-ui-bundle==0.0.6
 zstandard==0.12.0
