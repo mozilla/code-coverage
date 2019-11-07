@@ -160,7 +160,7 @@ tasks:
       created: {$fromNow: ''}
       deadline: {$fromNow: '1 hour'}
       provisionerId: proj-relman
-      workerType: relman-svc
+      workerType: ci
       dependencies:
         - {$eval: as_slugid("check_lint")}
         - {$eval: as_slugid("backend_check_tests")}
@@ -201,7 +201,7 @@ tasks:
       created: {$fromNow: ''}
       deadline: {$fromNow: '1 hour'}
       provisionerId: proj-relman
-      workerType: relman-svc
+      workerType: ci
       dependencies:
         - {$eval: as_slugid("check_lint")}
         - {$eval: as_slugid("bot_check_tests")}
@@ -242,7 +242,7 @@ tasks:
       created: {$fromNow: ''}
       deadline: {$fromNow: '1 hour'}
       provisionerId: proj-relman
-      workerType: relman-svc
+      workerType: ci
       dependencies:
         - {$eval: as_slugid("check_lint")}
         - {$eval: as_slugid("events_check_tests")}
