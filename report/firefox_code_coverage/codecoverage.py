@@ -40,40 +40,40 @@ def is_taskcluster_loaner():
 
 def get_last_task():
     last_task = get_json(
-        "https://index.taskcluster.net/v1/task/gecko.v2.mozilla-central.latest.firefox.linux64-ccov-debug"
+        "https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/gecko.v2.mozilla-central.latest.firefox.linux64-ccov-debug"
     )
     return last_task["taskId"]
 
 
 def get_task(branch, revision):
     task = get_json(
-        "https://index.taskcluster.net/v1/task/gecko.v2.%s.revision.%s.firefox.linux64-ccov-debug"
+        "https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/gecko.v2.%s.revision.%s.firefox.linux64-ccov-debug"
         % (branch, revision)
     )
     return task["taskId"]
 
 
 def get_task_details(task_id):
-    task_details = get_json("https://queue.taskcluster.net/v1/task/" + task_id)
+    task_details = get_json("https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/" + task_id)
     return task_details
 
 
 def get_task_artifacts(task_id):
     artifacts = get_json(
-        "https://queue.taskcluster.net/v1/task/" + task_id + "/artifacts"
+        "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/" + task_id + "/artifacts"
     )
     return artifacts["artifacts"]
 
 
 def get_tasks_in_group(group_id):
     reply = get_json(
-        "https://queue.taskcluster.net/v1/task-group/" + group_id + "/list",
+        "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task-group/" + group_id + "/list",
         {"limit": "200"},
     )
     tasks = reply["tasks"]
     while "continuationToken" in reply:
         reply = get_json(
-            "https://queue.taskcluster.net/v1/task-group/" + group_id + "/list",
+            "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task-group/" + group_id + "/list",
             {"limit": "200", "continuationToken": reply["continuationToken"]},
         )
         tasks += reply["tasks"]
@@ -88,7 +88,7 @@ def download_artifact(task_id, artifact, artifacts_path):
         while True:
             try:
                 urlretrieve(
-                    "https://queue.taskcluster.net/v1/task/"
+                    "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/"
                     + task_id
                     + "/artifacts/"
                     + artifact["name"],
@@ -127,7 +127,7 @@ def get_platform(task_name):
 
 
 def get_task_status(task_id):
-    status = get_json("https://queue.taskcluster.net/v1/task/{}/status".format(task_id))
+    status = get_json("https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/{}/status".format(task_id))
     return status["status"]["state"]
 
 

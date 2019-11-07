@@ -54,7 +54,7 @@
             "C:/mozilla-build/python3/python3.exe run-task -- c:\\mozilla-build\\python\\python.exe -u mozharness\\scripts\\desktop_unittest.py --cfg mozharness\\configs\\unittests\\win_unittest.py --mochitest-suite=mochitest-plain-chunked --code-coverage --setpref=media.peerconnection.mtransport_process=false --setpref=network.process.enabled=false --download-symbols true --mochitest-suite=mochitest-plain-chunked --code-coverage --setpref=media.peerconnection.mtransport_process=false --setpref=network.process.enabled=false --total-chunk=10 --this-chunk=7"
         ],
         "env": {
-            "EXTRA_MOZHARNESS_CONFIG": "{\"test_packages_url\": \"https://queue.taskcluster.net/v1/task/eA-zkasdQCmua27DPfzcZQ/artifacts/public/build/target.test_packages.json\", \"installer_url\": \"https://queue.taskcluster.net/v1/task/eA-zkasdQCmua27DPfzcZQ/artifacts/public/build/target.zip\"}",
+            "EXTRA_MOZHARNESS_CONFIG": "{\"test_packages_url\": \"https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/eA-zkasdQCmua27DPfzcZQ/artifacts/public/build/target.test_packages.json\", \"installer_url\": \"https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/eA-zkasdQCmua27DPfzcZQ/artifacts/public/build/target.zip\"}",
             "GECKO_HEAD_REPOSITORY": "https://hg.mozilla.org/mozilla-central",
             "GECKO_HEAD_REV": "3a71baea939144b4ec37805a932f0250c74986b1",
             "MOZ_AUTOMATION": "1",

@@ -72,8 +72,8 @@
       "/builds/worker/bin/run-task",
       "--",
       "/builds/worker/bin/test-linux.sh",
-      "--installer-url=https://queue.taskcluster.net/v1/task/ajAfM59jRx6OIauH3JLagQ/artifacts/public/build/target.tar.bz2",
-      "--test-packages-url=https://queue.taskcluster.net/v1/task/ajAfM59jRx6OIauH3JLagQ/artifacts/public/build/target.test_packages.json",
+      "--installer-url=https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/ajAfM59jRx6OIauH3JLagQ/artifacts/public/build/target.tar.bz2",
+      "--test-packages-url=https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/ajAfM59jRx6OIauH3JLagQ/artifacts/public/build/target.test_packages.json",
       "--mochitest-suite=plain-chunked",
       "--e10s",
       "--total-chunk=16",
@@ -99,8 +99,8 @@
       "TASKCLUSTER_VOLUMES": "/builds/worker/.cache;/builds/worker/checkouts;/builds/worker/tooltool-cache;/builds/worker/workspace",
       "MOZHARNESS_CONFIG": "unittests/linux_unittest.py remove_executables.py",
       "MOZHARNESS_SCRIPT": "desktop_unittest.py",
-      "MOZILLA_BUILD_URL": "https://queue.taskcluster.net/v1/task/ajAfM59jRx6OIauH3JLagQ/artifacts/public/build/target.tar.bz2",
-      "MOZHARNESS_URL": "https://queue.taskcluster.net/v1/task/ajAfM59jRx6OIauH3JLagQ/artifacts/public/build/mozharness.zip"
+      "MOZILLA_BUILD_URL": "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/ajAfM59jRx6OIauH3JLagQ/artifacts/public/build/target.tar.bz2",
+      "MOZHARNESS_URL": "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/ajAfM59jRx6OIauH3JLagQ/artifacts/public/build/mozharness.zip"
     },
     "features": {
       "taskclusterProxy": true,

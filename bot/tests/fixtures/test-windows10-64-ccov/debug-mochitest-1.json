@@ -34,7 +34,7 @@
       }
     ],
     "command": [
-      "c:\\mozilla-build\\python\\python.exe -u mozharness\\scripts\\desktop_unittest.py --cfg mozharness\\configs\\unittests\\win_taskcluster_unittest.py --mochitest-suite=plain-chunked --code-coverage --e10s --installer-url https://queue.taskcluster.net/v1/task/Db0nxP-CRTKA7ak9LCYucA/artifacts/public/build/target.zip --test-packages-url https://queue.taskcluster.net/v1/task/Db0nxP-CRTKA7ak9LCYucA/artifacts/public/build/target.test_packages.json --download-symbols true --mochitest-suite=plain-chunked --code-coverage --e10s --total-chunk=10 --this-chunk=1"
+      "c:\\mozilla-build\\python\\python.exe -u mozharness\\scripts\\desktop_unittest.py --cfg mozharness\\configs\\unittests\\win_taskcluster_unittest.py --mochitest-suite=plain-chunked --code-coverage --e10s --installer-url https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/Db0nxP-CRTKA7ak9LCYucA/artifacts/public/build/target.zip --test-packages-url https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/Db0nxP-CRTKA7ak9LCYucA/artifacts/public/build/target.test_packages.json --download-symbols true --mochitest-suite=plain-chunked --code-coverage --e10s --total-chunk=10 --this-chunk=1"
     ],
     "env": {
       "SCCACHE_DISABLE": "1",

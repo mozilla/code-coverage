@@ -33,7 +33,7 @@
       }
     ],
     "command": [
-      "c:\\mozilla-build\\python\\python.exe -u mozharness\\scripts\\desktop_unittest.py --cfg mozharness\\configs\\unittests\\win_taskcluster_unittest.py --cppunittest-suite=cppunittest --installer-url https://queue.taskcluster.net/v1/task/W7r-_k6BRti6V69f6PVFQA/artifacts/public/build/target.zip --test-packages-url https://queue.taskcluster.net/v1/task/W7r-_k6BRti6V69f6PVFQA/artifacts/public/build/target.test_packages.json --download-symbols true --cppunittest-suite=cppunittest"
+      "c:\\mozilla-build\\python\\python.exe -u mozharness\\scripts\\desktop_unittest.py --cfg mozharness\\configs\\unittests\\win_taskcluster_unittest.py --cppunittest-suite=cppunittest --installer-url https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/W7r-_k6BRti6V69f6PVFQA/artifacts/public/build/target.zip --test-packages-url https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/W7r-_k6BRti6V69f6PVFQA/artifacts/public/build/target.test_packages.json --download-symbols true --cppunittest-suite=cppunittest"
     ],
     "env": {
       "GECKO_HEAD_REPOSITORY": "https://hg.mozilla.org/mozilla-central",
