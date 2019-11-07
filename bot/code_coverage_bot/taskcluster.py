@@ -81,7 +81,7 @@ def download_artifact(artifact_path, task_id, artifact_name):
     # Build artifact public url
     # Use un-authenticated Taskcluster client to avoid taskcluster-proxy rewrite issue
     # https://github.com/taskcluster/taskcluster-proxy/issues/44
-    queue = taskcluster.Queue({"rootUrl": "https://taskcluster.net"})
+    queue = taskcluster.Queue({"rootUrl": "https://firefox-ci-tc.services.mozilla.com"})
     url = queue.buildUrl("getLatestArtifact", task_id, artifact_name)
     logger.debug("Downloading artifact", url=url)
 

@@ -66,7 +66,7 @@ class TaskclusterConfig(object):
                 "clientId": client_id,
                 "accessToken": access_token,
             }
-            self.options["rootUrl"] = "https://taskcluster.net"
+            self.options["rootUrl"] = "https://firefox-ci-tc.services.mozilla.com"
 
         else:
             # with taskclusterProxy

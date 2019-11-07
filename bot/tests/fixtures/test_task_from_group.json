@@ -69,8 +69,8 @@
             "--",
             "/builds/worker/bin/test-linux.sh",
             "--no-read-buildbot-config",
-            "--installer-url=https://queue.taskcluster.net/v1/task/MCIO1RWTRu2GhiE7_jILBw/artifacts/public/build/target.tar.bz2",
-            "--test-packages-url=https://queue.taskcluster.net/v1/task/MCIO1RWTRu2GhiE7_jILBw/artifacts/public/build/target.test_packages.json",
+            "--installer-url=https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/MCIO1RWTRu2GhiE7_jILBw/artifacts/public/build/target.tar.bz2",
+            "--test-packages-url=https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/MCIO1RWTRu2GhiE7_jILBw/artifacts/public/build/target.test_packages.json",
             "--mochitest-suite=mochitest-devtools-chrome-chunked",
             "--code-coverage",
             "--e10s",
@@ -87,7 +87,7 @@
             "GECKO_HEAD_REPOSITORY": "https://hg.mozilla.org/mozilla-central",
             "MOCHITEST_FLAVOR": "chrome",
             "TASKCLUSTER_VOLUMES": "/builds/worker/.cache;/builds/worker/checkouts;/builds/worker/tooltool-cache;/builds/worker/workspace",
-            "MOZHARNESS_URL": "https://queue.taskcluster.net/v1/task/MCIO1RWTRu2GhiE7_jILBw/artifacts/public/build/mozharness.zip",
+            "MOZHARNESS_URL": "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/MCIO1RWTRu2GhiE7_jILBw/artifacts/public/build/mozharness.zip",
             "NEED_PULSEAUDIO": "true",
             "MOZ_AUTOMATION": "1",
             "NEED_WINDOW_MANAGER": "true",
@@ -95,7 +95,7 @@
             "ENABLE_E10S": "true",
             "MOZHARNESS_SCRIPT": "desktop_unittest.py",
             "GECKO_BASE_REPOSITORY": "https://hg.mozilla.org/mozilla-unified",
-            "MOZILLA_BUILD_URL": "https://queue.taskcluster.net/v1/task/MCIO1RWTRu2GhiE7_jILBw/artifacts/public/build/target.tar.bz2"
+            "MOZILLA_BUILD_URL": "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/MCIO1RWTRu2GhiE7_jILBw/artifacts/public/build/target.tar.bz2"
           },
           "features": {
             "taskclusterProxy": true,
