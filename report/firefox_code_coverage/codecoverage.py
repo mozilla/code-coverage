@@ -54,26 +54,34 @@ def get_task(branch, revision):
 
 
 def get_task_details(task_id):
-    task_details = get_json("https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/" + task_id)
+    task_details = get_json(
+        "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/" + task_id
+    )
     return task_details
 
 
 def get_task_artifacts(task_id):
     artifacts = get_json(
-        "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/" + task_id + "/artifacts"
+        "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/"
+        + task_id
+        + "/artifacts"
     )
     return artifacts["artifacts"]
 
 
 def get_tasks_in_group(group_id):
     reply = get_json(
-        "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task-group/" + group_id + "/list",
+        "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task-group/"
+        + group_id
+        + "/list",
         {"limit": "200"},
     )
     tasks = reply["tasks"]
     while "continuationToken" in reply:
         reply = get_json(
-            "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task-group/" + group_id + "/list",
+            "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task-group/"
+            + group_id
+            + "/list",
             {"limit": "200", "continuationToken": reply["continuationToken"]},
         )
         tasks += reply["tasks"]
@@ -127,7 +135,11 @@ def get_platform(task_name):
 
 
 def get_task_status(task_id):
-    status = get_json("https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/{}/status".format(task_id))
+    status = get_json(
+        "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/{}/status".format(
+            task_id
+        )
+    )
     return status["status"]["state"]
 
 
