@@ -199,6 +199,8 @@ def download_coverage_artifacts(
             sys.stdout.flush()
             time.sleep(60)
             status = get_task_status(test_task["status"]["taskId"])
+            # Update the task status, as we will use it to compare statuses later.
+            test_task["status"]["state"] = status
             assert status in ALL_STATUSES
 
         chunk_name = get_chunk(test_task["task"]["metadata"]["name"])

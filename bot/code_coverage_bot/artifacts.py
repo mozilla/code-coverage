@@ -163,6 +163,8 @@ class ArtifactsHandler(object):
                 time.sleep(60)
                 task_status = taskcluster.get_task_status(task_id)
                 status = task_status["status"]["state"]
+                # Update the task status, as we will use it to compare statuses later.
+                test_task["status"]["state"] = status
 
         # Choose best tasks to download (e.g. 'completed' is better than 'failed')
         download_tasks = {}
