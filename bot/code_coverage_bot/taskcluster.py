@@ -17,7 +17,7 @@ taskcluster_config = TaskclusterConfig()
 
 def get_task(branch, revision, platform):
     if platform == "linux":
-        platform_name = "linux64-ccov-debug"
+        platform_name = "linux64-ccov-opt"
         product = "firefox"
     elif platform == "windows":
         platform_name = "win64-ccov-debug"
@@ -101,6 +101,7 @@ def download_artifact(artifact_path, task_id, artifact_name):
 
 BUILD_PLATFORMS = [
     "build-linux64-ccov/debug",
+    "build-linux64-ccov/opt",
     "build-win64-ccov/debug",
     "build-android-test-ccov/opt",
 ]
