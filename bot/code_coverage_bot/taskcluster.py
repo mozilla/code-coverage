@@ -108,6 +108,7 @@ BUILD_PLATFORMS = [
 
 TEST_PLATFORMS = [
     "test-linux64-ccov/debug",
+    "test-linux64-ccov/opt",
     "test-windows10-64-ccov/debug",
     "test-android-em-4.3-arm7-api-16-ccov/debug",
 ] + BUILD_PLATFORMS
