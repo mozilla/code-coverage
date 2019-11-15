@@ -39,7 +39,7 @@ def test_get_task(
 ):
     responses.add(
         responses.GET,
-        "http://taskcluster.test/api/index/v1/task/gecko.v2.mozilla-central.revision.b2a9a4bb5c94de179ae7a3f52fde58c0e2897498.firefox.linux64-ccov-debug",
+        "http://taskcluster.test/api/index/v1/task/gecko.v2.mozilla-central.revision.b2a9a4bb5c94de179ae7a3f52fde58c0e2897498.firefox.linux64-ccov-opt",
         json=LATEST_LINUX,
         status=200,
     )  # noqa
@@ -67,7 +67,7 @@ def test_get_task(
 def test_get_task_not_found(mock_taskcluster, TASK_NOT_FOUND):
     responses.add(
         responses.GET,
-        "http://taskcluster.test/api/index/v1/task/gecko.v2.mozilla-central.revision.b2a9a4bb5c94de179ae7a3f52fde58c0e2897498.firefox.linux64-ccov-debug",
+        "http://taskcluster.test/api/index/v1/task/gecko.v2.mozilla-central.revision.b2a9a4bb5c94de179ae7a3f52fde58c0e2897498.firefox.linux64-ccov-opt",
         json=TASK_NOT_FOUND,
         status=404,
     )  # noqa
@@ -85,7 +85,7 @@ def test_get_task_failure(mock_taskcluster, TASK_NOT_FOUND):
     err["code"] = "RandomError"
     responses.add(
         responses.GET,
-        "http://taskcluster.test/api/index/v1/task/gecko.v2.mozilla-central.revision.b2a9a4bb5c94de179ae7a3f52fde58c0e2897498.firefox.linux64-ccov-debug",
+        "http://taskcluster.test/api/index/v1/task/gecko.v2.mozilla-central.revision.b2a9a4bb5c94de179ae7a3f52fde58c0e2897498.firefox.linux64-ccov-opt",
         json=err,
         status=500,
     )  # noqa
@@ -134,14 +134,19 @@ def test_get_tasks_in_group(mock_taskcluster, GROUP_TASKS_1, GROUP_TASKS_2):
 @pytest.mark.parametrize(
     "task_name, expected",
     [
-        ("test-linux64-ccov/debug-mochitest-1", True),
-        ("test-linux64-ccov/debug-mochitest-e10s-7", True),
-        ("test-linux64-ccov/debug-cppunit", True),
-        ("test-linux64-ccov/debug-firefox-ui-functional-remote-e10s", True),
+        ("test-linux64-ccov/debug-mochitest-1", False),
+        ("test-linux64-ccov/debug-mochitest-e10s-7", False),
+        ("test-linux64-ccov/debug-cppunit", False),
+        ("test-linux64-ccov/debug-firefox-ui-functional-remote-e10s", False),
+        ("test-linux64-ccov/opt-mochitest-1", True),
+        ("test-linux64-ccov/opt-mochitest-e10s-7", True),
+        ("test-linux64-ccov/opt-cppunit", True),
+        ("test-linux64-ccov/opt-firefox-ui-functional-remote-e10s", True),
         ("test-windows10-64-ccov/debug-mochitest-1", True),
         ("test-windows10-64-ccov/debug-mochitest-e10s-7", True),
         ("test-windows10-64-ccov/debug-cppunit", True),
-        ("build-linux64-ccov/debug", True),
+        ("build-linux64-ccov/debug", False),
+        ("build-linux64-ccov/opt", True),
         ("build-android-test-ccov/opt", True),
         ("build-win64-ccov/debug", True),
         ("test-linux64/debug-mochitest-1", False),
@@ -157,17 +162,17 @@ def test_is_coverage_task(task_name, expected):
 @pytest.mark.parametrize(
     "task_name, expected",
     [
-        ("test-linux64-ccov/debug-mochitest-1", "mochitest-1"),
-        ("test-linux64-ccov/debug-mochitest-e10s-7", "mochitest-7"),
-        ("test-linux64-ccov/debug-cppunit", "cppunit"),
+        ("test-linux64-ccov/opt-mochitest-1", "mochitest-1"),
+        ("test-linux64-ccov/opt-mochitest-e10s-7", "mochitest-7"),
+        ("test-linux64-ccov/opt-cppunit", "cppunit"),
         (
-            "test-linux64-ccov/debug-firefox-ui-functional-remote-e10s",
+            "test-linux64-ccov/opt-firefox-ui-functional-remote-e10s",
             "firefox-ui-functional-remote",
         ),
         ("test-windows10-64-ccov/debug-mochitest-1", "mochitest-1"),
         ("test-windows10-64-ccov/debug-mochitest-e10s-7", "mochitest-7"),
         ("test-windows10-64-ccov/debug-cppunit", "cppunit"),
-        ("build-linux64-ccov/debug", "build"),
+        ("build-linux64-ccov/opt", "build"),
         ("build-android-test-ccov/opt", "build"),
         ("build-win64-ccov/debug", "build"),
     ],
@@ -193,17 +198,17 @@ def test_chunk_to_suite(chunk, expected):
 @pytest.mark.parametrize(
     "task_name, expected",
     [
-        ("test-linux64-ccov/debug-mochitest-1", "mochitest-1"),
-        ("test-linux64-ccov/debug-mochitest-e10s-7", "mochitest-plain-chunked-7"),
-        ("test-linux64-ccov/debug-cppunit", "cppunittest-1"),
+        ("test-linux64-ccov/opt-mochitest-1", "mochitest-plain-1"),
+        ("test-linux64-ccov/opt-mochitest-e10s-7", "mochitest-plain-7"),
+        ("test-linux64-ccov/opt-cppunit", "cppunittest-1"),
         (
-            "test-linux64-ccov/debug-firefox-ui-functional-remote-e10s",
+            "test-linux64-ccov/opt-firefox-ui-functional-remote-e10s",
             "firefox-ui-functional-remote-1",
         ),
         ("test-windows10-64-ccov/debug-mochitest-1", "mochitest-1"),
         ("test-windows10-64-ccov/debug-mochitest-e10s-7", "mochitest-plain-chunked-7"),
         ("test-windows10-64-ccov/debug-cppunit", "cppunittest-1"),
-        ("build-linux64-ccov/debug", "build"),
+        ("build-linux64-ccov/opt", "build"),
         ("build-android-test-ccov/opt", "build"),
         ("build-win64-ccov/debug", "build"),
     ],
@@ -216,17 +221,17 @@ def test_get_chunk(task_name, expected):
 @pytest.mark.parametrize(
     "task_name, expected",
     [
-        ("test-linux64-ccov/debug-mochitest-1", "mochitest"),
-        ("test-linux64-ccov/debug-mochitest-e10s-7", "mochitest-plain-chunked"),
-        ("test-linux64-ccov/debug-cppunit", "cppunittest"),
+        ("test-linux64-ccov/opt-mochitest-1", "mochitest-plain"),
+        ("test-linux64-ccov/opt-mochitest-e10s-7", "mochitest-plain"),
+        ("test-linux64-ccov/opt-cppunit", "cppunittest"),
         (
-            "test-linux64-ccov/debug-firefox-ui-functional-remote-e10s",
+            "test-linux64-ccov/opt-firefox-ui-functional-remote-e10s",
             "firefox-ui-functional-remote",
         ),
         ("test-windows10-64-ccov/debug-mochitest-1", "mochitest"),
         ("test-windows10-64-ccov/debug-mochitest-e10s-7", "mochitest-plain-chunked"),
         ("test-windows10-64-ccov/debug-cppunit", "cppunittest"),
-        ("build-linux64-ccov/debug", "build"),
+        ("build-linux64-ccov/opt", "build"),
         ("build-android-test-ccov/opt", "build"),
         ("build-win64-ccov/debug", "build"),
     ],
@@ -239,14 +244,14 @@ def test_get_suite(task_name, expected):
 @pytest.mark.parametrize(
     "task_name, expected",
     [
-        ("test-linux64-ccov/debug-mochitest-1", "linux"),
-        ("test-linux64-ccov/debug-mochitest-e10s-7", "linux"),
-        ("test-linux64-ccov/debug-cppunit", "linux"),
-        ("test-linux64-ccov/debug-firefox-ui-functional-remote-e10s", "linux"),
+        ("test-linux64-ccov/opt-mochitest-1", "linux"),
+        ("test-linux64-ccov/opt-mochitest-e10s-7", "linux"),
+        ("test-linux64-ccov/opt-cppunit", "linux"),
+        ("test-linux64-ccov/opt-firefox-ui-functional-remote-e10s", "linux"),
         ("test-windows10-64-ccov/debug-mochitest-1", "windows"),
         ("test-windows10-64-ccov/debug-mochitest-e10s-7", "windows"),
         ("test-windows10-64-ccov/debug-cppunit", "windows"),
-        ("build-linux64-ccov/debug", "linux"),
+        ("build-linux64-ccov/opt", "linux"),
         ("build-android-test-ccov/opt", "android"),
         ("build-win64-ccov/debug", "windows"),
     ],

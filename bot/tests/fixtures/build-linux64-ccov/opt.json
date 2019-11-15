@@ -1,0 +1,161 @@
+{
+  "provisionerId": "gecko-3",
+  "workerType": "b-linux",
+  "schedulerId": "gecko-level-3",
+  "taskGroupId": "UpVSSic1SeCw6sdDMidSLQ",
+  "dependencies": [
+    "GQWC8DtMRBmEhpgsPJdHHA",
+    "LFz17jARRPOoUz4s3CKY4g",
+    "Mmq5WgsmTLuLn4oWmhOmTA",
+    "T_bYPo8NRPuZ8cPKEhIoCw",
+    "XDSsJCY9Q1aA-6cY47adZg",
+    "XPFmlbUYTYi11JQKPw45ow",
+    "ZAI7Hy0rSmq7Nx-S112YaA",
+    "bSuO4tvARd2J454-Hg53kQ",
+    "fQRxzmt8RkChQnkmguktEg",
+    "UpVSSic1SeCw6sdDMidSLQ"
+  ],
+  "requires": "all-completed",
+  "routes": [
+    "index.gecko.v2.mozilla-central.latest.firefox.linux64-ccov-opt",
+    "index.gecko.v2.mozilla-central.pushdate.2019.11.15.20191115095319.firefox.linux64-ccov-opt",
+    "index.gecko.v2.mozilla-central.pushdate.2019.11.15.latest.firefox.linux64-ccov-opt",
+    "index.gecko.v2.mozilla-central.pushlog-id.36805.firefox.linux64-ccov-opt",
+    "index.gecko.v2.mozilla-central.revision.1e1617c67238dfb685fb3d07bf1793232c4469fa.firefox.linux64-ccov-opt",
+    "index.gecko.v2.trunk.revision.1e1617c67238dfb685fb3d07bf1793232c4469fa.firefox.linux64-ccov-opt",
+    "tc-treeherder.v2.mozilla-central.1e1617c67238dfb685fb3d07bf1793232c4469fa.36805"
+  ],
+  "priority": "medium",
+  "retries": 5,
+  "created": "2019-11-15T09:55:30.136Z",
+  "deadline": "2019-11-16T09:55:30.136Z",
+  "expires": "2020-11-14T09:55:30.136Z",
+  "scopes": [
+    "secrets:get:project/releng/gecko/build/level-3/*",
+    "secrets:get:project/taskcluster/gecko/hgfingerprint",
+    "secrets:get:project/taskcluster/gecko/hgmointernal",
+    "project:releng:services/tooltool/api/download/public",
+    "assume:project:taskcluster:gecko:level-3-sccache-buckets",
+    "auth:gcp:access-token:sccache-3/tc-l3*",
+    "docker-worker:cache:gecko-level-3-mozilla-central-build-linux64-ccov-opt-workspace-v3-e0773b586060dfe744c7",
+    "docker-worker:cache:gecko-level-3-checkouts-v3-e0773b586060dfe744c7",
+    "docker-worker:cache:gecko-level-3-tooltool-cache-v3-e0773b586060dfe744c7"
+  ],
+  "payload": {
+    "onExitStatus": {
+      "retry": [
+        4,
+        72
+      ],
+      "purgeCaches": [
+        72
+      ]
+    },
+    "maxRunTime": 7200,
+    "image": {
+      "path": "public/image.tar.zst",
+      "type": "task-image",
+      "taskId": "ZAI7Hy0rSmq7Nx-S112YaA"
+    },
+    "cache": {
+      "gecko-level-3-tooltool-cache-v3-e0773b586060dfe744c7": "/builds/worker/tooltool-cache",
+      "gecko-level-3-mozilla-central-build-linux64-ccov-opt-workspace-v3-e0773b586060dfe744c7": "/builds/worker/workspace",
+      "gecko-level-3-checkouts-v3-e0773b586060dfe744c7": "/builds/worker/checkouts"
+    },
+    "artifacts": {
+      "public/logs": {
+        "path": "/builds/worker/logs/",
+        "expires": "2020-11-14T09:55:30.136Z",
+        "type": "directory"
+      },
+      "public/build": {
+        "path": "/builds/worker/artifacts/",
+        "expires": "2020-11-14T09:55:30.136Z",
+        "type": "directory"
+      }
+    },
+    "command": [
+      "/builds/worker/bin/run-task",
+      "--gecko-checkout=/builds/worker/workspace/build/src",
+      "--fetch-hgfingerprint",
+      "--",
+      "/builds/worker/workspace/build/src/taskcluster/scripts/builder/build-linux.sh"
+    ],
+    "env": {
+      "FORCE_GCC": "1",
+      "MOZ_AUTOMATION": "1",
+      "MOZ_SOURCE_CHANGESET": "1e1617c67238dfb685fb3d07bf1793232c4469fa",
+      "ACCEPTED_MAR_CHANNEL_IDS": "firefox-mozilla-central",
+      "MOZ_FETCHES": "[{\"artifact\": \"public/build/clang.tar.xz\", \"extract\": true, \"task\": \"bSuO4tvARd2J454-Hg53kQ\"}, {\"artifact\": \"public/build/rustc.tar.xz\", \"extract\": true, \"task\": \"XPFmlbUYTYi11JQKPw45ow\"}, {\"artifact\": \"public/build/gcc.tar.xz\", \"extract\": true, \"task\": \"GQWC8DtMRBmEhpgsPJdHHA\"}, {\"artifact\": \"public/build/cbindgen.tar.xz\", \"extract\": true, \"task\": \"fQRxzmt8RkChQnkmguktEg\"}, {\"artifact\": \"public/build/sccache.tar.xz\", \"extract\": true, \"task\": \"XDSsJCY9Q1aA-6cY47adZg\"}, {\"artifact\": \"public/build/nasm.tar.bz2\", \"extract\": true, \"task\": \"Mmq5WgsmTLuLn4oWmhOmTA\"}, {\"artifact\": \"public/build/node.tar.xz\", \"extract\": true, \"task\": \"T_bYPo8NRPuZ8cPKEhIoCw\"}, {\"artifact\": \"public/build/grcov.tar.xz\", \"extract\": true, \"task\": \"LFz17jARRPOoUz4s3CKY4g\"}]",
+      "TOOLTOOL_CACHE": "/builds/worker/tooltool-cache",
+      "PYTHONUNBUFFERED": "1",
+      "MH_CUSTOM_BUILD_VARIANT_CFG": "code-coverage-opt",
+      "MOZHARNESS_SCRIPT": "mozharness/scripts/fx_desktop_build.py",
+      "MOZ_BUILD_DATE": "20191115095319",
+      "MH_BUILD_POOL": "taskcluster",
+      "HG_STORE_PATH": "/builds/worker/checkouts/hg-store",
+      "MOZ_FETCHES_DIR": "fetches",
+      "MOZHARNESS_ACTIONS": "get-secrets build",
+      "EXTRA_MOZHARNESS_CONFIG": "{\"update_channel\": \"nightly\", \"mozconfig_variant\": \"code-coverage-opt\"}",
+      "GECKO_HEAD_REPOSITORY": "https://hg.mozilla.org/mozilla-central",
+      "SCCACHE_GCS_PROJECT": "sccache-3",
+      "RUSTC_BOOTSTRAP": "1",
+      "MOZ_SOURCE_REPO": "https://hg.mozilla.org/mozilla-central",
+      "GECKO_HEAD_REV": "1e1617c67238dfb685fb3d07bf1793232c4469fa",
+      "MH_BRANCH": "mozilla-central",
+      "MOZ_SCM_LEVEL": "3",
+      "GECKO_BASE_REPOSITORY": "https://hg.mozilla.org/mozilla-unified",
+      "NEED_XVFB": "true",
+      "USE_SCCACHE": "1",
+      "MOZ_DISABLE_FULL_SYMBOLS": "1",
+      "UPLOAD_DIR": "/builds/worker/artifacts/",
+      "TASKCLUSTER_CACHES": "/builds/worker/checkouts;/builds/worker/tooltool-cache;/builds/worker/workspace",
+      "MAR_CHANNEL_ID": "firefox-mozilla-central",
+      "GECKO_PATH": "/builds/worker/workspace/build/src",
+      "SCCACHE_IDLE_TIMEOUT": "0",
+      "TASKCLUSTER_VOLUMES": "/builds/worker/checkouts;/builds/worker/tooltool-cache;/builds/worker/workspace",
+      "MOZHARNESS_CONFIG": "builds/releng_base_firefox.py builds/releng_base_linux_64_builds.py"
+    },
+    "features": {
+      "taskclusterProxy": true,
+      "chainOfTrust": true
+    }
+  },
+  "metadata": {
+    "owner": "aiakab@mozilla.com",
+    "source": "https://hg.mozilla.org/mozilla-central/file/1e1617c67238dfb685fb3d07bf1793232c4469fa/taskcluster/ci/build",
+    "description": "Linux64-CCov Opt ([Treeherder push](https://treeherder.mozilla.org/#/jobs?repo=mozilla-central&revision=1e1617c67238dfb685fb3d07bf1793232c4469fa))",
+    "name": "build-linux64-ccov/opt"
+  },
+  "tags": {
+    "kind": "build",
+    "worker-implementation": "docker-worker",
+    "createdForUser": "aiakab@mozilla.com",
+    "retrigger": "false",
+    "label": "build-linux64-ccov/opt",
+    "os": "linux"
+  },
+  "extra": {
+    "index": {
+      "rank": 0
+    },
+    "chainOfTrust": {
+      "inputs": {
+        "docker-image": "ZAI7Hy0rSmq7Nx-S112YaA"
+      }
+    },
+    "treeherder": {
+      "machine": {
+        "platform": "linux64-ccov"
+      },
+      "tier": 2,
+      "symbol": "B",
+      "jobKind": "build",
+      "collection": {
+        "opt": true
+      }
+    },
+    "treeherder-platform": "linux64-ccov/opt",
+    "parent": "UpVSSic1SeCw6sdDMidSLQ"
+  }
+}

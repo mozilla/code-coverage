@@ -18,7 +18,7 @@ except ImportError:
     from urllib2 import Request, urlopen
 
 
-TEST_PLATFORMS = ["test-linux64-ccov/debug", "test-windows10-64-ccov/debug"]
+TEST_PLATFORMS = ["test-linux64-ccov/opt", "test-windows10-64-ccov/debug"]
 FINISHED_STATUSES = ["completed", "failed", "exception"]
 ALL_STATUSES = FINISHED_STATUSES + ["unscheduled", "pending", "running"]
 STATUS_VALUE = {"exception": 1, "failed": 2, "completed": 3}
@@ -40,14 +40,14 @@ def is_taskcluster_loaner():
 
 def get_last_task():
     last_task = get_json(
-        "https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/gecko.v2.mozilla-central.latest.firefox.linux64-ccov-debug"
+        "https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/gecko.v2.mozilla-central.latest.firefox.linux64-ccov-opt"
     )
     return last_task["taskId"]
 
 
 def get_task(branch, revision):
     task = get_json(
-        "https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/gecko.v2.%s.revision.%s.firefox.linux64-ccov-debug"
+        "https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/gecko.v2.%s.revision.%s.firefox.linux64-ccov-opt"
         % (branch, revision)
     )
     return task["taskId"]

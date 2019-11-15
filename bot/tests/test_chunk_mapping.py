@@ -121,7 +121,7 @@ def test_zero_coverage(tmpdir, fake_artifacts_handler, fake_hg_repo_with_content
                             data = {
                                 "result.test": ["marionette-test1"],
                                 "run.key": [
-                                    "test-linux64-ccov/debug-marionette-headless-e10s"
+                                    "test-linux64-ccov/opt-marionette-headless-e10s"
                                 ],
                             }
                         elif prefix == "test-windows10-64-ccov":
