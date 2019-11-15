@@ -18,7 +18,7 @@ except ImportError:
     from urllib2 import Request, urlopen
 
 
-TEST_PLATFORMS = ["test-linux64-ccov/debug", "test-windows10-64-ccov/debug"]
+TEST_PLATFORMS = ["test-linux64-ccov/opt", "test-windows10-64-ccov/debug"]
 FINISHED_STATUSES = ["completed", "failed", "exception"]
 ALL_STATUSES = FINISHED_STATUSES + ["unscheduled", "pending", "running"]
 STATUS_VALUE = {"exception": 1, "failed": 2, "completed": 3}
