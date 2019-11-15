@@ -30,7 +30,7 @@ class Test(unittest.TestCase):
         self.assertTrue(task_id)
 
         task_data = codecoverage.get_task_details(task_id)
-        self.assertEqual(task_data["metadata"]["name"], "build-linux64-ccov/debug")
+        self.assertEqual(task_data["metadata"]["name"], "build-linux64-ccov/opt")
 
         revision = task_data["payload"]["env"]["GECKO_HEAD_REV"]
         task_id_2 = codecoverage.get_task("mozilla-central", revision)
