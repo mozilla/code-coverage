@@ -206,9 +206,9 @@ def test_download(
 def _group_tasks():
     task_state_groups = [
         [
-            ("test-linux64-ccov/debug-mochitest-devtools-chrome-e10s-4", "exception"),
-            ("test-linux64-ccov/debug-mochitest-devtools-chrome-e10s-4", "failed"),
-            ("test-linux64-ccov/debug-mochitest-devtools-chrome-e10s-4", "completed"),
+            ("test-linux64-ccov/opt-mochitest-devtools-chrome-e10s-4", "exception"),
+            ("test-linux64-ccov/opt-mochitest-devtools-chrome-e10s-4", "failed"),
+            ("test-linux64-ccov/opt-mochitest-devtools-chrome-e10s-4", "completed"),
         ],
         [
             ("test-windows10-64-ccov/debug-xpcshell-4", "exception"),
@@ -219,8 +219,8 @@ def _group_tasks():
             ("test-windows10-64-ccov/debug-talos-dromaeojs-e10s", "completed"),
         ],
         [
-            ("test-linux64-ccov/debug-cppunit", "exception"),
-            ("test-linux64-ccov/debug-cppunit", "completed"),
+            ("test-linux64-ccov/opt-cppunit", "exception"),
+            ("test-linux64-ccov/opt-cppunit", "completed"),
         ],
         [("test-linux64-stylo-disabled/debug-crashtest-e10s", "completed")],
     ]
@@ -232,7 +232,6 @@ def _group_tasks():
         platform, test = task_name.split("/")
         suite = test.rstrip("debug-")
         platform = platform.lstrip("test-").rstrip("-ccov")
-        print(suite, platform)
         return {
             "status": {"taskId": task_name + "-" + state, "state": state},
             "task": {
@@ -294,8 +293,8 @@ def test_download_all(
 
         assert downloaded == set(
             [
-                "test-linux64-ccov/debug-mochitest-devtools-chrome-e10s-4-completed",
+                "test-linux64-ccov/opt-mochitest-devtools-chrome-e10s-4-completed",
                 "test-windows10-64-ccov/debug-xpcshell-4-failed",
-                "test-linux64-ccov/debug-cppunit-completed",
+                "test-linux64-ccov/opt-cppunit-completed",
             ]
         )
