@@ -126,7 +126,7 @@ async function showDirectory(dir, revision, files) {
       // Build filename relative to current dir
       if (dir) {
         // Remove extra / only when present
-        const offset = dir.substring(dir.length - 1) === "/" ? 0 : 1;
+        const offset = dir[dir.length - 1] === "/" ? 0 : 1;
         return this.path.substring(dir.length + offset);
       }
 
