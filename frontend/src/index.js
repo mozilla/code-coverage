@@ -124,7 +124,13 @@ async function showDirectory(dir, revision, files) {
     revision: revision || REV_LATEST,
     file_name() {
       // Build filename relative to current dir
-      return dir ? this.path.substring(dir.length + 1) : this.path;
+      if (dir) {
+        // Remove extra / only when present
+        const offset = dir[dir.length - 1] === "/" ? 0 : 1;
+        return this.path.substring(dir.length + offset);
+      }
+
+      return this.path;
     }
   };
   render("file_browser", context, "output");
