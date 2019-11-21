@@ -328,7 +328,7 @@ export function buildNavbar(path, revision) {
       base += (base ? "/" : "") + file;
       return {
         name: file,
-        route: buildRoute({ path: base, revision })
+        route: buildRoute({ path: base, view: "directory", revision })
       };
     })
   );
