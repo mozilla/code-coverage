@@ -1,6 +1,5 @@
 logbook
 structlog
-taskcluster
 raven
 
 # limit async-timeout version to avoid using the alpha 4.0.0a0
