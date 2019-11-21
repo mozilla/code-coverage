@@ -3,7 +3,6 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-from code_coverage_bot import config
 from code_coverage_bot.taskcluster import taskcluster_config
 
 
@@ -19,7 +18,7 @@ class Secrets(dict):
     def load(self, taskcluster_secret):
         taskcluster_config.load_secrets(
             taskcluster_secret,
-            config.PROJECT_NAME,
+            prefixes=["common", "code-coverage-bot"],
             required=[
                 Secrets.APP_CHANNEL,
                 Secrets.BACKEND_HOST,
