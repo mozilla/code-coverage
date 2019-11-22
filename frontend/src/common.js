@@ -137,7 +137,7 @@ export async function getZeroCoverageData() {
   }
 
   const response = await fetch(
-    "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/project.releng.services.project.production.code_coverage_bot.latest/artifacts/public/zero_coverage_report.json"
+    "https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/project.relman.code-coverage.production.cron.latest/artifacts/public/zero_coverage_report.json"
   );
   data = await response.json();
 
@@ -328,7 +328,7 @@ export function buildNavbar(path, revision) {
       base += (base ? "/" : "") + file;
       return {
         name: file,
-        route: buildRoute({ path: base, revision })
+        route: buildRoute({ path: base, view: "directory", revision })
       };
     })
   );
