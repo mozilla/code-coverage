@@ -185,8 +185,8 @@ export async function zeroCoverageDisplay(data, dir) {
           path
         });
       }
-      // Fully reset the url when moving back to browser view
-      return `#view=browser&revision=${revision}&path=${path}`;
+      // Fully reset the url when moving back to file view
+      return `#view=file&revision=${revision}&path=${path}`;
     },
     navbar: buildNavbar(dir),
     total: files.length
