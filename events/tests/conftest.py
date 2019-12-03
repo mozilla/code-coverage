@@ -5,7 +5,8 @@
 
 import pytest
 import responses
-from libmozevent import taskcluster_config
+
+from code_coverage_events import taskcluster_config
 
 
 @pytest.fixture
