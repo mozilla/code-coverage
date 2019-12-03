@@ -20,7 +20,7 @@ def create_app():
     taskcluster.auth()
     taskcluster.load_secrets(
         os.environ.get("TASKCLUSTER_SECRET"),
-        code_coverage_backend.config.PROJECT_NAME,
+        prefixes=["common", "backend", "code-coverage-backend"],
         required=["GOOGLE_CLOUD_STORAGE", "APP_CHANNEL"],
         existing={"REDIS_URL": os.environ.get("REDIS_URL", "redis://localhost:6379")},
     )

@@ -7,12 +7,12 @@ from zipfile import is_zipfile
 import requests
 import structlog
 import taskcluster
+from taskcluster.helper import TaskclusterConfig
 
 from code_coverage_bot.utils import retry
-from code_coverage_tools.taskcluster import TaskclusterConfig
 
 logger = structlog.getLogger(__name__)
-taskcluster_config = TaskclusterConfig()
+taskcluster_config = TaskclusterConfig("https://firefox-ci-tc.services.mozilla.com")
 
 
 def get_task(branch, revision, platform):
