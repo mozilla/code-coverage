@@ -4,7 +4,6 @@ import asyncio
 
 import requests
 import structlog
-from libmozevent import taskcluster_config
 from libmozevent.bus import MessageBus
 from libmozevent.monitoring import Monitoring
 from libmozevent.pulse import PulseListener
@@ -13,6 +12,7 @@ from libmozevent.utils import run_tasks
 
 from code_coverage_events import QUEUE_MONITORING
 from code_coverage_events import QUEUE_PULSE
+from code_coverage_events import taskcluster_config
 
 logger = structlog.get_logger(__name__)
 
@@ -41,7 +41,7 @@ class CodeCoverage(object):
             payload = await self.bus.receive(QUEUE_PULSE)
 
             # Parse the payload to extract a new task's environment
-            envs = await self.parse(payload)
+            envs = await self.parse(payload["body"])
             if envs is None:
                 continue
 
@@ -169,15 +169,20 @@ class Events(object):
 
         # Setup monitoring for newly created tasks
         self.monitoring = Monitoring(
-            QUEUE_MONITORING, taskcluster_config.secrets["admins"], 7 * 3600
+            taskcluster_config,
+            QUEUE_MONITORING,
+            taskcluster_config.secrets["admins"],
+            7 * 3600,
         )
         self.monitoring.register(self.bus)
 
         # Create pulse listener for code coverage
         self.pulse = PulseListener(
-            QUEUE_PULSE,
-            "exchange/taskcluster-queue/v1/task-group-resolved",
-            "#",
+            {
+                QUEUE_PULSE: [
+                    ("exchange/taskcluster-queue/v1/task-group-resolved", ["#"])
+                ]
+            },
             taskcluster_config.secrets["pulse_user"],
             taskcluster_config.secrets["pulse_password"],
         )
