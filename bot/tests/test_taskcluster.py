@@ -42,7 +42,7 @@ def test_get_task(
         "http://taskcluster.test/api/index/v1/task/gecko.v2.mozilla-central.revision.b2a9a4bb5c94de179ae7a3f52fde58c0e2897498.firefox.linux64-ccov-opt",
         json=LATEST_LINUX,
         status=200,
-    )  # noqa
+    )
     assert (
         taskcluster.get_task(
             "mozilla-central", "b2a9a4bb5c94de179ae7a3f52fde58c0e2897498", "linux"
@@ -55,7 +55,7 @@ def test_get_task(
         "http://taskcluster.test/api/index/v1/task/gecko.v2.mozilla-central.revision.916103b8675d9fdb28b891cac235d74f9f475942.firefox.win64-ccov-debug",
         json=LATEST_WIN,
         status=200,
-    )  # noqa
+    )
     assert (
         taskcluster.get_task(
             "mozilla-central", "916103b8675d9fdb28b891cac235d74f9f475942", "windows"
@@ -70,7 +70,7 @@ def test_get_task_not_found(mock_taskcluster, TASK_NOT_FOUND):
         "http://taskcluster.test/api/index/v1/task/gecko.v2.mozilla-central.revision.b2a9a4bb5c94de179ae7a3f52fde58c0e2897498.firefox.linux64-ccov-opt",
         json=TASK_NOT_FOUND,
         status=404,
-    )  # noqa
+    )
 
     assert (
         taskcluster.get_task(
@@ -88,7 +88,7 @@ def test_get_task_failure(mock_taskcluster, TASK_NOT_FOUND):
         "http://taskcluster.test/api/index/v1/task/gecko.v2.mozilla-central.revision.b2a9a4bb5c94de179ae7a3f52fde58c0e2897498.firefox.linux64-ccov-opt",
         json=err,
         status=500,
-    )  # noqa
+    )
 
     with pytest.raises(TaskclusterRestFailure, match="Indexed task not found"):
         taskcluster.get_task(
@@ -116,14 +116,14 @@ def test_get_tasks_in_group(mock_taskcluster, GROUP_TASKS_1, GROUP_TASKS_2):
         json=GROUP_TASKS_1,
         status=200,
         match_querystring=True,
-    )  # noqa
+    )
     responses.add(
         responses.GET,
         "http://taskcluster.test/api/queue/v1/task-group/aPt9FbIdQwmhwDIPDYLuaw/list?continuationToken=1%2132%21YVB0OUZiSWRRd21od0RJUERZTHVhdw--~1%2132%21ZnJVcGRRT0VTalN0Nm9Ua1Ztcy04UQ--&limit=200",  # noqa
         json=GROUP_TASKS_2,
         status=200,
         match_querystring=True,
-    )  # noqa
+    )
 
     assert (
         list(taskcluster.get_tasks_in_group("aPt9FbIdQwmhwDIPDYLuaw"))
@@ -265,7 +265,7 @@ def test_get_platform(task_name, expected):
 def test_download_artifact_forbidden(mocked_sleep, mock_taskcluster, tmpdir):
     responses.add(
         responses.GET,
-        "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/FBdocjnAQOW_GJDOfmgjxw/artifacts/public%2Ftest_info%2Fcode-coverage-grcov.zip",  # noqa
+        "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/FBdocjnAQOW_GJDOfmgjxw/artifacts/public%2Ftest_info%2Fcode-coverage-grcov.zip",
         body="xml error...",
         status=403,
     )
@@ -287,7 +287,7 @@ def test_download_artifact_forbidden(mocked_sleep, mock_taskcluster, tmpdir):
 def test_download_artifact_badzip(mocked_sleep, mock_taskcluster, tmpdir):
     responses.add(
         responses.GET,
-        "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/FBdocjnAQOW_GJDOfmgjxw/artifacts/public%2Ftest_info%2Fcode-coverage-grcov.zip",  # noqa
+        "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/FBdocjnAQOW_GJDOfmgjxw/artifacts/public%2Ftest_info%2Fcode-coverage-grcov.zip",
         body="NOT A ZIP FILE",
         status=200,
         stream=True,
