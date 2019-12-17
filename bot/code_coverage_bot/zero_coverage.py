@@ -93,9 +93,7 @@ class ZeroCov(object):
         report = grcov.report(
             artifacts, out_format="coveralls+", source_dir=self.repo_dir
         )
-        report = json.loads(
-            report.decode("utf-8")
-        )  # Decoding is only necessary until Python 3.6.
+        report = json.loads(report)
 
         zero_coverage_files = set()
         zero_coverage_functions = {}
