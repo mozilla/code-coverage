@@ -206,7 +206,7 @@ def test_report_options(grcov_artifact, jsvm_artifact):
     output = grcov.report(
         [grcov_artifact, jsvm_artifact],
         out_format="covdir",
-        options=["--ignore-dir", "toolkit/*"],
+        options=["--ignore", "toolkit/*"],
     )
     report = json.loads(output.decode("utf-8"))
     assert report == {
