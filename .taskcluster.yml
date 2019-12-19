@@ -51,7 +51,7 @@ tasks:
         else: 'https://api.coverage.moz.tools'
       else: 'https://api.coverage.moz.tools'
 
-    taskboot_image: "mozilla/taskboot:0.2.0"
+    taskboot_image: "mozilla/taskboot:0.2.1"
   in:
     - taskId: {$eval: as_slugid("check_lint")}
       provisionerId: proj-relman
