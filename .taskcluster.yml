@@ -51,7 +51,7 @@ tasks:
         else: 'https://api.coverage.moz.tools'
       else: 'https://api.coverage.moz.tools'
 
-    taskboot_image: "mozilla/taskboot:0.1.9"
+    taskboot_image: "mozilla/taskboot:0.2.0"
   in:
     - taskId: {$eval: as_slugid("check_lint")}
       provisionerId: proj-relman
@@ -452,3 +452,40 @@ tasks:
           description: Deploy frontend build on environment
           owner: bastien@mozilla.com
           source: https://github.com/mozilla/code-coverage
+
+    - $if: 'tasks_for == "github-push" && head_branch[:10] == "refs/tags/"'
+      then:
+        $let:
+          version: {$eval: 'head_branch[10:]'}
+        in:
+          taskId: {$eval: as_slugid("release")}
+          dependencies:
+            - {$eval: as_slugid("addon_build")}
+            - {$eval: as_slugid("bot_build")}
+            - {$eval: as_slugid("backend_build")}
+            - {$eval: as_slugid("frontend_build")}
+            - {$eval: as_slugid("report_check_tests")}
+          provisionerId: proj-relman
+          workerType: ci
+          created: {$fromNow: ''}
+          deadline: {$fromNow: '1 hour'}
+          payload:
+            features:
+              # Needed for access to secret
+              taskclusterProxy: true
+            maxRunTime: 3600
+            image: "${taskboot_image}"
+            env:
+              TASKCLUSTER_SECRET: "project/relman/code-coverage/release"
+            command:
+              - taskboot
+              - github-release
+              - mozilla/code-coverage
+              - "${version}"
+          scopes:
+            - "secrets:get:project/relman/code-coverage/release"
+          metadata:
+            name: "Code Coverage Release ${version}"
+            description: Code Coverage Github automated release
+            owner: bastien@mozilla.com
+            source: https://github.com/mozilla/code-coverage
