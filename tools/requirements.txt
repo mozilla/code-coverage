@@ -3,4 +3,4 @@ async-timeout<4.0,>=3.0
 logbook
 raven
 structlog
-taskcluster==24.1.1
+taskcluster==24.1.2
