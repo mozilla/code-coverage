@@ -38,19 +38,19 @@ def is_taskcluster_loaner():
     return "TASKCLUSTER_INTERACTIVE" in os.environ
 
 
-def get_last_task():
-    last_task = get_json(
-        "https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/gecko.v2.mozilla-central.latest.firefox.linux64-ccov-opt"
-    )
-    return last_task["taskId"]
-
-
 def get_task(branch, revision):
     task = get_json(
         "https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/gecko.v2.%s.revision.%s.firefox.linux64-ccov-opt"
         % (branch, revision)
     )
     return task["taskId"]
+
+
+def get_last_task():
+    revision = get_json(
+        "https://api.coverage.moz.tools/v2/latest?repository=mozilla-central"
+    )[0]["revision"]
+    return get_task("mozilla-central", revision)
 
 
 def get_task_details(task_id):
