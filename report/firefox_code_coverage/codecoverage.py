@@ -18,7 +18,6 @@ except ImportError:
     from urllib2 import Request, urlopen
 
 
-TEST_PLATFORMS = ["test-linux64-ccov/opt", "test-windows10-64-ccov/debug"]
 FINISHED_STATUSES = ["completed", "failed", "exception"]
 ALL_STATUSES = FINISHED_STATUSES + ["unscheduled", "pending", "running"]
 STATUS_VALUE = {"exception": 1, "failed": 2, "completed": 3}
@@ -114,24 +113,29 @@ def download_artifact(task_id, artifact, artifacts_path):
 
 
 def get_chunk(task_name):
-    for t in TEST_PLATFORMS:
-        if task_name.startswith(t):
-            task_name = task_name[len(t) + 1 :]
-            break
-    return "-".join([p for p in task_name.split("-") if p != "e10s"])
+    task_name = task_name[task_name.find("/") + 1 :]
+    return "-".join(
+        p for p in task_name.split("-") if p not in ("opt", "debug", "e10s", "1proc")
+    )
 
 
 def get_suite(task_name):
-    return "-".join([p for p in get_chunk(task_name).split("-") if not p.isdigit()])
+    # Some tests are run on build machines, we define a placeholder chunk for those.
+    if task_name.startswith("build-"):
+        return "build"
+
+    return "-".join(p for p in get_chunk(task_name).split("-") if not p.isdigit())
 
 
 def get_platform(task_name):
     if "linux" in task_name:
         return "linux"
-    elif "windows" in task_name:
+    elif "win" in task_name:
         return "windows"
+    elif "macosx" in task_name:
+        return "macos"
     else:
-        raise Exception("Unknown platform")
+        raise Exception(f"Unknown platform for {task_name}")
 
 
 def get_task_status(task_id):
@@ -154,20 +158,16 @@ def download_coverage_artifacts(
 
     task_data = get_task_details(build_task_id)
 
-    # Returns True if the task is a test-related task.
+    # Returns True if the task is a test-related coverage task (build tasks are included).
     def _is_test_task(t):
-        return any(
-            t["task"]["metadata"]["name"].startswith(tp) for tp in TEST_PLATFORMS
-        )
+        return "ccov" in t["task"]["metadata"]["name"].split("/")[0].split("-")
 
     # Returns True if the task is part of one of the suites chosen by the user.
     def _is_in_suites_task(t):
         suite_name = get_suite(t["task"]["metadata"]["name"])
         return (
-            suites is None
-            or suite_name in suites
-            and suite_name not in suites_to_ignore
-        )
+            suites is None or suite_name in suites
+        ) and suite_name not in suites_to_ignore
 
     def _is_in_platforms_task(t):
         platform = get_platform(t["task"]["metadata"]["name"])
