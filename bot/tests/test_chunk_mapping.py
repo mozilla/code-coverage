@@ -116,15 +116,15 @@ def test_zero_coverage(tmpdir, fake_artifacts_handler, fake_hg_repo_with_content
                     if requested_suite in ["gtest", "talos"]:
                         data = {}
                     elif requested_suite == "marionette":
-                        prefix = payload["where"]["and"][3]["prefix"]["run.key"]
-                        if prefix == "test-linux64-ccov":
+                        regexp = payload["where"]["and"][3]["regexp"]["run.key"]
+                        if regexp == ".*-linux.*-ccov/.*":
                             data = {
                                 "result.test": ["marionette-test1"],
                                 "run.key": [
                                     "test-linux64-ccov/opt-marionette-headless-e10s"
                                 ],
                             }
-                        elif prefix == "test-windows10-64-ccov":
+                        elif regexp == ".*-windows.*-ccov/.*":
                             data = {
                                 "result.test": ["marionette-test2"],
                                 "run.key": [
@@ -132,7 +132,7 @@ def test_zero_coverage(tmpdir, fake_artifacts_handler, fake_hg_repo_with_content
                                 ],
                             }
                         else:
-                            assert False, "Unexpected prefix"
+                            assert False, "Unexpected regexp"
                     else:
                         assert False, "Unexpected suite"
                 else:
