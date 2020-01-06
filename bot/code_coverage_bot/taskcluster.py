@@ -14,6 +14,8 @@ from code_coverage_bot.utils import retry
 logger = structlog.getLogger(__name__)
 taskcluster_config = TaskclusterConfig("https://firefox-ci-tc.services.mozilla.com")
 
+NAME_PARTS_TO_SKIP = ("opt", "debug", "e10s", "1proc")
+
 
 def get_task(branch, revision, platform):
     if platform == "linux":
@@ -114,9 +116,7 @@ def name_to_chunk(name: str):
 
     name = name[name.find("/") + 1 :]
 
-    return "-".join(
-        [p for p in name.split("-") if p not in ("opt", "debug", "e10s", "1proc")]
-    )
+    return "-".join([p for p in name.split("-") if p not in NAME_PARTS_TO_SKIP])
 
 
 def chunk_to_suite(chunk: str):
