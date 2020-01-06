@@ -7,8 +7,9 @@ import structlog
 import zstandard as zstd
 
 from code_coverage_bot.secrets import secrets
-from code_coverage_bot.utils import retry
 from code_coverage_tools.gcp import get_bucket
+
+from tenacity import retry
 
 logger = structlog.get_logger(__name__)
 GCP_COVDIR_PATH = "{repository}/{revision}/{platform}:{suite}.json.zstd"
@@ -45,10 +46,10 @@ def gcp(repository, revision, report, platform, suite):
     logger.info("Uploaded {} on {}".format(path, bucket))
 
     # Trigger ingestion on backend
-    retry(
-        lambda: gcp_ingest(repository, revision, platform, suite),
-        retries=10,
-        wait_between_retries=60,
+    @tenacity.retry(
+        retry = retry_if_exception(lambda: gcp_ingest(repository, revision, platform, suite)),
+        stop=stop_after_attempt(10),
+        wait=wait_fixed(60)
     )
 
     return blob
