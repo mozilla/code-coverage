@@ -57,12 +57,9 @@ class CodeCoverage(object):
                 )
 
     def is_coverage_task(self, task):
-        return any(
-            task["task"]["metadata"]["name"].startswith(s)
-            for s in ["build-linux64-ccov", "build-win64-ccov"]
-        )
+        return "ccov" in task["task"]["metadata"]["name"].split("/")[0].split("-")
 
-    async def get_build_task_in_group(self, group_id):
+    async def get_coverage_task_in_group(self, group_id):
         if group_id in self.triggered_groups:
             logger.info(
                 "Received duplicated groupResolved notification", group=group_id
@@ -120,11 +117,11 @@ class CodeCoverage(object):
             )
             return None
 
-        build_task = await self.get_build_task_in_group(taskGroupId)
-        if build_task is None:
+        coverage_task = await self.get_coverage_task_in_group(taskGroupId)
+        if coverage_task is None:
             return None
 
-        repository = build_task["task"]["payload"]["env"]["GECKO_HEAD_REPOSITORY"]
+        repository = coverage_task["task"]["payload"]["env"]["GECKO_HEAD_REPOSITORY"]
 
         if repository not in [
             "https://hg.mozilla.org/mozilla-central",
@@ -136,19 +133,16 @@ class CodeCoverage(object):
             )
             return None
 
+        revision = coverage_task["task"]["payload"]["env"]["GECKO_HEAD_REV"]
+
         logger.info(
             "Received groupResolved notification for coverage builds",
             repository=repository,
-            revision=build_task["task"]["payload"]["env"]["GECKO_HEAD_REV"],
+            revision=revision,
             group=taskGroupId,
         )
 
-        return [
-            {
-                "REPOSITORY": repository,
-                "REVISION": build_task["task"]["payload"]["env"]["GECKO_HEAD_REV"],
-            }
-        ]
+        return [{"REPOSITORY": repository, "REVISION": revision}]
 
 
 class Events(object):

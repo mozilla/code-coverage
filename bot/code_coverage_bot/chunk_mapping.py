@@ -38,12 +38,7 @@ def get_suites(revision):
                 "and": [
                     {"eq": {"repo.branch.name": "mozilla-central"}},
                     {"eq": {"repo.changeset.id12": revision[:12]}},
-                    {
-                        "or": [
-                            {"prefix": {"run.key": "test-linux64-ccov"}},
-                            {"prefix": {"run.key": "test-windows10-64-ccov"}},
-                        ]
-                    },
+                    {"regexp": {"run.key": ".*-ccov/.*"}},
                 ]
             },
             "limit": 500000,
@@ -58,13 +53,6 @@ def get_suites(revision):
 
 # Retrieve chunk -> tests mapping from ActiveData.
 def get_tests_chunks(revision, platform, suite):
-    if platform == "linux":
-        run_key_prefix = "test-linux64-ccov"
-    elif platform == "windows":
-        run_key_prefix = "test-windows10-64-ccov"
-    else:
-        raise Exception("Unsupported platform {}".format(platform))
-
     r = requests.post(
         ACTIVEDATA_QUERY_URL,
         json={
@@ -74,7 +62,7 @@ def get_tests_chunks(revision, platform, suite):
                     {"eq": {"repo.branch.name": "mozilla-central"}},
                     {"eq": {"repo.changeset.id12": revision[:12]}},
                     {"eq": {"run.suite.fullname": suite}},
-                    {"prefix": {"run.key": run_key_prefix}},
+                    {"regexp": {"run.key": f".*-{platform}.*-ccov/.*"}},
                 ]
             },
             "limit": 50000,

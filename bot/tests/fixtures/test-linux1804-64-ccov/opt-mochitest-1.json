@@ -1,0 +1,158 @@
+{
+  "provisionerId": "gecko-t",
+  "workerType": "t-linux-xlarge",
+  "schedulerId": "gecko-level-3",
+  "taskGroupId": "UpVSSic1SeCw6sdDMidSLQ",
+  "dependencies": [
+    "EfaZjAzoQimatbNgqJd1zA",
+    "LFz17jARRPOoUz4s3CKY4g",
+    "Pq4D-RNFRHa_pSR7oP5CKg"
+  ],
+  "requires": "all-completed",
+  "routes": [
+    "tc-treeherder.v2.mozilla-central.1e1617c67238dfb685fb3d07bf1793232c4469fa.36805",
+    "coalesce.v1.mozilla-central.6b77c44ef9bf547dfe11"
+  ],
+  "priority": "medium",
+  "retries": 5,
+  "created": "2019-11-15T09:55:53.069Z",
+  "deadline": "2019-11-16T09:55:53.069Z",
+  "expires": "2020-11-14T09:55:53.069Z",
+  "scopes": [
+    "secrets:get:project/taskcluster/gecko/hgfingerprint",
+    "secrets:get:project/taskcluster/gecko/hgmointernal",
+    "project:releng:services/tooltool/api/download/public",
+    "docker-worker:feature:allowPtrace",
+    "docker-worker:capability:device:loopbackVideo",
+    "docker-worker:cache:gecko-level-3-checkouts-v3-e0773b586060dfe744c7",
+    "docker-worker:cache:gecko-level-3-tooltool-cache-v3-e0773b586060dfe744c7"
+  ],
+  "payload": {
+    "supersederUrl": "https://coalesce.mozilla-releng.net/v1/list/3600/5/mozilla-central.6b77c44ef9bf547dfe11",
+    "onExitStatus": {
+      "retry": [
+        4,
+        72
+      ],
+      "purgeCaches": [
+        72
+      ]
+    },
+    "maxRunTime": 5400,
+    "image": {
+      "path": "public/image.tar.zst",
+      "type": "task-image",
+      "taskId": "Pq4D-RNFRHa_pSR7oP5CKg"
+    },
+    "cache": {
+      "gecko-level-3-tooltool-cache-v3-e0773b586060dfe744c7": "/builds/worker/tooltool-cache",
+      "gecko-level-3-checkouts-v3-e0773b586060dfe744c7": "/builds/worker/checkouts"
+    },
+    "capabilities": {
+      "devices": {
+        "loopbackVideo": true
+      }
+    },
+    "artifacts": {
+      "public/logs/": {
+        "path": "/builds/worker/workspace/logs/",
+        "expires": "2020-11-14T09:55:53.069Z",
+        "type": "directory"
+      },
+      "public/test": {
+        "path": "/builds/worker/artifacts/",
+        "expires": "2020-11-14T09:55:53.069Z",
+        "type": "directory"
+      },
+      "public/test_info/": {
+        "path": "/builds/worker/workspace/build/blobber_upload_dir/",
+        "expires": "2020-11-14T09:55:53.069Z",
+        "type": "directory"
+      }
+    },
+    "command": [
+      "/builds/worker/bin/run-task",
+      "--fetch-hgfingerprint",
+      "--",
+      "/builds/worker/bin/test-linux.sh",
+      "--mochitest-suite=mochitest-plain",
+      "--code-coverage",
+      "--setpref=media.peerconnection.mtransport_process=false",
+      "--setpref=network.process.enabled=false",
+      "--total-chunk=10",
+      "--this-chunk=1",
+      "--download-symbols=ondemand"
+    ],
+    "env": {
+      "MOZ_AUTOMATION": "1",
+      "MOCHITEST_FLAVOR": "plain",
+      "TOOLTOOL_CACHE": "/builds/worker/tooltool-cache",
+      "MOZ_FETCHES_DIR": "fetches",
+      "MOZHARNESS_SCRIPT": "desktop_unittest.py",
+      "MOZ_NODE_PATH": "/usr/local/bin/node",
+      "HG_STORE_PATH": "/builds/worker/checkouts/hg-store",
+      "MOZILLA_BUILD_URL": "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/EfaZjAzoQimatbNgqJd1zA/artifacts/public/build/target.tar.bz2",
+      "GECKO_PATH": "/builds/worker/checkouts/gecko",
+      "GECKO_HEAD_REPOSITORY": "https://hg.mozilla.org/mozilla-central",
+      "EXTRA_MOZHARNESS_CONFIG": "{\"test_packages_url\": \"https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/EfaZjAzoQimatbNgqJd1zA/artifacts/public/build/target.test_packages.json\", \"installer_url\": \"https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/EfaZjAzoQimatbNgqJd1zA/artifacts/public/build/target.tar.bz2\"}",
+      "SCCACHE_DISABLE": "1",
+      "GECKO_HEAD_REV": "1e1617c67238dfb685fb3d07bf1793232c4469fa",
+      "NEED_COMPIZ": "true",
+      "MOZ_SCM_LEVEL": "3",
+      "TASKCLUSTER_VOLUMES": "/builds/worker/.cache;/builds/worker/checkouts;/builds/worker/tooltool-cache;/builds/worker/workspace",
+      "MOZHARNESS_URL": "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/EfaZjAzoQimatbNgqJd1zA/artifacts/public/build/mozharness.zip",
+      "GECKO_BASE_REPOSITORY": "https://hg.mozilla.org/mozilla-unified",
+      "MOZ_FETCHES": "[{\"artifact\": \"public/build/grcov.tar.xz\", \"extract\": true, \"task\": \"LFz17jARRPOoUz4s3CKY4g\"}]",
+      "TASKCLUSTER_CACHES": "/builds/worker/checkouts;/builds/worker/tooltool-cache",
+      "WORKING_DIR": "/builds/worker",
+      "NEED_PULSEAUDIO": "true",
+      "ENABLE_E10S": "true",
+      "NEED_WINDOW_MANAGER": "true",
+      "MOZHARNESS_CONFIG": "unittests/linux_unittest.py remove_executables.py"
+    },
+    "features": {
+      "taskclusterProxy": true,
+      "allowPtrace": true
+    }
+  },
+  "metadata": {
+    "owner": "aiakab@mozilla.com",
+    "source": "https://hg.mozilla.org/mozilla-central/file/1e1617c67238dfb685fb3d07bf1793232c4469fa/taskcluster/ci/test",
+    "description": "Mochitest plain run ([Treeherder push](https://treeherder.mozilla.org/#/jobs?repo=mozilla-central&revision=1e1617c67238dfb685fb3d07bf1793232c4469fa))",
+    "name": "test-linux1804-64-ccov/opt-mochitest-e10s-1"
+  },
+  "tags": {
+    "kind": "test",
+    "os": "linux",
+    "createdForUser": "aiakab@mozilla.com",
+    "retrigger": "true",
+    "label": "test-linux1804-64-ccov/opt-mochitest-e10s-1",
+    "test-type": "mochitest",
+    "worker-implementation": "docker-worker"
+  },
+  "extra": {
+    "index": {
+      "rank": 0
+    },
+    "parent": "UpVSSic1SeCw6sdDMidSLQ",
+    "chunks": {
+      "current": 1,
+      "total": 10
+    },
+    "suite": "mochitest-plain",
+    "treeherder": {
+      "jobKind": "test",
+      "groupSymbol": "M",
+      "collection": {
+        "opt": true
+      },
+      "machine": {
+        "platform": "linux1804-64-ccov"
+      },
+      "groupName": "Mochitests",
+      "tier": 3,
+      "symbol": "1"
+    },
+    "treeherder-platform": "linux1804-64-ccov/opt"
+  }
+}

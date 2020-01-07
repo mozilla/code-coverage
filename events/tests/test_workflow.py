@@ -19,6 +19,9 @@ def test_is_coverage_task(mock_taskcluster):
     cov_task = {"task": {"metadata": {"name": "build-linux64-ccov"}}}
     assert hook.is_coverage_task(cov_task)
 
+    cov_task = {"task": {"metadata": {"name": "build-linux1804-64-ccov"}}}
+    assert hook.is_coverage_task(cov_task)
+
     cov_task = {"task": {"metadata": {"name": "build-linux64-ccov/opt"}}}
     assert hook.is_coverage_task(cov_task)
 
@@ -26,20 +29,20 @@ def test_is_coverage_task(mock_taskcluster):
     assert hook.is_coverage_task(cov_task)
 
     nocov_task = {"task": {"metadata": {"name": "test-linux64-ccov/opt-mochitest-1"}}}
-    assert not hook.is_coverage_task(nocov_task)
+    assert hook.is_coverage_task(nocov_task)
 
     nocov_task = {"task": {"metadata": {"name": "test-linux64/opt-mochitest-1"}}}
     assert not hook.is_coverage_task(nocov_task)
 
 
 @pytest.mark.asyncio
-async def test_get_build_task_in_group(mock_taskcluster):
+async def test_get_coverage_task_in_group(mock_taskcluster):
     bus = MessageBus()
     hook = CodeCoverage("services-staging-codecoverage/bot", "project-test", bus)
 
     hook.triggered_groups.add("already-triggered-group")
 
-    assert await hook.get_build_task_in_group("already-triggered-group") is None
+    assert await hook.get_coverage_task_in_group("already-triggered-group") is None
 
 
 @pytest.mark.asyncio

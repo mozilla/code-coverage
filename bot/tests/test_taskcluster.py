@@ -134,18 +134,19 @@ def test_get_tasks_in_group(mock_taskcluster, GROUP_TASKS_1, GROUP_TASKS_2):
 @pytest.mark.parametrize(
     "task_name, expected",
     [
-        ("test-linux64-ccov/debug-mochitest-1", False),
-        ("test-linux64-ccov/debug-mochitest-e10s-7", False),
-        ("test-linux64-ccov/debug-cppunit", False),
-        ("test-linux64-ccov/debug-firefox-ui-functional-remote-e10s", False),
+        ("test-linux64-ccov/debug-mochitest-1", True),
+        ("test-linux64-ccov/debug-mochitest-e10s-7", True),
+        ("test-linux64-ccov/debug-cppunit", True),
+        ("test-linux64-ccov/debug-firefox-ui-functional-remote-e10s", True),
         ("test-linux64-ccov/opt-mochitest-1", True),
         ("test-linux64-ccov/opt-mochitest-e10s-7", True),
         ("test-linux64-ccov/opt-cppunit", True),
+        ("test-linux1804-64-ccov/opt-cppunit", True),
         ("test-linux64-ccov/opt-firefox-ui-functional-remote-e10s", True),
         ("test-windows10-64-ccov/debug-mochitest-1", True),
         ("test-windows10-64-ccov/debug-mochitest-e10s-7", True),
         ("test-windows10-64-ccov/debug-cppunit", True),
-        ("build-linux64-ccov/debug", False),
+        ("build-linux64-ccov/debug", True),
         ("build-linux64-ccov/opt", True),
         ("build-android-test-ccov/opt", True),
         ("build-win64-ccov/debug", True),
@@ -164,6 +165,7 @@ def test_is_coverage_task(task_name, expected):
     [
         ("test-linux64-ccov/opt-mochitest-1", "mochitest-1"),
         ("test-linux64-ccov/opt-mochitest-e10s-7", "mochitest-7"),
+        ("test-linux1804-64-ccov/opt-mochitest-e10s-7", "mochitest-7"),
         ("test-linux64-ccov/opt-cppunit", "cppunit"),
         (
             "test-linux64-ccov/opt-firefox-ui-functional-remote-e10s",
@@ -201,6 +203,7 @@ def test_chunk_to_suite(chunk, expected):
         ("test-linux64-ccov/opt-mochitest-1", "mochitest-plain-1"),
         ("test-linux64-ccov/opt-mochitest-e10s-7", "mochitest-plain-7"),
         ("test-linux64-ccov/opt-cppunit", "cppunittest-1"),
+        ("test-linux1804-64-ccov/opt-cppunit", "cppunittest-1"),
         (
             "test-linux64-ccov/opt-firefox-ui-functional-remote-e10s",
             "firefox-ui-functional-remote-1",
@@ -222,6 +225,7 @@ def test_get_chunk(task_name, expected):
     "task_name, expected",
     [
         ("test-linux64-ccov/opt-mochitest-1", "mochitest-plain"),
+        ("test-linux1804-64-ccov/opt-mochitest-1", "mochitest-plain"),
         ("test-linux64-ccov/opt-mochitest-e10s-7", "mochitest-plain"),
         ("test-linux64-ccov/opt-cppunit", "cppunittest"),
         (
@@ -245,6 +249,7 @@ def test_get_suite(task_name, expected):
     "task_name, expected",
     [
         ("test-linux64-ccov/opt-mochitest-1", "linux"),
+        ("test-linux1804-64-ccov/opt-mochitest-1", "linux"),
         ("test-linux64-ccov/opt-mochitest-e10s-7", "linux"),
         ("test-linux64-ccov/opt-cppunit", "linux"),
         ("test-linux64-ccov/opt-firefox-ui-functional-remote-e10s", "linux"),

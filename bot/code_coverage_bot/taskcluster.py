@@ -14,6 +14,8 @@ from tenacity import retry
 logger = structlog.getLogger(__name__)
 taskcluster_config = TaskclusterConfig("https://firefox-ci-tc.services.mozilla.com")
 
+NAME_PARTS_TO_SKIP = ("opt", "debug", "e10s", "1proc")
+
 
 def get_task(branch, revision, platform):
     if platform == "linux":
@@ -98,47 +100,29 @@ def download_artifact(artifact_path, task_id, artifact_name):
             raise BadZipFile("File is not a zip file")
 
 
-BUILD_PLATFORMS = [
-    "build-linux64-ccov/opt",
-    "build-win64-ccov/debug",
-    "build-android-test-ccov/opt",
-]
-
-TEST_PLATFORMS = [
-    "test-linux64-ccov/opt",
-    "test-windows10-64-ccov/debug",
-    "test-android-em-4.3-arm7-api-16-ccov/debug",
-] + BUILD_PLATFORMS
-
-
 def is_coverage_task(task):
-    return any(task["metadata"]["name"].startswith(t) for t in TEST_PLATFORMS)
+    return "ccov" in task["metadata"]["name"].split("/")[0].split("-")
 
 
-def name_to_chunk(name):
+def name_to_chunk(name: str):
     """
     Helper to convert a task name to a chunk
     Used by chunk mapping
     """
-    assert isinstance(name, str)
-
     # Some tests are run on build machines, we define a placeholder chunk for those.
-    if name in BUILD_PLATFORMS:
+    if name.startswith("build-"):
         return "build"
 
-    for t in TEST_PLATFORMS:
-        if name.startswith(t):
-            name = name[len(t) + 1 :]
-            break
-    return "-".join([p for p in name.split("-") if p != "e10s"])
+    name = name[name.find("/") + 1 :]
+
+    return "-".join([p for p in name.split("-") if p not in NAME_PARTS_TO_SKIP])
 
 
-def chunk_to_suite(chunk):
+def chunk_to_suite(chunk: str):
     """
     Helper to convert a chunk to a suite (no numbers)
     Used by chunk mapping
     """
-    assert isinstance(chunk, str)
     return "-".join([p for p in chunk.split("-") if not p.isdigit()])
 
 
