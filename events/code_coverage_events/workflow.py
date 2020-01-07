@@ -57,10 +57,8 @@ class CodeCoverage(object):
                 )
 
     def is_coverage_task(self, task):
-        return any(
-            task["task"]["metadata"]["name"].startswith(s)
-            for s in ["build-linux64-ccov", "build-win64-ccov"]
-        )
+        name = task["task"]["metadata"]["name"]
+        return name.startswith("build-") and "ccov" in name.split("/")[0].split("-")
 
     async def get_build_task_in_group(self, group_id):
         if group_id in self.triggered_groups:

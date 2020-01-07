@@ -68,6 +68,18 @@ class Test(unittest.TestCase):
         self.assertEqual(len([a for a in artifact_paths if "grcov" in a]), 2)
         self.assertEqual(len([a for a in artifact_paths if "jsvm" in a]), 2)
 
+        artifact_paths = codecoverage.download_coverage_artifacts(
+            task_id, "cppunit-1proc", None, "ccov-artifacts"
+        )
+        self.assertEqual(
+            len([a for a in os.listdir("ccov-artifacts") if "grcov" in a]), 4
+        )
+        self.assertEqual(
+            len([a for a in os.listdir("ccov-artifacts") if "jsvm" in a]), 4
+        )
+        self.assertEqual(len([a for a in artifact_paths if "grcov" in a]), 2)
+        self.assertEqual(len([a for a in artifact_paths if "jsvm" in a]), 2)
+
         codecoverage.download_grcov()
         codecoverage.generate_report("./grcov", "lcov", "output.info", artifact_paths)
         self.assertTrue(os.path.exists("output.info"))
@@ -78,6 +90,7 @@ class Test(unittest.TestCase):
 
     def test_suite_name_from_task_name(self):
         cases = [
+            ("test-linux1804-64-ccov/opt-cppunit-1proc", "cppunit"),
             ("test-linux64-ccov/opt-gtest", "gtest"),
             ("test-linux64-ccov/opt-jsreftest-1", "jsreftest"),
             (
@@ -89,6 +102,9 @@ class Test(unittest.TestCase):
             ("test-linux64-ccov/opt-mochitest-5", "mochitest"),
             ("test-windows10-64-ccov/debug-mochitest-5", "mochitest"),
             ("test-windows10-64-ccov/debug-cppunit", "cppunit"),
+            ("build-linux64-ccov/opt", "build"),
+            ("build-android-test-ccov/opt", "build"),
+            ("build-win64-ccov/debug", "build"),
         ]
         for c in cases:
             self.assertEqual(codecoverage.get_suite(c[0]), c[1])

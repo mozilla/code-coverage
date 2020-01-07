@@ -19,6 +19,9 @@ def test_is_coverage_task(mock_taskcluster):
     cov_task = {"task": {"metadata": {"name": "build-linux64-ccov"}}}
     assert hook.is_coverage_task(cov_task)
 
+    cov_task = {"task": {"metadata": {"name": "build-linux1804-64-ccov"}}}
+    assert hook.is_coverage_task(cov_task)
+
     cov_task = {"task": {"metadata": {"name": "build-linux64-ccov/opt"}}}
     assert hook.is_coverage_task(cov_task)
 
