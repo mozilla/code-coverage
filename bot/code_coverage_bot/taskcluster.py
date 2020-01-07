@@ -87,7 +87,7 @@ def download_artifact(artifact_path, task_id, artifact_name):
     url = queue.buildUrl("getLatestArtifact", task_id, artifact_name)
     logger.debug("Downloading artifact", url=url)
 
-    @retry(wait=wait_fixed(30), stop=stop_after_attempt(5)):
+    @retry(wait=wait_fixed(30), stop=stop_after_attempt(5))
     def perform_download():
         r = requests.get(url, stream=True)
         r.raise_for_status()
