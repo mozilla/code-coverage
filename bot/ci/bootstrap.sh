@@ -1,7 +1,7 @@
 #!/bin/bash -ex
 GRCOV_VERSION="v0.5.8"
-MERCURIAL_VERSION="5.1"
-VERSION_CONTROL_TOOLS_REV="709c897f2444"
+MERCURIAL_VERSION="5.2"
+VERSION_CONTROL_TOOLS_REV="102106f53cb2"
 
 apt-get update
 apt-get install --no-install-recommends -y gcc curl bzip2 python2-minimal python-bz2file python-dev
