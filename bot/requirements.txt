@@ -4,3 +4,4 @@ libmozdata==0.1.64
 pytoml==0.1.21
 pytz==2019.3
 zstandard==0.13.0
+tenacity==6.0.0
