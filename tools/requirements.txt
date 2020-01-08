@@ -1,7 +1,6 @@
-# limit aiohttp and async-timeout versions to avoid using the alpha 4.0.0a0
 aiohttp==3.6.2
-async-timeout<4.0,>=3.0
-logbook
-raven
-structlog
+async-timeout==3.0.1
+logbook==1.5.3
+raven==6.10.0
+structlog==19.2.0
 taskcluster==24.1.9
