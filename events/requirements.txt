@@ -1,3 +1,2 @@
-aiohttp==3.6.2
 -e ../tools #egg=code-coverage-tools
 libmozevent==1.1.0
