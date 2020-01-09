@@ -118,7 +118,7 @@ def name_to_chunk(name: str):
 
     name = name.split("/")[1]
 
-    return "-".join([p for p in name.split("-") if p not in NAME_PARTS_TO_SKIP])
+    return "-".join(p for p in name.split("-") if p not in NAME_PARTS_TO_SKIP)
 
 
 def chunk_to_suite(chunk: str):
@@ -126,7 +126,7 @@ def chunk_to_suite(chunk: str):
     Helper to convert a chunk to a suite (no numbers)
     Used by chunk mapping
     """
-    return "-".join([p for p in chunk.split("-") if not p.isdigit()])
+    return "-".join(p for p in chunk.split("-") if not p.isdigit())
 
 
 def get_chunk(task):
