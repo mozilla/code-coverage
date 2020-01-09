@@ -98,6 +98,7 @@ def download_artifact(artifact_path, task_id, artifact_name):
 
         if artifact_path.endswith(".zip") and not is_zipfile(artifact_path):
             raise BadZipFile("File is not a zip file")
+    perform_download()
 
 
 def is_coverage_task(task):
