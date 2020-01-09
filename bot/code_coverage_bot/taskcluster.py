@@ -164,7 +164,6 @@ def get_platform(task):
     Build clean platform from a Taskcluster task
     """
     assert isinstance(task, dict)
-    assert isinstance(task, dict)
     tags = task.get("tags", {})
     platform = tags.get("os")
     if not platform:
