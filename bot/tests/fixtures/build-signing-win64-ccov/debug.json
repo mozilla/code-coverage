@@ -1,0 +1,78 @@
+{
+  "provisionerId": "scriptworker-k8s",
+  "workerType": "gecko-t-signing",
+  "schedulerId": "gecko-level-3",
+  "taskGroupId": "UhJPTJ9VTCadd4Yga4D5Pw",
+  "dependencies": [
+    "G90hAz7wQNG6EJhhnwtSDg"
+  ],
+  "requires": "all-completed",
+  "routes": [
+    "tc-treeherder.v2.mozilla-central.adeaa48edc50404d3c77a2faaf496ac89711b8f6.36996"
+  ],
+  "priority": "medium",
+  "retries": 5,
+  "created": "2020-01-09T03:43:00.310Z",
+  "deadline": "2020-01-10T03:43:00.310Z",
+  "expires": "2021-01-08T03:43:00.310Z",
+  "scopes": [
+    "project:releng:signing:cert:dep-signing"
+  ],
+  "payload": {
+    "maxRunTime": 3600,
+    "upstreamArtifacts": [
+      {
+        "paths": [
+          "public/build/setup.exe"
+        ],
+        "formats": [
+          "autograph_authenticode"
+        ],
+        "taskId": "G90hAz7wQNG6EJhhnwtSDg",
+        "taskType": "build"
+      },
+      {
+        "paths": [
+          "public/build/target.zip"
+        ],
+        "formats": [
+          "autograph_authenticode",
+          "autograph_widevine",
+          "autograph_omnija"
+        ],
+        "taskId": "G90hAz7wQNG6EJhhnwtSDg",
+        "taskType": "build"
+      }
+    ]
+  },
+  "metadata": {
+    "owner": "apavel@mozilla.com",
+    "source": "https://hg.mozilla.org/mozilla-central/file/adeaa48edc50404d3c77a2faaf496ac89711b8f6/taskcluster/ci/build-signing",
+    "description": "Initial Signing for locale 'en-US' for build 'win64-ccov/debug' ([Treeherder push](https://treeherder.mozilla.org/#/jobs?repo=mozilla-central&revision=adeaa48edc50404d3c77a2faaf496ac89711b8f6))",
+    "name": "build-signing-win64-ccov/debug"
+  },
+  "tags": {
+    "createdForUser": "apavel@mozilla.com",
+    "retrigger": "false",
+    "kind": "build-signing",
+    "label": "build-signing-win64-ccov/debug"
+  },
+  "extra": {
+    "index": {
+      "rank": 0
+    },
+    "treeherder": {
+      "machine": {
+        "platform": "windows2012-64"
+      },
+      "tier": 2,
+      "symbol": "Bs",
+      "jobKind": "build",
+      "collection": {
+        "ccov": true
+      }
+    },
+    "treeherder-platform": "windows2012-64/ccov",
+    "parent": "UhJPTJ9VTCadd4Yga4D5Pw"
+  }
+}
