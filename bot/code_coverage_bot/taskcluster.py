@@ -110,13 +110,15 @@ def name_to_chunk(name: str):
     Helper to convert a task name to a chunk
     Used by chunk mapping
     """
-    # Some tests are run on build machines, we define a placeholder chunk for those.
-    if name.startswith("build-"):
+    # Some tests are run on build machines, we define placeholder chunks for those.
+    if name.startswith("build-signing-"):
+        return "build-signing"
+    elif name.startswith("build-"):
         return "build"
 
-    name = name[name.find("/") + 1 :]
+    name = name.split("/")[1]
 
-    return "-".join([p for p in name.split("-") if p not in NAME_PARTS_TO_SKIP])
+    return "-".join(p for p in name.split("-") if p not in NAME_PARTS_TO_SKIP)
 
 
 def chunk_to_suite(chunk: str):
@@ -124,7 +126,7 @@ def chunk_to_suite(chunk: str):
     Helper to convert a chunk to a suite (no numbers)
     Used by chunk mapping
     """
-    return "-".join([p for p in chunk.split("-") if not p.isdigit()])
+    return "-".join(p for p in chunk.split("-") if not p.isdigit())
 
 
 def get_chunk(task):
@@ -145,10 +147,11 @@ def get_suite(task):
     assert isinstance(task, dict)
     tags = task["tags"]
     extra = task["extra"]
-    treeherder = extra.get("treeherder", {})
 
-    if treeherder.get("jobKind") == "build":
+    if tags.get("kind") == "build":
         return "build"
+    elif tags.get("kind") == "build-signing":
+        return "build-signing"
     elif "suite" in extra:
         if isinstance(extra["suite"], dict):
             return extra["suite"]["name"]
@@ -156,7 +159,7 @@ def get_suite(task):
     else:
         return tags.get("test-type")
 
-    raise Exception("Unknown chunk")
+    raise Exception(f"Unknown chunk for {task}")
 
 
 def get_platform(task):
@@ -166,8 +169,22 @@ def get_platform(task):
     assert isinstance(task, dict)
     tags = task.get("tags", {})
     platform = tags.get("os")
+
+    # Fallback on parsing the task name for signing tasks, as they don't have "os" in their tags.
+    name = task.get("metadata", {}).get("name", "")
+    if not platform and "signing" in name:
+        name = name.split("/")[0]
+        if "linux" in name:
+            platform = "linux"
+        if "win" in name:
+            assert platform is None
+            platform = "windows"
+        if "mac" in name:
+            assert platform is None
+            platform = "mac"
+
     if not platform:
-        raise Exception("Unknown platform")
+        raise Exception(f"Unknown platform for {task}")
 
     # Weird case for android build on Linux docker
     if platform == "linux" and tags.get("android-stuff"):

@@ -113,6 +113,12 @@ def download_artifact(task_id, artifact, artifacts_path):
 
 
 def get_chunk(task_name):
+    # Some tests are run on build machines, we define placeholder chunks for those.
+    if task_name.startswith("build-signing-"):
+        return "build-signing"
+    elif task_name.startswith("build-"):
+        return "build"
+
     task_name = task_name[task_name.find("/") + 1 :]
     return "-".join(
         p for p in task_name.split("-") if p not in ("opt", "debug", "e10s", "1proc")
@@ -120,10 +126,6 @@ def get_chunk(task_name):
 
 
 def get_suite(task_name):
-    # Some tests are run on build machines, we define a placeholder chunk for those.
-    if task_name.startswith("build-"):
-        return "build"
-
     return "-".join(p for p in get_chunk(task_name).split("-") if not p.isdigit())
 
 
