@@ -30,7 +30,7 @@ class Test(unittest.TestCase):
         self.assertTrue(task_id)
 
         task_data = codecoverage.get_task_details(task_id)
-        self.assertEqual(task_data["metadata"]["name"], "build-linux64-ccov/opt")
+        self.assertEqual(task_data["metadata"]["name"], "Gecko Decision Task")
 
         revision = task_data["payload"]["env"]["GECKO_HEAD_REV"]
         task_id_2 = codecoverage.get_task("mozilla-central", revision)
@@ -39,7 +39,7 @@ class Test(unittest.TestCase):
         artifacts = codecoverage.get_task_artifacts(task_id)
         chosen_artifact = None
         for artifact in artifacts:
-            if artifact["name"] == "public/build/target.txt":
+            if artifact["name"] == "public/target-tasks.json":
                 chosen_artifact = artifact
         self.assertIsNotNone(chosen_artifact)
 
@@ -53,8 +53,8 @@ class Test(unittest.TestCase):
                 raise e
 
         codecoverage.download_artifact(task_id, chosen_artifact, "ccov-artifacts")
-        self.assertTrue(os.path.exists("ccov-artifacts/%s_target.txt" % task_id))
-        os.remove("ccov-artifacts/%s_target.txt" % task_id)
+        self.assertTrue(os.path.exists("ccov-artifacts/%s_target-tasks.json" % task_id))
+        os.remove("ccov-artifacts/%s_target-tasks.json" % task_id)
 
         artifact_paths = codecoverage.download_coverage_artifacts(
             task_id, "gtest-1proc", None, "ccov-artifacts"
