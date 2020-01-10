@@ -153,6 +153,7 @@ def test_get_tasks_in_group(mock_taskcluster, GROUP_TASKS_1, GROUP_TASKS_2):
         ("test-linux64/debug-mochitest-1", False),
         ("test-windows10-64/debug-cppunit", False),
         ("build-win64/debug", False),
+        ("build-signing-win64-ccov/debug", True),
     ],
 )
 def test_is_coverage_task(task_name, expected):
@@ -177,6 +178,7 @@ def test_is_coverage_task(task_name, expected):
         ("build-linux64-ccov/opt", "build"),
         ("build-android-test-ccov/opt", "build"),
         ("build-win64-ccov/debug", "build"),
+        ("build-signing-win64-ccov/debug", "build-signing"),
     ],
 )
 def test_name_to_chunk(task_name, expected):
@@ -214,6 +216,7 @@ def test_chunk_to_suite(chunk, expected):
         ("build-linux64-ccov/opt", "build"),
         ("build-android-test-ccov/opt", "build"),
         ("build-win64-ccov/debug", "build"),
+        ("build-signing-win64-ccov/debug", "build-signing"),
     ],
 )
 def test_get_chunk(task_name, expected):
@@ -238,6 +241,7 @@ def test_get_chunk(task_name, expected):
         ("build-linux64-ccov/opt", "build"),
         ("build-android-test-ccov/opt", "build"),
         ("build-win64-ccov/debug", "build"),
+        ("build-signing-win64-ccov/debug", "build-signing"),
     ],
 )
 def test_get_suite(task_name, expected):
@@ -259,6 +263,7 @@ def test_get_suite(task_name, expected):
         ("build-linux64-ccov/opt", "linux"),
         ("build-android-test-ccov/opt", "android"),
         ("build-win64-ccov/debug", "windows"),
+        ("build-signing-win64-ccov/debug", "windows"),
     ],
 )
 def test_get_platform(task_name, expected):
