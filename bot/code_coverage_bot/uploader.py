@@ -45,7 +45,7 @@ def gcp(repository, revision, report, platform, suite):
     logger.info("Uploaded {} on {}".format(path, bucket))
 
     # Trigger ingestion on backend
-	gcp_ingest(repository, revision, platform, suite)
+    gcp_ingest(repository, revision, platform, suite)
 
     return blob
 
@@ -61,7 +61,8 @@ def gcp_covdir_exists(repository, revision, platform, suite):
     blob = bucket.blob(path)
     return blob.exists()
 
-@tenacity.retry(stop = tenacity.stop_after_attempt(10), wait = tenacity.wait_fixed(60))
+
+@tenacity.retry(stop=tenacity.stop_after_attempt(10), wait=tenacity.wait_fixed(60))
 def gcp_ingest(repository, revision, platform, suite):
     """
     The GCP report ingestion is triggered remotely on a backend
