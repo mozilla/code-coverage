@@ -4,11 +4,16 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import concurrent.futures
 import subprocess
-import time
 
 import structlog
 
 log = structlog.get_logger(__name__)
+
+
+class RunException(Exception):
+    """
+    Exception used to stop retrying
+    """
 
 
 def hide_secrets(text, secrets):
