@@ -10,6 +10,7 @@ import structlog
 
 log = structlog.get_logger(__name__)
 
+
 def hide_secrets(text, secrets):
     if type(text) is bytes:
         encode_secret, xxx = lambda x: bytes(x, encoding="utf-8"), b"XXX"

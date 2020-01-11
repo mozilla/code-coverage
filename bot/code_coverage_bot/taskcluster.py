@@ -7,9 +7,8 @@ from zipfile import is_zipfile
 import requests
 import structlog
 import taskcluster
-from taskcluster.helper import TaskclusterConfig
-
 import tenacity
+from taskcluster.helper import TaskclusterConfig
 
 logger = structlog.getLogger(__name__)
 taskcluster_config = TaskclusterConfig("https://firefox-ci-tc.services.mozilla.com")
@@ -98,6 +97,7 @@ def download_artifact(artifact_path, task_id, artifact_name):
 
         if artifact_path.endswith(".zip") and not is_zipfile(artifact_path):
             raise BadZipFile("File is not a zip file")
+
     perform_download()
 
 
