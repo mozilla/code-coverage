@@ -99,7 +99,19 @@ def download_artifact(artifact_path, task_id, artifact_name):
     url = queue.buildUrl("getLatestArtifact", task_id, artifact_name)
     logger.debug("Downloading artifact", url=url)
 
-    perform_download(url, artifact_path)
+    @tenacity.retry(wait=tenacity.wait_fixed(30), stop=tenacity.stop_after_attempt(5))
+    def perform_download():
+        r = requests.get(url, stream=True)
+        r.raise_for_status()
+
+        with open(artifact_path, "wb") as f:
+            r.raw.decode_content = True
+            shutil.copyfileobj(r.raw, f)
+
+        if artifact_path.endswith(".zip") and not is_zipfile(artifact_path):
+            raise BadZipFile("File is not a zip file")
+
+    perform_download()
 
 
 def is_coverage_task(task):
