@@ -4,12 +4,11 @@ import os.path
 
 import requests
 import structlog
+import tenacity
 import zstandard as zstd
 
 from code_coverage_bot.secrets import secrets
 from code_coverage_tools.gcp import get_bucket
-
-import tenacity
 
 logger = structlog.get_logger(__name__)
 GCP_COVDIR_PATH = "{repository}/{revision}/{platform}:{suite}.json.zstd"
@@ -46,11 +45,7 @@ def gcp(repository, revision, report, platform, suite):
     logger.info("Uploaded {} on {}".format(path, bucket))
 
     # Trigger ingestion on backend
-    @tenacity.retry(
-        retry = retry_if_exception(lambda: gcp_ingest(repository, revision, platform, suite)),
-        stop=stop_after_attempt(10),
-        wait=wait_fixed(60)
-    )
+	gcp_ingest(repository, revision, platform, suite)
 
     return blob
 
@@ -66,7 +61,7 @@ def gcp_covdir_exists(repository, revision, platform, suite):
     blob = bucket.blob(path)
     return blob.exists()
 
-
+@tenacity.retry(stop = tenacity.stop_after_attempt(10), wait = tenacity.wait_fixed(60))
 def gcp_ingest(repository, revision, platform, suite):
     """
     The GCP report ingestion is triggered remotely on a backend
