@@ -26,8 +26,8 @@ STATUS_VALUE = {"exception": 1, "failed": 2, "completed": 3}
 
 
 class ArtifactsHandler(object):
-    def __init__(self, task_ids, parent_dir="ccov-artifacts", task_name_filter="*"):
-        self.task_ids = task_ids
+    def __init__(self, test_tasks, parent_dir="ccov-artifacts", task_name_filter="*"):
+        self.test_tasks = test_tasks
         self.parent_dir = parent_dir
         self.task_name_filter = task_name_filter
         self.artifacts = []
@@ -133,26 +133,9 @@ class ArtifactsHandler(object):
     def download_all(self):
         os.makedirs(self.parent_dir, exist_ok=True)
 
-        # The test tasks for the Linux and Windows builds are in the same group,
-        # but the following code is generic and supports build tasks split in
-        # separate groups.
-        groups = set(
-            [
-                taskcluster.get_task_details(build_task_id)["taskGroupId"]
-                for build_task_id in self.task_ids.values()
-                if build_task_id is not None
-            ]
-        )
-        test_tasks = [
-            task
-            for group in groups
-            for task in taskcluster.get_tasks_in_group(group)
-            if taskcluster.is_coverage_task(task["task"])
-            and not self.is_filtered_task(task)
-        ]
-        logger.info("Downloading artifacts from {} tasks".format(len(test_tasks)))
+        logger.info("Downloading artifacts from {} tasks".format(len(self.test_tasks)))
 
-        for test_task in test_tasks:
+        for test_task in self.test_tasks:
             status = test_task["status"]["state"]
             task_id = test_task["status"]["taskId"]
             while status not in FINISHED_STATUSES:
@@ -168,7 +151,7 @@ class ArtifactsHandler(object):
 
         # Choose best tasks to download (e.g. 'completed' is better than 'failed')
         download_tasks = {}
-        for test_task in test_tasks:
+        for test_task in self.test_tasks:
             status = test_task["status"]["state"]
             assert status in FINISHED_STATUSES, "State '{}' not recognized".format(
                 status

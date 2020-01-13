@@ -1,0 +1,93 @@
+{
+  "provisionerId": "gecko-3",
+  "workerType": "decision",
+  "schedulerId": "gecko-level-3",
+  "taskGroupId": "OuvSoOjkSvKYLbaGMknMfA",
+  "dependencies": [],
+  "requires": "all-completed",
+  "routes": [
+    "tc-treeherder.v2.mozilla-central.7828a10a94b6afb78d18d9b7b83e7aa79337cc24.37010",
+    "index.gecko.v2.mozilla-central.latest.taskgraph.decision",
+    "index.gecko.v2.mozilla-central.revision.7828a10a94b6afb78d18d9b7b83e7aa79337cc24.taskgraph.decision",
+    "index.gecko.v2.mozilla-central.pushlog-id.37010.decision",
+    "notify.email.dvarga@mozilla.com.on-failed",
+    "notify.email.dvarga@mozilla.com.on-exception",
+    "index.gecko.v2.mozilla-central.latest.firefox.decision",
+    "index.gecko.v2.mozilla-central.revision.7828a10a94b6afb78d18d9b7b83e7aa79337cc24.firefox.decision"
+  ],
+  "priority": "lowest",
+  "retries": 5,
+  "created": "2020-01-13T15:45:58.646Z",
+  "deadline": "2020-01-14T15:45:58.646Z",
+  "expires": "2021-01-12T15:45:58.646Z",
+  "scopes": [
+    "assume:repo:hg.mozilla.org/mozilla-central:branch:default",
+    "queue:route:notify.email.dvarga@mozilla.com.*",
+    "in-tree:hook-action:project-gecko/in-tree-action-3-*"
+  ],
+  "payload": {
+    "env": {
+      "GECKO_BASE_REPOSITORY": "https://hg.mozilla.org/mozilla-unified",
+      "GECKO_HEAD_REPOSITORY": "https://hg.mozilla.org/mozilla-central",
+      "GECKO_HEAD_REF": "7828a10a94b6afb78d18d9b7b83e7aa79337cc24",
+      "GECKO_HEAD_REV": "7828a10a94b6afb78d18d9b7b83e7aa79337cc24",
+      "HG_STORE_PATH": "/builds/worker/checkouts/hg-store",
+      "TASKCLUSTER_CACHES": "/builds/worker/checkouts",
+      "PYTHONDONTWRITEBYTECODE": "1",
+      "TASKCLUSTER_ROOT_URL": "https://taskcluster.net",
+      "TASKCLUSTER_PROXY_URL": "http://taskcluster"
+    },
+    "cache": {
+      "gecko-level-3-checkouts-sparse-v2": "/builds/worker/checkouts"
+    },
+    "features": {
+      "taskclusterProxy": true,
+      "chainOfTrust": true
+    },
+    "image": "taskcluster/decision:2.2.0@sha256:0e9689e94605eb8395f5b49141a48148416b0d825f6f7be04c29642d1a85ee3d",
+    "maxRunTime": 1800,
+    "command": [
+      "/builds/worker/bin/run-task",
+      "--gecko-checkout=/builds/worker/checkouts/gecko",
+      "--gecko-sparse-profile=build/sparse-profiles/taskgraph",
+      "--",
+      "bash",
+      "-cx",
+      "cd /builds/worker/checkouts/gecko && ln -s /builds/worker/artifacts artifacts && ./mach --log-no-times taskgraph decision --pushlog-id='37010' --pushdate='1578930324' --project='mozilla-central' --owner='dvarga@mozilla.com' --level='3' --tasks-for='hg-push' --base-repository=\"$GECKO_BASE_REPOSITORY\" --head-repository=\"$GECKO_HEAD_REPOSITORY\" --head-ref=\"$GECKO_HEAD_REF\" --head-rev=\"$GECKO_HEAD_REV\" \n"
+    ],
+    "artifacts": {
+      "public": {
+        "type": "directory",
+        "path": "/builds/worker/artifacts",
+        "expires": "2021-01-12T15:45:58.646Z"
+      }
+    }
+  },
+  "metadata": {
+    "owner": "dvarga@mozilla.com",
+    "source": "https://hg.mozilla.org/mozilla-central/raw-file/7828a10a94b6afb78d18d9b7b83e7aa79337cc24/.taskcluster.yml",
+    "name": "Gecko Decision Task",
+    "description": "The task that creates all of the other tasks in the task graph"
+  },
+  "tags": {
+    "createdForUser": "dvarga@mozilla.com",
+    "kind": "decision-task"
+  },
+  "extra": {
+    "treeherder": {
+      "machine": {
+        "platform": "gecko-decision"
+      },
+      "symbol": "D"
+    },
+    "tasks_for": "hg-push",
+    "notify": {
+      "email": {
+        "link": {
+          "text": "Treeherder Jobs",
+          "href": "https://treeherder.mozilla.org/#/jobs?repo=mozilla-central&revision=7828a10a94b6afb78d18d9b7b83e7aa79337cc24"
+        }
+      }
+    }
+  }
+}

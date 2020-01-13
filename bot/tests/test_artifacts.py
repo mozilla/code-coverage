@@ -9,6 +9,7 @@ import responses
 
 from code_coverage_bot.artifacts import Artifact
 from code_coverage_bot.artifacts import ArtifactsHandler
+from code_coverage_bot.hooks.base import Hook
 
 FILES = [
     "windows_mochitest-1_code-coverage-jsvm.info",
@@ -259,28 +260,45 @@ def _group_tasks():
 
 
 def test_download_all(
-    LINUX_TASK_ID,
-    LINUX_TASK,
+    DECISION_TASK_ID,
+    DECISION_TASK,
+    LATEST_DECISION,
     GROUP_TASKS_1,
     GROUP_TASKS_2,
     fake_artifacts,
     mock_taskcluster,
+    tmpdir,
 ):
     responses.add(
         responses.GET,
-        f"http://taskcluster.test/api/queue/v1/task/{LINUX_TASK_ID}",
-        json=LINUX_TASK,
+        "http://taskcluster.test/api/index/v1/task/gecko.v2.mozilla-central.revision.7828a10a94b6afb78d18d9b7b83e7aa79337cc24.firefox.decision",
+        json=LATEST_DECISION,
+        status=200,
+    )
+    responses.add(
+        responses.GET,
+        f"http://taskcluster.test/api/queue/v1/task/{DECISION_TASK_ID}",
+        json=DECISION_TASK,
         status=200,
     )
     for group_tasks in _group_tasks():
         responses.add(
             responses.GET,
-            "http://taskcluster.test/api/queue/v1/task-group/aPt9FbIdQwmhwDIPDYLuaw/list",
+            "http://taskcluster.test/api/queue/v1/task-group/OuvSoOjkSvKYLbaGMknMfA/list",
             json=group_tasks,
             status=200,
         )
 
-        a = ArtifactsHandler({"linux": LINUX_TASK_ID})
+        h = Hook(
+            "https://hg.mozilla.org/mozilla-central",
+            "7828a10a94b6afb78d18d9b7b83e7aa79337cc24",
+            "*",
+            tmpdir,
+            tmpdir,
+        )
+        a = h.artifactsHandler
+
+        # a = ArtifactsHandler({"linux": LINUX_TASK_ID})
 
         downloaded = set()
 

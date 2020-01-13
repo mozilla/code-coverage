@@ -68,8 +68,18 @@ def TASK_NOT_FOUND():
 
 
 @pytest.fixture(scope="session")
-def LATEST_LINUX():
-    return load_json("latest_linux.json")
+def DECISION_TASK_ID():
+    return "OuvSoOjkSvKYLbaGMknMfA"
+
+
+@pytest.fixture(scope="session")
+def DECISION_TASK():
+    return load_json("decision_task.json")
+
+
+@pytest.fixture(scope="session")
+def LATEST_DECISION():
+    return load_json("latest_decision.json")
 
 
 @pytest.fixture(scope="session")
@@ -90,16 +100,6 @@ def LINUX_TASK_STATUS():
 @pytest.fixture(scope="session")
 def LINUX_TASK_ARTIFACTS():
     return load_json("linux_task_artifacts.json")
-
-
-@pytest.fixture(scope="session")
-def LATEST_WIN():
-    return load_json("latest_win.json")
-
-
-@pytest.fixture(scope="session")
-def WIN_TASK_ID():
-    return "PWnw3h-QQSiqxO83MDzKag"
 
 
 @pytest.fixture(scope="session")
