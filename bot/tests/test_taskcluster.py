@@ -52,7 +52,7 @@ def test_get_task(
 
     responses.add(
         responses.GET,
-        "http://taskcluster.test/api/index/v1/task/gecko.v2.mozilla-central.revision.916103b8675d9fdb28b891cac235d74f9f475942.firefox.win64-ccov-debug",
+        "http://taskcluster.test/api/index/v1/task/gecko.v2.mozilla-central.revision.916103b8675d9fdb28b891cac235d74f9f475942.firefox.win64-ccov-opt",
         json=LATEST_WIN,
         status=200,
     )

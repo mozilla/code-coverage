@@ -22,7 +22,7 @@ def get_task(branch, revision, platform):
         platform_name = "linux64-ccov-opt"
         product = "firefox"
     elif platform == "windows":
-        platform_name = "win64-ccov-debug"
+        platform_name = "win64-ccov-opt"
         product = "firefox"
     elif platform == "android-test":
         platform_name = "android-test-ccov"
