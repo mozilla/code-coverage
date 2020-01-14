@@ -10,12 +10,6 @@ import structlog
 log = structlog.get_logger(__name__)
 
 
-class RunException(Exception):
-    """
-    Exception used to stop retrying
-    """
-
-
 def hide_secrets(text, secrets):
     if type(text) is bytes:
         encode_secret, xxx = lambda x: bytes(x, encoding="utf-8"), b"XXX"
@@ -38,7 +32,7 @@ def run_check(command, **kwargs):
     assert isinstance(command, list)
 
     if len(command) == 0:
-        raise RunException("Can't run an empty command.")
+        raise Exception("Can't run an empty command.")
 
     _kwargs = dict(
         stdin=subprocess.DEVNULL,  # no interactions
@@ -65,7 +59,7 @@ def run_check(command, **kwargs):
             error=error,
         )
 
-        raise RunException(f"`{command[0]}` failed with code: {proc.returncode}.")
+        raise Exception(f"`{command[0]}` failed with code: {proc.returncode}.")
 
     return output
 
