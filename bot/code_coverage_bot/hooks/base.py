@@ -52,7 +52,7 @@ class Hook(object):
         self.repo_dir = os.path.join(cache_root, self.branch)
 
         # Load coverage tasks for all platforms
-        decision_task_id = taskcluster.get_task(self.branch, self.revision)
+        decision_task_id = taskcluster.get_decision_task(self.branch, self.revision)
 
         group = taskcluster.get_task_details(decision_task_id)["taskGroupId"]
 

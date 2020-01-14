@@ -17,7 +17,7 @@ taskcluster_config = TaskclusterConfig("https://firefox-ci-tc.services.mozilla.c
 NAME_PARTS_TO_SKIP = ("opt", "debug", "e10s", "1proc")
 
 
-def get_task(branch, revision):
+def get_decision_task(branch, revision):
     route = f"gecko.v2.{branch}.revision.{revision}.firefox.decision"
     index = taskcluster_config.get_service("index")
     try:

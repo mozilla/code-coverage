@@ -42,7 +42,7 @@ def test_get_task(mock_taskcluster, DECISION_TASK_ID, LATEST_DECISION):
         status=200,
     )
     assert (
-        taskcluster.get_task(
+        taskcluster.get_decision_task(
             "mozilla-central", "7828a10a94b6afb78d18d9b7b83e7aa79337cc24"
         )
         == DECISION_TASK_ID
@@ -58,7 +58,7 @@ def test_get_task_not_found(mock_taskcluster, TASK_NOT_FOUND):
     )
 
     assert (
-        taskcluster.get_task(
+        taskcluster.get_decision_task(
             "mozilla-central", "b2a9a4bb5c94de179ae7a3f52fde58c0e2897498"
         )
         is None
@@ -76,7 +76,7 @@ def test_get_task_failure(mock_taskcluster, TASK_NOT_FOUND):
     )
 
     with pytest.raises(TaskclusterRestFailure, match="Indexed task not found"):
-        taskcluster.get_task(
+        taskcluster.get_decision_task(
             "mozilla-central", "b2a9a4bb5c94de179ae7a3f52fde58c0e2897498"
         )
 
