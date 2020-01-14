@@ -34,47 +34,32 @@ def test_get_task_details(mock_taskcluster, LINUX_TASK_ID, LINUX_TASK):
     assert taskcluster.get_task_details(LINUX_TASK_ID) == LINUX_TASK
 
 
-def test_get_task(
-    mock_taskcluster, LINUX_TASK_ID, LATEST_LINUX, WIN_TASK_ID, LATEST_WIN
-):
+def test_get_task(mock_taskcluster, DECISION_TASK_ID, LATEST_DECISION):
     responses.add(
         responses.GET,
-        "http://taskcluster.test/api/index/v1/task/gecko.v2.mozilla-central.revision.b2a9a4bb5c94de179ae7a3f52fde58c0e2897498.firefox.linux64-ccov-opt",
-        json=LATEST_LINUX,
+        "http://taskcluster.test/api/index/v1/task/gecko.v2.mozilla-central.revision.7828a10a94b6afb78d18d9b7b83e7aa79337cc24.firefox.decision",
+        json=LATEST_DECISION,
         status=200,
     )
     assert (
-        taskcluster.get_task(
-            "mozilla-central", "b2a9a4bb5c94de179ae7a3f52fde58c0e2897498", "linux"
+        taskcluster.get_decision_task(
+            "mozilla-central", "7828a10a94b6afb78d18d9b7b83e7aa79337cc24"
         )
-        == LINUX_TASK_ID
-    )
-
-    responses.add(
-        responses.GET,
-        "http://taskcluster.test/api/index/v1/task/gecko.v2.mozilla-central.revision.916103b8675d9fdb28b891cac235d74f9f475942.firefox.win64-ccov-opt",
-        json=LATEST_WIN,
-        status=200,
-    )
-    assert (
-        taskcluster.get_task(
-            "mozilla-central", "916103b8675d9fdb28b891cac235d74f9f475942", "windows"
-        )
-        == WIN_TASK_ID
+        == DECISION_TASK_ID
     )
 
 
 def test_get_task_not_found(mock_taskcluster, TASK_NOT_FOUND):
     responses.add(
         responses.GET,
-        "http://taskcluster.test/api/index/v1/task/gecko.v2.mozilla-central.revision.b2a9a4bb5c94de179ae7a3f52fde58c0e2897498.firefox.linux64-ccov-opt",
+        "http://taskcluster.test/api/index/v1/task/gecko.v2.mozilla-central.revision.b2a9a4bb5c94de179ae7a3f52fde58c0e2897498.firefox.decision",
         json=TASK_NOT_FOUND,
         status=404,
     )
 
     assert (
-        taskcluster.get_task(
-            "mozilla-central", "b2a9a4bb5c94de179ae7a3f52fde58c0e2897498", "linux"
+        taskcluster.get_decision_task(
+            "mozilla-central", "b2a9a4bb5c94de179ae7a3f52fde58c0e2897498"
         )
         is None
     )
@@ -85,14 +70,14 @@ def test_get_task_failure(mock_taskcluster, TASK_NOT_FOUND):
     err["code"] = "RandomError"
     responses.add(
         responses.GET,
-        "http://taskcluster.test/api/index/v1/task/gecko.v2.mozilla-central.revision.b2a9a4bb5c94de179ae7a3f52fde58c0e2897498.firefox.linux64-ccov-opt",
+        "http://taskcluster.test/api/index/v1/task/gecko.v2.mozilla-central.revision.b2a9a4bb5c94de179ae7a3f52fde58c0e2897498.firefox.decision",
         json=err,
         status=500,
     )
 
     with pytest.raises(TaskclusterRestFailure, match="Indexed task not found"):
-        taskcluster.get_task(
-            "mozilla-central", "b2a9a4bb5c94de179ae7a3f52fde58c0e2897498", "linux"
+        taskcluster.get_decision_task(
+            "mozilla-central", "b2a9a4bb5c94de179ae7a3f52fde58c0e2897498"
         )
 
 

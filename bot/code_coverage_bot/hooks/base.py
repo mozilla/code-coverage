@@ -20,9 +20,6 @@ from code_coverage_bot.utils import ThreadPoolExecutorResult
 logger = structlog.get_logger(__name__)
 
 
-PLATFORMS = ["linux", "windows", "android-test", "android-emulator"]
-
-
 class Hook(object):
     def __init__(
         self,
@@ -54,21 +51,26 @@ class Hook(object):
         assert os.path.isdir(cache_root), f"Cache root {cache_root} is not a dir."
         self.repo_dir = os.path.join(cache_root, self.branch)
 
-        # Load current coverage task for all platforms
-        task_ids = {
-            platform: taskcluster.get_task(self.branch, self.revision, platform)
-            for platform in PLATFORMS
-        }
+        # Load coverage tasks for all platforms
+        decision_task_id = taskcluster.get_decision_task(self.branch, self.revision)
+
+        group = taskcluster.get_task_details(decision_task_id)["taskGroupId"]
+
+        test_tasks = [
+            task
+            for task in taskcluster.get_tasks_in_group(group)
+            if taskcluster.is_coverage_task(task["task"])
+        ]
 
         # Check the required platforms are present
+        platforms = set(
+            taskcluster.get_platform(test_task["task"]) for test_task in test_tasks
+        )
         for platform in required_platforms:
-            if not task_ids[platform]:
-                raise Exception(
-                    f"Code coverage build on {platform} failed and was not indexed."
-                )
+            assert platform in platforms, f"{platform} missing in the task group."
 
         self.artifactsHandler = ArtifactsHandler(
-            task_ids, self.artifacts_dir, task_name_filter
+            test_tasks, self.artifacts_dir, task_name_filter
         )
 
     @property

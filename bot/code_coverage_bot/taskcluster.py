@@ -17,23 +17,8 @@ taskcluster_config = TaskclusterConfig("https://firefox-ci-tc.services.mozilla.c
 NAME_PARTS_TO_SKIP = ("opt", "debug", "e10s", "1proc")
 
 
-def get_task(branch, revision, platform):
-    if platform == "linux":
-        platform_name = "linux64-ccov-opt"
-        product = "firefox"
-    elif platform == "windows":
-        platform_name = "win64-ccov-opt"
-        product = "firefox"
-    elif platform == "android-test":
-        platform_name = "android-test-ccov"
-        product = "mobile"
-    elif platform == "android-emulator":
-        platform_name = "android-api-16-ccov-debug"
-        product = "mobile"
-    else:
-        raise Exception(f"Unsupported platform: {platform}")
-
-    route = f"gecko.v2.{branch}.revision.{revision}.{product}.{platform_name}"
+def get_decision_task(branch, revision):
+    route = f"gecko.v2.{branch}.revision.{revision}.firefox.decision"
     index = taskcluster_config.get_service("index")
     try:
         return index.findTask(route)["taskId"]
