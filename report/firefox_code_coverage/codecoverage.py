@@ -39,8 +39,7 @@ def is_taskcluster_loaner():
 
 def get_task(branch, revision):
     task = get_json(
-        "https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/gecko.v2.%s.revision.%s.firefox.linux64-ccov-opt"
-        % (branch, revision)
+        f"https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/gecko.v2.{branch}.revision.{revision}.firefox.decision"
     )
     return task["taskId"]
 
@@ -150,7 +149,11 @@ def get_task_status(task_id):
 
 
 def download_coverage_artifacts(
-    build_task_id, suites, platforms, artifacts_path, suites_to_ignore=["talos", "awsy"]
+    decision_task_id,
+    suites,
+    platforms,
+    artifacts_path,
+    suites_to_ignore=["talos", "awsy"],
 ):
     try:
         os.mkdir(artifacts_path)
@@ -158,7 +161,7 @@ def download_coverage_artifacts(
         if e.errno != errno.EEXIST:
             raise e
 
-    task_data = get_task_details(build_task_id)
+    task_data = get_task_details(decision_task_id)
 
     # Returns True if the task is a test-related coverage task (build tasks are included).
     def _is_test_task(t):
