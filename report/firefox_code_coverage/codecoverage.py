@@ -315,16 +315,29 @@ def download_grcov():
     )
     latest_tag = r["tag_name"]
 
-    if os.path.exists("grcov") and os.path.exists("grcov_ver"):
+    if sys.platform.startswith("linux"):
+        platform = "linux"
+        grcov_path = "grcov"
+    elif sys.platform == "darwin":
+        platform = "osx"
+        grcov_path = "grcov"
+    elif sys.platform.startswith("win"):
+        platform = "win"
+        grcov_path = "grcov.exe"
+    else:
+        assert False, f"Unknown platform {sys.platform}"
+
+    if os.path.exists(grcov_path) and os.path.exists("grcov_ver"):
         with open("grcov_ver", "r") as f:
             installed_ver = f.read()
 
         if installed_ver == latest_tag:
-            return
+            return grcov_path
 
     urlretrieve(
-        "https://github.com/marco-c/grcov/releases/download/%s/grcov-linux-x86_64.tar.bz2"
-        % latest_tag,
+        "https://github.com/marco-c/grcov/releases/download/{}/grcov-{}-x86_64.tar.bz2".format(
+            latest_tag, platform
+        ),
         "grcov.tar.bz2",
     )
 
@@ -336,6 +349,8 @@ def download_grcov():
 
     with open("grcov_ver", "w") as f:
         f.write(latest_tag)
+
+    return grcov_path
 
 
 def download_genhtml():
@@ -442,8 +457,7 @@ def main():
     if args.grcov:
         grcov_path = args.grcov
     else:
-        download_grcov()
-        grcov_path = "./grcov"
+        grcov_path = download_grcov()
 
     if args.stats:
         generate_report(grcov_path, "coveralls", "output.json", artifact_paths)
