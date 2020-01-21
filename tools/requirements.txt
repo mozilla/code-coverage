@@ -3,4 +3,4 @@ async-timeout==3.0.1
 logbook==1.5.3
 raven==6.10.0
 structlog==19.2.0
-taskcluster==24.1.10
+taskcluster==24.2.0
