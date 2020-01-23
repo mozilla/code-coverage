@@ -244,18 +244,6 @@ def download_coverage_artifacts(
 
 
 def generate_report(grcov_path, output_format, output_path, artifact_paths):
-    mod_env = os.environ.copy()
-    if is_taskcluster_loaner():
-        one_click_loaner_gcc = os.path.join(TASKCLUSTER_SRC_DIR, "gcc/bin")
-        i = 0
-        while (
-            not os.path.isdir(one_click_loaner_gcc)
-            or len(os.listdir(one_click_loaner_gcc)) == 0
-        ):
-            print("Waiting one-click loaner to be ready... " + str(i))
-            i += 1
-            time.sleep(60)
-        mod_env["PATH"] = one_click_loaner_gcc + ":" + mod_env["PATH"]
     cmd = [
         grcov_path,
         "-t",
@@ -268,7 +256,7 @@ def generate_report(grcov_path, output_format, output_path, artifact_paths):
     if output_format in ["coveralls", "coveralls+"]:
         cmd += ["--token", "UNUSED", "--commit-sha", "UNUSED"]
     cmd.extend(artifact_paths)
-    proc = subprocess.Popen(cmd, stderr=subprocess.PIPE, env=mod_env)
+    proc = subprocess.Popen(cmd, stderr=subprocess.PIPE)
     i = 0
     while proc.poll() is None:
         if i % 60 == 0:
