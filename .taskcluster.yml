@@ -146,7 +146,8 @@ tasks:
         features:
           taskclusterProxy: true
         maxRunTime: 3600
-        image: python:3.8
+        # Stick to python 3.5 as this is the version available on Taskcluster interactive tasks
+        image: python:3.5
         command:
           - sh
           - -lxce
