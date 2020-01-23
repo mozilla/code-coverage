@@ -4,9 +4,11 @@ import argparse
 import errno
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tarfile
+import tempfile
 import time
 import warnings
 
@@ -21,6 +23,9 @@ except ImportError:
 FINISHED_STATUSES = ["completed", "failed", "exception"]
 ALL_STATUSES = FINISHED_STATUSES + ["unscheduled", "pending", "running"]
 STATUS_VALUE = {"exception": 1, "failed": 2, "completed": 3}
+
+GRCOV_INDEX = "gecko.cache.level-3.toolchains.v3.linux64-grcov.latest"
+GRCOV_ARTIFACT = "public/build/grcov.tar.xz"
 
 
 def get_json(url, params=None, headers={}):
@@ -306,36 +311,42 @@ def generate_html_report(
 
 
 def download_grcov():
-    headers = {}
-    if "GITHUB_ACCESS_TOKEN" in os.environ:
-        headers["Authorization"] = "token {}".format(os.environ["GITHUB_ACCESS_TOKEN"])
+    local_path = "grcov"
+    local_version = "grcov_ver"
 
-    r = get_json(
-        "https://api.github.com/repos/marco-c/grcov/releases/latest", headers=headers
+    dest = tempfile.mkdtemp(suffix="grcov")
+    archive = os.path.join(dest, "grcov.tar.xz")
+    url = "https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/{index}/artifacts/{artifact}".format(
+        index=GRCOV_INDEX, artifact=GRCOV_ARTIFACT
     )
-    latest_tag = r["tag_name"]
+    urlretrieve(url, archive)
 
-    if os.path.exists("grcov") and os.path.exists("grcov_ver"):
-        with open("grcov_ver", "r") as f:
+    # Extract archive in temp
+    tar = tarfile.open(archive, "r:xz")
+    tar.extractall(dest)
+    tar.close()
+    os.remove(archive)
+
+    # Get version from grcov binary
+    grcov = os.path.join(dest, "grcov")
+    assert os.path.exists(grcov), "Missing grcov binary"
+    version = subprocess.check_output([grcov, "--version"]).decode("utf-8")
+
+    # Compare version with currently available
+    if os.path.exists(local_path) and os.path.exists(local_version):
+        with open(local_version, "r") as f:
             installed_ver = f.read()
 
-        if installed_ver == latest_tag:
-            return
+        if installed_ver == version:
+            return local_path
 
-    urlretrieve(
-        "https://github.com/marco-c/grcov/releases/download/%s/grcov-linux-x86_64.tar.bz2"
-        % latest_tag,
-        "grcov.tar.bz2",
-    )
+    # Promote downloaded version to installed one
+    shutil.move(grcov, local_path)
+    shutil.rmtree(dest)
+    with open(local_version, "w") as f:
+        f.write(version)
 
-    tar = tarfile.open("grcov.tar.bz2", "r:bz2")
-    tar.extractall()
-    tar.close()
-
-    os.remove("grcov.tar.bz2")
-
-    with open("grcov_ver", "w") as f:
-        f.write(latest_tag)
+    return local_path
 
 
 def download_genhtml():
@@ -442,8 +453,7 @@ def main():
     if args.grcov:
         grcov_path = args.grcov
     else:
-        download_grcov()
-        grcov_path = "./grcov"
+        grcov_path = download_grcov()
 
     if args.stats:
         generate_report(grcov_path, "coveralls", "output.json", artifact_paths)
