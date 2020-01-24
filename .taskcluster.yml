@@ -149,7 +149,7 @@ tasks:
           - sh
           - -lxce
           - "git clone --quiet ${repository} /src && cd /src && git checkout ${head_rev} -b checks &&
-            cd /src/report && ./ci-test.sh"
+            cd /src/report && pip install -r requirements.txt && ./ci-test.sh"
       metadata:
         name: "Code Coverage Report checks: unit tests"
         description: Check python code with unittest
