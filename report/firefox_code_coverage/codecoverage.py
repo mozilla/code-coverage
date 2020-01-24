@@ -424,9 +424,6 @@ def main():
         parser.print_help()
         return
 
-    # Start by running automatic auth on Taskcluster client
-    taskcluster.auth()
-
     if args.branch and args.commit:
         task_id = get_task(args.branch, args.commit)
     else:
