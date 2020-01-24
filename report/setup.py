@@ -12,7 +12,11 @@ def read_requirements(file_):
         for line in f.readlines():
             line = line.strip()
             if line.startswith("https://"):
-                line = line.split("#")[1].split("egg=")[1]
+                params = {
+                    p[: p.index("=")]: p[p.index("=") + 1 :]
+                    for p in line.split("#")[1].split("&")
+                }
+                line = params["egg"]
             elif line == "" or line.startswith("#") or line.startswith("-"):
                 continue
             line = line.split("#")[0].strip()

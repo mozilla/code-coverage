@@ -11,7 +11,10 @@ import tarfile
 import tempfile
 import time
 import warnings
+from datetime import timedelta
+from pathlib import Path
 
+import magic
 import requests
 import tenacity
 
@@ -311,6 +314,27 @@ def download_grcov():
     return local_path
 
 
+def upload_html_report(
+    report_dir, base_artifact="public/report", ttl=timedelta(days=10)
+):
+    assert os.path.isdir(report_dir), "Not a directory {}".format(report_dir)
+    report_dir = os.path.realpath(report_dir)
+    assert not base_artifact.endswith("/"), "No trailing / in base_artifact"
+
+    # Use Taskcluster proxy when available
+    taskcluster.auth()
+
+    for path in Path(report_dir).rglob("*"):
+
+        filename = str(path.relative_to(report_dir))
+        content_type = magic.from_file(str(path), mime=True)
+        print("Uploading {} as {}".format(filename, content_type))
+
+        taskcluster.upload_artifact(
+            "{}/{}".format(base_artifact, filename), path.read_text(), content_type, ttl
+        )
+
+
 def main():
     parser = argparse.ArgumentParser()
 
@@ -437,6 +461,9 @@ def main():
         )
     else:
         generate_report(grcov_path, "html", args.output_dir, artifact_paths)
+
+        if is_taskcluster_loaner():
+            upload_html_report(args.output_dir)
 
 
 if __name__ == "__main__":
