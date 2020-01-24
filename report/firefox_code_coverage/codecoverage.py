@@ -67,9 +67,9 @@ def get_tasks_in_group(group_id):
     return tasks
 
 
-def download_binary(url, path):
+def download_binary(url, path, retries=5):
     """Download a binary file from an url"""
-    while True:
+    for i in range(1, retries + 1):
         try:
             artifact = requests.get(url, stream=True)
             artifact.raise_for_status()
@@ -84,7 +84,12 @@ def download_binary(url, path):
             except OSError:
                 pass
 
-            time.sleep(7)
+            if i == retries:
+                raise Exception(
+                    "Download failed after {} retries - {}".format(retries, url)
+                )
+
+            time.sleep(7 * i)
 
 
 def download_artifact(task_id, artifact, artifacts_path):
