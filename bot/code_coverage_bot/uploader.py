@@ -62,7 +62,9 @@ def gcp_covdir_exists(repository, revision, platform, suite):
     return blob.exists()
 
 
-@tenacity.retry(stop=tenacity.stop_after_attempt(10), wait=tenacity.wait_fixed(60))
+@tenacity.retry(
+    stop=tenacity.stop_after_attempt(10), wait=tenacity.wait_fixed(60), reraise=True
+)
 def gcp_ingest(repository, revision, platform, suite):
     """
     The GCP report ingestion is triggered remotely on a backend
