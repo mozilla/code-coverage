@@ -5,7 +5,7 @@ fakeredis==1.1.0
 Flask==1.1.1
 Flask-Cors==3.0.8
 flask-talisman==0.7.0
-google-cloud-storage==1.24.1
+google-cloud-storage==1.25.0
 gunicorn==20.0.4
 python-dateutil==2.8.1
 pytoml==0.1.21

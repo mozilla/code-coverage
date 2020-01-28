@@ -4,33 +4,24 @@ import argparse
 import errno
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tarfile
+import tempfile
 import time
 import warnings
 
-try:
-    from urllib.parse import urlencode
-    from urllib.request import Request, urlopen, urlretrieve
-except ImportError:
-    from urllib import urlencode, urlretrieve
-    from urllib2 import Request, urlopen
+import requests
 
+from firefox_code_coverage import taskcluster
 
 FINISHED_STATUSES = ["completed", "failed", "exception"]
 ALL_STATUSES = FINISHED_STATUSES + ["unscheduled", "pending", "running"]
 STATUS_VALUE = {"exception": 1, "failed": 2, "completed": 3}
 
-
-def get_json(url, params=None, headers={}):
-    if params is not None:
-        url += "?" + urlencode(params)
-
-    request = Request(url, headers=headers)
-    r = urlopen(request).read().decode("utf-8")
-
-    return json.loads(r)
+GRCOV_INDEX = "gecko.cache.level-3.toolchains.v3.linux64-grcov.latest"
+GRCOV_ARTIFACT = "public/build/grcov.tar.xz"
 
 
 def is_taskcluster_loaner():
@@ -38,76 +29,82 @@ def is_taskcluster_loaner():
 
 
 def get_task(branch, revision):
-    task = get_json(
-        f"https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/gecko.v2.{branch}.revision.{revision}.firefox.decision"
-    )
+    index = taskcluster.get_service("index")
+    task = index.findTask(f"gecko.v2.{branch}.revision.{revision}.firefox.decision")
     return task["taskId"]
 
 
 def get_last_task():
-    revision = get_json(
+    resp = requests.get(
         "https://api.coverage.moz.tools/v2/latest?repository=mozilla-central"
-    )[0]["revision"]
+    )
+    resp.raise_for_status()
+    data = resp.json()
+    revision = data[0]["revision"]
     return get_task("mozilla-central", revision)
 
 
 def get_task_details(task_id):
-    task_details = get_json(
-        "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/" + task_id
-    )
-    return task_details
+    queue = taskcluster.get_service("queue")
+    return queue.task(task_id)
 
 
 def get_task_artifacts(task_id):
-    artifacts = get_json(
-        "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/"
-        + task_id
-        + "/artifacts"
-    )
-    return artifacts["artifacts"]
+    queue = taskcluster.get_service("queue")
+    response = queue.listLatestArtifacts(task_id)
+    return response["artifacts"]
 
 
 def get_tasks_in_group(group_id):
-    reply = get_json(
-        "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task-group/"
-        + group_id
-        + "/list",
-        {"limit": "200"},
-    )
-    tasks = reply["tasks"]
-    while "continuationToken" in reply:
-        reply = get_json(
-            "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task-group/"
-            + group_id
-            + "/list",
-            {"limit": "200", "continuationToken": reply["continuationToken"]},
-        )
-        tasks += reply["tasks"]
+    tasks = []
+
+    def _save_tasks(response):
+        tasks.extend(response["tasks"])
+
+    queue = taskcluster.get_service("queue")
+    queue.listTaskGroup(group_id, paginationHandler=_save_tasks)
+
     return tasks
+
+
+def download_binary(url, path, retries=5):
+    """Download a binary file from an url"""
+    for i in range(1, retries + 1):
+        try:
+            artifact = requests.get(url, stream=True)
+            artifact.raise_for_status()
+
+            with open(path, "wb") as f:
+                for chunk in artifact.iter_content(chunk_size=8192):
+                    f.write(chunk)
+            break
+        except:  # noqa: E722
+            try:
+                os.remove(path)
+            except OSError:
+                pass
+
+            if i == retries:
+                raise Exception(
+                    "Download failed after {} retries - {}".format(retries, url)
+                )
+
+            time.sleep(7 * i)
 
 
 def download_artifact(task_id, artifact, artifacts_path):
     fname = os.path.join(
         artifacts_path, task_id + "_" + os.path.basename(artifact["name"])
     )
-    if not os.path.exists(fname):
-        while True:
-            try:
-                urlretrieve(
-                    "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/"
-                    + task_id
-                    + "/artifacts/"
-                    + artifact["name"],
-                    fname,
-                )
-                break
-            except:  # noqa: E722
-                try:
-                    os.remove(fname)
-                except OSError:
-                    pass
 
-                time.sleep(7)
+    # As recommended by Taskcluster doc, use requests to download
+    # from the artifact public url instead of relying on the client method
+    queue = taskcluster.get_service("queue")
+    url = queue.buildUrl("getLatestArtifact", task_id, artifact["name"])
+
+    if not os.path.exists(fname):
+        download_binary(url, fname)
+
     return fname
 
 
@@ -140,11 +137,8 @@ def get_platform(task_name):
 
 
 def get_task_status(task_id):
-    status = get_json(
-        "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/{}/status".format(
-            task_id
-        )
-    )
+    queue = taskcluster.get_service("queue")
+    status = queue.status(task_id)
     return status["status"]["state"]
 
 
@@ -306,36 +300,41 @@ def generate_html_report(
 
 
 def download_grcov():
-    headers = {}
-    if "GITHUB_ACCESS_TOKEN" in os.environ:
-        headers["Authorization"] = "token {}".format(os.environ["GITHUB_ACCESS_TOKEN"])
+    local_path = "grcov"
+    local_version = "grcov_ver"
 
-    r = get_json(
-        "https://api.github.com/repos/marco-c/grcov/releases/latest", headers=headers
-    )
-    latest_tag = r["tag_name"]
+    dest = tempfile.mkdtemp(suffix="grcov")
+    archive = os.path.join(dest, "grcov.tar.xz")
+    index = taskcluster.get_service("index")
+    url = index.buildUrl("findArtifactFromTask", GRCOV_INDEX, GRCOV_ARTIFACT)
+    download_binary(url, archive)
 
-    if os.path.exists("grcov") and os.path.exists("grcov_ver"):
-        with open("grcov_ver", "r") as f:
+    # Extract archive in temp
+    tar = tarfile.open(archive, "r:xz")
+    tar.extractall(dest)
+    tar.close()
+    os.remove(archive)
+
+    # Get version from grcov binary
+    grcov = os.path.join(dest, "grcov")
+    assert os.path.exists(grcov), "Missing grcov binary"
+    version = subprocess.check_output([grcov, "--version"]).decode("utf-8")
+
+    # Compare version with currently available
+    if os.path.exists(local_path) and os.path.exists(local_version):
+        with open(local_version, "r") as f:
             installed_ver = f.read()
 
-        if installed_ver == latest_tag:
-            return
+        if installed_ver == version:
+            return local_path
 
-    urlretrieve(
-        "https://github.com/marco-c/grcov/releases/download/%s/grcov-linux-x86_64.tar.bz2"
-        % latest_tag,
-        "grcov.tar.bz2",
-    )
+    # Promote downloaded version to installed one
+    shutil.move(grcov, local_path)
+    shutil.rmtree(dest)
+    with open(local_version, "w") as f:
+        f.write(version)
 
-    tar = tarfile.open("grcov.tar.bz2", "r:bz2")
-    tar.extractall()
-    tar.close()
-
-    os.remove("grcov.tar.bz2")
-
-    with open("grcov_ver", "w") as f:
-        f.write(latest_tag)
+    return local_path
 
 
 def download_genhtml():
@@ -442,8 +441,7 @@ def main():
     if args.grcov:
         grcov_path = args.grcov
     else:
-        download_grcov()
-        grcov_path = "./grcov"
+        grcov_path = download_grcov()
 
     if args.stats:
         generate_report(grcov_path, "coveralls", "output.json", artifact_paths)

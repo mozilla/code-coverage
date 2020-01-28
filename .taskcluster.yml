@@ -149,7 +149,7 @@ tasks:
           - sh
           - -lxce
           - "git clone --quiet ${repository} /src && cd /src && git checkout ${head_rev} -b checks &&
-            cd /src/report && ./ci-test.sh"
+            cd /src/report && pip install -r requirements.txt && ./ci-test.sh"
       metadata:
         name: "Code Coverage Report checks: unit tests"
         description: Check python code with unittest
@@ -489,3 +489,33 @@ tasks:
             description: Code Coverage Github automated release
             owner: bastien@mozilla.com
             source: https://github.com/mozilla/code-coverage
+
+    - $if: 'tasks_for == "github-push" && head_branch[:10] == "refs/tags/"'
+      then:
+        taskId: {$eval: as_slugid("report_deploy_pypi")}
+        dependencies:
+          - {$eval: as_slugid("report_check_tests")}
+        provisionerId: proj-relman
+        workerType: ci
+        created: {$fromNow: ''}
+        deadline: {$fromNow: '1 hour'}
+        payload:
+          features:
+            # Needed for access to secret
+            taskclusterProxy: true
+          maxRunTime: 3600
+          image: "${taskboot_image}"
+          env:
+            TASKCLUSTER_SECRET: "project/relman/code-coverage/release"
+          command:
+            - sh
+            - -lxce
+            - "git clone ${repository} /project && cd /project && git checkout ${head_rev} -b release &&
+               taskboot --target=/project/report deploy-pypi"
+        scopes:
+            - "secrets:get:project/relman/code-coverage/release"
+        metadata:
+          name: "Code Coverage Report: publish on pypi"
+          description: Code Coverage Github Pypi publication for report
+          owner: bastien@mozilla.com
+          source: https://github.com/mozilla/code-coverage
