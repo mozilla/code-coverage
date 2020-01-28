@@ -275,7 +275,7 @@ def test_download_artifact_forbidden(mocked_sleep, mock_taskcluster, tmpdir):
             "public/test_info/code-coverage-grcov.zip",
         )
 
-    assert mocked_sleep.call_count == 4
+    assert len(responses.calls) == 5
 
 
 @mock.patch("time.sleep")
@@ -295,4 +295,4 @@ def test_download_artifact_badzip(mocked_sleep, mock_taskcluster, tmpdir):
             "public/test_info/code-coverage-grcov.zip",
         )
 
-    assert mocked_sleep.call_count == 4
+    assert len(responses.calls) == 5

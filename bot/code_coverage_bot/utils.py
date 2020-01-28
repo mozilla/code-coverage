@@ -4,32 +4,10 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import concurrent.futures
 import subprocess
-import time
 
 import structlog
 
 log = structlog.get_logger(__name__)
-
-
-class RunException(Exception):
-    """
-    Exception used to stop retrying
-    """
-
-
-def retry(
-    operation, retries=5, wait_between_retries=30, exception_to_break=RunException
-):
-    while True:
-        try:
-            return operation()
-        except Exception as e:
-            if isinstance(e, exception_to_break):
-                raise
-            retries -= 1
-            if retries == 0:
-                raise
-            time.sleep(wait_between_retries)
 
 
 def hide_secrets(text, secrets):
@@ -54,7 +32,7 @@ def run_check(command, **kwargs):
     assert isinstance(command, list)
 
     if len(command) == 0:
-        raise RunException("Can't run an empty command.")
+        raise Exception("Can't run an empty command.")
 
     _kwargs = dict(
         stdin=subprocess.DEVNULL,  # no interactions
@@ -81,7 +59,7 @@ def run_check(command, **kwargs):
             error=error,
         )
 
-        raise RunException(f"`{command[0]}` failed with code: {proc.returncode}.")
+        raise Exception(f"`{command[0]}` failed with code: {proc.returncode}.")
 
     return output
 

@@ -7,9 +7,8 @@ from zipfile import is_zipfile
 import requests
 import structlog
 import taskcluster
+import tenacity
 from taskcluster.helper import TaskclusterConfig
-
-from code_coverage_bot.utils import retry
 
 logger = structlog.getLogger(__name__)
 taskcluster_config = TaskclusterConfig("https://firefox-ci-tc.services.mozilla.com")
@@ -72,6 +71,9 @@ def download_artifact(artifact_path, task_id, artifact_name):
     url = queue.buildUrl("getLatestArtifact", task_id, artifact_name)
     logger.debug("Downloading artifact", url=url)
 
+    @tenacity.retry(
+        reraise=True, wait=tenacity.wait_fixed(30), stop=tenacity.stop_after_attempt(5)
+    )
     def perform_download():
         r = requests.get(url, stream=True)
         r.raise_for_status()
@@ -83,7 +85,7 @@ def download_artifact(artifact_path, task_id, artifact_name):
         if artifact_path.endswith(".zip") and not is_zipfile(artifact_path):
             raise BadZipFile("File is not a zip file")
 
-    retry(perform_download)
+    perform_download()
 
 
 def is_coverage_task(task):
