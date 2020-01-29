@@ -376,7 +376,15 @@ def main():
         action="store_true",
         help="Only generate high-level stats, not a full HTML report",
     )
+    parser.add_argument(
+        "-o",
+        "--output-dir",
+        help="The output directory for generated report",
+        default=os.path.join(os.getcwd(), "ccov-report"),
+    )
     args = parser.parse_args()
+
+    os.makedirs(args.output_dir, exist_ok=True)
 
     if (args.branch is None) != (args.commit is None):
         parser.print_help()
@@ -402,9 +410,10 @@ def main():
         grcov_path = download_grcov()
 
     if args.stats:
-        generate_report(grcov_path, "coveralls", "output.json", artifact_paths)
+        output = os.path.join(args.output_dir, "output.json")
+        generate_report(grcov_path, "coveralls", output, artifact_paths)
 
-        with open("output.json", "r") as f:
+        with open(output, "r") as f:
             report = json.load(f)
 
         total_lines = 0
@@ -426,8 +435,7 @@ def main():
             )
         )
     else:
-        report_dir = tempfile.mkdtemp(suffix="html-report")
-        generate_report(grcov_path, "html", report_dir, artifact_paths)
+        generate_report(grcov_path, "html", args.output_dir, artifact_paths)
 
 
 if __name__ == "__main__":
