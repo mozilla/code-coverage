@@ -246,12 +246,19 @@ def generate_report(grcov_path, output_format, output_path, artifact_paths):
             i += 1
             time.sleep(60)
         mod_env["PATH"] = one_click_loaner_gcc + ":" + mod_env["PATH"]
-    fout = open(output_path, "w")
-    cmd = [grcov_path, "-t", output_format, "-p", "/home/worker/workspace/build/src/"]
+    cmd = [
+        grcov_path,
+        "-t",
+        output_format,
+        "-p",
+        "/home/worker/workspace/build/src/",
+        "-o",
+        output_path,
+    ]
     if output_format in ["coveralls", "coveralls+"]:
         cmd += ["--token", "UNUSED", "--commit-sha", "UNUSED"]
     cmd.extend(artifact_paths)
-    proc = subprocess.Popen(cmd, stdout=fout, stderr=subprocess.PIPE, env=mod_env)
+    proc = subprocess.Popen(cmd, stderr=subprocess.PIPE)
     i = 0
     while proc.poll() is None:
         if i % 60 == 0:
@@ -263,40 +270,6 @@ def generate_report(grcov_path, output_format, output_path, artifact_paths):
 
     if proc.poll() != 0:
         raise Exception("Error while running grcov: {}\n".format(proc.stderr.read()))
-
-
-def generate_html_report(
-    src_dir,
-    info_file=os.path.join(os.getcwd(), "output.info"),
-    output_dir=os.path.join(os.getcwd(), "report"),
-    silent=False,
-    style_file=None,
-):
-    cwd = os.getcwd()
-    os.chdir(src_dir)
-
-    with open(os.devnull, "w") as fnull:
-        command = [
-            os.path.join(cwd, "lcov-bin/usr/local/bin/genhtml"),
-            "-o",
-            output_dir,
-            "--show-details",
-            "--highlight",
-            "--ignore-errors",
-            "source",
-            "--legend",
-            info_file,
-        ]
-        if style_file is not None:
-            command += ["--css-file", style_file]
-        ret = subprocess.call(
-            command, stdout=fnull if silent else None, stderr=fnull if silent else None
-        )
-
-    if ret != 0:
-        raise Exception("Error while running genhtml.")
-
-    os.chdir(cwd)
 
 
 def download_grcov():
@@ -335,21 +308,6 @@ def download_grcov():
         f.write(version)
 
     return local_path
-
-
-def download_genhtml():
-    if os.path.isdir("lcov"):
-        os.chdir("lcov")
-        subprocess.check_call(["git", "pull"])
-    else:
-        subprocess.check_call(
-            ["git", "clone", "https://github.com/linux-test-project/lcov.git"]
-        )
-        os.chdir("lcov")
-
-    subprocess.check_call(["make", "install", "DESTDIR=../lcov-bin"])
-
-    os.chdir("..")
 
 
 def main():
@@ -468,10 +426,8 @@ def main():
             )
         )
     else:
-        generate_report(grcov_path, "lcov", "output.info", artifact_paths)
-
-        download_genhtml()
-        generate_html_report(os.path.abspath(args.src_dir))
+        report_dir = tempfile.mkdtemp(suffix="html-report")
+        generate_report(grcov_path, "html", report_dir, artifact_paths)
 
 
 if __name__ == "__main__":
