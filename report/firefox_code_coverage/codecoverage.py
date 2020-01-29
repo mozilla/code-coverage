@@ -258,7 +258,7 @@ def generate_report(grcov_path, output_format, output_path, artifact_paths):
     if output_format in ["coveralls", "coveralls+"]:
         cmd += ["--token", "UNUSED", "--commit-sha", "UNUSED"]
     cmd.extend(artifact_paths)
-    proc = subprocess.Popen(cmd, stderr=subprocess.PIPE)
+    proc = subprocess.Popen(cmd, stderr=subprocess.PIPE, env=mod_env)
     i = 0
     while proc.poll() is None:
         if i % 60 == 0:
