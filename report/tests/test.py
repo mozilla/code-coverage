@@ -84,9 +84,9 @@ class Test(unittest.TestCase):
         codecoverage.generate_report("./grcov", "lcov", "output.info", artifact_paths)
         self.assertTrue(os.path.exists("output.info"))
 
-        codecoverage.download_genhtml()
-        codecoverage.generate_html_report("tests", silent=True)
-        self.assertTrue(os.path.isdir("report"))
+        codecoverage.generate_report("./grcov", "html", "report_html", artifact_paths)
+        self.assertTrue(os.path.isdir("report_html"))
+        self.assertListEqual(os.listdir("report_html"), ["index.html", "grcov.css"])
 
     def test_suite_name_from_task_name(self):
         cases = [
@@ -141,13 +141,6 @@ class Test(unittest.TestCase):
         self.assertTrue(os.path.getsize("grcov") > 5)
         with open("grcov_ver", "r") as f:
             self.assertEqual(ver, f.read())
-
-    def test_download_genhtml(self):
-        codecoverage.download_genhtml()
-        self.assertTrue(os.path.exists("./lcov-bin/usr/local/bin/genhtml"))
-
-        codecoverage.download_genhtml()
-        self.assertTrue(os.path.exists("./lcov-bin/usr/local/bin/genhtml"))
 
 
 if __name__ == "__main__":
