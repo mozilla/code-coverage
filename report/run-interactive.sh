@@ -5,7 +5,7 @@ VENV=/tmp/ccov-env
 
 # Build new Python 3 virtual environment
 pip install https://github.com/pypa/virtualenv/archive/16.7.9.tar.gz
-virtualenv -p /usr/local/bin/python3 --no-wheel --no-pip --no-setuptools $VENV
+virtualenv -p $(which python3) --no-wheel --no-pip --no-setuptools $VENV
 
 # Run following commands in new virtualenv
 . $VENV/bin/activate
