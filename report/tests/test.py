@@ -86,7 +86,8 @@ class Test(unittest.TestCase):
 
         codecoverage.generate_report("./grcov", "html", "report_html", artifact_paths)
         self.assertTrue(os.path.isdir("report_html"))
-        self.assertListEqual(os.listdir("report_html"), ["index.html", "grcov.css"])
+        self.assertTrue(os.path.exists("report_html/index.html"))
+        self.assertTrue(os.path.exists("report_html/grcov.css"))
 
     def test_suite_name_from_task_name(self):
         cases = [
