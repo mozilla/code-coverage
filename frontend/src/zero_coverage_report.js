@@ -105,7 +105,7 @@ function getBaseStats(file, children) {
     children,
     funcs: file.funcs,
     first_push_date: file.first_push_date,
-    lastPushDate: file.lastPushDate,
+    last_push_date: file.last_push_date,
     size: file.size,
     commits: file.commits
   };
@@ -120,9 +120,9 @@ function cumStats(prevStats, newStats) {
     prevStats.first_push_date,
     newStats.first_push_date
   );
-  prevStats.lastPushDate = getMinDate(
-    prevStats.lastPushDate,
-    newStats.lastPushDate
+  prevStats.last_push_date = getMinDate(
+    prevStats.last_push_date,
+    newStats.last_push_date
   );
 }
 
