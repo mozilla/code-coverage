@@ -68,8 +68,8 @@ def get_tasks_in_group(group_id):
     return tasks
 
 
-@tenacity.retry(stop=tenacity.stop_after_attempt(3),
-                    wait=tenacity.wait_incrementing(start = 1, increment = 1),
+@tenacity.retry(stop=tenacity.stop_after_attempt(5),
+                    wait=tenacity.wait_incrementing(start = 7, increment = 7),
                     reraise=True)
 def download_binary(url, path):
     """Download a binary file from an url"""
@@ -83,7 +83,6 @@ def download_binary(url, path):
                 f.write(chunk)
                 
     except Exception:
-        print("-----")
         try:
             os.remove(path)
             
