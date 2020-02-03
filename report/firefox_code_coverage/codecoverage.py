@@ -11,8 +11,9 @@ import tarfile
 import tempfile
 import time
 import warnings
-import tenacity
+
 import requests
+import tenacity
 
 from firefox_code_coverage import taskcluster
 
@@ -67,12 +68,14 @@ def get_tasks_in_group(group_id):
     return tasks
 
 
-@tenacity.retry(stop=tenacity.stop_after_attempt(5),
-                    wait=tenacity.wait_incrementing(start = 7, increment = 7),
-                    reraise=True)
+@tenacity.retry(
+    stop=tenacity.stop_after_attempt(5),
+    wait=tenacity.wait_incrementing(start=7, increment=7),
+    reraise=True,
+)
 def download_binary(url, path):
     """Download a binary file from an url"""
-    
+
     try:
         artifact = requests.get(url, stream=True)
         artifact.raise_for_status()
@@ -80,7 +83,7 @@ def download_binary(url, path):
         with open(path, "wb") as f:
             for chunk in artifact.iter_content(chunk_size=8192):
                 f.write(chunk)
-                
+
     except Exception:
         try:
             os.remove(path)
