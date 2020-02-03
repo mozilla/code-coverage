@@ -9,6 +9,7 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+import tenacity
 import time
 import warnings
 
@@ -69,7 +70,10 @@ def get_tasks_in_group(group_id):
 
 def download_binary(url, path, retries=5):
     """Download a binary file from an url"""
-    for i in range(1, retries + 1):
+    @tenacity.retry(stop=tenacity.stop_after_attempt(retries),
+                    wait=tenacity.wait_incrementing(start = 7, increment = 7),
+                    reraise=True)
+    def retry_function():
         try:
             artifact = requests.get(url, stream=True)
             artifact.raise_for_status()
@@ -77,19 +81,17 @@ def download_binary(url, path, retries=5):
             with open(path, "wb") as f:
                 for chunk in artifact.iter_content(chunk_size=8192):
                     f.write(chunk)
-            break
-        except:  # noqa: E722
+        except:
             try:
                 os.remove(path)
             except OSError:
                 pass
-
-            if i == retries:
-                raise Exception(
-                    "Download failed after {} retries - {}".format(retries, url)
+            
+            raise Exception(
+                    "Download failed after {} retries - {}".format(retry_function.retry.statistics["attempt_number"], url)
                 )
-
-            time.sleep(7 * i)
+    
+    retry_function()
 
 
 def download_artifact(task_id, artifact, artifacts_path):
