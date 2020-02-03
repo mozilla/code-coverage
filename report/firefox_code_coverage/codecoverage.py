@@ -13,6 +13,7 @@ import time
 import warnings
 
 import requests
+import tenacity
 
 from firefox_code_coverage import taskcluster
 
@@ -67,29 +68,29 @@ def get_tasks_in_group(group_id):
     return tasks
 
 
-def download_binary(url, path, retries=5):
+@tenacity.retry(
+    stop=tenacity.stop_after_attempt(5),
+    wait=tenacity.wait_incrementing(start=7, increment=7),
+    reraise=True,
+)
+def download_binary(url, path):
     """Download a binary file from an url"""
-    for i in range(1, retries + 1):
+
+    try:
+        artifact = requests.get(url, stream=True)
+        artifact.raise_for_status()
+
+        with open(path, "wb") as f:
+            for chunk in artifact.iter_content(chunk_size=8192):
+                f.write(chunk)
+
+    except Exception:
         try:
-            artifact = requests.get(url, stream=True)
-            artifact.raise_for_status()
+            os.remove(path)
+        except OSError:
+            pass
 
-            with open(path, "wb") as f:
-                for chunk in artifact.iter_content(chunk_size=8192):
-                    f.write(chunk)
-            break
-        except:  # noqa: E722
-            try:
-                os.remove(path)
-            except OSError:
-                pass
-
-            if i == retries:
-                raise Exception(
-                    "Download failed after {} retries - {}".format(retries, url)
-                )
-
-            time.sleep(7 * i)
+        raise
 
 
 def download_artifact(task_id, artifact, artifacts_path):
