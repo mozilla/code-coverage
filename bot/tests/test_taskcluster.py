@@ -104,7 +104,7 @@ def test_get_tasks_in_group(mock_taskcluster, GROUP_TASKS_1, GROUP_TASKS_2):
     )
     responses.add(
         responses.GET,
-        "http://taskcluster.test/api/queue/v1/task-group/aPt9FbIdQwmhwDIPDYLuaw/list?continuationToken=1%2132%21YVB0OUZiSWRRd21od0RJUERZTHVhdw--~1%2132%21ZnJVcGRRT0VTalN0Nm9Ua1Ztcy04UQ--&limit=200",  # noqa
+        "http://taskcluster.test/api/queue/v1/task-group/aPt9FbIdQwmhwDIPDYLuaw/list?continuationToken=1%2132%21YVB0OUZiSWRRd21od0RJUERZTHVhdw--~1%2132%21ZnJVcGRRT0VTalN0Nm9Ua1Ztcy04UQ--&limit=200",
         json=GROUP_TASKS_2,
         status=200,
         match_querystring=True,
@@ -267,7 +267,7 @@ def test_download_artifact_forbidden(mocked_sleep, mock_taskcluster, tmpdir):
 
     with pytest.raises(
         requests.exceptions.HTTPError,
-        match="403 Client Error: Forbidden for url: https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/FBdocjnAQOW_GJDOfmgjxw/artifacts/public%2Ftest_info%2Fcode-coverage-grcov.zip",  # noqa
+        match="403 Client Error: Forbidden for url: https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/FBdocjnAQOW_GJDOfmgjxw/artifacts/public%2Ftest_info%2Fcode-coverage-grcov.zip",
     ):
         taskcluster.download_artifact(
             os.path.join(tmpdir.strpath, "windows_reftest-6_code-coverage-grcov.zip"),
