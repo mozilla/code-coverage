@@ -68,30 +68,29 @@ def get_tasks_in_group(group_id):
     return tasks
 
 
-def download_binary(url, path, retries=5):
-    """Download a binary file from an url"""
-    @tenacity.retry(stop=tenacity.stop_after_attempt(retries),
-                    wait=tenacity.wait_incrementing(start = 7, increment = 7),
+@tenacity.retry(stop=tenacity.stop_after_attempt(3),
+                    wait=tenacity.wait_incrementing(start = 1, increment = 1),
                     reraise=True)
-    def retry_function():
-        try:
-            artifact = requests.get(url, stream=True)
-            artifact.raise_for_status()
-
-            with open(path, "wb") as f:
-                for chunk in artifact.iter_content(chunk_size=8192):
-                    f.write(chunk)
-        except:
-            try:
-                os.remove(path)
-            except OSError:
-                pass
-            
-            raise Exception(
-                    "Download failed after {} retries - {}".format(retry_function.retry.statistics["attempt_number"], url)
-                )
+def download_binary(url, path):
+    """Download a binary file from an url"""
     
-    retry_function()
+    try:
+        artifact = requests.get(url, stream=True)
+        artifact.raise_for_status()
+
+        with open(path, "wb") as f:
+            for chunk in artifact.iter_content(chunk_size=8192):
+                f.write(chunk)
+                
+    except Exception:
+        print("-----")
+        try:
+            os.remove(path)
+            
+        except OSError:
+            pass
+
+        raise
 
 
 def download_artifact(task_id, artifact, artifacts_path):
