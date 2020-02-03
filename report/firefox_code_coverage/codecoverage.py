@@ -15,6 +15,7 @@ import warnings
 import requests
 
 from firefox_code_coverage import taskcluster
+from tenacity import retry, stop_after_attempt, wait_exponential
 
 FINISHED_STATUSES = ["completed", "failed", "exception"]
 ALL_STATUSES = FINISHED_STATUSES + ["unscheduled", "pending", "running"]
@@ -67,30 +68,33 @@ def get_tasks_in_group(group_id):
     return tasks
 
 
-def download_binary(url, path, retries=5):
-    """Download a binary file from an url"""
-    for i in range(1, retries + 1):
+@retry(stop=stop_after_attempt(5), wait=wait_exponential(multiplier=1, max=64))
+def retry_download_binary(url, path):
+    """Download a binary file from an url with exponential backoff"""
+    try:
+        artifact = requests.get(url, stream=True)
+        artifact.raise_for_status()
+
+        with open(path, "wb") as f:
+            for chunk in artifact.iter_content(chunk_size=8192):
+                f.write(chunk)
+        return
+    except:  # noqa: E722
         try:
-            artifact = requests.get(url, stream=True)
-            artifact.raise_for_status()
+            os.remove(path)
+        except OSError:
+            raise Exception
 
-            with open(path, "wb") as f:
-                for chunk in artifact.iter_content(chunk_size=8192):
-                    f.write(chunk)
-            break
-        except:  # noqa: E722
-            try:
-                os.remove(path)
-            except OSError:
-                pass
 
-            if i == retries:
-                raise Exception(
-                    "Download failed after {} retries - {}".format(retries, url)
-                )
-
-            time.sleep(7 * i)
-
+def download_binary(url, path):
+    """Wrapper function for retry_download_binary which raises exception after max number of retries"""
+    try:
+        retry_download_binary(url, path)
+    except:
+        raise Exception(
+            "Download failed after {} retries - {}".format(str(retry_download_binary.retry.statistics["attempt_number"])
+                                                           , url)
+        )
 
 def download_artifact(task_id, artifact, artifacts_path):
     fname = os.path.join(
