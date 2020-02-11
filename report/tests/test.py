@@ -7,7 +7,9 @@
 import errno
 import os
 import shutil
+import tempfile
 import unittest
+from datetime import timedelta
 
 from firefox_code_coverage import codecoverage
 
@@ -142,6 +144,19 @@ class Test(unittest.TestCase):
         self.assertTrue(os.path.getsize("grcov") > 5)
         with open("grcov_ver", "r") as f:
             self.assertEqual(ver, f.read())
+
+    def test_upload_report(self):
+
+        # Can only run on Taskcluster
+        if "TASK_ID" not in os.environ:
+            return
+
+        _dir = tempfile.mkdtemp()
+
+        with open(os.path.join(_dir, "report.html"), "w") as f:
+            f.write("<strong>This is a test</strong>")
+
+        codecoverage.upload_html_report(str(_dir), ttl=timedelta(days=1))
 
 
 if __name__ == "__main__":
