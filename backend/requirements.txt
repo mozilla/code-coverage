@@ -1,6 +1,6 @@
 -e ../tools #egg=code-coverage-tools
 connexion==2.6.0
-datadog==0.33.0
+datadog==0.34.1
 fakeredis==1.2.0
 Flask==1.1.1
 Flask-Cors==3.0.8
