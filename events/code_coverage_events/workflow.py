@@ -7,7 +7,6 @@ import structlog
 from libmozevent.bus import MessageBus
 from libmozevent.monitoring import Monitoring
 from libmozevent.pulse import PulseListener
-from libmozevent.utils import retry
 from libmozevent.utils import run_tasks
 
 from code_coverage_events import QUEUE_MONITORING
@@ -81,7 +80,7 @@ class CodeCoverage(object):
             query = {"limit": limit}
             if continuationToken is not None:
                 query["continuationToken"] = continuationToken
-            reply = retry(lambda: self.queue.listTaskGroup(group_id, query=query))
+            reply = self.queue.listTaskGroup(group_id, query=query)
             return maybe_trigger(reply["tasks"]), reply.get("continuationToken")
 
         async def retrieve_coverage_task():
