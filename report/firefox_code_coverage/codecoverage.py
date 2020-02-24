@@ -24,6 +24,7 @@ from firefox_code_coverage import taskcluster
 FINISHED_STATUSES = ["completed", "failed", "exception"]
 ALL_STATUSES = FINISHED_STATUSES + ["unscheduled", "pending", "running"]
 STATUS_VALUE = {"exception": 1, "failed": 2, "completed": 3}
+TASKCLUSTER_SRC_DIR = "/builds/worker/workspace/build/src/"
 
 GRCOV_INDEX = "gecko.cache.level-3.toolchains.v3.linux64-grcov.latest"
 GRCOV_ARTIFACT = "public/build/grcov.tar.xz"
@@ -32,12 +33,16 @@ logger = logging.getLogger(__name__)
 
 
 def is_taskcluster_loaner():
-    return "TASKCLUSTER_INTERACTIVE" in os.environ
+    return os.environ.get("TASKCLUSTER_INTERACTIVE") == "true"
 
 
 def get_task(branch, revision):
     index = taskcluster.get_service("index")
-    task = index.findTask(f"gecko.v2.{branch}.revision.{revision}.firefox.decision")
+    task = index.findTask(
+        "gecko.v2.{branch}.revision.{revision}.firefox.decision".format(
+            branch=branch, revision=revision
+        )
+    )
     return task["taskId"]
 
 
@@ -140,7 +145,7 @@ def get_platform(task_name):
     elif "macosx" in task_name:
         return "macos"
     else:
-        raise Exception(f"Unknown platform for {task_name}")
+        raise Exception("Unknown platform for {}".format(task_name))
 
 
 def get_task_status(task_id):
@@ -241,31 +246,19 @@ def download_coverage_artifacts(
 
 
 def generate_report(grcov_path, output_format, output_path, artifact_paths):
-    mod_env = os.environ.copy()
-    if is_taskcluster_loaner():
-        one_click_loaner_gcc = "/home/worker/workspace/build/src/gcc/bin"
-        i = 0
-        while (
-            not os.path.isdir(one_click_loaner_gcc)
-            or len(os.listdir(one_click_loaner_gcc)) == 0
-        ):
-            print("Waiting one-click loaner to be ready... " + str(i))
-            i += 1
-            time.sleep(60)
-        mod_env["PATH"] = one_click_loaner_gcc + ":" + mod_env["PATH"]
     cmd = [
         grcov_path,
         "-t",
         output_format,
         "-p",
-        "/home/worker/workspace/build/src/",
+        TASKCLUSTER_SRC_DIR,
         "-o",
         output_path,
     ]
     if output_format in ["coveralls", "coveralls+"]:
         cmd += ["--token", "UNUSED", "--commit-sha", "UNUSED"]
     cmd.extend(artifact_paths)
-    proc = subprocess.Popen(cmd, stderr=subprocess.PIPE, env=mod_env)
+    proc = subprocess.Popen(cmd, stderr=subprocess.PIPE)
     i = 0
     while proc.poll() is None:
         if i % 60 == 0:
@@ -280,8 +273,8 @@ def generate_report(grcov_path, output_format, output_path, artifact_paths):
 
 
 def download_grcov():
-    local_path = "grcov"
-    local_version = "grcov_ver"
+    local_path = os.path.join(os.getcwd(), "grcov")
+    local_version = os.path.join(os.getcwd(), "grcov_ver")
 
     dest = tempfile.mkdtemp(suffix="grcov")
     archive = os.path.join(dest, "grcov.tar.xz")
@@ -343,7 +336,7 @@ def main():
 
     if is_taskcluster_loaner():
         nargs = "?"
-        default_src_dir = "/home/worker/workspace/build/src/"
+        default_src_dir = TASKCLUSTER_SRC_DIR
         default_branch = os.environ["MH_BRANCH"]
         default_commit = os.environ["GECKO_HEAD_REV"]
     else:
