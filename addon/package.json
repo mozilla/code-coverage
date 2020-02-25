@@ -13,7 +13,7 @@
     "eslint-plugin-no-unsanitized": "^3.0.2",
     "web-ext": "^4.1.0",
     "webpack": "^4.41.6",
-    "webpack-cli": "^3.3.10"
+    "webpack-cli": "^3.3.11"
   },
   "scripts": {
     "lint": "eslint src/*.js",
