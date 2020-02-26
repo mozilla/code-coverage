@@ -53,6 +53,11 @@ tasks:
 
     taskboot_image: "mozilla/taskboot:0.2.1"
   in:
+    # TODO: move the bot docker build flow on Firefox CI Taskcluster
+    # when https://phabricator.services.mozilla.com/D63876 lands
+    $if: "taskcluster_root_url == 'https://firefox-ci-tc.services.mozilla.com'"
+    then: []
+    else:
     - taskId: {$eval: as_slugid("check_lint")}
       provisionerId: proj-relman
       workerType: ci
