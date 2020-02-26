@@ -72,7 +72,7 @@ tasks:
           - "git clone --quiet ${repository} /src && cd /src && git checkout ${head_rev} -b checks &&
             cd /src/bot && pip install --disable-pip-version-check --no-cache-dir --quiet -r requirements-dev.txt &&
             cd /src/backend && pip install --disable-pip-version-check --no-cache-dir --quiet -r requirements-dev.txt &&
-            cd /src && pre-commit run -a"
+            cd /src && pre-commit run -a --show-diff-on-failure"
       metadata:
         name: "Code Coverage checks: linting"
         description: Check code style with pre-commit hooks
