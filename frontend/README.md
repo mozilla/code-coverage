@@ -29,3 +29,7 @@ You can specify another remote backend like so:
 ```
 BACKEND_URL=https://api.coverage.moz.tools npm run start
 ```
+
+## Help
+
+You can reach us on our Matrix instance: [#codecoverage:mozilla.org](https://chat.mozilla.org/#/room/#codecoverage:mozilla.org)

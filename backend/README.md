@@ -58,3 +58,7 @@ You can specify a firefox-ci Taskcluster secret instead using:
 ```shell
 TASKCLUSTER_SECRET=path/to/secret ./run.sh
 ```
+
+## Help
+
+You can reach us on our Matrix instance: [#codecoverage:mozilla.org](https://chat.mozilla.org/#/room/#codecoverage:mozilla.org)
