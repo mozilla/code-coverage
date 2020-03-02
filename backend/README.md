@@ -37,13 +37,23 @@ docker run -v /tmp/ccov-redis:/data -p 6379:6379 redis
 
 The development webserver will run on **http://localhost:8000**
 
-Using default secret `project-relman/code-coverage/dev`:
+You need to setup a local YAML configuration file, with the following content:
 
-```shell
-./run.sh
+```yaml
+---
+common:
+  APP_CHANNEL: dev
+  GOOGLE_CLOUD_STORAGE: null
 ```
 
-You can specify any other secret as:
+Using your local configuration:
+
+```shell
+LOCAL_CONFIGURATION=/path/to/code-coverage-conf.yml ./run.sh
+
+```
+
+You can specify a firefox-ci Taskcluster secret instead using:
 
 ```shell
 TASKCLUSTER_SECRET=path/to/secret ./run.sh
