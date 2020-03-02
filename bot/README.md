@@ -13,12 +13,6 @@ Requirements:
 - [virtualenvwrapper](https://virtualenvwrapper.readthedocs.io/en/latest/)
 - Mercurial 5.3
 
-You'll need an up to date clone of [mozilla-central](https://hg.mozilla.org/mozilla-central/) on your computer. If you do not already have one, please do:
-
-```console
-hg clone https://hg.mozilla.org/mozilla-central/
-```
-
 Setup on your computer:
 
 ```console
@@ -52,12 +46,18 @@ bot:
   PHABRICATOR_TOKEN: api-xxx
   PHABRICATOR_ENABLED: false
   PHABRICATOR_URL: 'https://phabricator-dev.allizom.org/api/'
+	GOOGLE_CLOUD_STORAGE: null
 ```
 
-Run the bot:
+Run the bot (in cron mode):
 
 ```console
 mkdir -p build/{cache,work} # or elsewhere on your system
-code-coverage-repo --cache-root=build/cache --working-dir=build/work --local-configuration=path/to/code-coverage.yml
+code-coverage-cron--cache-root=build/cache --working-dir=build/work --local-configuration=path/to/code-coverage.yml
 ```
 
+The repo mode (with `code-coverage-repo` is harder to use, as it requires a Google Cloud Storage & Phabricator account.
+
+## Help
+
+You can reach us on our Matrix instance: [#codecoverage:mozilla.org](https://chat.mozilla.org/#/room/#codecoverage:mozilla.org)
