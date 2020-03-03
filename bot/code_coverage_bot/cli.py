@@ -44,7 +44,6 @@ def setup_cli(ask_repository=True, ask_revision=True):
         "--local-configuration",
         help="Path to a local YAML configuration file",
         type=open,
-        default=os.environ.get("TASKCLUSTER_SECRET"),
     )
     parser.add_argument("--taskcluster-client-id", help="Taskcluster Client ID")
     parser.add_argument("--taskcluster-access-token", help="Taskcluster Access token")
