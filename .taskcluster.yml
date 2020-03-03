@@ -64,7 +64,7 @@ tasks:
       then: linux
       else: ci
 
-    taskboot_image: "mozilla/taskboot:0.2.1"
+    taskboot_image: "mozilla/taskboot:0.2.2"
   in:
     $flatten:
       $match:
