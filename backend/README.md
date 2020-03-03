@@ -52,7 +52,7 @@ Using your local configuration:
 LOCAL_CONFIGURATION=/path/to/code-coverage-conf.yml ./run.sh
 ```
 
-You can specify a firefox-ci Taskcluster secret instead using:
+You can specify a firefox-ci Taskcluster secret (e.g. project-relman/code-coverage/dev) instead using:
 
 ```shell
 TASKCLUSTER_SECRET=path/to/secret ./run.sh
