@@ -9,14 +9,17 @@ It's built using Python 3.8 and few dependencies.
 Requirements:
 
 - Python 3.8
-- [virtualenv](https://virtualenv.pypa.io/en/stable/)
-- [virtualenvwrapper](https://virtualenvwrapper.readthedocs.io/en/latest/)
 - Mercurial 5.3
+- (optional) [virtualenv](https://virtualenv.pypa.io/en/stable/)
+- (optional) [virtualenvwrapper](https://virtualenvwrapper.readthedocs.io/en/latest/)
 
 Setup on your computer:
 
 ```console
+# If you have virtualenvwrapper:
 mkvirtualenv -p /usr/bin/python3.8 code-coverage-bot
+
+# Mandatory steps
 pip install -r requirements.txt -r requirements-dev.txt
 pip install -e .
 pre-commit install
