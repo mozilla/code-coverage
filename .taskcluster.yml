@@ -8,7 +8,11 @@ tasks:
       then: ${event.pull_request.head.ref}
       else:
         $if: 'tasks_for == "github-push"'
-        then: ${event.ref}
+        then:
+          # Strip ref branch prefix
+          $if: 'event.ref[0:11] == "refs/heads/"'
+          then: ${event.ref[11:]}
+          else: ${event.ref}
         else: ${event.release.target_commitish}
 
     head_rev:
