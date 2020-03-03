@@ -56,7 +56,7 @@ mkdir -p build/{cache,work} # or elsewhere on your system
 code-coverage-cron --cache-root=build/cache --working-dir=build/work --local-configuration=path/to/code-coverage.yml
 ```
 
-The repo mode (with `code-coverage-repo` is harder to use, as it requires a Google Cloud Storage & Phabricator account.
+The repo mode (with `code-coverage-repo`) is harder to use, as it requires a Google Cloud Storage and a Phabricator account.
 
 ## Help
 
