@@ -15,10 +15,10 @@ class Secrets(dict):
     PHABRICATOR_TOKEN = "PHABRICATOR_TOKEN"
     GOOGLE_CLOUD_STORAGE = "GOOGLE_CLOUD_STORAGE"
 
-    def load(self, taskcluster_secret):
+    def load(self, taskcluster_secret=None, local_secrets=None):
         taskcluster_config.load_secrets(
             taskcluster_secret,
-            prefixes=["common", "code-coverage-bot"],
+            prefixes=["common", "bot"],
             required=[
                 Secrets.APP_CHANNEL,
                 Secrets.BACKEND_HOST,
@@ -27,6 +27,7 @@ class Secrets(dict):
                 Secrets.PHABRICATOR_URL,
                 Secrets.PHABRICATOR_TOKEN,
             ],
+            local_secrets=local_secrets,
         )
         self.update(taskcluster_config.secrets)
 
