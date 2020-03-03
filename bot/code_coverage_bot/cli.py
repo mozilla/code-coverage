@@ -6,6 +6,8 @@
 import argparse
 import os
 
+import yaml
+
 from code_coverage_bot.secrets import secrets
 from code_coverage_bot.taskcluster import taskcluster_config
 from code_coverage_tools.log import init_logger
@@ -38,6 +40,11 @@ def setup_cli(ask_repository=True, ask_revision=True):
         help="Taskcluster Secret path",
         default=os.environ.get("TASKCLUSTER_SECRET"),
     )
+    parser.add_argument(
+        "--local-configuration",
+        help="Path to a local YAML configuration file",
+        type=open,
+    )
     parser.add_argument("--taskcluster-client-id", help="Taskcluster Client ID")
     parser.add_argument("--taskcluster-access-token", help="Taskcluster Access token")
     args = parser.parse_args()
@@ -46,7 +53,12 @@ def setup_cli(ask_repository=True, ask_revision=True):
     taskcluster_config.auth(args.taskcluster_client_id, args.taskcluster_access_token)
 
     # Then load secrets
-    secrets.load(args.taskcluster_secret)
+    secrets.load(
+        args.taskcluster_secret,
+        local_secrets=yaml.safe_load(args.local_configuration)
+        if args.local_configuration
+        else None,
+    )
 
     init_logger(
         "bot",

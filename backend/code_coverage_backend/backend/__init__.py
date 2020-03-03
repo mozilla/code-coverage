@@ -6,6 +6,7 @@
 import os.path
 
 import structlog
+import yaml
 
 import code_coverage_backend.datadog
 import code_coverage_backend.gcp
@@ -17,12 +18,20 @@ from .build import build_flask_app
 
 def create_app():
     # Load secrets from Taskcluster
+    local_secrets_path = os.environ.get("LOCAL_CONFIGURATION")
+    if local_secrets_path is not None:
+        assert os.path.exists(
+            local_secrets_path
+        ), f"Invalid local secrets path {local_secrets_path}"
     taskcluster.auth()
     taskcluster.load_secrets(
         os.environ.get("TASKCLUSTER_SECRET"),
         prefixes=["common", "backend", "code-coverage-backend"],
         required=["GOOGLE_CLOUD_STORAGE", "APP_CHANNEL"],
         existing={"REDIS_URL": os.environ.get("REDIS_URL", "redis://localhost:6379")},
+        local_secrets=yaml.safe_load(open(local_secrets_path))
+        if local_secrets_path
+        else None,
     )
 
     # Configure logger
