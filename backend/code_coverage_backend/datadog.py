@@ -25,7 +25,7 @@ def get_stats():
 
     app_channel = taskcluster.secrets["APP_CHANNEL"]
 
-    if taskcluster.secrets["DATADOG_API_KEY"]:
+    if taskcluster.secrets.get("DATADOG_API_KEY"):
         datadog.initialize(
             api_key=taskcluster.secrets["DATADOG_API_KEY"],
             host_name=f"coverage.{app_channel}.moz.tools",
