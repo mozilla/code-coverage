@@ -51,478 +51,474 @@ tasks:
         else: 'https://api.coverage.moz.tools'
       else: 'https://api.coverage.moz.tools'
 
-    taskboot_image: "mozilla/taskboot:0.2.1"
+    provisionerId:
+      $if: 'taskcluster_root_url == "https://firefox-ci-tc.services.mozilla.com"'
+      then:
+          $if: 'tasks_for == "github-push"'
+          then: 'code-analysis-3'
+          else: 'code-analysis-1'
+      else: proj-relman
+
+    workerType:
+      $if: 'taskcluster_root_url == "https://firefox-ci-tc.services.mozilla.com"'
+      then: linux
+      else: ci
+
+    taskboot_image: "mozilla/taskboot:0.2.2"
   in:
-    # TODO: move the bot docker build flow on Firefox CI Taskcluster
-    # when https://phabricator.services.mozilla.com/D63876 lands
-    $if: "taskcluster_root_url == 'https://firefox-ci-tc.services.mozilla.com'"
-    then: []
-    else:
-    - taskId: {$eval: as_slugid("check_lint")}
-      provisionerId: proj-relman
-      workerType: ci
-      created: {$fromNow: ''}
-      deadline: {$fromNow: '1 hour'}
-      payload:
-        maxRunTime: 3600
-        image: python:3.8
-        command:
-          - sh
-          - -lxce
-          - "git clone --quiet ${repository} /src && cd /src && git checkout ${head_rev} -b checks &&
-            cd /src/bot && pip install --disable-pip-version-check --no-cache-dir --quiet -r requirements-dev.txt &&
-            cd /src/backend && pip install --disable-pip-version-check --no-cache-dir --quiet -r requirements-dev.txt &&
-            cd /src && pre-commit run -a --show-diff-on-failure"
-      metadata:
-        name: "Code Coverage checks: linting"
-        description: Check code style with pre-commit hooks
-        owner: bastien@mozilla.com
-        source: https://github.com/mozilla/code-coverage
+    $flatten:
+      $match:
+        # Always run those tasks
+        "true":
+          - taskId: {$eval: as_slugid("check_lint")}
+            provisionerId: "${provisionerId}"
+            workerType: "${workerType}"
+            created: {$fromNow: ''}
+            deadline: {$fromNow: '1 hour'}
+            payload:
+              maxRunTime: 3600
+              image: python:3.8
+              command:
+                - sh
+                - -lxce
+                - "git clone --quiet ${repository} /src && cd /src && git checkout ${head_rev} -b checks &&
+                  cd /src/bot && pip install --disable-pip-version-check --no-cache-dir --quiet -r requirements-dev.txt &&
+                  cd /src/backend && pip install --disable-pip-version-check --no-cache-dir --quiet -r requirements-dev.txt &&
+                  cd /src && pre-commit run -a --show-diff-on-failure"
+            metadata:
+              name: "Code Coverage checks: linting"
+              description: Check code style with pre-commit hooks
+              owner: bastien@mozilla.com
+              source: https://github.com/mozilla/code-coverage
 
-    - taskId: {$eval: as_slugid("bot_check_tests")}
-      provisionerId: proj-relman
-      workerType: ci
-      created: {$fromNow: ''}
-      deadline: {$fromNow: '1 hour'}
-      payload:
-        maxRunTime: 3600
-        image: python:3.8
-        command:
-          - sh
-          - -lxce
-          - "git clone --quiet ${repository} /src && cd /src && git checkout ${head_rev} -b checks &&
-            /src/bot/ci/bootstrap.sh &&
-            cd /src/tools && python3 setup.py install &&
-            cd /src/bot && pip3 install --disable-pip-version-check --no-cache-dir --quiet . && pip3 install --disable-pip-version-check --no-cache-dir --quiet -r requirements-dev.txt &&
-            pytest -v"
-      metadata:
-        name: "Code Coverage Bot checks: unit tests"
-        description: Check python code with pytest
-        owner: bastien@mozilla.com
-        source: https://github.com/mozilla/code-coverage
+        # Run only on firefoxci Taskcluster
+        'taskcluster_root_url == "https://firefox-ci-tc.services.mozilla.com"':
+          - taskId: {$eval: as_slugid("bot_check_tests")}
+            provisionerId: "${provisionerId}"
+            workerType: "${workerType}"
+            created: {$fromNow: ''}
+            deadline: {$fromNow: '1 hour'}
+            payload:
+              maxRunTime: 3600
+              image: python:3.8
+              command:
+                - sh
+                - -lxce
+                - "git clone --quiet ${repository} /src && cd /src && git checkout ${head_rev} -b checks &&
+                  /src/bot/ci/bootstrap.sh &&
+                  cd /src/tools && python3 setup.py install &&
+                  cd /src/bot && pip3 install --disable-pip-version-check --no-cache-dir --quiet . && pip3 install --disable-pip-version-check --no-cache-dir --quiet -r requirements-dev.txt &&
+                  pytest -v"
+            metadata:
+              name: "Code Coverage Bot checks: unit tests"
+              description: Check python code with pytest
+              owner: bastien@mozilla.com
+              source: https://github.com/mozilla/code-coverage
 
-    - taskId: {$eval: as_slugid("backend_check_tests")}
-      provisionerId: proj-relman
-      workerType: ci
-      created: {$fromNow: ''}
-      deadline: {$fromNow: '1 hour'}
-      payload:
-        maxRunTime: 3600
-        image: python:3.8
-        command:
-          - sh
-          - -lxce
-          - "git clone --quiet ${repository} /src && cd /src && git checkout ${head_rev} -b checks &&
-            cd /src/tools && python setup.py install &&
-            cd /src/backend && pip install --disable-pip-version-check --no-cache-dir --quiet . && pip install --disable-pip-version-check --no-cache-dir --quiet -r requirements-dev.txt &&
-            pytest -v"
-      metadata:
-        name: "Code Coverage Backend checks: unit tests"
-        description: Check python code with pytest
-        owner: bastien@mozilla.com
-        source: https://github.com/mozilla/code-coverage
+          - taskId: {$eval: as_slugid("bot_build")}
+            created: {$fromNow: ''}
+            deadline: {$fromNow: '1 hour'}
+            provisionerId: "${provisionerId}"
+            workerType: "${workerType}"
+            dependencies:
+              - {$eval: as_slugid("check_lint")}
+              - {$eval: as_slugid("bot_check_tests")}
+            payload:
+              features:
+                dind: true
+              maxRunTime: 3600
+              image: "${taskboot_image}"
+              env:
+                GIT_REPOSITORY: ${repository}
+                GIT_REVISION: ${head_rev}
+              command:
+                - taskboot
+                - build
+                - --build-tool
+                - dind
+                - --image
+                - mozilla/code-coverage
+                - --tag
+                - "bot-${channel}"
+                - --tag
+                - "bot-${head_rev}"
+                - --write
+                - /bot.tar
+                - bot/Dockerfile
+              artifacts:
+                public/code-coverage-bot.tar:
+                  expires: {$fromNow: '2 weeks'}
+                  path: /bot.tar
+                  type: file
+            routes:
+              $if: 'tasks_for == "github-pull-request"'
+              then:
+                - "index.code-analysis.v2.code-coverage-pr.revision.${head_rev}"
+                - "index.code-analysis.v2.code-coverage-pr.branch.${head_branch}"
+              else:
+                - "index.code-analysis.v2.code-coverage.revision.${head_rev}"
+                - "index.code-analysis.v2.code-coverage.branch.${head_branch}"
+            metadata:
+              name: Code Coverage Bot docker build
+              description: Build docker image with taskboot
+              owner: bastien@mozilla.com
+              source: https://github.com/mozilla/code-coverage
 
-    - taskId: {$eval: as_slugid("events_check_tests")}
-      provisionerId: proj-relman
-      workerType: ci
-      created: {$fromNow: ''}
-      deadline: {$fromNow: '1 hour'}
-      payload:
-        maxRunTime: 3600
-        image: python:3.8
-        command:
-          - sh
-          - -lxce
-          - "git clone --quiet ${repository} /src && cd /src && git checkout ${head_rev} -b checks &&
-            cd /src/events && pip install --disable-pip-version-check --no-cache-dir --quiet -q -r requirements.txt && pip install --disable-pip-version-check --no-cache-dir --quiet . && pip install --disable-pip-version-check --no-cache-dir --quiet -r requirements-dev.txt &&
-            pytest -v"
-      metadata:
-        name: "Code Coverage Events checks: unit tests"
-        description: Check python code with pytest
-        owner: bastien@mozilla.com
-        source: https://github.com/mozilla/code-coverage
 
-    - taskId: {$eval: as_slugid("report_check_tests")}
-      provisionerId: proj-relman
-      workerType: ci
-      created: {$fromNow: ''}
-      deadline: {$fromNow: '1 hour'}
-      payload:
-        features:
-          taskclusterProxy: true
-        maxRunTime: 3600
-        image: python:3.8
-        command:
-          - sh
-          - -lxce
-          - "git clone --quiet ${repository} /src && cd /src && git checkout ${head_rev} -b checks &&
-            cd /src/report && ./ci-test.sh"
-      metadata:
-        name: "Code Coverage Report checks: unit tests"
-        description: Check python code with unittest
-        owner: bastien@mozilla.com
-        source: https://github.com/mozilla/code-coverage
+        # Run only on community Taskcluster
+        'taskcluster_root_url == "https://community-tc.services.mozilla.com"':
+          - taskId: {$eval: as_slugid("backend_check_tests")}
+            provisionerId: "${provisionerId}"
+            workerType: "${workerType}"
+            created: {$fromNow: ''}
+            deadline: {$fromNow: '1 hour'}
+            payload:
+              maxRunTime: 3600
+              image: python:3.8
+              command:
+                - sh
+                - -lxce
+                - "git clone --quiet ${repository} /src && cd /src && git checkout ${head_rev} -b checks &&
+                  cd /src/tools && python setup.py install &&
+                  cd /src/backend && pip install --disable-pip-version-check --no-cache-dir --quiet . && pip install --disable-pip-version-check --no-cache-dir --quiet -r requirements-dev.txt &&
+                  pytest -v"
+            metadata:
+              name: "Code Coverage Backend checks: unit tests"
+              description: Check python code with pytest
+              owner: bastien@mozilla.com
+              source: https://github.com/mozilla/code-coverage
 
-    - taskId: {$eval: as_slugid("backend_build")}
-      created: {$fromNow: ''}
-      deadline: {$fromNow: '1 hour'}
-      provisionerId: proj-relman
-      workerType: ci
-      dependencies:
-        - {$eval: as_slugid("check_lint")}
-        - {$eval: as_slugid("backend_check_tests")}
-      payload:
-        capabilities:
-          privileged: true
-        maxRunTime: 3600
-        image: "${taskboot_image}"
-        env:
-          GIT_REPOSITORY: ${repository}
-          GIT_REVISION: ${head_rev}
-        command:
-          - taskboot
-          - build
-          - --image
-          - mozilla/code-coverage/backend
-          - --tag
-          - "${channel}"
-          - --tag
-          - "${head_rev}"
-          - --write
-          - /backend.tar
-          - backend/Dockerfile
-        artifacts:
-          public/code-coverage-backend.tar:
-            expires: {$fromNow: '2 weeks'}
-            path: /backend.tar
-            type: file
-      scopes:
-        - docker-worker:capability:privileged
-      metadata:
-        name: Code Coverage Backend docker build
-        description: Build docker image with taskboot
-        owner: bastien@mozilla.com
-        source: https://github.com/mozilla/code-coverage
+          - taskId: {$eval: as_slugid("events_check_tests")}
+            provisionerId: "${provisionerId}"
+            workerType: "${workerType}"
+            created: {$fromNow: ''}
+            deadline: {$fromNow: '1 hour'}
+            payload:
+              maxRunTime: 3600
+              image: python:3.8
+              command:
+                - sh
+                - -lxce
+                - "git clone --quiet ${repository} /src && cd /src && git checkout ${head_rev} -b checks &&
+                  cd /src/events && pip install --disable-pip-version-check --no-cache-dir --quiet -q -r requirements.txt && pip install --disable-pip-version-check --no-cache-dir --quiet . && pip install --disable-pip-version-check --no-cache-dir --quiet -r requirements-dev.txt &&
+                  pytest -v"
+            metadata:
+              name: "Code Coverage Events checks: unit tests"
+              description: Check python code with pytest
+              owner: bastien@mozilla.com
+              source: https://github.com/mozilla/code-coverage
 
-    - taskId: {$eval: as_slugid("bot_build")}
-      created: {$fromNow: ''}
-      deadline: {$fromNow: '1 hour'}
-      provisionerId: proj-relman
-      workerType: ci
-      dependencies:
-        - {$eval: as_slugid("check_lint")}
-        - {$eval: as_slugid("bot_check_tests")}
-      payload:
-        capabilities:
-          privileged: true
-        maxRunTime: 3600
-        image: "${taskboot_image}"
-        env:
-          GIT_REPOSITORY: ${repository}
-          GIT_REVISION: ${head_rev}
-        command:
-          - taskboot
-          - build
-          - --image
-          - mozilla/code-coverage
-          - --tag
-          - "bot-${channel}"
-          - --tag
-          - "bot-${head_rev}"
-          - --write
-          - /bot.tar
-          - bot/Dockerfile
-        artifacts:
-          public/code-coverage-bot.tar:
-            expires: {$fromNow: '2 weeks'}
-            path: /bot.tar
-            type: file
-      scopes:
-        - docker-worker:capability:privileged
-      metadata:
-        name: Code Coverage Bot docker build
-        description: Build docker image with taskboot
-        owner: bastien@mozilla.com
-        source: https://github.com/mozilla/code-coverage
+          - taskId: {$eval: as_slugid("report_check_tests")}
+            provisionerId: "${provisionerId}"
+            workerType: "${workerType}"
+            created: {$fromNow: ''}
+            deadline: {$fromNow: '1 hour'}
+            payload:
+              features:
+                taskclusterProxy: true
+              maxRunTime: 3600
+              image: python:3.8
+              command:
+                - sh
+                - -lxce
+                - "git clone --quiet ${repository} /src && cd /src && git checkout ${head_rev} -b checks &&
+                  cd /src/report && ./ci-test.sh"
+            metadata:
+              name: "Code Coverage Report checks: unit tests"
+              description: Check python code with unittest
+              owner: bastien@mozilla.com
+              source: https://github.com/mozilla/code-coverage
 
-    - taskId: {$eval: as_slugid("events_build")}
-      created: {$fromNow: ''}
-      deadline: {$fromNow: '1 hour'}
-      provisionerId: proj-relman
-      workerType: ci
-      dependencies:
-        - {$eval: as_slugid("check_lint")}
-        - {$eval: as_slugid("events_check_tests")}
-      payload:
-        capabilities:
-          privileged: true
-        maxRunTime: 3600
-        image: "${taskboot_image}"
-        env:
-          GIT_REPOSITORY: ${repository}
-          GIT_REVISION: ${head_rev}
-        command:
-          - taskboot
-          - build
-          - --image
-          - mozilla/code-coverage
-          - --tag
-          - "events-${channel}"
-          - --tag
-          - "events-${head_rev}"
-          - --write
-          - /events.tar
-          - events/Dockerfile
-        artifacts:
-          public/code-coverage-events.tar:
-            expires: {$fromNow: '2 weeks'}
-            path: /events.tar
-            type: file
-      scopes:
-        - docker-worker:capability:privileged
-      metadata:
-        name: Code Coverage Events docker build
-        description: Build docker image with taskboot
-        owner: bastien@mozilla.com
-        source: https://github.com/mozilla/code-coverage
+          - taskId: {$eval: as_slugid("backend_build")}
+            created: {$fromNow: ''}
+            deadline: {$fromNow: '1 hour'}
+            provisionerId: "${provisionerId}"
+            workerType: "${workerType}"
+            dependencies:
+              - {$eval: as_slugid("check_lint")}
+              - {$eval: as_slugid("backend_check_tests")}
+            payload:
+              capabilities:
+                privileged: true
+              maxRunTime: 3600
+              image: "${taskboot_image}"
+              env:
+                GIT_REPOSITORY: ${repository}
+                GIT_REVISION: ${head_rev}
+              command:
+                - taskboot
+                - build
+                - --image
+                - mozilla/code-coverage/backend
+                - --tag
+                - "${channel}"
+                - --tag
+                - "${head_rev}"
+                - --write
+                - /backend.tar
+                - backend/Dockerfile
+              artifacts:
+                public/code-coverage-backend.tar:
+                  expires: {$fromNow: '2 weeks'}
+                  path: /backend.tar
+                  type: file
+            scopes:
+              - docker-worker:capability:privileged
+            metadata:
+              name: Code Coverage Backend docker build
+              description: Build docker image with taskboot
+              owner: bastien@mozilla.com
+              source: https://github.com/mozilla/code-coverage
 
-    - taskId: {$eval: as_slugid("addon_build")}
-      provisionerId: proj-relman
-      workerType: ci
-      created: {$fromNow: ''}
-      deadline: {$fromNow: '1 hour'}
-      payload:
-        maxRunTime: 3600
-        image: node:11-alpine
-        command:
-          - sh
-          - -lxce
-          - "apk add --quiet --update git python &&
-            git clone --quiet ${repository} /src && cd /src/addon && git checkout ${head_rev} -b build &&
-            npm install --no-progress &&
-            npm run build &&
-            npm run test &&
-            npm run export"
-        artifacts:
-          public/addon:
-            expires: {$fromNow: '2 weeks'}
-            path: /src/addon/web-ext-artifacts
-            type: directory
-      metadata:
-        name: Code Coverage Addon build
-        description: Build code-coverage webextension
-        owner: bastien@mozilla.com
-        source: https://github.com/mozilla/code-coverage
+          - taskId: {$eval: as_slugid("events_build")}
+            created: {$fromNow: ''}
+            deadline: {$fromNow: '1 hour'}
+            provisionerId: "${provisionerId}"
+            workerType: "${workerType}"
+            dependencies:
+              - {$eval: as_slugid("check_lint")}
+              - {$eval: as_slugid("events_check_tests")}
+            payload:
+              capabilities:
+                privileged: true
+              maxRunTime: 3600
+              image: "${taskboot_image}"
+              env:
+                GIT_REPOSITORY: ${repository}
+                GIT_REVISION: ${head_rev}
+              command:
+                - taskboot
+                - build
+                - --image
+                - mozilla/code-coverage
+                - --tag
+                - "events-${channel}"
+                - --tag
+                - "events-${head_rev}"
+                - --write
+                - /events.tar
+                - events/Dockerfile
+              artifacts:
+                public/code-coverage-events.tar:
+                  expires: {$fromNow: '2 weeks'}
+                  path: /events.tar
+                  type: file
+            scopes:
+              - docker-worker:capability:privileged
+            metadata:
+              name: Code Coverage Events docker build
+              description: Build docker image with taskboot
+              owner: bastien@mozilla.com
+              source: https://github.com/mozilla/code-coverage
 
-    - taskId: {$eval: as_slugid("frontend_build")}
-      provisionerId: proj-relman
-      workerType: ci
-      created: {$fromNow: ''}
-      deadline: {$fromNow: '1 hour'}
-      payload:
-        maxRunTime: 3600
-        image: node
-        env:
-          BACKEND_URL: "${backend_url}"
-        command:
-          - sh
-          - -lxce
-          - "git clone --quiet ${repository} /src && cd /src/frontend && git checkout ${head_rev} -b build &&
-            npm install --no-progress && npm run release"
-        artifacts:
-          public/frontend:
-            expires: {$fromNow: '2 weeks'}
-            path: /src/frontend/dist
-            type: directory
-      metadata:
-        name: Code Coverage Frontend build
-        description: Build web single page application
-        owner: bastien@mozilla.com
-        source: https://github.com/mozilla/code-coverage
+          - taskId: {$eval: as_slugid("addon_build")}
+            provisionerId: "${provisionerId}"
+            workerType: "${workerType}"
+            created: {$fromNow: ''}
+            deadline: {$fromNow: '1 hour'}
+            payload:
+              maxRunTime: 3600
+              image: node:11-alpine
+              command:
+                - sh
+                - -lxce
+                - "apk add --quiet --update git python &&
+                  git clone --quiet ${repository} /src && cd /src/addon && git checkout ${head_rev} -b build &&
+                  npm install --no-progress &&
+                  npm run build &&
+                  npm run test &&
+                  npm run export"
+              artifacts:
+                public/addon:
+                  expires: {$fromNow: '2 weeks'}
+                  path: /src/addon/web-ext-artifacts
+                  type: directory
+            metadata:
+              name: Code Coverage Addon build
+              description: Build code-coverage webextension
+              owner: bastien@mozilla.com
+              source: https://github.com/mozilla/code-coverage
 
-    - $if: 'channel in ["testing", "production"]'
-      then:
-        taskId: {$eval: as_slugid("backend_deploy")}
-        created: {$fromNow: ''}
-        deadline: {$fromNow: '1 hour'}
-        provisionerId: proj-relman
-        workerType: ci
-        dependencies:
-          - {$eval: as_slugid("backend_build")}
-        payload:
-          features:
-            taskclusterProxy: true
-          maxRunTime: 3600
-          image: "${taskboot_image}"
-          command:
-            - taskboot
-            - deploy-heroku
-            - --heroku-app
-            - "code-coverage-${channel}"
-            - web:public/code-coverage-backend.tar
-          env:
-            TASKCLUSTER_SECRET: "project/relman/code-coverage/deploy-${channel}"
-        scopes:
-          - "secrets:get:project/relman/code-coverage/deploy-${channel}"
-        metadata:
-          name: "Code Coverage Backend deployment (${channel})"
-          description: Deploy docker image on Heroku
-          owner: bastien@mozilla.com
-          source: https://github.com/mozilla/code-coverage
+          - taskId: {$eval: as_slugid("frontend_build")}
+            provisionerId: "${provisionerId}"
+            workerType: "${workerType}"
+            created: {$fromNow: ''}
+            deadline: {$fromNow: '1 hour'}
+            payload:
+              maxRunTime: 3600
+              image: node
+              env:
+                BACKEND_URL: "${backend_url}"
+              command:
+                - sh
+                - -lxce
+                - "git clone --quiet ${repository} /src && cd /src/frontend && git checkout ${head_rev} -b build &&
+                  npm install --no-progress && npm run release"
+              artifacts:
+                public/frontend:
+                  expires: {$fromNow: '2 weeks'}
+                  path: /src/frontend/dist
+                  type: directory
+            metadata:
+              name: Code Coverage Frontend build
+              description: Build web single page application
+              owner: bastien@mozilla.com
+              source: https://github.com/mozilla/code-coverage
 
-    - $if: 'channel in ["testing", "production"]'
-      then:
-        taskId: {$eval: as_slugid("events_deploy")}
-        created: {$fromNow: ''}
-        deadline: {$fromNow: '1 hour'}
-        provisionerId: proj-relman
-        workerType: ci
-        dependencies:
-          - {$eval: as_slugid("events_build")}
-        payload:
-          features:
-            taskclusterProxy: true
-          maxRunTime: 3600
-          image: "${taskboot_image}"
-          command:
-            - taskboot
-            - deploy-heroku
-            - --heroku-app
-            - "code-coverage-events-${channel_short}"
-            - worker:public/code-coverage-events.tar
-          env:
-            TASKCLUSTER_SECRET: "project/relman/code-coverage/deploy-${channel}"
-        scopes:
-          - "secrets:get:project/relman/code-coverage/deploy-${channel}"
-        metadata:
-          name: "Code Coverage Events deployment (${channel})"
-          description: Deploy docker image on Heroku
-          owner: bastien@mozilla.com
-          source: https://github.com/mozilla/code-coverage
+          - $if: 'channel in ["testing", "production"]'
+            then:
+              taskId: {$eval: as_slugid("backend_deploy")}
+              created: {$fromNow: ''}
+              deadline: {$fromNow: '1 hour'}
+              provisionerId: "${provisionerId}"
+              workerType: "${workerType}"
+              dependencies:
+                - {$eval: as_slugid("backend_build")}
+              payload:
+                features:
+                  taskclusterProxy: true
+                maxRunTime: 3600
+                image: "${taskboot_image}"
+                command:
+                  - taskboot
+                  - deploy-heroku
+                  - --heroku-app
+                  - "code-coverage-${channel}"
+                  - web:public/code-coverage-backend.tar
+                env:
+                  TASKCLUSTER_SECRET: "project/relman/code-coverage/deploy-${channel}"
+              scopes:
+                - "secrets:get:project/relman/code-coverage/deploy-${channel}"
+              metadata:
+                name: "Code Coverage Backend deployment (${channel})"
+                description: Deploy docker image on Heroku
+                owner: bastien@mozilla.com
+                source: https://github.com/mozilla/code-coverage
 
-    - $if: 'channel in ["testing", "production"]'
-      then:
-        taskId: {$eval: as_slugid("bot_deploy")}
-        created: {$fromNow: ''}
-        deadline: {$fromNow: '1 hour'}
-        provisionerId: proj-relman
-        workerType: ci
-        dependencies:
-          - {$eval: as_slugid("bot_build")}
-        payload:
-          features:
-            # Needed for access to secret
-            taskclusterProxy: true
-          maxRunTime: 3600
-          image: "${taskboot_image}"
-          env:
-            TASKCLUSTER_SECRET: "project/relman/code-coverage/deploy-${channel}"
-          command:
-            - taskboot
-            - push-artifact
-        scopes:
-          - "secrets:get:project/relman/code-coverage/deploy-${channel}"
-        metadata:
-          name: "Code Coverage Bot push (${channel})"
-          description: Push bot's docker image on repository
-          owner: bastien@mozilla.com
-          source: https://github.com/mozilla/code-coverage
+          - $if: 'channel in ["testing", "production"]'
+            then:
+              taskId: {$eval: as_slugid("events_deploy")}
+              created: {$fromNow: ''}
+              deadline: {$fromNow: '1 hour'}
+              provisionerId: "${provisionerId}"
+              workerType: "${workerType}"
+              dependencies:
+                - {$eval: as_slugid("events_build")}
+              payload:
+                features:
+                  taskclusterProxy: true
+                maxRunTime: 3600
+                image: "${taskboot_image}"
+                command:
+                  - taskboot
+                  - deploy-heroku
+                  - --heroku-app
+                  - "code-coverage-events-${channel_short}"
+                  - worker:public/code-coverage-events.tar
+                env:
+                  TASKCLUSTER_SECRET: "project/relman/code-coverage/deploy-${channel}"
+              scopes:
+                - "secrets:get:project/relman/code-coverage/deploy-${channel}"
+              metadata:
+                name: "Code Coverage Events deployment (${channel})"
+                description: Deploy docker image on Heroku
+                owner: bastien@mozilla.com
+                source: https://github.com/mozilla/code-coverage
 
-    - $if: 'channel in ["testing", "production"]'
-      then:
-        taskId: {$eval: as_slugid("frontend_deploy")}
-        created: {$fromNow: ''}
-        deadline: {$fromNow: '1 hour'}
-        provisionerId: proj-relman
-        workerType: ci
-        dependencies:
-          - {$eval: as_slugid("frontend_build")}
-        payload:
-          features:
-            # Needed for access to secret
-            taskclusterProxy: true
-          maxRunTime: 3600
-          image: "${taskboot_image}"
-          env:
-            TASKCLUSTER_SECRET: "project/relman/code-coverage/deploy-${channel}"
-          command:
-            - taskboot
-            - deploy-s3
-            - --artifact-folder
-            - public/frontend
-            - --bucket
-            - "codecoverage-${channel_short}-site-static-website"
-        scopes:
-          - "secrets:get:project/relman/code-coverage/deploy-${channel}"
-        metadata:
-          name: "Code Coverage Frontend deploy (${channel})"
-          description: Deploy frontend build on environment
-          owner: bastien@mozilla.com
-          source: https://github.com/mozilla/code-coverage
+          - $if: 'channel in ["testing", "production"]'
+            then:
+              taskId: {$eval: as_slugid("frontend_deploy")}
+              created: {$fromNow: ''}
+              deadline: {$fromNow: '1 hour'}
+              provisionerId: "${provisionerId}"
+              workerType: "${workerType}"
+              dependencies:
+                - {$eval: as_slugid("frontend_build")}
+              payload:
+                features:
+                  # Needed for access to secret
+                  taskclusterProxy: true
+                maxRunTime: 3600
+                image: "${taskboot_image}"
+                env:
+                  TASKCLUSTER_SECRET: "project/relman/code-coverage/deploy-${channel}"
+                command:
+                  - taskboot
+                  - deploy-s3
+                  - --artifact-folder
+                  - public/frontend
+                  - --bucket
+                  - "codecoverage-${channel_short}-site-static-website"
+              scopes:
+                - "secrets:get:project/relman/code-coverage/deploy-${channel}"
+              metadata:
+                name: "Code Coverage Frontend deploy (${channel})"
+                description: Deploy frontend build on environment
+                owner: bastien@mozilla.com
+                source: https://github.com/mozilla/code-coverage
 
-    - $if: 'tasks_for == "github-push" && head_branch[:10] == "refs/tags/"'
-      then:
-        $let:
-          version: {$eval: 'head_branch[10:]'}
-        in:
-          taskId: {$eval: as_slugid("release")}
-          dependencies:
-            - {$eval: as_slugid("addon_build")}
-            - {$eval: as_slugid("bot_build")}
-            - {$eval: as_slugid("backend_build")}
-            - {$eval: as_slugid("frontend_build")}
-            - {$eval: as_slugid("report_check_tests")}
-          provisionerId: proj-relman
-          workerType: ci
-          created: {$fromNow: ''}
-          deadline: {$fromNow: '1 hour'}
-          payload:
-            features:
-              # Needed for access to secret
-              taskclusterProxy: true
-            maxRunTime: 3600
-            image: "${taskboot_image}"
-            env:
-              TASKCLUSTER_SECRET: "project/relman/code-coverage/release"
-            command:
-              - taskboot
-              - github-release
-              - mozilla/code-coverage
-              - "${version}"
-          scopes:
-            - "secrets:get:project/relman/code-coverage/release"
-          metadata:
-            name: "Code Coverage Release ${version}"
-            description: Code Coverage Github automated release
-            owner: bastien@mozilla.com
-            source: https://github.com/mozilla/code-coverage
+          - $if: 'tasks_for == "github-push" && head_branch[:10] == "refs/tags/"'
+            then:
+              $let:
+                version: {$eval: 'head_branch[10:]'}
+              in:
+                taskId: {$eval: as_slugid("release")}
+                dependencies:
+                  - {$eval: as_slugid("addon_build")}
+                  - {$eval: as_slugid("backend_build")}
+                  - {$eval: as_slugid("frontend_build")}
+                  - {$eval: as_slugid("report_check_tests")}
+                provisionerId: "${provisionerId}"
+                workerType: "${workerType}"
+                created: {$fromNow: ''}
+                deadline: {$fromNow: '1 hour'}
+                payload:
+                  features:
+                    # Needed for access to secret
+                    taskclusterProxy: true
+                  maxRunTime: 3600
+                  image: "${taskboot_image}"
+                  env:
+                    TASKCLUSTER_SECRET: "project/relman/code-coverage/release"
+                  command:
+                    - taskboot
+                    - github-release
+                    - mozilla/code-coverage
+                    - "${version}"
+                scopes:
+                  - "secrets:get:project/relman/code-coverage/release"
+                metadata:
+                  name: "Code Coverage Release ${version}"
+                  description: Code Coverage Github automated release
+                  owner: bastien@mozilla.com
+                  source: https://github.com/mozilla/code-coverage
 
-    - $if: 'tasks_for == "github-push" && head_branch[:10] == "refs/tags/"'
-      then:
-        taskId: {$eval: as_slugid("report_deploy_pypi")}
-        dependencies:
-          - {$eval: as_slugid("report_check_tests")}
-        provisionerId: proj-relman
-        workerType: ci
-        created: {$fromNow: ''}
-        deadline: {$fromNow: '1 hour'}
-        payload:
-          features:
-            # Needed for access to secret
-            taskclusterProxy: true
-          maxRunTime: 3600
-          image: "${taskboot_image}"
-          env:
-            TASKCLUSTER_SECRET: "project/relman/code-coverage/release"
-          command:
-            - sh
-            - -lxce
-            - "git clone ${repository} /project && cd /project && git checkout ${head_rev} -b release &&
-               taskboot --target=/project/report deploy-pypi"
-        scopes:
-            - "secrets:get:project/relman/code-coverage/release"
-        metadata:
-          name: "Code Coverage Report: publish on pypi"
-          description: Code Coverage Github Pypi publication for report
-          owner: bastien@mozilla.com
-          source: https://github.com/mozilla/code-coverage
+          - $if: 'tasks_for == "github-push" && head_branch[:10] == "refs/tags/"'
+            then:
+              taskId: {$eval: as_slugid("report_deploy_pypi")}
+              dependencies:
+                - {$eval: as_slugid("report_check_tests")}
+              provisionerId: "${provisionerId}"
+              workerType: "${workerType}"
+              created: {$fromNow: ''}
+              deadline: {$fromNow: '1 hour'}
+              payload:
+                features:
+                  # Needed for access to secret
+                  taskclusterProxy: true
+                maxRunTime: 3600
+                image: "${taskboot_image}"
+                env:
+                  TASKCLUSTER_SECRET: "project/relman/code-coverage/release"
+                command:
+                  - sh
+                  - -lxce
+                  - "git clone ${repository} /project && cd /project && git checkout ${head_rev} -b release &&
+                     taskboot --target=/project/report deploy-pypi"
+              scopes:
+                  - "secrets:get:project/relman/code-coverage/release"
+              metadata:
+                name: "Code Coverage Report: publish on pypi"
+                description: Code Coverage Github Pypi publication for report
+                owner: bastien@mozilla.com
+                source: https://github.com/mozilla/code-coverage
