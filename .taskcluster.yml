@@ -124,8 +124,8 @@ tasks:
               - {$eval: as_slugid("check_lint")}
               - {$eval: as_slugid("bot_check_tests")}
             payload:
-              capabilities:
-                privileged: true
+              features:
+                dind: true
               maxRunTime: 3600
               image: "${taskboot_image}"
               env:
@@ -134,6 +134,8 @@ tasks:
               command:
                 - taskboot
                 - build
+                - --build-tool
+                - dind
                 - --image
                 - mozilla/code-coverage
                 - --tag
@@ -148,8 +150,14 @@ tasks:
                   expires: {$fromNow: '2 weeks'}
                   path: /bot.tar
                   type: file
-            scopes:
-              - docker-worker:capability:privileged
+            routes:
+              $if: 'tasks_for == "github-pull-request"'
+              then:
+                - "index.code-analysis.v2.code-coverage-pr.revision.${head_rev}"
+                - "index.code-analysis.v2.code-coverage-pr.branch.${head_branch}"
+              else:
+                - "index.code-analysis.v2.code-coverage.revision.${head_rev}"
+                - "index.code-analysis.v2.code-coverage.branch.${head_branch}"
             metadata:
               name: Code Coverage Bot docker build
               description: Build docker image with taskboot
