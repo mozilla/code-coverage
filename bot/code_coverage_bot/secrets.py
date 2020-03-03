@@ -18,7 +18,7 @@ class Secrets(dict):
     def load(self, taskcluster_secret=None, local_secrets=None):
         taskcluster_config.load_secrets(
             taskcluster_secret,
-            prefixes=["common", "code-coverage-bot", "bot"],
+            prefixes=["common", "bot"],
             required=[
                 Secrets.APP_CHANNEL,
                 Secrets.BACKEND_HOST,
