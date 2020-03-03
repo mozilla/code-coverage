@@ -50,7 +50,6 @@ Using your local configuration:
 
 ```shell
 LOCAL_CONFIGURATION=/path/to/code-coverage-conf.yml ./run.sh
-
 ```
 
 You can specify a firefox-ci Taskcluster secret instead using:
