@@ -46,7 +46,7 @@ bot:
   PHABRICATOR_TOKEN: api-xxx
   PHABRICATOR_ENABLED: false
   PHABRICATOR_URL: 'https://phabricator-dev.allizom.org/api/'
-	GOOGLE_CLOUD_STORAGE: null
+  GOOGLE_CLOUD_STORAGE: null
 ```
 
 Run the bot (in cron mode):
