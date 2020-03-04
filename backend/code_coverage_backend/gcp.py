@@ -5,7 +5,9 @@ import os
 import re
 import tempfile
 from datetime import datetime
+from datetime import timedelta
 
+import pytz
 import redis
 import structlog
 import zstandard as zstd
@@ -368,7 +370,7 @@ class GCPCache(object):
         suites = self.redis.smembers(KEY_SUITES.format(repository=repository))
         return sorted(map(lambda x: x.decode("utf-8"), suites))
 
-    def ingest_available_reports(self, repository):
+    def ingest_available_reports(self, repository, until=None):
         """
         Ingest all the available reports for a repository
         """
@@ -377,7 +379,12 @@ class GCPCache(object):
         REGEX_BLOB = re.compile(
             r"^{}/(\w+)/([\w\-]+):([\w\-]+).json.zstd$".format(repository)
         )
+        now = datetime.utcnow().replace(tzinfo=pytz.UTC)
         for blob in self.bucket.list_blobs(prefix=repository):
+
+            if isinstance(until, timedelta) and (now - blob.time_created) >= until:
+                logger.debug(f"Skipping old blob {blob}")
+                continue
 
             # Get changeset from blob name
             match = REGEX_BLOB.match(blob.name)
