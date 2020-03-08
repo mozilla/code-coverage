@@ -400,7 +400,7 @@ $samp_size: 20px;
   position: relative;
   display: inline-block;
 
-  // Question mark container 
+  // Question mark container
   .questionbox {
     text-align: center;
     border-bottom: 1px dotted black;
@@ -422,8 +422,8 @@ $samp_size: 20px;
     padding: 2vh 2vw;
     border-radius: 6px;
     box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
-    
-    // Position the tooltip 
+
+    // Position the tooltip
     position: absolute;
     z-index: 1;
     width: 36vw;
