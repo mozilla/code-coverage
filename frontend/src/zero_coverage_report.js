@@ -55,7 +55,8 @@ export function zeroCoverageMenu(route) {
       return {
         key,
         message: filter.name,
-        checked: isEnabled(key)
+        checked: isEnabled(key),
+        needs_explanation: key === "completely_uncovered"
       };
     }),
     last_pushes: Object.entries(ZERO_COVERAGE_PUSHES).map(
