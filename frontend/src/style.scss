@@ -419,17 +419,17 @@ $samp_size: 20px;
     background-color: $default_color;
     color: white;
     text-align: left;
-    padding: 2vh 2vw;
+    padding: 1vh 1vw;
     border-radius: 6px;
     box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2);
 
     // Position the tooltip
     position: absolute;
     z-index: 1;
-    width: 36vw;
+    width: 30vw;
     top: 100%;
     left: 50%;
-    margin-left: -20vw; // Use half of the width including left horizontal padding size i.e 36vw/2 + 2vw
+    margin-left: -16vw; // Use half of the width including left horizontal padding size i.e 30vw/2 + 1vw
 
     &::after {
       content: " ";
