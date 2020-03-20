@@ -69,7 +69,6 @@
         "scopes": [
             "secrets:get:project/relman/code-coverage/runtime-CHANNEL",
             "docker-worker:cache:code-coverage-bot-CHANNEL",
-            "index:insert-task:project.releng.services.project.CHANNEL.code_coverage_bot.*",
             "index:insert-task:project.relman.code-coverage.CHANNEL.cron.*"
         ],
         "tags": {},
