@@ -48,12 +48,6 @@ class CronHook(Hook):
         # overwrite the "latest" entry.
         self.index_task(
             [
-                "project.releng.services.project.{}.code_coverage_bot.{}".format(
-                    secrets[secrets.APP_CHANNEL], self.revision
-                ),
-                "project.releng.services.project.{}.code_coverage_bot.latest".format(
-                    secrets[secrets.APP_CHANNEL]
-                ),
                 "project.relman.code-coverage.{}.cron.{}".format(
                     secrets[secrets.APP_CHANNEL], self.revision
                 ),
