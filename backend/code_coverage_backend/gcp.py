@@ -132,6 +132,10 @@ class GCPCache(object):
         assert len(overall_coverage) > 0, "No overall coverage"
         self.redis.hmset(report.key_overall, overall_coverage)
 
+        # Apply expiry for overall report
+        if report.ttl is not None:
+            self.redis.expire(report.key_overall, report.ttl)
+
         # Add the changeset to the sorted sets of known reports
         # The numeric push_id is used as a score to keep the ingested
         # changesets ordered

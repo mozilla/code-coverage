@@ -65,6 +65,10 @@ def test_ingestion(mock_cache):
     mock_cache.ingest_report(report_2)
     mock_cache.ingest_report(report_10)
 
+    # Check expiry
+    assert report_1.ttl is None
+    assert mock_cache.redis.ttl(report_1.key_overall) == -1
+
     # They must be in redis and on the file system
     assert mock_cache.redis.zcard(b"reports:myrepo:all:all") == 3
     assert mock_cache.redis.zcard(b"history:myrepo") == 3
@@ -106,6 +110,33 @@ def test_ingestion(mock_cache):
         {"changeset": "rev2", "coverage": 0.2, "date": 2000},
         {"changeset": "rev1", "coverage": 0.1, "date": 1000},
     ]
+
+
+def test_expiry(mock_cache):
+    """
+    Test expiry for platform & suite reports
+    """
+    mock_cache.bucket.add_mock_blob("myrepo/rev1/all:somesuite.json.zstd", coverage=1.0)
+    report_suite = Report(
+        mock_cache.reports_dir,
+        "myrepo",
+        "rev1",
+        platform="all",
+        suite="somesuite",
+        date=1000,
+        push_id=1,
+    )
+    mock_cache.ingest_report(report_suite)
+    assert report_suite.ttl == 1296000
+    assert mock_cache.redis.ttl(report_suite.key_overall) > 0
+
+    mock_cache.bucket.add_mock_blob("myrepo/rev1/win:all.json.zstd", coverage=1.0)
+    report_platform = Report(
+        mock_cache.reports_dir, "myrepo", "rev1", platform="win", date=2000, push_id=2
+    )
+    mock_cache.ingest_report(report_platform)
+    assert report_platform.ttl == 1296000
+    assert mock_cache.redis.ttl(report_platform.key_overall) > 0
 
 
 def test_ingest_hgmo(mock_cache, mock_hgmo):
