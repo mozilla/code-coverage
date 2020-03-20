@@ -94,3 +94,15 @@ class Report(object):
         platform = self.platform or "all"
         suite = self.suite or "all"
         return f"overall:{self.repository}:{self.changeset}:{platform}:{suite}"
+
+    @property
+    def ttl(self):
+        """Time to live in seconds for the full report
+
+        Will be None (no expiry) for full report (all:all)
+        Otherwise set to 2 weeks
+        """
+        if self.suite == DEFAULT_FILTER and self.platform == DEFAULT_FILTER:
+            return
+
+        return 15 * 24 * 3600
