@@ -2,7 +2,6 @@
 
 import json
 import os
-from unittest import mock
 from zipfile import BadZipFile
 
 import pytest
@@ -256,8 +255,7 @@ def test_get_platform(task_name, expected):
     assert taskcluster.get_platform(task) == expected
 
 
-@mock.patch("time.sleep")
-def test_download_artifact_forbidden(mocked_sleep, mock_taskcluster, tmpdir):
+def test_download_artifact_forbidden(mock_taskcluster, tmpdir, mock_tenacity):
     responses.add(
         responses.GET,
         "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/FBdocjnAQOW_GJDOfmgjxw/artifacts/public%2Ftest_info%2Fcode-coverage-grcov.zip",
@@ -278,8 +276,7 @@ def test_download_artifact_forbidden(mocked_sleep, mock_taskcluster, tmpdir):
     assert len(responses.calls) == 5
 
 
-@mock.patch("time.sleep")
-def test_download_artifact_badzip(mocked_sleep, mock_taskcluster, tmpdir):
+def test_download_artifact_badzip(mock_taskcluster, tmpdir, mock_tenacity):
     responses.add(
         responses.GET,
         "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/FBdocjnAQOW_GJDOfmgjxw/artifacts/public%2Ftest_info%2Fcode-coverage-grcov.zip",
