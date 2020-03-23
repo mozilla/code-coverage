@@ -13,6 +13,7 @@ from contextlib import contextmanager
 import hglib
 import pytest
 import responses
+import tenacity
 
 FIXTURES_DIR = os.path.join(os.path.dirname(__file__), "fixtures")
 
@@ -405,3 +406,11 @@ def covdir_report(codecov):
         "linesMissed": _sum("linesMissed"),
         "linesTotal": _sum("linesTotal"),
     }
+
+
+@pytest.fixture
+def mock_tenacity(monkeypatch):
+    """
+    Mock Tenacity wait function to avoid spening time in unit tests
+    """
+    monkeypatch.setattr(tenacity, "wait_fixed", lambda x: None)
