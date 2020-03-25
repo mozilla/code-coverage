@@ -1,10 +1,11 @@
 #!/bin/bash -ex
-GRCOV_VERSION="v0.5.9"
+GRCOV_VERSION="v0.5.10"
 MERCURIAL_VERSION="5.3"
 VERSION_CONTROL_TOOLS_REV="2f7b4df4a928"
 
 apt-get update
-apt-get install --no-install-recommends -y gcc curl bzip2 python-dev
+# libgoogle-perftools4 is currently required for grcov (until https://github.com/mozilla/grcov/issues/403 is fixed).
+apt-get install --no-install-recommends -y gcc curl bzip2 python-dev libgoogle-perftools4
 
 pip install --disable-pip-version-check --quiet --no-cache-dir mercurial==$MERCURIAL_VERSION
 

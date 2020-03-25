@@ -24,10 +24,7 @@ def test_report_grcov_artifact_coverallsplus(grcov_artifact):
     output = grcov.report([grcov_artifact], out_format="coveralls+")
     report = json.loads(output.decode("utf-8"))
     assert report["repo_token"] == "unused"
-    assert report["service_name"] == "TaskCluster"
-    assert report["service_job_number"] == "1"
     assert report["git"]["branch"] == "master"
-    assert report["git"]["head"]["id"] == "unused"
     assert report["service_number"] == ""
     assert len(report["source_files"]) == 1
     assert report["source_files"][0]["name"] == "js/src/jit/BitSet.cpp"
