@@ -17,18 +17,7 @@ def report(artifacts, source_dir=None, out_format="covdir", options=[]):
 
     # Coveralls+ is only needed for zero-coverage reports
     if out_format == "coveralls+":
-        cmd.extend(
-            [
-                "--service-name",
-                "TaskCluster",
-                "--commit-sha",
-                "unused",
-                "--token",
-                "unused",
-                "--service-job-number",
-                "1",
-            ]
-        )
+        cmd.extend(["--token", "unused"])
 
     if source_dir is not None:
         cmd.extend(["-s", source_dir])
