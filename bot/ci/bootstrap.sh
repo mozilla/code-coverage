@@ -1,5 +1,5 @@
 #!/bin/bash -ex
-GRCOV_VERSION="v0.5.12"
+GRCOV_VERSION="v0.5.13"
 MERCURIAL_VERSION="5.3"
 VERSION_CONTROL_TOOLS_REV="2f7b4df4a928"
 
@@ -10,7 +10,7 @@ apt-get install --no-install-recommends -y gcc curl bzip2 python-dev libgoogle-p
 pip install --disable-pip-version-check --quiet --no-cache-dir mercurial==$MERCURIAL_VERSION
 
 # Setup grcov
-curl -L https://github.com/mozilla/grcov/releases/download/$GRCOV_VERSION/grcov-linux-x86_64.tar.bz2 | tar -C /usr/bin -xjv
+curl -L https://github.com/mozilla/grcov/releases/download/$GRCOV_VERSION/grcov-tcmalloc-linux-x86_64.tar.bz2 | tar -C /usr/bin -xjv
 chmod +x /usr/bin/grcov
 
 # Setup mercurial with needed extensions
