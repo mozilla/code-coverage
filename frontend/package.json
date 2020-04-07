@@ -30,7 +30,7 @@
     "eslint": "^6.2.2",
     "eslint-config-prettier": "^6.2.0",
     "eslint-config-standard": "^14.1.0",
-    "eslint-loader": "^3.0.0",
+    "eslint-loader": "^4.0.0",
     "eslint-plugin-fetch-options": "0.0.5",
     "eslint-plugin-html": "^6.0.0",
     "eslint-plugin-mozilla": "^2.1.0",
