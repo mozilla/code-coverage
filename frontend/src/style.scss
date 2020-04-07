@@ -42,12 +42,19 @@ header {
   border-bottom: 1px solid darkgray;
   min-height: $header_height;
 
+  $horizontal_margin: 10px;
+
   div.logo {
     display: inline-block;
+    height: $header_height;
+    line-height: $header_height;
+    margin-left: $horizontal_margin;
+
     img {
       margin: $header_height * 0.1;
       max-height: $header_height * 0.8;
     }
+
     a {
       color: $default_color;
       line-height: $header_height;
@@ -70,7 +77,7 @@ header {
     float: right;
     height: $header_height;
     line-height: $header_height;
-    margin-right: 10px;
+    margin-right: $horizontal_margin;
   }
 
   input.revision {
@@ -135,12 +142,9 @@ nav {
 
 // Directory navigation
 #browser {
-  margin: 1em 20%;
-
-  // On smaller screens, display table on full width
-  @media only screen and (max-width: $small_screen) {
-    margin: 0.5em;
-  }
+  max-width: 56ch;
+  margin: 0 auto;
+  padding: .5em;
 
   .table {
     display: table;
