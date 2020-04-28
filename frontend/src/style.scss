@@ -42,6 +42,8 @@ header {
   border-bottom: 1px solid darkgray;
   min-height: $header_height;
 
+  $horizontal_margin: 10px;
+
   div.logo {
     display: inline-block;
     height: $header_height;
@@ -52,6 +54,7 @@ header {
       margin: $header_height * 0.1;
       max-height: $header_height * 0.8;
     }
+
     a {
       color: $default_color;
       line-height: $header_height;
@@ -74,7 +77,7 @@ header {
     float: right;
     height: $header_height;
     line-height: $header_height;
-    margin-right: 10px;
+    margin-right: $horizontal_margin;
   }
 
   input.revision {
