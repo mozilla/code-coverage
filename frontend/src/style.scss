@@ -9,7 +9,7 @@ $coverage_low: #d91a47;
 $coverage_warn: #ff9a36;
 $coverage_good: #438718;
 $highlighted: #f7f448;
-$small_screen: 1900px;
+$small_screen: 1280px;
 
 body {
   // Setup base typography
@@ -142,12 +142,9 @@ nav {
 
 // Directory navigation
 #browser {
-  margin: 1em 20%;
-
-  // On smaller screens, display table on full width
-  @media only screen and (max-width: $small_screen) {
-    margin: 0.5em;
-  }
+  max-width: $small_screen;
+  margin: 0 auto;
+  padding: .5em;
 
   .table {
     display: table;
