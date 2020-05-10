@@ -63,7 +63,9 @@ def gcp_covdir_exists(repository, revision, platform, suite):
 
 
 @tenacity.retry(
-    stop=tenacity.stop_after_attempt(10), wait=tenacity.wait_exponential(multiplier=1, min=16, max=64), reraise=True
+    stop=tenacity.stop_after_attempt(10),
+    wait=tenacity.wait_exponential(multiplier=1, min=16, max=64),
+    reraise=True,
 )
 def gcp_ingest(repository, revision, platform, suite):
     """
