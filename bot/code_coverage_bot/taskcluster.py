@@ -72,7 +72,7 @@ def download_artifact(artifact_path, task_id, artifact_name):
     logger.debug("Downloading artifact", url=url)
 
     @tenacity.retry(
-        reraise=True, wait=tenacity.wait_fixed(30), stop=tenacity.stop_after_attempt(5)
+        reraise=True, wait=tenacity.wait_exponential(multiplier=1, min=16, max=64), stop=tenacity.stop_after_attempt(5)
     )
     def perform_download():
         r = requests.get(url, stream=True)
