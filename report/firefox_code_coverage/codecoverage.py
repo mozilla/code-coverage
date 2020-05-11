@@ -76,7 +76,7 @@ def get_tasks_in_group(group_id):
 
 @tenacity.retry(
     stop=tenacity.stop_after_attempt(5),
-    wait=tenacity.wait_incrementing(start=7, increment=7),
+    wait=tenacity.wait_exponential(multiplier=1, min=16, max=64),
     reraise=True,
 )
 def download_binary(url, path):
