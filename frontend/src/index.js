@@ -159,6 +159,7 @@ async function showFile(source, file, revision, selectedLine) {
     language,
     lines: source.map((line, nb) => {
       const coverage = file.coverage[nb];
+      nb = nb + 1;
       let cssClass = "";
       let hits = null;
       if (coverage !== undefined && coverage >= 0) {
