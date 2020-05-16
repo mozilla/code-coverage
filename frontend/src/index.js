@@ -159,7 +159,6 @@ async function showFile(source, file, revision, selectedLine) {
     language,
     lines: source.map((line, nb) => {
       const coverage = file.coverage[nb];
-      nb = nb + 1;
       let cssClass = "";
       let hits = null;
       if (coverage !== undefined && coverage >= 0) {
@@ -183,6 +182,9 @@ async function showFile(source, file, revision, selectedLine) {
           };
         }
       }
+
+      // To make line numbers start from 1
+      nb = nb + 1;
 
       // Override css class when selected
       if (nb === selectedLine) {
