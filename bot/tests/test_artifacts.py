@@ -271,7 +271,7 @@ def test_download_all(
 ):
     responses.add(
         responses.GET,
-        "http://taskcluster.test/api/index/v1/task/gecko.v2.mozilla-central.revision.7828a10a94b6afb78d18d9b7b83e7aa79337cc24.firefox.decision",
+        "http://taskcluster.test/api/index/v1/task/gecko.v2.mozilla-central.revision.7828a10a94b6afb78d18d9b7b83e7aa79337cc24.taskgraph.decision",
         json=LATEST_DECISION,
         status=200,
     )
