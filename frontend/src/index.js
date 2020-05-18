@@ -183,6 +183,9 @@ async function showFile(source, file, revision, selectedLine) {
         }
       }
 
+      // To make line numbers start from 1
+      nb = nb + 1;
+
       // Override css class when selected
       if (nb === selectedLine) {
         cssClass = "selected";
