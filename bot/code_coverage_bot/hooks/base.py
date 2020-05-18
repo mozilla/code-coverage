@@ -54,6 +54,8 @@ class Hook(object):
         # Load coverage tasks for all platforms
         decision_task_id = taskcluster.get_decision_task(self.branch, self.revision)
 
+        assert decision_task_id is not None, "The decision task couldn't be found"
+
         group = taskcluster.get_task_details(decision_task_id)["taskGroupId"]
 
         test_tasks = [
