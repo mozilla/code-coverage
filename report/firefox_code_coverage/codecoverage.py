@@ -37,7 +37,7 @@ def is_taskcluster_loaner():
 
 def get_task(branch, revision):
     index = taskcluster.get_service("index")
-    task = index.findTask(f"gecko.v2.{branch}.revision.{revision}.firefox.decision")
+    task = index.findTask(f"gecko.v2.{branch}.revision.{revision}.taskgraph.decision")
     return task["taskId"]
 
 

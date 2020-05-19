@@ -171,9 +171,7 @@
           "notify.email.ciduty+failedcron@mozilla.com.on-failed",
           "notify.email.ciduty+exceptioncron@mozilla.com.on-exception",
           "notify.email.sheriffs+failedcron@mozilla.com.on-failed",
-          "notify.email.sheriffs+exceptioncron@mozilla.com.on-exception",
-          "index.gecko.v2.try.latest.firefox.decision",
-          "index.gecko.v2.try.revision.066cb18ba95a7efe144e729713c429e422d9f95b.firefox.decision"
+          "notify.email.sheriffs+exceptioncron@mozilla.com.on-exception"
         ],
         "priority": "very-low",
         "retries": 5,
