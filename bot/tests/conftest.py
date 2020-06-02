@@ -382,7 +382,7 @@ def covdir_report(codecov):
         assert "/" not in cov["name"]
         coverage = cov["coverage"]
         total = len(coverage)
-        covered = sum(l is not None and l > 0 for l in coverage)
+        covered = sum(line is not None and line > 0 for line in coverage)
         out[cov["name"]] = {
             "children": {},
             "name": cov["name"],
