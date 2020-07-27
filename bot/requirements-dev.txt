@@ -1,4 +1,4 @@
-json-e==4.1.0
+json-e==4.2.0
 jsonschema==3.2.0
 pre-commit==2.6.0
 pytest==5.4.3
