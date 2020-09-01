@@ -3,7 +3,7 @@ connexion==2.7.0
 datadog==0.39.0
 fakeredis==1.4.3
 Flask==1.1.2
-Flask-Cors==3.0.8
+Flask-Cors==3.0.9
 flask-talisman==0.7.0
 google-cloud-storage==1.30.0
 gunicorn==20.0.4
