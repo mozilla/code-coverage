@@ -1,5 +1,5 @@
 -e ../tools #egg=code-coverage-tools
-google-cloud-storage==1.31.2
+google-cloud-storage==1.32.0
 libmozdata==0.1.68
 pytoml==0.1.21
 pytz==2020.1
