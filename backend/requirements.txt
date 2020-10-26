@@ -1,11 +1,11 @@
 -e ../tools #egg=code-coverage-tools
 connexion==2.7.0
 datadog==0.39.0
-fakeredis==1.4.3
+fakeredis==1.4.4
 Flask==1.1.2
 Flask-Cors==3.0.9
 flask-talisman==0.7.0
-google-cloud-storage==1.31.2
+google-cloud-storage==1.32.0
 gunicorn==20.0.4
 python-dateutil==2.8.1
 pytoml==0.1.21
