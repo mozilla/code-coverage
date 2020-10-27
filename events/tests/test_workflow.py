@@ -28,8 +28,8 @@ def test_is_coverage_task(mock_taskcluster):
     cov_task = {"task": {"metadata": {"name": "build-win64-ccov/debug"}}}
     assert hook.is_coverage_task(cov_task)
 
-    nocov_task = {"task": {"metadata": {"name": "test-linux64-ccov/opt-mochitest-1"}}}
-    assert hook.is_coverage_task(nocov_task)
+    cov_task = {"task": {"metadata": {"name": "test-linux64-ccov/opt-mochitest-1"}}}
+    assert hook.is_coverage_task(cov_task)
 
     nocov_task = {"task": {"metadata": {"name": "test-linux64/opt-mochitest-1"}}}
     assert not hook.is_coverage_task(nocov_task)
