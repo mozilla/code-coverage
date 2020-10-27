@@ -117,14 +117,14 @@ def test_zero_coverage(tmpdir, fake_artifacts_handler, fake_hg_repo_with_content
                         data = {}
                     elif requested_suite == "marionette":
                         regexp = payload["where"]["and"][3]["regexp"]["run.key"]
-                        if regexp == ".*-linux.*-ccov/.*":
+                        if regexp == ".*-linux.*-ccov.*/.*":
                             data = {
                                 "result.test": ["marionette-test1"],
                                 "run.key": [
                                     "test-linux64-ccov/opt-marionette-headless-e10s"
                                 ],
                             }
-                        elif regexp == ".*-windows.*-ccov/.*":
+                        elif regexp == ".*-windows.*-ccov.*/.*":
                             data = {
                                 "result.test": ["marionette-test2"],
                                 "run.key": [
