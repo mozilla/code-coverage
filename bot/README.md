@@ -28,7 +28,7 @@ pre-commit install
 Check linting (it should be automatically done before any commit):
 
 ```console
-pre-commint run -a
+pre-commit run -a
 ```
 
 Check unit tests:
