@@ -38,7 +38,7 @@ def get_suites(revision):
                 "and": [
                     {"eq": {"repo.branch.name": "mozilla-central"}},
                     {"eq": {"repo.changeset.id12": revision[:12]}},
-                    {"regexp": {"run.key": ".*-ccov/.*"}},
+                    {"regexp": {"run.key": ".*-ccov.*/.*"}},
                 ]
             },
             "limit": 500000,
@@ -62,7 +62,7 @@ def get_tests_chunks(revision, platform, suite):
                     {"eq": {"repo.branch.name": "mozilla-central"}},
                     {"eq": {"repo.changeset.id12": revision[:12]}},
                     {"eq": {"run.suite.fullname": suite}},
-                    {"regexp": {"run.key": f".*-{platform}.*-ccov/.*"}},
+                    {"regexp": {"run.key": f".*-{platform}.*-ccov.*/.*"}},
                 ]
             },
             "limit": 50000,
