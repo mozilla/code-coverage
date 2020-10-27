@@ -1,0 +1,100 @@
+{
+  "provisionerId": "aws-provisioner-v1",
+  "workerType": "gecko-t-win10-64",
+  "schedulerId": "gecko-level-3",
+  "taskGroupId": "Mu6w3n-dS9GOfrv6wGOtvg",
+  "dependencies": [
+    "Db0nxP-CRTKA7ak9LCYucA",
+    "brd6yPH_TEegeE8bjBLsxQ"
+  ],
+  "requires": "all-completed",
+  "routes": [
+    "tc-treeherder.v2.mozilla-central.e31357c7759379d2279b6883cb09c91997bfaa5d.35772",
+    "coalesce.v1.mozilla-central.f3031b7eecbe9114a96f"
+  ],
+  "priority": "medium",
+  "retries": 5,
+  "created": "2019-03-28T17:39:26.586Z",
+  "deadline": "2019-03-29T17:39:26.586Z",
+  "expires": "2020-03-27T17:39:26.586Z",
+  "scopes": [],
+  "payload": {
+    "supersederUrl": "https://coalesce.mozilla-releng.net/v1/list/3600/5/mozilla-central.f3031b7eecbe9114a96f",
+    "maxRunTime": 5400,
+    "artifacts": [
+      {
+        "path": "logs",
+        "type": "directory",
+        "name": "public/logs"
+      },
+      {
+        "path": "build/blobber_upload_dir",
+        "type": "directory",
+        "name": "public/test_info"
+      }
+    ],
+    "command": [
+      "c:\\mozilla-build\\python\\python.exe -u mozharness\\scripts\\desktop_unittest.py --cfg mozharness\\configs\\unittests\\win_taskcluster_unittest.py --mochitest-suite=plain-chunked --code-coverage --e10s --installer-url https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/Db0nxP-CRTKA7ak9LCYucA/artifacts/public/build/target.zip --test-packages-url https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/Db0nxP-CRTKA7ak9LCYucA/artifacts/public/build/target.test_packages.json --download-symbols true --enable-webrender --mochitest-suite=plain-chunked --code-coverage --e10s --total-chunk=10 --this-chunk=1"
+    ],
+    "env": {
+      "SCCACHE_DISABLE": "1",
+      "GECKO_HEAD_REV": "e31357c7759379d2279b6883cb09c91997bfaa5d",
+      "GECKO_HEAD_REPOSITORY": "https://hg.mozilla.org/mozilla-central",
+      "MOZ_FETCHES": "[{\"artifact\": \"public/build/grcov.tar.bz2\", \"extract\": true, \"task\": \"brd6yPH_TEegeE8bjBLsxQ\"}]",
+      "MOZ_FETCHES_DIR": "fetches",
+      "MOZ_AUTOMATION": "1"
+    },
+    "mounts": [
+      {
+        "directory": ".",
+        "content": {
+          "taskId": "Db0nxP-CRTKA7ak9LCYucA",
+          "artifact": "public/build/mozharness.zip"
+        },
+        "format": "zip"
+      }
+    ]
+  },
+  "metadata": {
+    "owner": "opoprus@mozilla.com",
+    "source": "https://hg.mozilla.org/mozilla-central/file/e31357c7759379d2279b6883cb09c91997bfaa5d/taskcluster/ci/test",
+    "description": "Mochitest plain run ([Treeherder push](https://treeherder.mozilla.org/#/jobs?repo=mozilla-central&revision=e31357c7759379d2279b6883cb09c91997bfaa5d))",
+    "name": "test-windows10-64-ccov-qr/debug-mochitest-e10s-1"
+  },
+  "tags": {
+    "kind": "test",
+    "worker-implementation": "generic-worker",
+    "createdForUser": "opoprus@mozilla.com",
+    "label": "test-windows10-64-ccov-qr/debug-mochitest-e10s-1",
+    "test-type": "mochitest",
+    "os": "windows"
+  },
+  "extra": {
+    "index": {
+      "rank": 0
+    },
+    "parent": "Mu6w3n-dS9GOfrv6wGOtvg",
+    "chunks": {
+      "current": 1,
+      "total": 10
+    },
+    "suite": {
+      "flavor": "plain-chunked",
+      "name": "mochitest"
+    },
+    "treeherder": {
+      "jobKind": "test",
+      "groupSymbol": "M-e10s",
+      "collection": {
+        "debug": true
+      },
+      "machine": {
+        "platform": "windows10-64-ccov-qr"
+      },
+      "groupName": "Mochitests with e10s",
+      "tier": 2,
+      "symbol": "1"
+    },
+    "treeherder-platform": "windows10-64-ccov-qr/debug"
+  }
+}

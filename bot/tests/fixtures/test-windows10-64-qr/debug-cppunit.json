@@ -1,0 +1,94 @@
+{
+  "provisionerId": "aws-provisioner-v1",
+  "workerType": "gecko-t-win10-64",
+  "schedulerId": "gecko-level-3",
+  "taskGroupId": "Mu6w3n-dS9GOfrv6wGOtvg",
+  "dependencies": [
+    "W7r-_k6BRti6V69f6PVFQA"
+  ],
+  "requires": "all-completed",
+  "routes": [
+    "tc-treeherder.v2.mozilla-central.e31357c7759379d2279b6883cb09c91997bfaa5d.35772",
+    "coalesce.v1.mozilla-central.e97a7cee04fa0f3b4f7d"
+  ],
+  "priority": "medium",
+  "retries": 5,
+  "created": "2019-03-28T17:40:03.103Z",
+  "deadline": "2019-03-29T17:40:03.103Z",
+  "expires": "2020-03-27T17:40:03.103Z",
+  "scopes": [],
+  "payload": {
+    "supersederUrl": "https://coalesce.mozilla-releng.net/v1/list/3600/5/mozilla-central.e97a7cee04fa0f3b4f7d",
+    "maxRunTime": 3600,
+    "artifacts": [
+      {
+        "path": "logs",
+        "type": "directory",
+        "name": "public/logs"
+      },
+      {
+        "path": "build/blobber_upload_dir",
+        "type": "directory",
+        "name": "public/test_info"
+      }
+    ],
+    "command": [
+      "c:\\mozilla-build\\python\\python.exe -u mozharness\\scripts\\desktop_unittest.py --cfg mozharness\\configs\\unittests\\win_taskcluster_unittest.py --cppunittest-suite=cppunittest --installer-url https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/W7r-_k6BRti6V69f6PVFQA/artifacts/public/build/target.zip --test-packages-url https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/W7r-_k6BRti6V69f6PVFQA/artifacts/public/build/target.test_packages.json --enable-webrender --download-symbols true --cppunittest-suite=cppunittest"
+    ],
+    "env": {
+      "GECKO_HEAD_REPOSITORY": "https://hg.mozilla.org/mozilla-central",
+      "MOZ_AUTOMATION": "1",
+      "SCCACHE_DISABLE": "1",
+      "GECKO_HEAD_REV": "e31357c7759379d2279b6883cb09c91997bfaa5d"
+    },
+    "mounts": [
+      {
+        "directory": ".",
+        "content": {
+          "taskId": "W7r-_k6BRti6V69f6PVFQA",
+          "artifact": "public/build/mozharness.zip"
+        },
+        "format": "zip"
+      }
+    ]
+  },
+  "metadata": {
+    "owner": "opoprus@mozilla.com",
+    "source": "https://hg.mozilla.org/mozilla-central/file/e31357c7759379d2279b6883cb09c91997bfaa5d/taskcluster/ci/test",
+    "description": "CPP Unit Tests ([Treeherder push](https://treeherder.mozilla.org/#/jobs?repo=mozilla-central&revision=e31357c7759379d2279b6883cb09c91997bfaa5d))",
+    "name": "test-windows10-64-qr/debug-cppunit"
+  },
+  "tags": {
+    "os": "windows",
+    "createdForUser": "opoprus@mozilla.com",
+    "worker-implementation": "generic-worker",
+    "kind": "test",
+    "label": "test-windows10-64-qr/debug-cppunit"
+  },
+  "extra": {
+    "index": {
+      "rank": 1553794301
+    },
+    "parent": "Mu6w3n-dS9GOfrv6wGOtvg",
+    "chunks": {
+      "current": 1,
+      "total": 1
+    },
+    "suite": {
+      "flavor": "cppunittest",
+      "name": "cppunittest"
+    },
+    "treeherder": {
+      "machine": {
+        "platform": "windows10-64-qr"
+      },
+      "tier": 1,
+      "symbol": "Cpp",
+      "jobKind": "test",
+      "collection": {
+        "debug": true
+      }
+    },
+    "treeherder-platform": "windows10-64-qr/debug"
+  }
+}
