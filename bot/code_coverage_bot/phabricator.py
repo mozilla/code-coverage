@@ -108,7 +108,7 @@ class PhabricatorUploader(object):
             key = "{}-{}".format(orig_changeset, orig_line)
             if key in coverage_map:
                 count = coverage_map[key]
-                if count is None:
+                if count == -1:
                     # A non-executable line.
                     phab_coverage_data += "N"
                 elif count > 0:
