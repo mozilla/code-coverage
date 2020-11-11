@@ -380,9 +380,9 @@ def covdir_report(codecov):
     out = {}
     for cov in codecov["source_files"]:
         assert "/" not in cov["name"]
-        coverage = cov["coverage"]
+        coverage = [c if c is not None else -1 for c in cov["coverage"]]
         total = len(coverage)
-        covered = sum(line is not None and line > 0 for line in coverage)
+        covered = sum(line > 0 for line in coverage)
         out[cov["name"]] = {
             "children": {},
             "name": cov["name"],
