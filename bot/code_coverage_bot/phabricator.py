@@ -91,7 +91,7 @@ class PhabricatorUploader(object):
             orig_changeset = data["node"]
 
             if lineno < len(coverage_record):
-                key = "{}-{}".format(orig_changeset, orig_line)
+                key = (orig_changeset, orig_line)
                 coverage_map[key] = coverage_record[lineno]
 
         return coverage_map
@@ -105,7 +105,7 @@ class PhabricatorUploader(object):
             # The changeset when it was introduced.
             orig_changeset = data["node"]
 
-            key = "{}-{}".format(orig_changeset, orig_line)
+            key = (orig_changeset, orig_line)
             if key in coverage_map:
                 count = coverage_map[key]
                 if count == -1:
