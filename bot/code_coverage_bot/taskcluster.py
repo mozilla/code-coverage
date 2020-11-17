@@ -1,14 +1,11 @@
 # -*- coding: utf-8 -*-
 import os
-import shutil
-from zipfile import BadZipFile
-from zipfile import is_zipfile
 
-import requests
 import structlog
 import taskcluster
-import tenacity
 from taskcluster.helper import TaskclusterConfig
+
+from code_coverage_bot.utils import download_file
 
 logger = structlog.getLogger(__name__)
 taskcluster_config = TaskclusterConfig("https://firefox-ci-tc.services.mozilla.com")
@@ -60,9 +57,9 @@ def get_tasks_in_group(group_id):
             break
 
 
-def download_artifact(artifact_path, task_id, artifact_name):
+def download_artifact(artifact_path: str, task_id: str, artifact_name: str) -> None:
     if os.path.exists(artifact_path):
-        return artifact_path
+        return
 
     # Build artifact public url
     # Use un-authenticated Taskcluster client to avoid taskcluster-proxy rewrite issue
@@ -71,23 +68,7 @@ def download_artifact(artifact_path, task_id, artifact_name):
     url = queue.buildUrl("getLatestArtifact", task_id, artifact_name)
     logger.debug("Downloading artifact", url=url)
 
-    @tenacity.retry(
-        reraise=True,
-        wait=tenacity.wait_exponential(multiplier=1, min=16, max=64),
-        stop=tenacity.stop_after_attempt(5),
-    )
-    def perform_download():
-        r = requests.get(url, stream=True)
-        r.raise_for_status()
-
-        with open(artifact_path, "wb") as f:
-            r.raw.decode_content = True
-            shutil.copyfileobj(r.raw, f)
-
-        if artifact_path.endswith(".zip") and not is_zipfile(artifact_path):
-            raise BadZipFile("File is not a zip file")
-
-    perform_download()
+    download_file(url, artifact_path)
 
 
 def is_coverage_task(task):

@@ -3,9 +3,14 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import concurrent.futures
+import shutil
 import subprocess
+from zipfile import BadZipFile
+from zipfile import is_zipfile
 
+import requests
 import structlog
+import tenacity
 
 log = structlog.get_logger(__name__)
 
@@ -83,3 +88,23 @@ class ThreadPoolExecutorResult(concurrent.futures.ThreadPoolExecutor):
                 future.cancel()
             raise e
         return super(ThreadPoolExecutorResult, self).__exit__(*args)
+
+
+def download_file(url: str, path: str) -> None:
+    @tenacity.retry(
+        reraise=True,
+        wait=tenacity.wait_exponential(multiplier=1, min=16, max=64),
+        stop=tenacity.stop_after_attempt(5),
+    )
+    def perform_download() -> None:
+        r = requests.get(url, stream=True)
+        r.raise_for_status()
+
+        with open(path, "wb") as f:
+            r.raw.decode_content = True
+            shutil.copyfileobj(r.raw, f)
+
+        if path.endswith(".zip") and not is_zipfile(path):
+            raise BadZipFile("File is not a zip file")
+
+    perform_download()
