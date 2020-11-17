@@ -122,7 +122,8 @@ class MozillaCentralHook(RepositoryHook):
         # Retrieve the full report
         full_path = reports.get(("all", "all"))
         assert full_path is not None, "Missing full report (all:all)"
-        report = json.load(open(full_path))
+        with open(full_path, "r") as f:
+            report = json.load(f)
 
         # Check extensions
         paths = uploader.covdir_paths(report)
