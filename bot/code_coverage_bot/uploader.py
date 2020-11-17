@@ -27,7 +27,7 @@ def gcp(repository, revision, report, platform, suite):
     bucket = get_bucket(secrets[secrets.GOOGLE_CLOUD_STORAGE])
 
     # Compress report
-    compressor = zstd.ZstdCompressor()
+    compressor = zstd.ZstdCompressor(threads=-1)
     archive = compressor.compress(report)
 
     # Upload archive
