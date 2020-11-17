@@ -19,9 +19,6 @@ def notify_email(revision, changesets, changesets_coverage):
     for changeset in changesets:
         desc = changeset["desc"].split("\n")[0]
 
-        if any(text in desc for text in ["r=merge", "a=merge"]):
-            continue
-
         # Lookup changeset coverage from phabricator uploader
         rev_id = parse_revision_id(changeset["desc"])
         if rev_id is None:

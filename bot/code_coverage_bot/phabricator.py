@@ -145,10 +145,14 @@ class PhabricatorUploader(object):
 
         with hgmo.HGMO(self.repo_dir) as hgmo_server:
             for changeset in changesets:
+                desc = changeset["desc"].split("\n")[0]
+
+                # Skip merge changesets.
+                if any(text in desc for text in ["r=merge", "a=merge"]):
+                    continue
+
                 # Retrieve the revision ID for this changeset.
                 revision_id = parse_revision_id(changeset["desc"])
-                if revision_id is None:
-                    continue
 
                 results[changeset["node"]] = {
                     "revision_id": revision_id,
@@ -226,6 +230,8 @@ class PhabricatorUploader(object):
 
         for result in results.values():
             rev_id = result["revision_id"]
+            if rev_id is None:
+                continue
 
             # Only upload raw coverage data to Phabricator, not stats
             coverage = {path: cov["coverage"] for path, cov in result["paths"].items()}

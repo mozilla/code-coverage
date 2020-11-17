@@ -123,15 +123,23 @@ def test_one_commit_without_differential(mock_secrets, fake_hg_repo):
 
     phabricator = PhabricatorUploader(local, revision)
     report = covdir_report(
-        {
-            "source_files": [
-                {"name": "file_one_commit", "coverage": [None, 0, 1, 1, 1, 1, 0]}
-            ]
-        }
+        {"source_files": [{"name": "file", "coverage": [None, 0, 1, 1, 1, 1, 0]}]}
     )
     results = phabricator.generate(report, changesets(local, revision))
 
-    assert results == {}
+    assert results == {
+        revision: {
+            "revision_id": None,
+            "paths": {
+                "file": {
+                    "coverage": "NUCCCCU",
+                    "lines_added": 6,
+                    "lines_covered": 4,
+                    "lines_unknown": 0,
+                }
+            },
+        }
+    }
 
 
 def test_two_commits_two_files(mock_secrets, fake_hg_repo):
@@ -364,7 +372,18 @@ def test_changesets_overwriting_one_commit_without_differential(
                     "lines_unknown": 1,
                 }
             },
-        }
+        },
+        revision2: {
+            "revision_id": None,
+            "paths": {
+                "file": {
+                    "coverage": "NUCCCCU",
+                    "lines_added": 1,
+                    "lines_covered": 1,
+                    "lines_unknown": 0,
+                }
+            },
+        },
     }
 
 
@@ -385,7 +404,10 @@ def test_removed_file(mock_secrets, fake_hg_repo):
     report = covdir_report({"source_files": []})
     results = phabricator.generate(report, changesets(local, revision2))
 
-    assert results == {revision1: {"revision_id": 1, "paths": {}}}
+    assert results == {
+        revision1: {"revision_id": 1, "paths": {}},
+        revision2: {"revision_id": None, "paths": {}},
+    }
 
 
 def test_backout_removed_file(mock_secrets, fake_hg_repo):
