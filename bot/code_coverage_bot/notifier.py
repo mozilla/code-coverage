@@ -35,7 +35,7 @@ def notify_email(revision, changesets, changesets_coverage):
         covered = sum(c["lines_covered"] for c in coverage.values())
         added = sum(c["lines_added"] for c in coverage.values())
 
-        if covered < 0.2 * added:
+        if covered < 0.4 * added:
             url = parse_revision_url(changeset["desc"])
             content += f"* [{desc}]({url}): {covered} covered out of {added} added.\n"
 
