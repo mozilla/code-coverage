@@ -343,7 +343,7 @@ class GCPCache(object):
             start = int(datetime.timestamp(start))
         assert isinstance(start, int)
         assert isinstance(end, int)
-        assert end > start
+        assert end > start, f"Bad timestamps: {start} should come before {end}"
 
         # Load changesets ordered by date, in that range
         history = self.redis.zrevrangebyscore(
