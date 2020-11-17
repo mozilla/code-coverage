@@ -23,7 +23,6 @@ from code_coverage_tools.gcp import get_bucket
 
 logger = structlog.get_logger(__name__)
 __cache = None
-__hgmo = {}
 
 KEY_REPORTS = "reports:{repository}:{platform}:{suite}"
 KEY_CHANGESET = "changeset:{repository}:{changeset}"
