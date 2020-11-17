@@ -1,12 +1,10 @@
 # -*- coding: utf-8 -*-
 import argparse
 import json
-import os
 from datetime import datetime
 
 from taskcluster.utils import slugId
 
-from code_coverage_bot.secrets import secrets
 from code_coverage_bot.taskcluster import taskcluster_config
 
 MC_REPO = "https://hg.mozilla.org/mozilla-central"
@@ -14,13 +12,13 @@ HOOK_GROUP = "project-relman"
 HOOK_ID = "code-coverage-{app_channel}"
 
 
-def trigger_task(task_group_id, commit):
+def trigger_task(app_channel, task_group_id, commit):
     """
     Trigger a code coverage task to build covdir at a specified revision
     """
     date = datetime.fromtimestamp(commit["date"]).strftime("%Y-%m-%d")
     name = "covdir with suites on {} - {} - {}".format(
-        secrets[secrets.APP_CHANNEL], date, commit["changeset"]
+        app_channel, date, commit["changeset"]
     )
     hooks = taskcluster_config.get_service("hooks")
     payload = {
@@ -29,13 +27,16 @@ def trigger_task(task_group_id, commit):
         "taskGroupId": task_group_id,
         "taskName": name,
     }
-    hook_id = HOOK_ID.format(app_channel=secrets[secrets.APP_CHANNEL])
+    hook_id = HOOK_ID.format(app_channel=app_channel)
     return hooks.triggerHook(HOOK_GROUP, hook_id, payload)
 
 
 def main():
     # CLI args
     parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--channel", type=str, default="production", help="Which channel to use"
+    )
     parser.add_argument("--nb-tasks", type=int, default=5, help="NB of tasks to create")
     parser.add_argument(
         "--group", type=str, default=slugId(), help="Task group to create/update"
@@ -53,7 +54,6 @@ def main():
 
     # Setup Taskcluster
     taskcluster_config.auth()
-    secrets.load(os.environ["TASKCLUSTER_SECRET"])
 
     # List existing tags & commits
     print("Group", args.group)
@@ -104,7 +104,7 @@ def main():
         if args.dry_run:
             print(">>> No trigger on dry run")
         else:
-            out = trigger_task(args.group, commit)
+            out = trigger_task(args.app_channel, args.group, commit)
             print(">>>", out["status"]["taskId"])
         nb += 1
         dates.append(date.date())
