@@ -26,14 +26,14 @@ def notify_email(revision, changesets, changesets_coverage):
         rev_id = parse_revision_id(changeset["desc"])
         if rev_id is None:
             continue
-        coverage = changesets_coverage.get(rev_id)
+        coverage = changesets_coverage.get(changeset["node"])
         if coverage is None:
             logger.warn("No coverage found", changeset=changeset)
             continue
 
         # Calc totals for all files
-        covered = sum(c["lines_covered"] for c in coverage.values())
-        added = sum(c["lines_added"] for c in coverage.values())
+        covered = sum(c["lines_covered"] for c in coverage["paths"].values())
+        added = sum(c["lines_added"] for c in coverage["paths"].values())
 
         if covered < 0.4 * added:
             url = parse_revision_url(changeset["desc"])

@@ -150,7 +150,10 @@ class PhabricatorUploader(object):
                 if revision_id is None:
                     continue
 
-                results[revision_id] = {}
+                results[changeset["node"]] = {
+                    "revision_id": revision_id,
+                    "paths": {},
+                }
 
                 # For each file...
                 for path in changeset["files"]:
@@ -189,7 +192,7 @@ class PhabricatorUploader(object):
 
                     # Apply the coverage map on the annotate data of the changeset of interest.
                     coverage = self._apply_coverage_map(annotate, coverage_map)
-                    results[revision_id][path] = {
+                    results[changeset["node"]]["paths"][path] = {
                         "lines_added": len(lines_added),
                         "lines_covered": sum(
                             coverage[line - 1] in ("C", "X", "N")
@@ -211,9 +214,11 @@ class PhabricatorUploader(object):
         else:
             phabricator = None
 
-        for rev_id, coverage in results.items():
+        for result in results.values():
+            rev_id = result["revision_id"]
+
             # Only upload raw coverage data to Phabricator, not stats
-            coverage = {path: cov["coverage"] for path, cov in coverage.items()}
+            coverage = {path: cov["coverage"] for path, cov in result["paths"].items()}
             logger.info("{} coverage: {}".format(rev_id, coverage))
 
             if not phabricator or not coverage:

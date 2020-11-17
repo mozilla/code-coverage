@@ -31,7 +31,12 @@ def test_simple(mock_secrets, mock_phabricator, fake_hg_repo):
     results = phabricator.generate(report, changesets(local, revision))
 
     assert results == {
-        1: {"file": {"coverage": "NUCCCCU", "lines_added": 7, "lines_covered": 5}}
+        revision: {
+            "revision_id": 1,
+            "paths": {
+                "file": {"coverage": "NUCCCCU", "lines_added": 7, "lines_covered": 5}
+            },
+        }
     }
 
     phabricator.upload(report, changesets(local, revision))
@@ -98,7 +103,7 @@ def test_file_with_no_coverage(mock_secrets, fake_hg_repo):
     report = covdir_report({"source_files": []})
     results = phabricator.generate(report, changesets(local, revision))
 
-    assert results == {1: {}}
+    assert results == {revision: {"revision_id": 1, "paths": {}}}
 
 
 def test_one_commit_without_differential(mock_secrets, fake_hg_repo):
@@ -129,16 +134,16 @@ def test_two_commits_two_files(mock_secrets, fake_hg_repo):
 
     add_file(hg, local, "file1_commit1", "1\n2\n3\n4\n5\n6\n7\n")
     add_file(hg, local, "file2_commit1", "1\n2\n3\n")
-    revision = commit(hg, 1)
+    revision1 = commit(hg, 1)
 
     add_file(hg, local, "file3_commit2", "1\n2\n3\n4\n5\n")
-    revision = commit(hg, 2)
+    revision2 = commit(hg, 2)
 
     hg.push(dest=bytes(remote, "ascii"))
 
     copy_pushlog_database(remote, local)
 
-    phabricator = PhabricatorUploader(local, revision)
+    phabricator = PhabricatorUploader(local, revision2)
     report = covdir_report(
         {
             "source_files": [
@@ -148,19 +153,33 @@ def test_two_commits_two_files(mock_secrets, fake_hg_repo):
             ]
         }
     )
-    results = phabricator.generate(report, changesets(local, revision))
+    results = phabricator.generate(report, changesets(local, revision2))
 
     assert results == {
-        1: {
-            "file1_commit1": {
-                "coverage": "NUCCCCU",
-                "lines_added": 7,
-                "lines_covered": 5,
+        revision1: {
+            "revision_id": 1,
+            "paths": {
+                "file1_commit1": {
+                    "coverage": "NUCCCCU",
+                    "lines_added": 7,
+                    "lines_covered": 5,
+                },
+                "file2_commit1": {
+                    "coverage": "CCU",
+                    "lines_added": 3,
+                    "lines_covered": 2,
+                },
             },
-            "file2_commit1": {"coverage": "CCU", "lines_added": 3, "lines_covered": 2},
         },
-        2: {
-            "file3_commit2": {"coverage": "CCUCN", "lines_added": 5, "lines_covered": 4}
+        revision2: {
+            "revision_id": 2,
+            "paths": {
+                "file3_commit2": {
+                    "coverage": "CCUCN",
+                    "lines_added": 5,
+                    "lines_covered": 4,
+                }
+            },
         },
     }
 
@@ -169,24 +188,34 @@ def test_changesets_overwriting(mock_secrets, fake_hg_repo):
     hg, local, remote = fake_hg_repo
 
     add_file(hg, local, "file", "1\n2\n3\n4\n5\n6\n7\n")
-    commit(hg, 1)
+    revision1 = commit(hg, 1)
 
     add_file(hg, local, "file", "1\n2\n3\n42\n5\n6\n7\n")
-    revision = commit(hg, 2)
+    revision2 = commit(hg, 2)
 
     hg.push(dest=bytes(remote, "ascii"))
 
     copy_pushlog_database(remote, local)
 
-    phabricator = PhabricatorUploader(local, revision)
+    phabricator = PhabricatorUploader(local, revision2)
     report = covdir_report(
         {"source_files": [{"name": "file", "coverage": [None, 0, 1, 1, 1, 1, 0]}]}
     )
-    results = phabricator.generate(report, changesets(local, revision))
+    results = phabricator.generate(report, changesets(local, revision2))
 
     assert results == {
-        1: {"file": {"coverage": "NUCXCCU", "lines_added": 6, "lines_covered": 4}},
-        2: {"file": {"coverage": "NUCCCCU", "lines_added": 1, "lines_covered": 1}},
+        revision1: {
+            "revision_id": 1,
+            "paths": {
+                "file": {"coverage": "NUCXCCU", "lines_added": 6, "lines_covered": 4}
+            },
+        },
+        revision2: {
+            "revision_id": 2,
+            "paths": {
+                "file": {"coverage": "NUCCCCU", "lines_added": 1, "lines_covered": 1}
+            },
+        },
     }
 
 
@@ -194,16 +223,16 @@ def test_changesets_displacing(mock_secrets, fake_hg_repo):
     hg, local, remote = fake_hg_repo
 
     add_file(hg, local, "file", "1\n2\n3\n4\n5\n6\n7\n")
-    commit(hg, 1)
+    revision1 = commit(hg, 1)
 
     add_file(hg, local, "file", "-1\n-2\n1\n2\n3\n4\n5\n6\n7\n8\n9\n")
-    revision = commit(hg, 2)
+    revision2 = commit(hg, 2)
 
     hg.push(dest=bytes(remote, "ascii"))
 
     copy_pushlog_database(remote, local)
 
-    phabricator = PhabricatorUploader(local, revision)
+    phabricator = PhabricatorUploader(local, revision2)
     report = covdir_report(
         {
             "source_files": [
@@ -211,11 +240,25 @@ def test_changesets_displacing(mock_secrets, fake_hg_repo):
             ]
         }
     )
-    results = phabricator.generate(report, changesets(local, revision))
+    results = phabricator.generate(report, changesets(local, revision2))
 
     assert results == {
-        1: {"file": {"coverage": "NUCCCCU", "lines_added": 7, "lines_covered": 4}},
-        2: {"file": {"coverage": "UCNUCCCCUCU", "lines_added": 4, "lines_covered": 2}},
+        revision1: {
+            "revision_id": 1,
+            "paths": {
+                "file": {"coverage": "NUCCCCU", "lines_added": 7, "lines_covered": 4}
+            },
+        },
+        revision2: {
+            "revision_id": 2,
+            "paths": {
+                "file": {
+                    "coverage": "UCNUCCCCUCU",
+                    "lines_added": 4,
+                    "lines_covered": 2,
+                }
+            },
+        },
     }
 
 
@@ -223,24 +266,34 @@ def test_changesets_reducing_size(mock_secrets, fake_hg_repo):
     hg, local, remote = fake_hg_repo
 
     add_file(hg, local, "file", "1\n2\n3\n4\n5\n6\n7\n")
-    commit(hg, 1)
+    revision1 = commit(hg, 1)
 
     add_file(hg, local, "file", "1\n2\n3\n4\n5\n")
-    revision = commit(hg, 2)
+    revision2 = commit(hg, 2)
 
     hg.push(dest=bytes(remote, "ascii"))
 
     copy_pushlog_database(remote, local)
 
-    phabricator = PhabricatorUploader(local, revision)
+    phabricator = PhabricatorUploader(local, revision2)
     report = covdir_report(
         {"source_files": [{"name": "file", "coverage": [None, 0, 1, 1, 1]}]}
     )
-    results = phabricator.generate(report, changesets(local, revision))
+    results = phabricator.generate(report, changesets(local, revision2))
 
     assert results == {
-        1: {"file": {"coverage": "NUCCCXX", "lines_added": 5, "lines_covered": 4}},
-        2: {"file": {"coverage": "NUCCC", "lines_added": 0, "lines_covered": 0}},
+        revision1: {
+            "revision_id": 1,
+            "paths": {
+                "file": {"coverage": "NUCCCXX", "lines_added": 5, "lines_covered": 4}
+            },
+        },
+        revision2: {
+            "revision_id": 2,
+            "paths": {
+                "file": {"coverage": "NUCCC", "lines_added": 0, "lines_covered": 0}
+            },
+        },
     }
 
 
@@ -250,24 +303,29 @@ def test_changesets_overwriting_one_commit_without_differential(
     hg, local, remote = fake_hg_repo
 
     add_file(hg, local, "file", "1\n2\n3\n4\n5\n6\n7\n")
-    commit(hg, 1)
+    revision1 = commit(hg, 1)
 
     add_file(hg, local, "file", "1\n2\n3\n42\n5\n6\n7\n")
-    revision = commit(hg)
+    revision2 = commit(hg)
 
     hg.push(dest=bytes(remote, "ascii"))
 
     copy_pushlog_database(remote, local)
 
-    phabricator = PhabricatorUploader(local, revision)
+    phabricator = PhabricatorUploader(local, revision2)
 
     report = covdir_report(
         {"source_files": [{"name": "file", "coverage": [None, 0, 1, 1, 1, 1, 0]}]}
     )
-    results = phabricator.generate(report, changesets(local, revision))
+    results = phabricator.generate(report, changesets(local, revision2))
 
     assert results == {
-        1: {"file": {"coverage": "NUCXCCU", "lines_added": 6, "lines_covered": 4}}
+        revision1: {
+            "revision_id": 1,
+            "paths": {
+                "file": {"coverage": "NUCXCCU", "lines_added": 6, "lines_covered": 4}
+            },
+        }
     }
 
 
@@ -275,20 +333,20 @@ def test_removed_file(mock_secrets, fake_hg_repo):
     hg, local, remote = fake_hg_repo
 
     add_file(hg, local, "file", "1\n2\n3\n4\n5\n6\n7\n")
-    commit(hg, 1)
+    revision1 = commit(hg, 1)
 
     hg.remove(files=[bytes(os.path.join(local, "file"), "ascii")])
-    revision = commit(hg)
+    revision2 = commit(hg)
 
     hg.push(dest=bytes(remote, "ascii"))
 
     copy_pushlog_database(remote, local)
 
-    phabricator = PhabricatorUploader(local, revision)
+    phabricator = PhabricatorUploader(local, revision2)
     report = covdir_report({"source_files": []})
-    results = phabricator.generate(report, changesets(local, revision))
+    results = phabricator.generate(report, changesets(local, revision2))
 
-    assert results == {1: {}}
+    assert results == {revision1: {"revision_id": 1, "paths": {}}}
 
 
 def test_backout_removed_file(mock_secrets, fake_hg_repo):

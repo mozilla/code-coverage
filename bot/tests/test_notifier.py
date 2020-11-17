@@ -12,16 +12,16 @@ def test_notification(mock_secrets, mock_taskcluster, mock_phabricator, fake_hg_
     hg, local, remote = fake_hg_repo
 
     add_file(hg, local, "file", "1\n2\n3\n4\n")
-    commit(hg, 1)
+    revision1 = commit(hg, 1)
 
     add_file(hg, local, "file", "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n")
-    revision = commit(hg, 2)
+    revision2 = commit(hg, 2)
 
     hg.push(dest=bytes(remote, "ascii"))
 
     copy_pushlog_database(remote, local)
 
-    stack = changesets(local, revision)
+    stack = changesets(local, revision2)
     assert len(stack) == 2
     assert (
         stack[0]["desc"]
@@ -39,16 +39,26 @@ def test_notification(mock_secrets, mock_taskcluster, mock_phabricator, fake_hg_
             ]
         }
     )
-    phab = PhabricatorUploader(local, revision)
+    phab = PhabricatorUploader(local, revision2)
     changesets_coverage = phab.generate(report, stack)
 
     assert changesets_coverage == {
-        1: {"file": {"lines_added": 4, "lines_covered": 2, "coverage": "NUCU"}},
-        2: {"file": {"lines_added": 6, "lines_covered": 0, "coverage": "NUCUUUUUUU"}},
+        revision1: {
+            "revision_id": 1,
+            "paths": {
+                "file": {"lines_added": 4, "lines_covered": 2, "coverage": "NUCU"}
+            },
+        },
+        revision2: {
+            "revision_id": 2,
+            "paths": {
+                "file": {"lines_added": 6, "lines_covered": 0, "coverage": "NUCUUUUUUU"}
+            },
+        },
     }
 
-    mail = notify_email(revision, stack, changesets_coverage)
+    mail = notify_email(revision2, stack, changesets_coverage)
     assert (
         mail
-        == "* [Commit [(b'M', b'file')]Differential Revision: https://phabricator.services.mozilla.com/D2](https://phabricator.services.mozilla.com/D2): 0 covered out of 6 added.\n"  # noqa
+        == """* [Commit [(b'M', b'file')]Differential Revision: https://phabricator.services.mozilla.com/D2](https://phabricator.services.mozilla.com/D2): 0 covered out of 6 added.\n"""  # noqa
     )
