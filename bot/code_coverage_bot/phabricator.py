@@ -185,19 +185,29 @@ class PhabricatorUploader(object):
 
                     # List lines added by this patch
                     lines_added = [
-                        line["lineno"]
-                        for line in build_annotate
+                        line["lineno"] - 1
+                        for line in annotate
                         if line["node"] == changeset["node"]
                     ]
 
                     # Apply the coverage map on the annotate data of the changeset of interest.
                     coverage = self._apply_coverage_map(annotate, coverage_map)
+
                     results[changeset["node"]]["paths"][path] = {
-                        "lines_added": len(lines_added),
-                        "lines_covered": sum(
-                            coverage[line - 1] in ("C", "X", "N")
+                        "lines_added": sum(
+                            coverage[line] != "N"
                             for line in lines_added
-                            if line - 1 < len(coverage)
+                            if line < len(coverage)
+                        ),
+                        "lines_unknown": sum(
+                            coverage[line] == "X"
+                            for line in lines_added
+                            if line < len(coverage)
+                        ),
+                        "lines_covered": sum(
+                            coverage[line] == "C"
+                            for line in lines_added
+                            if line < len(coverage)
                         ),
                         "coverage": coverage,
                     }

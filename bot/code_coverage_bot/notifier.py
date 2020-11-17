@@ -32,7 +32,9 @@ def notify_email(revision, changesets, changesets_coverage):
             continue
 
         # Calc totals for all files
-        covered = sum(c["lines_covered"] for c in coverage["paths"].values())
+        covered = sum(
+            c["lines_covered"] + c["lines_unknown"] for c in coverage["paths"].values()
+        )
         added = sum(c["lines_added"] for c in coverage["paths"].values())
 
         if covered < 0.4 * added:

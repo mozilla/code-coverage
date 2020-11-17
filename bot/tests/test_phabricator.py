@@ -34,7 +34,12 @@ def test_simple(mock_secrets, mock_phabricator, fake_hg_repo):
         revision: {
             "revision_id": 1,
             "paths": {
-                "file": {"coverage": "NUCCCCU", "lines_added": 7, "lines_covered": 5}
+                "file": {
+                    "coverage": "NUCCCCU",
+                    "lines_added": 6,
+                    "lines_covered": 4,
+                    "lines_unknown": 0,
+                }
             },
         }
     }
@@ -161,13 +166,15 @@ def test_two_commits_two_files(mock_secrets, fake_hg_repo):
             "paths": {
                 "file1_commit1": {
                     "coverage": "NUCCCCU",
-                    "lines_added": 7,
-                    "lines_covered": 5,
+                    "lines_added": 6,
+                    "lines_covered": 4,
+                    "lines_unknown": 0,
                 },
                 "file2_commit1": {
                     "coverage": "CCU",
                     "lines_added": 3,
                     "lines_covered": 2,
+                    "lines_unknown": 0,
                 },
             },
         },
@@ -176,8 +183,9 @@ def test_two_commits_two_files(mock_secrets, fake_hg_repo):
             "paths": {
                 "file3_commit2": {
                     "coverage": "CCUCN",
-                    "lines_added": 5,
-                    "lines_covered": 4,
+                    "lines_added": 4,
+                    "lines_covered": 3,
+                    "lines_unknown": 0,
                 }
             },
         },
@@ -207,13 +215,23 @@ def test_changesets_overwriting(mock_secrets, fake_hg_repo):
         revision1: {
             "revision_id": 1,
             "paths": {
-                "file": {"coverage": "NUCXCCU", "lines_added": 6, "lines_covered": 4}
+                "file": {
+                    "coverage": "NUCXCCU",
+                    "lines_added": 6,
+                    "lines_covered": 3,
+                    "lines_unknown": 1,
+                }
             },
         },
         revision2: {
             "revision_id": 2,
             "paths": {
-                "file": {"coverage": "NUCCCCU", "lines_added": 1, "lines_covered": 1}
+                "file": {
+                    "coverage": "NUCCCCU",
+                    "lines_added": 1,
+                    "lines_covered": 1,
+                    "lines_unknown": 0,
+                }
             },
         },
     }
@@ -246,7 +264,12 @@ def test_changesets_displacing(mock_secrets, fake_hg_repo):
         revision1: {
             "revision_id": 1,
             "paths": {
-                "file": {"coverage": "NUCCCCU", "lines_added": 7, "lines_covered": 4}
+                "file": {
+                    "coverage": "NUCCCCU",
+                    "lines_added": 6,
+                    "lines_covered": 4,
+                    "lines_unknown": 0,
+                }
             },
         },
         revision2: {
@@ -256,6 +279,7 @@ def test_changesets_displacing(mock_secrets, fake_hg_repo):
                     "coverage": "UCNUCCCCUCU",
                     "lines_added": 4,
                     "lines_covered": 2,
+                    "lines_unknown": 0,
                 }
             },
         },
@@ -285,13 +309,23 @@ def test_changesets_reducing_size(mock_secrets, fake_hg_repo):
         revision1: {
             "revision_id": 1,
             "paths": {
-                "file": {"coverage": "NUCCCXX", "lines_added": 5, "lines_covered": 4}
+                "file": {
+                    "coverage": "NUCCCXX",
+                    "lines_added": 6,
+                    "lines_covered": 3,
+                    "lines_unknown": 2,
+                }
             },
         },
         revision2: {
             "revision_id": 2,
             "paths": {
-                "file": {"coverage": "NUCCC", "lines_added": 0, "lines_covered": 0}
+                "file": {
+                    "coverage": "NUCCC",
+                    "lines_added": 0,
+                    "lines_covered": 0,
+                    "lines_unknown": 0,
+                }
             },
         },
     }
@@ -323,7 +357,12 @@ def test_changesets_overwriting_one_commit_without_differential(
         revision1: {
             "revision_id": 1,
             "paths": {
-                "file": {"coverage": "NUCXCCU", "lines_added": 6, "lines_covered": 4}
+                "file": {
+                    "coverage": "NUCXCCU",
+                    "lines_added": 6,
+                    "lines_covered": 3,
+                    "lines_unknown": 1,
+                }
             },
         }
     }

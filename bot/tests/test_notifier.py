@@ -35,7 +35,7 @@ def test_notification(mock_secrets, mock_taskcluster, mock_phabricator, fake_hg_
     report = covdir_report(
         {
             "source_files": [
-                {"name": "file", "coverage": [None, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0]}
+                {"name": "file", "coverage": [None, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0]}
             ]
         }
     )
@@ -46,13 +46,23 @@ def test_notification(mock_secrets, mock_taskcluster, mock_phabricator, fake_hg_
         revision1: {
             "revision_id": 1,
             "paths": {
-                "file": {"lines_added": 4, "lines_covered": 2, "coverage": "NUCU"}
+                "file": {
+                    "lines_added": 3,
+                    "lines_covered": 2,
+                    "lines_unknown": 0,
+                    "coverage": "NCCU",
+                }
             },
         },
         revision2: {
             "revision_id": 2,
             "paths": {
-                "file": {"lines_added": 6, "lines_covered": 0, "coverage": "NUCUUUUUUU"}
+                "file": {
+                    "lines_added": 6,
+                    "lines_covered": 0,
+                    "lines_unknown": 0,
+                    "coverage": "NCCUUUUUUU",
+                }
             },
         },
     }
