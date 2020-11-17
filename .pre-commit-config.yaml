@@ -50,6 +50,34 @@ repos:
     rev: v1.1.0
     hooks:
       - id: yesqa
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v0.782
+    hooks:
+    -   id: mypy
+        name: mypy-backend
+        files: ^backend/
+        entry: mypy backend/
+        pass_filenames: false
+    -   id: mypy
+        name: mypy-bot
+        files: ^bot/
+        entry: mypy bot/
+        pass_filenames: false
+    -   id: mypy
+        name: mypy-events
+        files: ^events/
+        entry: mypy events/
+        pass_filenames: false
+    -   id: mypy
+        name: mypy-report
+        files: ^report/
+        entry: mypy report/
+        pass_filenames: false
+    -   id: mypy
+        name: mypy-tools
+        files: ^tools/
+        entry: mypy tools/
+        pass_filenames: false
   - repo: meta
     hooks:
       - id: check-useless-excludes
