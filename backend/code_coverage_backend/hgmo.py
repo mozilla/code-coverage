@@ -3,12 +3,15 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+from typing import Dict
+from typing import Tuple
+
 import requests
 import structlog
 
 logger = structlog.get_logger(__name__)
 
-__hgmo = {}
+__hgmo: Dict[str, Tuple[int, float]] = {}
 
 HGMO_REVISION_URL = "https://hg.mozilla.org/{repository}/json-rev/{revision}"
 HGMO_PUSHES_URL = "https://hg.mozilla.org/{repository}/json-pushes"
