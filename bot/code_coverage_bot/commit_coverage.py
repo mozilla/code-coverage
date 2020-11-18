@@ -45,44 +45,48 @@ def generate(repo_dir: str) -> None:
     ), "Missing GOOGLE_CLOUD_STORAGE secret"
     bucket = get_bucket(secrets[secrets.GOOGLE_CLOUD_STORAGE])
 
-    for changeset, platform, suite in list_reports(bucket, "mozilla-central"):
-        # We are only interested in "overall" coverage, not platform or suite specific.
-        if platform != DEFAULT_FILTER or suite != DEFAULT_FILTER:
-            continue
+    with hgmo.HGMO(repo_dir=repo_dir) as hgmo_server:
+        for changeset, platform, suite in list_reports(bucket, "mozilla-central"):
+            # We are only interested in "overall" coverage, not platform or suite specific.
+            if platform != DEFAULT_FILTER or suite != DEFAULT_FILTER:
+                continue
 
-        # We already have data for this commit.
-        if changeset in commit_coverage:
-            continue
+            # We already have data for this commit.
+            if changeset in commit_coverage:
+                continue
 
-        report_name = get_name("mozilla-central", changeset, platform, suite)
-        assert download_report("ccov-reports", bucket, report_name)
+            report_name = get_name("mozilla-central", changeset, platform, suite)
+            assert download_report("ccov-reports", bucket, report_name)
 
-        with open(os.path.join("ccov-reports", f"{report_name}.json"), "r") as f:
-            report = json.load(f)
+            with open(os.path.join("ccov-reports", f"{report_name}.json"), "r") as f:
+                report = json.load(f)
 
-        phabricatorUploader = PhabricatorUploader(repo_dir, changeset)
+            phabricatorUploader = PhabricatorUploader(repo_dir, changeset)
 
-        with hgmo.HGMO(repo_dir=repo_dir) as hgmo_server:
             changesets = hgmo_server.get_automation_relevance_changesets(changeset)
 
-        results = phabricatorUploader.generate(report, changesets)
-        for changeset in changesets:
-            desc = changeset["desc"].split("\n")[0]
+            results = phabricatorUploader.generate(report, changesets)
+            for changeset in changesets:
+                desc = changeset["desc"].split("\n")[0]
 
-            if any(text in desc for text in ["r=merge", "a=merge"]):
-                continue
+                if any(text in desc for text in ["r=merge", "a=merge"]):
+                    continue
 
-            # Lookup changeset coverage from phabricator uploader
-            coverage = results.get(changeset["node"])
-            if coverage is None:
-                logger.warn("No coverage found", changeset=changeset)
-                continue
+                # Lookup changeset coverage from phabricator uploader
+                coverage = results.get(changeset["node"])
+                if coverage is None:
+                    logger.warn("No coverage found", changeset=changeset)
+                    continue
 
-            commit_coverage[changeset["node"]] = {
-                "added": sum(c["lines_added"] for c in coverage["paths"].values()),
-                "covered": sum(c["lines_covered"] for c in coverage["paths"].values()),
-                "unknown": sum(c["lines_unknown"] for c in coverage["paths"].values()),
-            }
+                commit_coverage[changeset["node"]] = {
+                    "added": sum(c["lines_added"] for c in coverage["paths"].values()),
+                    "covered": sum(
+                        c["lines_covered"] for c in coverage["paths"].values()
+                    ),
+                    "unknown": sum(
+                        c["lines_unknown"] for c in coverage["paths"].values()
+                    ),
+                }
 
     cctx = zstandard.ZstdCompressor(threads=-1)
     with open(f"{commit_coverage_path}.zst", "wb") as zf:
