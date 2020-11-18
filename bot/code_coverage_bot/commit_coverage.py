@@ -67,7 +67,7 @@ def generate(repo_dir: str) -> None:
 
             changesets = hgmo_server.get_automation_relevance_changesets(changeset)
 
-            results = phabricatorUploader.generate(report, changesets)
+            results = phabricatorUploader.generate(hgmo_server, report, changesets)
             for changeset in changesets:
                 # Lookup changeset coverage from phabricator uploader
                 coverage = results.get(changeset["node"])

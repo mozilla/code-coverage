@@ -6,6 +6,7 @@ import urllib.parse
 
 import responses
 
+from code_coverage_bot import hgmo
 from code_coverage_bot.phabricator import PhabricatorUploader
 from conftest import add_file
 from conftest import changesets
@@ -28,7 +29,9 @@ def test_simple(mock_secrets, mock_phabricator, fake_hg_repo):
     report = covdir_report(
         {"source_files": [{"name": "file", "coverage": [None, 0, 1, 1, 1, 1, 0]}]}
     )
-    results = phabricator.generate(report, changesets(local, revision))
+    with hgmo.HGMO(local) as hgmo_server:
+        stack = changesets(hgmo_server, revision)
+        results = phabricator.generate(hgmo_server, report, stack)
 
     assert results == {
         revision: {
@@ -44,7 +47,7 @@ def test_simple(mock_secrets, mock_phabricator, fake_hg_repo):
         }
     }
 
-    phabricator.upload(report, changesets(local, revision))
+    phabricator.upload(report, stack)
 
     assert len(responses.calls) >= 3
 
@@ -106,7 +109,10 @@ def test_file_with_no_coverage(mock_secrets, fake_hg_repo):
 
     phabricator = PhabricatorUploader(local, revision)
     report = covdir_report({"source_files": []})
-    results = phabricator.generate(report, changesets(local, revision))
+    with hgmo.HGMO(local) as hgmo_server:
+        results = phabricator.generate(
+            hgmo_server, report, changesets(hgmo_server, revision)
+        )
 
     assert results == {revision: {"revision_id": 1, "paths": {}}}
 
@@ -125,7 +131,10 @@ def test_one_commit_without_differential(mock_secrets, fake_hg_repo):
     report = covdir_report(
         {"source_files": [{"name": "file", "coverage": [None, 0, 1, 1, 1, 1, 0]}]}
     )
-    results = phabricator.generate(report, changesets(local, revision))
+    with hgmo.HGMO(local) as hgmo_server:
+        results = phabricator.generate(
+            hgmo_server, report, changesets(hgmo_server, revision)
+        )
 
     assert results == {
         revision: {
@@ -166,7 +175,10 @@ def test_two_commits_two_files(mock_secrets, fake_hg_repo):
             ]
         }
     )
-    results = phabricator.generate(report, changesets(local, revision2))
+    with hgmo.HGMO(local) as hgmo_server:
+        results = phabricator.generate(
+            hgmo_server, report, changesets(hgmo_server, revision2)
+        )
 
     assert results == {
         revision1: {
@@ -217,7 +229,10 @@ def test_changesets_overwriting(mock_secrets, fake_hg_repo):
     report = covdir_report(
         {"source_files": [{"name": "file", "coverage": [None, 0, 1, 1, 1, 1, 0]}]}
     )
-    results = phabricator.generate(report, changesets(local, revision2))
+    with hgmo.HGMO(local) as hgmo_server:
+        results = phabricator.generate(
+            hgmo_server, report, changesets(hgmo_server, revision2)
+        )
 
     assert results == {
         revision1: {
@@ -266,7 +281,10 @@ def test_changesets_displacing(mock_secrets, fake_hg_repo):
             ]
         }
     )
-    results = phabricator.generate(report, changesets(local, revision2))
+    with hgmo.HGMO(local) as hgmo_server:
+        results = phabricator.generate(
+            hgmo_server, report, changesets(hgmo_server, revision2)
+        )
 
     assert results == {
         revision1: {
@@ -311,7 +329,10 @@ def test_changesets_reducing_size(mock_secrets, fake_hg_repo):
     report = covdir_report(
         {"source_files": [{"name": "file", "coverage": [None, 0, 1, 1, 1]}]}
     )
-    results = phabricator.generate(report, changesets(local, revision2))
+    with hgmo.HGMO(local) as hgmo_server:
+        results = phabricator.generate(
+            hgmo_server, report, changesets(hgmo_server, revision2)
+        )
 
     assert results == {
         revision1: {
@@ -359,7 +380,10 @@ def test_changesets_overwriting_one_commit_without_differential(
     report = covdir_report(
         {"source_files": [{"name": "file", "coverage": [None, 0, 1, 1, 1, 1, 0]}]}
     )
-    results = phabricator.generate(report, changesets(local, revision2))
+    with hgmo.HGMO(local) as hgmo_server:
+        results = phabricator.generate(
+            hgmo_server, report, changesets(hgmo_server, revision2)
+        )
 
     assert results == {
         revision1: {
@@ -402,7 +426,10 @@ def test_removed_file(mock_secrets, fake_hg_repo):
 
     phabricator = PhabricatorUploader(local, revision2)
     report = covdir_report({"source_files": []})
-    results = phabricator.generate(report, changesets(local, revision2))
+    with hgmo.HGMO(local) as hgmo_server:
+        results = phabricator.generate(
+            hgmo_server, report, changesets(hgmo_server, revision2)
+        )
 
     assert results == {
         revision1: {"revision_id": 1, "paths": {}},
@@ -430,7 +457,10 @@ def test_backout_removed_file(mock_secrets, fake_hg_repo):
     report = covdir_report(
         {"source_files": [{"name": "file", "coverage": [None, 0, 1, 1, 1, 1, 0]}]}
     )
-    results = phabricator.generate(report, changesets(local, revision3))
+    with hgmo.HGMO(local) as hgmo_server:
+        results = phabricator.generate(
+            hgmo_server, report, changesets(hgmo_server, revision3)
+        )
 
     assert results == {
         revision1: {
@@ -462,7 +492,10 @@ def test_coverable_last_lines(mock_secrets, mock_phabricator, fake_hg_repo):
     report = covdir_report(
         {"source_files": [{"name": "file", "coverage": [None, 0, 1, 1, 1]}]}
     )
-    results = phabricator.generate(report, changesets(local, revision))
+    with hgmo.HGMO(local) as hgmo_server:
+        results = phabricator.generate(
+            hgmo_server, report, changesets(hgmo_server, revision)
+        )
 
     assert results == {
         revision: {

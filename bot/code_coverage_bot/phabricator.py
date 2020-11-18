@@ -152,7 +152,7 @@ class PhabricatorUploader(object):
         return ext[1:] in COVERAGE_EXTENSIONS
 
     def generate(
-        self, report: dict, changesets: List[dict]
+        self, hgmo_server: hgmo.HGMO, report: dict, changesets: List[dict]
     ) -> Dict[str, Dict[str, Any]]:
         results = {}
 
@@ -171,88 +171,86 @@ class PhabricatorUploader(object):
             set(sum((changeset["files"] for changeset in changesets), []))
         )
 
-        with hgmo.HGMO(self.repo_dir) as hgmo_server:
-            coverage_records_by_path = {
-                path: self._find_coverage(report, path) for path in all_paths
+        coverage_records_by_path = {
+            path: self._find_coverage(report, path) for path in all_paths
+        }
+
+        # Retrieve the annotate data for the build changeset.
+        build_annotate_by_path = {
+            path: hgmo_server.get_annotate(self.revision, path)
+            for path in all_paths
+            if coverage_records_by_path.get(path) is not None
+        }
+
+        for changeset in changesets:
+            # Retrieve the revision ID for this changeset.
+            revision_id = parse_revision_id(changeset["desc"])
+
+            results[changeset["node"]] = {
+                "revision_id": revision_id,
+                "paths": {},
             }
 
-            # Retrieve the annotate data for the build changeset.
-            build_annotate_by_path = {
-                path: hgmo_server.get_annotate(self.revision, path)
-                for path in all_paths
-                if coverage_records_by_path.get(path) is not None
-            }
+            # For each file...
+            for path in changeset["files"]:
+                # Retrieve the coverage data.
+                coverage_record = coverage_records_by_path.get(path)
+                if coverage_record is None:
+                    continue
 
-            for changeset in changesets:
-                # Retrieve the revision ID for this changeset.
-                revision_id = parse_revision_id(changeset["desc"])
+                # Retrieve the annotate data for the build changeset.
+                build_annotate = build_annotate_by_path.get(path)
+                if build_annotate is None:
+                    # This means the file has been removed by another changeset, but if this is the
+                    # case, then we shouldn't have a coverage record and so we should have *continue*d
+                    # earlier.
+                    assert (
+                        False
+                    ), "Failure to retrieve annotate data for the build changeset"
 
-                results[changeset["node"]] = {
-                    "revision_id": revision_id,
-                    "paths": {},
+                # Build the coverage map from the annotate data and the coverage data of the build changeset.
+                coverage_map = self._build_coverage_map(build_annotate, coverage_record)
+
+                # Retrieve the annotate data for the changeset of interest.
+                annotate = hgmo_server.get_annotate(changeset["node"], path)
+                if annotate is None:
+                    # This means the file has been removed by this changeset, and maybe was brought back by a following changeset.
+                    continue
+
+                # List lines added by this patch
+                lines_added = [
+                    line["lineno"] - 1
+                    for line in annotate
+                    if line["node"] == changeset["node"]
+                ]
+
+                # Apply the coverage map on the annotate data of the changeset of interest.
+                coverage = self._apply_coverage_map(annotate, coverage_map)
+
+                results[changeset["node"]]["paths"][path] = {
+                    "lines_added": sum(
+                        coverage[line] != "N"
+                        for line in lines_added
+                        if line < len(coverage)
+                    ),
+                    "lines_unknown": sum(
+                        coverage[line] == "X"
+                        for line in lines_added
+                        if line < len(coverage)
+                    ),
+                    "lines_covered": sum(
+                        coverage[line] == "C"
+                        for line in lines_added
+                        if line < len(coverage)
+                    ),
+                    "coverage": coverage,
                 }
-
-                # For each file...
-                for path in changeset["files"]:
-                    # Retrieve the coverage data.
-                    coverage_record = coverage_records_by_path.get(path)
-                    if coverage_record is None:
-                        continue
-
-                    # Retrieve the annotate data for the build changeset.
-                    build_annotate = build_annotate_by_path.get(path)
-                    if build_annotate is None:
-                        # This means the file has been removed by another changeset, but if this is the
-                        # case, then we shouldn't have a coverage record and so we should have *continue*d
-                        # earlier.
-                        assert (
-                            False
-                        ), "Failure to retrieve annotate data for the build changeset"
-
-                    # Build the coverage map from the annotate data and the coverage data of the build changeset.
-                    coverage_map = self._build_coverage_map(
-                        build_annotate, coverage_record
-                    )
-
-                    # Retrieve the annotate data for the changeset of interest.
-                    annotate = hgmo_server.get_annotate(changeset["node"], path)
-                    if annotate is None:
-                        # This means the file has been removed by this changeset, and maybe was brought back by a following changeset.
-                        continue
-
-                    # List lines added by this patch
-                    lines_added = [
-                        line["lineno"] - 1
-                        for line in annotate
-                        if line["node"] == changeset["node"]
-                    ]
-
-                    # Apply the coverage map on the annotate data of the changeset of interest.
-                    coverage = self._apply_coverage_map(annotate, coverage_map)
-
-                    results[changeset["node"]]["paths"][path] = {
-                        "lines_added": sum(
-                            coverage[line] != "N"
-                            for line in lines_added
-                            if line < len(coverage)
-                        ),
-                        "lines_unknown": sum(
-                            coverage[line] == "X"
-                            for line in lines_added
-                            if line < len(coverage)
-                        ),
-                        "lines_covered": sum(
-                            coverage[line] == "C"
-                            for line in lines_added
-                            if line < len(coverage)
-                        ),
-                        "coverage": coverage,
-                    }
 
         return results
 
-    def upload(self, report, changesets):
-        results = self.generate(report, changesets)
+    def upload(self, report: dict, changesets: List[dict]) -> Dict[str, Dict[str, Any]]:
+        with hgmo.HGMO(self.repo_dir) as hgmo_server:
+            results = self.generate(hgmo_server, report, changesets)
 
         if secrets[secrets.PHABRICATOR_ENABLED]:
             phabricator = PhabricatorAPI(

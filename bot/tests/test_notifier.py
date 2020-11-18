@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from code_coverage_bot import hgmo
 from code_coverage_bot.notifier import notify_email
 from code_coverage_bot.phabricator import PhabricatorUploader
 from conftest import add_file
@@ -21,7 +22,8 @@ def test_notification(mock_secrets, mock_taskcluster, mock_phabricator, fake_hg_
 
     copy_pushlog_database(remote, local)
 
-    stack = changesets(local, revision2)
+    with hgmo.HGMO(local) as hgmo_server:
+        stack = changesets(hgmo_server, revision2)
     assert len(stack) == 2
     assert (
         stack[0]["desc"]
@@ -40,7 +42,8 @@ def test_notification(mock_secrets, mock_taskcluster, mock_phabricator, fake_hg_
         }
     )
     phab = PhabricatorUploader(local, revision2)
-    changesets_coverage = phab.generate(report, stack)
+    with hgmo.HGMO(local) as hgmo_server:
+        changesets_coverage = phab.generate(hgmo_server, report, stack)
 
     assert changesets_coverage == {
         revision1: {

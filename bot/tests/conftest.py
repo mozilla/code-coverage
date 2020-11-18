@@ -46,11 +46,8 @@ def commit(hg, diff_rev=None):
     return str(revision, "ascii")
 
 
-def changesets(repo_dir, revision):
-    from code_coverage_bot import hgmo
-
-    with hgmo.HGMO(repo_dir) as hgmo_server:
-        return hgmo_server.get_automation_relevance_changesets(revision)
+def changesets(hgmo_server, revision):
+    return hgmo_server.get_automation_relevance_changesets(revision)
 
 
 def load_file(path):
