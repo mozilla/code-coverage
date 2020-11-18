@@ -2,6 +2,8 @@
 
 import os
 import re
+from typing import Any
+from typing import Dict
 from typing import List
 from typing import Optional
 
@@ -149,21 +151,39 @@ class PhabricatorUploader(object):
             return False
         return ext[1:] in COVERAGE_EXTENSIONS
 
-    def generate(self, report, changesets):
+    def generate(
+        self, report: dict, changesets: List[dict]
+    ) -> Dict[str, Dict[str, Any]]:
         results = {}
 
+        # Skip merge changesets and backouts.
+        changesets = [
+            changeset
+            for changeset in changesets
+            if not any(
+                text in changeset["desc"].split("\n")[0]
+                for text in ["r=merge", "a=merge"]
+            )
+            and len(changeset["backsoutnodes"]) == 0
+        ]
+
+        all_paths = tuple(
+            set(sum((changeset["files"] for changeset in changesets), []))
+        )
+
         with hgmo.HGMO(self.repo_dir) as hgmo_server:
+            coverage_records_by_path = {
+                path: self._find_coverage(report, path) for path in all_paths
+            }
+
+            # Retrieve the annotate data for the build changeset.
+            build_annotate_by_path = {
+                path: hgmo_server.get_annotate(self.revision, path)
+                for path in all_paths
+                if coverage_records_by_path.get(path) is not None
+            }
+
             for changeset in changesets:
-                desc = changeset["desc"].split("\n")[0]
-
-                # Skip merge changesets.
-                if any(text in desc for text in ["r=merge", "a=merge"]):
-                    continue
-
-                # Skip backouts.
-                if len(changeset["backsoutnodes"]) > 0:
-                    continue
-
                 # Retrieve the revision ID for this changeset.
                 revision_id = parse_revision_id(changeset["desc"])
 
@@ -175,12 +195,12 @@ class PhabricatorUploader(object):
                 # For each file...
                 for path in changeset["files"]:
                     # Retrieve the coverage data.
-                    coverage_record = self._find_coverage(report, path)
+                    coverage_record = coverage_records_by_path.get(path)
                     if coverage_record is None:
                         continue
 
                     # Retrieve the annotate data for the build changeset.
-                    build_annotate = hgmo_server.get_annotate(self.revision, path)
+                    build_annotate = build_annotate_by_path.get(path)
                     if build_annotate is None:
                         # This means the file has been removed by another changeset, but if this is the
                         # case, then we shouldn't have a coverage record and so we should have *continue*d
