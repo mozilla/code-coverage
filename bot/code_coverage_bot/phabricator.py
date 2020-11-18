@@ -151,6 +151,10 @@ class PhabricatorUploader(object):
                 if any(text in desc for text in ["r=merge", "a=merge"]):
                     continue
 
+                # Skip backouts.
+                if len(changeset["backsoutnodes"]) > 0:
+                    continue
+
                 # Retrieve the revision ID for this changeset.
                 revision_id = parse_revision_id(changeset["desc"])
 

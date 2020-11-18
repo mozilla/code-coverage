@@ -445,7 +445,6 @@ def test_backout_removed_file(mock_secrets, fake_hg_repo):
             },
         },
         revision2: {"revision_id": 2, "paths": {}},
-        revision3: {"revision_id": None, "paths": {}},
     }
 
 
