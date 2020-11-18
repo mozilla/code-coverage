@@ -419,7 +419,7 @@ def test_backout_removed_file(mock_secrets, fake_hg_repo):
     hg.remove(files=[bytes(os.path.join(local, "file"), "ascii")])
     revision2 = commit(hg, 2)
 
-    hg.backout(rev=revision2, message="backout", user="marco")
+    hg.backout(rev=revision2, message=f"Backout {revision2[:12]}", user="marco")
     revision3 = hg.log(limit=1)[0][1].decode("ascii")
 
     hg.push(dest=bytes(remote, "ascii"))
