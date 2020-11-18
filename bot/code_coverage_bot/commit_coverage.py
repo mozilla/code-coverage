@@ -69,11 +69,6 @@ def generate(repo_dir: str) -> None:
 
             results = phabricatorUploader.generate(report, changesets)
             for changeset in changesets:
-                desc = changeset["desc"].split("\n")[0]
-
-                if any(text in desc for text in ["r=merge", "a=merge"]):
-                    continue
-
                 # Lookup changeset coverage from phabricator uploader
                 coverage = results.get(changeset["node"])
                 if coverage is None:
