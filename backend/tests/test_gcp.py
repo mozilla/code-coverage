@@ -7,6 +7,7 @@ import uuid
 import pytest
 
 from code_coverage_backend.report import Report
+from code_coverage_tools.gcp import download_report
 
 
 def test_download_report(mock_cache):
@@ -17,7 +18,9 @@ def test_download_report(mock_cache):
 
     # Does not exist
     report = Report(mock_cache.reports_dir, "myrepo", "missing", date=1, push_id=1)
-    assert mock_cache.download_report(report) is False
+    assert (
+        download_report(mock_cache.reports_dir, mock_cache.bucket, report.name) is False
+    )
 
     archive = os.path.join(
         mock_cache.reports_dir, "myrepo", "deadbeef123", "all:all.json.zstd"
@@ -30,7 +33,9 @@ def test_download_report(mock_cache):
 
     # Valid blob
     report = Report(mock_cache.reports_dir, "myrepo", "deadbeef123", date=1, push_id=1)
-    assert mock_cache.download_report(report) is True
+    assert (
+        download_report(mock_cache.reports_dir, mock_cache.bucket, report.name) is True
+    )
     assert archive == report.archive_path
     assert payload == report.path
 
