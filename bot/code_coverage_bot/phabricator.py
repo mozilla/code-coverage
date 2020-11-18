@@ -90,9 +90,12 @@ class PhabricatorUploader(object):
             # The changeset when it was introduced.
             orig_changeset = data["node"]
 
-            if lineno < len(coverage_record):
-                key = (orig_changeset, orig_line)
-                coverage_map[key] = coverage_record[lineno]
+            key = (orig_changeset, orig_line)
+            # Assume lines outside the coverage record are uncoverable (that happens for the
+            # last few lines of a file, they are not considered by instrumentation).
+            coverage_map[key] = (
+                coverage_record[lineno] if lineno < len(coverage_record) else -1
+            )
 
         return coverage_map
 

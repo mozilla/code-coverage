@@ -448,6 +448,37 @@ def test_backout_removed_file(mock_secrets, fake_hg_repo):
     }
 
 
+def test_coverable_last_lines(mock_secrets, mock_phabricator, fake_hg_repo):
+    hg, local, remote = fake_hg_repo
+
+    add_file(hg, local, "file", "1\n2\n3\n4\n5\n6\n7\n")
+    revision = commit(hg, 1)
+
+    hg.push(dest=bytes(remote, "ascii"))
+
+    copy_pushlog_database(remote, local)
+
+    phabricator = PhabricatorUploader(local, revision)
+    report = covdir_report(
+        {"source_files": [{"name": "file", "coverage": [None, 0, 1, 1, 1]}]}
+    )
+    results = phabricator.generate(report, changesets(local, revision))
+
+    assert results == {
+        revision: {
+            "revision_id": 1,
+            "paths": {
+                "file": {
+                    "coverage": "NUCCCNN",
+                    "lines_added": 4,
+                    "lines_covered": 3,
+                    "lines_unknown": 0,
+                }
+            },
+        }
+    }
+
+
 def test_third_party(mock_secrets, fake_hg_repo):
     hg, local, remote = fake_hg_repo
 
