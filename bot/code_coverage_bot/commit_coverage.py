@@ -84,6 +84,7 @@ def generate(repo_dir: str) -> None:
                 coverage = results.get(changeset["node"])
                 if coverage is None:
                     logger.info("No coverage found", changeset=changeset)
+                    commit_coverage[changeset["node"]] = None
                     continue
 
                 commit_coverage[changeset["node"]] = {
