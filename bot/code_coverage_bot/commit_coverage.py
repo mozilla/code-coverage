@@ -1,0 +1,91 @@
+# -*- coding: utf-8 -*-
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+
+import io
+import json
+import os
+
+import requests
+import structlog
+import zstandard
+
+from code_coverage_bot import hgmo
+from code_coverage_bot import utils
+from code_coverage_bot.phabricator import PhabricatorUploader
+from code_coverage_bot.secrets import secrets
+from code_coverage_tools.gcp import DEFAULT_FILTER
+from code_coverage_tools.gcp import download_report
+from code_coverage_tools.gcp import get_bucket
+from code_coverage_tools.gcp import get_name
+from code_coverage_tools.gcp import list_reports
+
+logger = structlog.get_logger(__name__)
+
+
+def generate(repo_dir: str) -> None:
+    commit_coverage_path = "commit_coverage.json"
+
+    url = f"https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/project.relman.code-coverage.{secrets[secrets.APP_CHANNEL]}.cron.latest/artifacts/public/{commit_coverage_path}.zst"  # noqa
+    r = requests.head(url, allow_redirects=True)
+    if r.status_code != 404:
+        utils.download_file(url, f"{commit_coverage_path}.zst")
+
+    try:
+        dctx = zstandard.ZstdDecompressor()
+        with open(f"{commit_coverage_path}.zst", "rb") as zf:
+            with dctx.stream_reader(zf) as reader:
+                commit_coverage = json.load(reader)
+    except FileNotFoundError:
+        commit_coverage = {}
+
+    assert (
+        secrets[secrets.GOOGLE_CLOUD_STORAGE] is not None
+    ), "Missing GOOGLE_CLOUD_STORAGE secret"
+    bucket = get_bucket(secrets[secrets.GOOGLE_CLOUD_STORAGE])
+
+    for changeset, platform, suite in list_reports(bucket, "mozilla-central"):
+        # We are only interested in "overall" coverage, not platform or suite specific.
+        if platform != DEFAULT_FILTER or suite != DEFAULT_FILTER:
+            continue
+
+        # We already have data for this commit.
+        if changeset in commit_coverage:
+            continue
+
+        report_name = get_name("mozilla-central", changeset, platform, suite)
+        assert download_report("ccov-reports", bucket, report_name)
+
+        with open(os.path.join("ccov-reports", f"{report_name}.json"), "r") as f:
+            report = json.load(f)
+
+        phabricatorUploader = PhabricatorUploader(repo_dir, changeset)
+
+        with hgmo.HGMO(repo_dir=repo_dir) as hgmo_server:
+            changesets = hgmo_server.get_automation_relevance_changesets(changeset)
+
+        results = phabricatorUploader.generate(report, changesets)
+        for changeset in changesets:
+            desc = changeset["desc"].split("\n")[0]
+
+            if any(text in desc for text in ["r=merge", "a=merge"]):
+                continue
+
+            # Lookup changeset coverage from phabricator uploader
+            coverage = results.get(changeset["node"])
+            if coverage is None:
+                logger.warn("No coverage found", changeset=changeset)
+                continue
+
+            commit_coverage[changeset["node"]] = {
+                "added": sum(c["lines_added"] for c in coverage["paths"].values()),
+                "covered": sum(c["lines_covered"] for c in coverage["paths"].values()),
+                "unknown": sum(c["lines_unknown"] for c in coverage["paths"].values()),
+            }
+
+    cctx = zstandard.ZstdCompressor(threads=-1)
+    with open(f"{commit_coverage_path}.zst", "wb") as zf:
+        with cctx.stream_writer(zf) as compressor:
+            with io.TextIOWrapper(compressor, encoding="utf-8") as f:
+                json.dump(commit_coverage, f)

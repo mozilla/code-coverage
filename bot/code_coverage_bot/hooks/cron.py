@@ -7,6 +7,7 @@
 import structlog
 
 from code_coverage_bot import chunk_mapping
+from code_coverage_bot import commit_coverage
 from code_coverage_bot import config
 from code_coverage_bot import uploader
 from code_coverage_bot.cli import setup_cli
@@ -33,8 +34,10 @@ class CronHook(Hook):
 
         super().__init__(config.MOZILLA_CENTRAL_REPOSITORY, revision, *args, **kwargs)
 
-    def run(self):
+    def run(self) -> None:
         self.retrieve_source_and_artifacts()
+
+        commit_coverage.generate(self.repo_dir)
 
         logger.info("Generating zero coverage reports")
         zc = ZeroCov(self.repo_dir)
@@ -58,7 +61,7 @@ class CronHook(Hook):
         )
 
 
-def main():
+def main() -> None:
     logger.info("Starting code coverage bot for cron")
     args = setup_cli(ask_revision=False, ask_repository=False)
     hook = CronHook(args.task_name_filter, args.cache_root, args.working_dir)
