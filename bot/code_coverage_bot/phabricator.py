@@ -2,6 +2,8 @@
 
 import os
 import re
+from typing import List
+from typing import Optional
 
 import structlog
 from libmozdata.phabricator import BuildState
@@ -34,9 +36,12 @@ def parse_revision_url(desc):
 
 
 class PhabricatorUploader(object):
-    def __init__(self, repo_dir, revision):
+    def __init__(
+        self, repo_dir: str, revision: str, warnings_enabled: Optional[bool] = True
+    ) -> None:
         self.repo_dir = repo_dir
         self.revision = revision
+        self.warnings_enabled = warnings_enabled
 
         # Read third party exclusion lists from repo
         third_parties = os.path.join(
@@ -48,12 +53,10 @@ class PhabricatorUploader(object):
             self.third_parties = []
             logger.warn("Missing third party exclusion list", path=third_parties)
 
-    def _find_coverage(self, report, path):
+    def _find_coverage(self, report: dict, path: str) -> Optional[List[int]]:
         """
         Find coverage value in a covdir report
         """
-        assert isinstance(report, dict)
-
         parts = path.split("/")
         for part in filter(None, parts):
             if part not in report["children"]:
@@ -65,8 +68,11 @@ class PhabricatorUploader(object):
                         "Path not found in report for unsupported extension", path=path
                     )
                 else:
-                    logger.warn("Path not found in report", path=path)
-                return
+                    if self.warnings_enabled:
+                        logger.warn("Path not found in report", path=path)
+                    else:
+                        logger.info("Path not found in report", path=path)
+                return None
             report = report["children"][part]
 
         return report["coverage"]

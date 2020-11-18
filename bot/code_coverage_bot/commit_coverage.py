@@ -61,7 +61,9 @@ def generate(repo_dir: str) -> None:
             with open(os.path.join("ccov-reports", f"{report_name}.json"), "r") as f:
                 report = json.load(f)
 
-            phabricatorUploader = PhabricatorUploader(repo_dir, changeset)
+            phabricatorUploader = PhabricatorUploader(
+                repo_dir, changeset, warnings_enabled=False
+            )
 
             changesets = hgmo_server.get_automation_relevance_changesets(changeset)
 
@@ -75,7 +77,7 @@ def generate(repo_dir: str) -> None:
                 # Lookup changeset coverage from phabricator uploader
                 coverage = results.get(changeset["node"])
                 if coverage is None:
-                    logger.warn("No coverage found", changeset=changeset)
+                    logger.info("No coverage found", changeset=changeset)
                     continue
 
                 commit_coverage[changeset["node"]] = {
