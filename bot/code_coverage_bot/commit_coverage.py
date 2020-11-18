@@ -47,27 +47,36 @@ def generate(repo_dir: str) -> None:
     bucket = get_bucket(secrets[secrets.GOOGLE_CLOUD_STORAGE])
 
     with hgmo.HGMO(repo_dir=repo_dir) as hgmo_server:
-        reports = list(list_reports(bucket, "mozilla-central"))
-        for changeset, platform, suite in tqdm(reports):
-            # We are only interested in "overall" coverage, not platform or suite specific.
-            if platform != DEFAULT_FILTER or suite != DEFAULT_FILTER:
-                continue
+        # We are only interested in "overall" coverage, not platform or suite specific.
+        changesets_to_analyze = [
+            changeset
+            for changeset, platform, suite in list_reports(bucket, "mozilla-central")
+            if platform == DEFAULT_FILTER and suite == DEFAULT_FILTER
+        ]
 
-            # We already have data for this commit.
-            if changeset in commit_coverage:
-                continue
+        # Skip already analyzed changesets.
+        changesets_to_analyze = [
+            changeset
+            for changeset in changesets_to_analyze
+            if changeset not in commit_coverage
+        ]
 
-            report_name = get_name("mozilla-central", changeset, platform, suite)
+        for changeset_to_analyze in tqdm(changesets_to_analyze):
+            report_name = get_name(
+                "mozilla-central", changeset_to_analyze, DEFAULT_FILTER, DEFAULT_FILTER
+            )
             assert download_report("ccov-reports", bucket, report_name)
 
             with open(os.path.join("ccov-reports", f"{report_name}.json"), "r") as f:
                 report = json.load(f)
 
             phabricatorUploader = PhabricatorUploader(
-                repo_dir, changeset, warnings_enabled=False
+                repo_dir, changeset_to_analyze, warnings_enabled=False
             )
 
-            changesets = hgmo_server.get_automation_relevance_changesets(changeset)
+            changesets = hgmo_server.get_automation_relevance_changesets(
+                changeset_to_analyze
+            )
 
             results = phabricatorUploader.generate(hgmo_server, report, changesets)
             for changeset in changesets:
