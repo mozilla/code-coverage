@@ -6,7 +6,7 @@
   "scripts": {
     "build": "webpack",
     "release": "webpack --config webpack.prod.js",
-    "start": "webpack-dev-server --open",
+    "start": "webpack serve",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
