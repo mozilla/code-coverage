@@ -10,6 +10,7 @@ import os
 import requests
 import structlog
 import zstandard
+from tqdm import tqdm
 
 from code_coverage_bot import hgmo
 from code_coverage_bot import utils
@@ -46,7 +47,8 @@ def generate(repo_dir: str) -> None:
     bucket = get_bucket(secrets[secrets.GOOGLE_CLOUD_STORAGE])
 
     with hgmo.HGMO(repo_dir=repo_dir) as hgmo_server:
-        for changeset, platform, suite in list_reports(bucket, "mozilla-central"):
+        reports = list(list_reports(bucket, "mozilla-central"))
+        for changeset, platform, suite in tqdm(reports):
             # We are only interested in "overall" coverage, not platform or suite specific.
             if platform != DEFAULT_FILTER or suite != DEFAULT_FILTER:
                 continue
