@@ -414,27 +414,38 @@ def test_backout_removed_file(mock_secrets, fake_hg_repo):
     hg, local, remote = fake_hg_repo
 
     add_file(hg, local, "file", "1\n2\n3\n4\n5\n6\n7\n")
-    commit(hg, 1)
+    revision1 = commit(hg, 1)
 
     hg.remove(files=[bytes(os.path.join(local, "file"), "ascii")])
-    revision = commit(hg, 2)
+    revision2 = commit(hg, 2)
 
-    hg.backout(rev=revision, message="backout", user="marco")
-    revision = hg.log(limit=1)[0][1].decode("ascii")
+    hg.backout(rev=revision2, message="backout", user="marco")
+    revision3 = hg.log(limit=1)[0][1].decode("ascii")
 
     hg.push(dest=bytes(remote, "ascii"))
 
     copy_pushlog_database(remote, local)
 
-    phabricator = PhabricatorUploader(local, revision)
+    phabricator = PhabricatorUploader(local, revision3)
     report = covdir_report(
         {"source_files": [{"name": "file", "coverage": [None, 0, 1, 1, 1, 1, 0]}]}
     )
-    results = phabricator.generate(report, changesets(local, revision))
+    results = phabricator.generate(report, changesets(local, revision3))
 
     assert results == {
-        1: {"file": {"coverage": "NUCCCCU", "lines_added": 7, "lines_covered": 5}},
-        2: {},
+        revision1: {
+            "revision_id": 1,
+            "paths": {
+                "file": {
+                    "coverage": "NUCCCCU",
+                    "lines_added": 6,
+                    "lines_covered": 4,
+                    "lines_unknown": 0,
+                }
+            },
+        },
+        revision2: {"revision_id": 2, "paths": {}},
+        revision3: {"revision_id": None, "paths": {}},
     }
 
 
