@@ -60,7 +60,7 @@ def trigger_missing(repo_dir: str, out_dir: str = ".") -> None:
         triggered_revisions = set()
 
     # Get all mozilla-central revisions from the past year.
-    days = 365 if secrets[secrets.APP_CHANNEL] == "production" else 90
+    days = 365 if secrets[secrets.APP_CHANNEL] == "production" else 30
     a_year_ago = datetime.utcnow() - timedelta(days=days)
     with hgmo.HGMO(repo_dir=repo_dir) as hgmo_server:
         data = hgmo_server.get_pushes(
