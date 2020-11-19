@@ -205,10 +205,12 @@ def mock_secrets():
 
     secrets.update(
         {
+            "APP_CHANNEL": "production",
             "PHABRICATOR_ENABLED": True,
             "PHABRICATOR_URL": "http://phabricator.test/api/",
             "PHABRICATOR_TOKEN": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
             "EMAIL_ADDRESSES": ["admin@allizom.org"],
+            "GOOGLE_CLOUD_STORAGE": {},
         }
     )
 

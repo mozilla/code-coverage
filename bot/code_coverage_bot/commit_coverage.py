@@ -25,10 +25,10 @@ from code_coverage_tools.gcp import list_reports
 logger = structlog.get_logger(__name__)
 
 
-def generate(repo_dir: str) -> None:
-    commit_coverage_path = "commit_coverage.json"
+def generate(repo_dir: str, out_dir: str = ".") -> None:
+    commit_coverage_path = os.path.join(out_dir, "commit_coverage.json")
 
-    url = f"https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/project.relman.code-coverage.{secrets[secrets.APP_CHANNEL]}.cron.latest/artifacts/public/{commit_coverage_path}.zst"  # noqa
+    url = f"https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/project.relman.code-coverage.{secrets[secrets.APP_CHANNEL]}.cron.latest/artifacts/public/commit_coverage.json.zst"  # noqa
     r = requests.head(url, allow_redirects=True)
     if r.status_code != 404:
         utils.download_file(url, f"{commit_coverage_path}.zst")
@@ -65,9 +65,13 @@ def generate(repo_dir: str) -> None:
             report_name = get_name(
                 "mozilla-central", changeset_to_analyze, DEFAULT_FILTER, DEFAULT_FILTER
             )
-            assert download_report("ccov-reports", bucket, report_name)
+            assert download_report(
+                os.path.join(out_dir, "ccov-reports"), bucket, report_name
+            )
 
-            with open(os.path.join("ccov-reports", f"{report_name}.json"), "r") as f:
+            with open(
+                os.path.join(out_dir, "ccov-reports", f"{report_name}.json"), "r"
+            ) as f:
                 report = json.load(f)
 
             phabricatorUploader = PhabricatorUploader(
