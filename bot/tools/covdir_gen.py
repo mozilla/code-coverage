@@ -9,7 +9,7 @@ from code_coverage_bot.taskcluster import taskcluster_config
 
 MC_REPO = "https://hg.mozilla.org/mozilla-central"
 HOOK_GROUP = "project-relman"
-HOOK_ID = "code-coverage-{app_channel}"
+HOOK_ID = "code-coverage-repo-{app_channel}"
 
 
 def trigger_task(app_channel, task_group_id, commit):
