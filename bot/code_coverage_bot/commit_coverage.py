@@ -26,16 +26,16 @@ logger = structlog.get_logger(__name__)
 
 
 def generate(repo_dir: str, out_dir: str = ".") -> None:
-    commit_coverage_path = os.path.join(out_dir, "commit_coverage.json")
+    commit_coverage_path = os.path.join(out_dir, "commit_coverage.json.zst")
 
     url = f"https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/project.relman.code-coverage.{secrets[secrets.APP_CHANNEL]}.cron.latest/artifacts/public/commit_coverage.json.zst"  # noqa
     r = requests.head(url, allow_redirects=True)
     if r.status_code != 404:
-        utils.download_file(url, f"{commit_coverage_path}.zst")
+        utils.download_file(url, commit_coverage_path)
 
     try:
         dctx = zstandard.ZstdDecompressor()
-        with open(f"{commit_coverage_path}.zst", "rb") as zf:
+        with open(commit_coverage_path, "rb") as zf:
             with dctx.stream_reader(zf) as reader:
                 commit_coverage = json.load(reader)
     except FileNotFoundError:
@@ -102,7 +102,7 @@ def generate(repo_dir: str, out_dir: str = ".") -> None:
                 }
 
     cctx = zstandard.ZstdCompressor(threads=-1)
-    with open(f"{commit_coverage_path}.zst", "wb") as zf:
+    with open(commit_coverage_path, "wb") as zf:
         with cctx.stream_writer(zf) as compressor:
             with io.TextIOWrapper(compressor, encoding="utf-8") as f:
                 json.dump(commit_coverage, f)
