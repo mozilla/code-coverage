@@ -3,7 +3,6 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import concurrent.futures
-import shutil
 import subprocess
 from zipfile import BadZipFile
 from zipfile import is_zipfile
@@ -101,8 +100,8 @@ def download_file(url: str, path: str) -> None:
         r.raise_for_status()
 
         with open(path, "wb") as f:
-            r.raw.decode_content = True
-            shutil.copyfileobj(r.raw, f)
+            for chunk in r.iter_content(chunk_size=1048576):
+                f.write(chunk)
 
         if path.endswith(".zip") and not is_zipfile(path):
             raise BadZipFile("File is not a zip file")
