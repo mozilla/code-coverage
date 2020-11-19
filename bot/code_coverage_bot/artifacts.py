@@ -20,8 +20,6 @@ SUITES_TO_IGNORE = [
     "awsy",
     "talos",
 ]  # Ignore awsy and talos as they aren't actually suites of tests.
-FINISHED_STATUSES = ["completed", "failed", "exception"]
-ALL_STATUSES = FINISHED_STATUSES + ["unscheduled", "pending", "running"]
 STATUS_VALUE = {"exception": 1, "failed": 2, "completed": 3}
 
 
@@ -130,7 +128,7 @@ class ArtifactsHandler(object):
 
         return False
 
-    def download_all(self):
+    def download_all(self) -> None:
         os.makedirs(self.parent_dir, exist_ok=True)
 
         logger.info("Downloading artifacts from {} tasks".format(len(self.test_tasks)))
@@ -138,10 +136,10 @@ class ArtifactsHandler(object):
         for test_task in self.test_tasks:
             status = test_task["status"]["state"]
             task_id = test_task["status"]["taskId"]
-            while status not in FINISHED_STATUSES:
-                assert status in ALL_STATUSES, "State '{}' not recognized".format(
-                    status
-                )
+            while status not in taskcluster.FINISHED_STATUSES:
+                assert (
+                    status in taskcluster.ALL_STATUSES
+                ), "State '{}' not recognized".format(status)
                 logger.info(f"Waiting for task {task_id} to finish...")
                 time.sleep(60)
                 task_status = taskcluster.get_task_status(task_id)
@@ -153,9 +151,9 @@ class ArtifactsHandler(object):
         download_tasks = {}
         for test_task in self.test_tasks:
             status = test_task["status"]["state"]
-            assert status in FINISHED_STATUSES, "State '{}' not recognized".format(
-                status
-            )
+            assert (
+                status in taskcluster.FINISHED_STATUSES
+            ), "State '{}' not recognized".format(status)
 
             chunk_name = taskcluster.get_chunk(test_task["task"])
             platform_name = taskcluster.get_platform(test_task["task"])

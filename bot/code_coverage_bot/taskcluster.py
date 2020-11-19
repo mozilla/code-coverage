@@ -10,6 +10,8 @@ from code_coverage_bot.utils import download_file
 logger = structlog.getLogger(__name__)
 taskcluster_config = TaskclusterConfig("https://firefox-ci-tc.services.mozilla.com")
 
+FINISHED_STATUSES = ["completed", "failed", "exception"]
+ALL_STATUSES = FINISHED_STATUSES + ["unscheduled", "pending", "running"]
 NAME_PARTS_TO_SKIP = ("opt", "debug", "e10s", "1proc")
 
 

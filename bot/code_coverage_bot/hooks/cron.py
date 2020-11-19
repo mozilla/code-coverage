@@ -9,6 +9,7 @@ import structlog
 from code_coverage_bot import chunk_mapping
 from code_coverage_bot import commit_coverage
 from code_coverage_bot import config
+from code_coverage_bot import trigger_missing
 from code_coverage_bot import uploader
 from code_coverage_bot.cli import setup_cli
 from code_coverage_bot.hooks.base import Hook
@@ -36,6 +37,8 @@ class CronHook(Hook):
 
     def run(self) -> None:
         self.retrieve_source_and_artifacts()
+
+        trigger_missing.trigger_missing(self.repo_dir)
 
         commit_coverage.generate(self.repo_dir)
 

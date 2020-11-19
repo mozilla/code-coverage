@@ -56,13 +56,24 @@ class HGMO(object):
         os.remove(self.pid_file)
         logger.info("hgmo has been killed")
 
-    def get_pushes(self, startID=None, changeset=None):
-        assert startID is not None or changeset is not None
+    def get_pushes(
+        self, startID=None, startDate=None, changeset=None, full=True, tipsonly=False
+    ):
+        assert startID is not None or startDate is not None or changeset is not None
 
-        params = {"version": 2, "full": 1}
+        params = {"version": 2}
+
+        if full:
+            params["full"] = 1
+
+        if tipsonly:
+            params["tipsonly"] = 1
 
         if startID is not None:
             params["startID"] = startID
+
+        if startDate is not None:
+            params["startdate"] = startDate
 
         if changeset is not None:
             params["changeset"] = changeset
