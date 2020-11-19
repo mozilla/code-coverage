@@ -6,6 +6,7 @@ import requests
 import structlog
 import tenacity
 import zstandard as zstd
+from google.cloud.storage.bucket import Bucket
 
 from code_coverage_bot.secrets import secrets
 from code_coverage_tools.gcp import get_bucket
@@ -50,11 +51,12 @@ def gcp(repository, revision, report, platform, suite):
     return blob
 
 
-def gcp_covdir_exists(repository, revision, platform, suite):
+def gcp_covdir_exists(
+    bucket: Bucket, repository: str, revision: str, platform: str, suite: str
+) -> bool:
     """
     Check if a covdir report exists on the Google Cloud Storage bucket
     """
-    bucket = get_bucket(secrets[secrets.GOOGLE_CLOUD_STORAGE])
     path = GCP_COVDIR_PATH.format(
         repository=repository, revision=revision, platform=platform, suite=suite
     )

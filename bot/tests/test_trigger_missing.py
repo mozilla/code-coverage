@@ -7,6 +7,7 @@ import zstandard
 
 from code_coverage_bot import taskcluster
 from code_coverage_bot import trigger_missing
+from code_coverage_bot import uploader
 from code_coverage_bot.taskcluster import taskcluster_config
 from conftest import add_file
 from conftest import commit
@@ -58,12 +59,18 @@ def test_trigger_from_scratch(
 
     monkeypatch.setattr(trigger_missing, "get_bucket", get_bucket)
 
-    def list_reports(bucket, repo):
-        assert bucket == myBucket
-        assert repo == "mozilla-central"
-        yield revision3, "all", "all"
+    gcp_covdir_exists_calls = 0
 
-    monkeypatch.setattr(trigger_missing, "list_reports", list_reports)
+    def gcp_covdir_exists(bucket, repository, revision, platform, suite):
+        nonlocal gcp_covdir_exists_calls
+        gcp_covdir_exists_calls += 1
+        assert bucket == myBucket
+        assert repository == "mozilla-central"
+        assert platform == "all"
+        assert suite == "all"
+        return revision == revision3
+
+    monkeypatch.setattr(uploader, "gcp_covdir_exists", gcp_covdir_exists)
 
     def slugId():
         return "myGroupId"
@@ -182,6 +189,7 @@ def test_trigger_from_scratch(
 
     trigger_missing.trigger_missing(local, out_dir=tmp_path)
 
+    assert gcp_covdir_exists_calls == 4
     assert trigger_hook_calls == 2
     assert get_decision_task_calls == 3
     assert get_task_details_calls == 3
@@ -245,12 +253,18 @@ def test_trigger_from_preexisting(
 
     monkeypatch.setattr(trigger_missing, "get_bucket", get_bucket)
 
-    def list_reports(bucket, repo):
-        assert bucket == myBucket
-        assert repo == "mozilla-central"
-        yield revision3, "all", "all"
+    gcp_covdir_exists_calls = 0
 
-    monkeypatch.setattr(trigger_missing, "list_reports", list_reports)
+    def gcp_covdir_exists(bucket, repository, revision, platform, suite):
+        nonlocal gcp_covdir_exists_calls
+        gcp_covdir_exists_calls += 1
+        assert bucket == myBucket
+        assert repository == "mozilla-central"
+        assert platform == "all"
+        assert suite == "all"
+        return revision == revision3
+
+    monkeypatch.setattr(uploader, "gcp_covdir_exists", gcp_covdir_exists)
 
     def slugId():
         return "myGroupId"
@@ -323,6 +337,7 @@ def test_trigger_from_preexisting(
 
     trigger_missing.trigger_missing(local, out_dir=tmp_path)
 
+    assert gcp_covdir_exists_calls == 1
     assert trigger_hook_calls == 1
     assert get_decision_task_calls == 1
     assert get_task_details_calls == 1

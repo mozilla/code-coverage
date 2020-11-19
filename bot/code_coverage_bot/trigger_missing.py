@@ -16,11 +16,11 @@ from taskcluster.utils import slugId
 from code_coverage_bot import config
 from code_coverage_bot import hgmo
 from code_coverage_bot import taskcluster
+from code_coverage_bot import uploader
 from code_coverage_bot import utils
 from code_coverage_bot.secrets import secrets
 from code_coverage_bot.taskcluster import taskcluster_config
 from code_coverage_tools.gcp import get_bucket
-from code_coverage_tools.gcp import list_reports
 
 logger = structlog.get_logger(__name__)
 
@@ -79,16 +79,21 @@ def trigger_missing(repo_dir: str, out_dir: str = ".") -> None:
     ), "Missing GOOGLE_CLOUD_STORAGE secret"
     bucket = get_bucket(secrets[secrets.GOOGLE_CLOUD_STORAGE])
 
-    ingested_revisions = set(
-        revision for revision, _, _ in list_reports(bucket, "mozilla-central")
-    )
-    triggered_revisions.update(ingested_revisions)
+    missing_revisions = []
+    for revision, timestamp in revisions:
+        # Skip revisions that have already been triggered. If they are still missing,
+        # it means there is a problem that is preventing us from ingesting them.
+        if revision in triggered_revisions:
+            continue
 
-    missing_revisions = [
-        (revision, timestamp)
-        for revision, timestamp in revisions
-        if revision not in ingested_revisions and revision not in triggered_revisions
-    ]
+        # If the revision was already ingested, we don't need to trigger ingestion for it again.
+        if uploader.gcp_covdir_exists(
+            bucket, "mozilla-central", revision, "all", "all"
+        ):
+            triggered_revisions.add(revision)
+            continue
+
+        missing_revisions.append((revision, timestamp))
 
     logger.info(f"{len(missing_revisions)} missing pushes in the past year")
 

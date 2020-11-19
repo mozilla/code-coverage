@@ -18,6 +18,7 @@ from code_coverage_bot.notifier import notify_email
 from code_coverage_bot.phabricator import PhabricatorUploader
 from code_coverage_bot.phabricator import parse_revision_id
 from code_coverage_bot.secrets import secrets
+from code_coverage_tools import gcp
 
 logger = structlog.get_logger(__name__)
 
@@ -108,7 +109,8 @@ class MozillaCentralHook(RepositoryHook):
 
     def run(self):
         # Check the covdir report does not already exists
-        if uploader.gcp_covdir_exists(self.branch, self.revision, "all", "all"):
+        bucket = gcp.get_bucket(secrets[secrets.GOOGLE_CLOUD_STORAGE])
+        if uploader.gcp_covdir_exists(bucket, self.branch, self.revision, "all", "all"):
             logger.warn("Full covdir report already on GCP")
             return
 
