@@ -360,6 +360,58 @@ def test_changesets_reducing_size(mock_secrets, fake_hg_repo):
     }
 
 
+def test_changesets_increasing_size(mock_secrets, fake_hg_repo):
+    hg, local, remote = fake_hg_repo
+
+    add_file(hg, local, "file", "1\n2\n3\n4\n")
+    revision1 = commit(hg, 1)
+
+    add_file(hg, local, "file", "1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n")
+    revision2 = commit(hg, 2)
+
+    hg.push(dest=bytes(remote, "ascii"))
+
+    copy_pushlog_database(remote, local)
+
+    phabricator = PhabricatorUploader(local, revision2)
+    report = covdir_report(
+        {
+            "source_files": [
+                {"name": "file", "coverage": [None, 0, 1, 0, 0, 0, 0, 0, 1, 1]}
+            ]
+        }
+    )
+    with hgmo.HGMO(local) as hgmo_server:
+        results = phabricator.generate(
+            hgmo_server, report, changesets(hgmo_server, revision2)
+        )
+
+    assert results == {
+        revision1: {
+            "revision_id": 1,
+            "paths": {
+                "file": {
+                    "coverage": "NUCU",
+                    "lines_added": 3,
+                    "lines_covered": 1,
+                    "lines_unknown": 0,
+                }
+            },
+        },
+        revision2: {
+            "revision_id": 2,
+            "paths": {
+                "file": {
+                    "coverage": "NUCUUUUUCC",
+                    "lines_added": 6,
+                    "lines_covered": 2,
+                    "lines_unknown": 0,
+                }
+            },
+        },
+    }
+
+
 def test_changesets_overwriting_one_commit_without_differential(
     mock_secrets, fake_hg_repo
 ):
