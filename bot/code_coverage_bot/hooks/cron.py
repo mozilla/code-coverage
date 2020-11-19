@@ -6,7 +6,6 @@
 
 import structlog
 
-from code_coverage_bot import chunk_mapping
 from code_coverage_bot import commit_coverage
 from code_coverage_bot import config
 from code_coverage_bot import trigger_missing
@@ -46,8 +45,9 @@ class CronHook(Hook):
         zc = ZeroCov(self.repo_dir)
         zc.generate(self.artifactsHandler.get(), self.revision)
 
-        logger.info("Generating chunk mapping")
-        chunk_mapping.generate(self.repo_dir, self.revision, self.artifactsHandler)
+        # This is disabled as it is not used yet.
+        # logger.info("Generating chunk mapping")
+        # chunk_mapping.generate(self.repo_dir, self.revision, self.artifactsHandler)
 
         # Index the task in the TaskCluster index at the given revision and as "latest".
         # Given that all tasks have the same rank, the latest task that finishes will
