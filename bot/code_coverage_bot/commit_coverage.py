@@ -104,5 +104,5 @@ def generate(repo_dir: str, out_dir: str = ".") -> None:
     cctx = zstandard.ZstdCompressor(threads=-1)
     with open(commit_coverage_path, "wb") as zf:
         with cctx.stream_writer(zf) as compressor:
-            with io.TextIOWrapper(compressor, encoding="utf-8") as f:
+            with io.TextIOWrapper(compressor, encoding="ascii") as f:
                 json.dump(commit_coverage, f)
