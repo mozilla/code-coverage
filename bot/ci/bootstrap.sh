@@ -1,7 +1,7 @@
 #!/bin/bash -ex
 GRCOV_VERSION="v0.5.14"
 MERCURIAL_VERSION="5.5.2"
-VERSION_CONTROL_TOOLS_REV="2f7b4df4a928"
+VERSION_CONTROL_TOOLS_REV="29460de72118"
 
 apt-get update
 # libgoogle-perftools4 is currently required for grcov (until https://github.com/mozilla/grcov/issues/403 is fixed).
