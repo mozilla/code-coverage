@@ -18,13 +18,11 @@ logger = structlog.get_logger(__name__)
 DEFAULT_FILTER = "all"
 
 
-def get_bucket(service_account: str) -> gcp_storage.bucket.Bucket:
+def get_bucket(service_account: dict) -> gcp_storage.bucket.Bucket:
     """
     Build a Google Cloud Storage client & bucket
     from Taskcluster secret
     """
-    assert isinstance(service_account, dict)
-
     # Load credentials from Taskcluster secret
     if "bucket" not in service_account:
         raise KeyError("Missing bucket in GOOGLE_CLOUD_STORAGE")
