@@ -88,7 +88,7 @@ def test_trigger_from_scratch(
                 nonlocal trigger_hook_calls
                 assert hook_group == "project-relman"
                 assert hook_id == "code-coverage-repo-production"
-                rev = revision2 if trigger_hook_calls == 0 else revision4
+                rev = revision4 if trigger_hook_calls == 0 else revision2
                 assert payload == {
                     "REPOSITORY": "https://hg.mozilla.org/mozilla-central",
                     "REVISION": rev,
@@ -107,11 +107,11 @@ def test_trigger_from_scratch(
         nonlocal get_decision_task_calls
         assert branch == "mozilla-central"
         if get_decision_task_calls == 0:
-            assert revision == revision2
+            assert revision == revision5
         elif get_decision_task_calls == 1:
             assert revision == revision4
         elif get_decision_task_calls == 2:
-            assert revision == revision5
+            assert revision == revision2
         get_decision_task_calls += 1
         return f"decisionTask-{revision}"
 
@@ -122,17 +122,17 @@ def test_trigger_from_scratch(
     def get_task_details(decision_task_id):
         nonlocal get_task_details_calls
         if get_task_details_calls == 0:
-            assert decision_task_id == f"decisionTask-{revision2}"
+            assert decision_task_id == f"decisionTask-{revision5}"
             get_task_details_calls += 1
-            return {"taskGroupId": f"decisionTaskGroup-{revision2}"}
+            return {"taskGroupId": f"decisionTaskGroup-{revision5}"}
         elif get_task_details_calls == 1:
             assert decision_task_id == f"decisionTask-{revision4}"
             get_task_details_calls += 1
             return {"taskGroupId": f"decisionTaskGroup-{revision4}"}
         elif get_task_details_calls == 2:
-            assert decision_task_id == f"decisionTask-{revision5}"
+            assert decision_task_id == f"decisionTask-{revision2}"
             get_task_details_calls += 1
-            return {"taskGroupId": f"decisionTaskGroup-{revision5}"}
+            return {"taskGroupId": f"decisionTaskGroup-{revision2}"}
 
     monkeypatch.setattr(taskcluster, "get_task_details", get_task_details)
 
@@ -141,12 +141,12 @@ def test_trigger_from_scratch(
     def get_tasks_in_group(group_id):
         nonlocal get_tasks_in_group_calls
         if get_tasks_in_group_calls == 0:
-            assert group_id == f"decisionTaskGroup-{revision2}"
+            assert group_id == f"decisionTaskGroup-{revision5}"
             get_tasks_in_group_calls += 1
             return [
                 {
                     "status": {
-                        "state": "completed",
+                        "state": "running",
                     },
                     "task": {
                         "metadata": {
@@ -171,12 +171,12 @@ def test_trigger_from_scratch(
                 }
             ]
         elif get_tasks_in_group_calls == 2:
-            assert group_id == f"decisionTaskGroup-{revision5}"
+            assert group_id == f"decisionTaskGroup-{revision2}"
             get_tasks_in_group_calls += 1
             return [
                 {
                     "status": {
-                        "state": "running",
+                        "state": "completed",
                     },
                     "task": {
                         "metadata": {
