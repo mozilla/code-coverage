@@ -3,7 +3,6 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-
 import structlog
 
 from code_coverage_bot import commit_coverage
@@ -35,9 +34,9 @@ class CronHook(Hook):
         super().__init__(config.MOZILLA_CENTRAL_REPOSITORY, revision, *args, **kwargs)
 
     def run(self) -> None:
-        self.retrieve_source_and_artifacts()
+        trigger_missing.trigger_missing(config.MOZILLA_CENTRAL_REPOSITORY)
 
-        trigger_missing.trigger_missing(self.repo_dir)
+        self.retrieve_source_and_artifacts()
 
         commit_coverage.generate(self.repo_dir)
 

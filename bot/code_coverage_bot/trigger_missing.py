@@ -42,7 +42,7 @@ def trigger_task(task_group_id: str, revision: str) -> None:
     )
 
 
-def trigger_missing(repo_dir: str, out_dir: str = ".") -> None:
+def trigger_missing(server_address: str, out_dir: str = ".") -> None:
     triggered_revisions_path = os.path.join(out_dir, "triggered_revisions.zst")
 
     url = f"https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/project.relman.code-coverage.{secrets[secrets.APP_CHANNEL]}.cron.latest/artifacts/public/triggered_revisions.zst"  # noqa
@@ -62,7 +62,7 @@ def trigger_missing(repo_dir: str, out_dir: str = ".") -> None:
     # Get all mozilla-central revisions from the past year.
     days = 365 if secrets[secrets.APP_CHANNEL] == "production" else 30
     a_year_ago = datetime.utcnow() - timedelta(days=days)
-    with hgmo.HGMO(repo_dir=repo_dir) as hgmo_server:
+    with hgmo.HGMO(server_address=server_address) as hgmo_server:
         data = hgmo_server.get_pushes(
             startDate=a_year_ago.strftime("%Y-%m-%d"), full=False, tipsonly=True
         )

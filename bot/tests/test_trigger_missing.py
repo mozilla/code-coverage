@@ -5,6 +5,7 @@ import os
 import responses
 import zstandard
 
+from code_coverage_bot import hgmo
 from code_coverage_bot import taskcluster
 from code_coverage_bot import trigger_missing
 from code_coverage_bot import uploader
@@ -187,7 +188,8 @@ def test_trigger_from_scratch(
 
     monkeypatch.setattr(taskcluster, "get_tasks_in_group", get_tasks_in_group)
 
-    trigger_missing.trigger_missing(local, out_dir=tmp_path)
+    with hgmo.HGMO(repo_dir=local) as hgmo_server:
+        trigger_missing.trigger_missing(hgmo_server.server_address, out_dir=tmp_path)
 
     assert gcp_covdir_exists_calls == 4
     assert trigger_hook_calls == 2
@@ -335,7 +337,8 @@ def test_trigger_from_preexisting(
 
     monkeypatch.setattr(taskcluster, "get_tasks_in_group", get_tasks_in_group)
 
-    trigger_missing.trigger_missing(local, out_dir=tmp_path)
+    with hgmo.HGMO(repo_dir=local) as hgmo_server:
+        trigger_missing.trigger_missing(hgmo_server.server_address, out_dir=tmp_path)
 
     assert gcp_covdir_exists_calls == 1
     assert trigger_hook_calls == 1
