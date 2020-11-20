@@ -104,6 +104,7 @@ def trigger_missing(server_address: str, out_dir: str = ".") -> None:
 
     task_group_id = slugId()
     logger.info(f"Triggering tasks in the {task_group_id} group")
+    triggered = 0
     for revision, timestamp in reversed(missing_revisions):
         # If it's older than yesterday, we assume the group finished.
         # If it is newer than yesterday, we load the group and check if all tasks in it finished.
@@ -124,7 +125,8 @@ def trigger_missing(server_address: str, out_dir: str = ".") -> None:
 
         trigger_task(task_group_id, revision)
         triggered_revisions.add(revision)
-        if len(triggered_revisions) == MAXIMUM_TRIGGERS:
+        triggered += 1
+        if triggered == MAXIMUM_TRIGGERS:
             break
 
     cctx = zstandard.ZstdCompressor(threads=-1)
