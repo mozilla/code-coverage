@@ -25,6 +25,9 @@ from code_coverage_tools.gcp import get_bucket
 logger = structlog.get_logger(__name__)
 
 
+MAXIMUM_TRIGGERS = 7
+
+
 def trigger_task(task_group_id: str, revision: str) -> None:
     """
     Trigger a code coverage task to build covdir at a specified revision
@@ -121,6 +124,8 @@ def trigger_missing(server_address: str, out_dir: str = ".") -> None:
 
         trigger_task(task_group_id, revision)
         triggered_revisions.add(revision)
+        if len(triggered_revisions) == MAXIMUM_TRIGGERS:
+            break
 
     cctx = zstandard.ZstdCompressor(threads=-1)
     with open(triggered_revisions_path, "wb") as zf:
