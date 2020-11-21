@@ -66,54 +66,58 @@ def generate(server_address: str, repo_dir: str, out_dir: str = ".") -> None:
         if changeset not in commit_coverage
     ]
 
-    for changeset_to_analyze in tqdm(changesets_to_analyze):
-        report_name = get_name(
-            "mozilla-central", changeset_to_analyze, DEFAULT_FILTER, DEFAULT_FILTER
-        )
-        assert download_report(
-            os.path.join(out_dir, "ccov-reports"), bucket, report_name
-        )
-
-        with open(
-            os.path.join(out_dir, "ccov-reports", f"{report_name}.json"), "r"
-        ) as f:
-            report = json.load(f)
-
-        phabricatorUploader = PhabricatorUploader(
-            repo_dir, changeset_to_analyze, warnings_enabled=False
-        )
-
-        # Use the hg.mozilla.org server to get the automation relevant changesets, since
-        # this information is broken in our local repo (which mozilla-unified).
-        with hgmo.HGMO(server_address=server_address) as hgmo_remote_server:
-            changesets = hgmo_remote_server.get_automation_relevance_changesets(
-                changeset_to_analyze
+    # Use the local server to generate the coverage mapping, as it is faster and
+    # correct.
+    with hgmo.HGMO(repo_dir=repo_dir) as hgmo_local_server:
+        for changeset_to_analyze in tqdm(changesets_to_analyze):
+            report_name = get_name(
+                "mozilla-central", changeset_to_analyze, DEFAULT_FILTER, DEFAULT_FILTER
+            )
+            assert download_report(
+                os.path.join(out_dir, "ccov-reports"), bucket, report_name
             )
 
-        # Use the local server to generate the coverage mapping, as it is faster and
-        # correct.
-        with hgmo.HGMO(repo_dir=repo_dir) as hgmo_local_server:
+            with open(
+                os.path.join(out_dir, "ccov-reports", f"{report_name}.json"), "r"
+            ) as f:
+                report = json.load(f)
+
+            phabricatorUploader = PhabricatorUploader(
+                repo_dir, changeset_to_analyze, warnings_enabled=False
+            )
+
+            # Use the hg.mozilla.org server to get the automation relevant changesets, since
+            # this information is broken in our local repo (which mozilla-unified).
+            with hgmo.HGMO(server_address=server_address) as hgmo_remote_server:
+                changesets = hgmo_remote_server.get_automation_relevance_changesets(
+                    changeset_to_analyze
+                )
+
             results = phabricatorUploader.generate(
                 hgmo_local_server, report, changesets
             )
 
-        for changeset in changesets:
-            # Lookup changeset coverage from phabricator uploader
-            coverage = results.get(changeset["node"])
-            if coverage is None:
-                logger.info("No coverage found", changeset=changeset)
-                commit_coverage[changeset["node"]] = None
-                continue
+            for changeset in changesets:
+                # Lookup changeset coverage from phabricator uploader
+                coverage = results.get(changeset["node"])
+                if coverage is None:
+                    logger.info("No coverage found", changeset=changeset)
+                    commit_coverage[changeset["node"]] = None
+                    continue
 
-            commit_coverage[changeset["node"]] = {
-                "added": sum(c["lines_added"] for c in coverage["paths"].values()),
-                "covered": sum(c["lines_covered"] for c in coverage["paths"].values()),
-                "unknown": sum(c["lines_unknown"] for c in coverage["paths"].values()),
-            }
+                commit_coverage[changeset["node"]] = {
+                    "added": sum(c["lines_added"] for c in coverage["paths"].values()),
+                    "covered": sum(
+                        c["lines_covered"] for c in coverage["paths"].values()
+                    ),
+                    "unknown": sum(
+                        c["lines_unknown"] for c in coverage["paths"].values()
+                    ),
+                }
 
-        if time.monotonic() - start_time >= 3600:
-            _upload()
-            start_time = time.monotonic()
+            if time.monotonic() - start_time >= 3600:
+                _upload()
+                start_time = time.monotonic()
 
     _upload()
 
