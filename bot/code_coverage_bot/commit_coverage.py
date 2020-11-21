@@ -3,9 +3,11 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+import concurrent.futures
 import io
 import json
 import os
+import threading
 import time
 
 import hglib
@@ -16,6 +18,7 @@ from tqdm import tqdm
 from code_coverage_bot import hgmo
 from code_coverage_bot.phabricator import PhabricatorUploader
 from code_coverage_bot.secrets import secrets
+from code_coverage_bot.utils import ThreadPoolExecutorResult
 from code_coverage_tools.gcp import DEFAULT_FILTER
 from code_coverage_tools.gcp import download_report
 from code_coverage_tools.gcp import get_bucket
@@ -23,6 +26,17 @@ from code_coverage_tools.gcp import get_name
 from code_coverage_tools.gcp import list_reports
 
 logger = structlog.get_logger(__name__)
+
+hg_servers = list()
+hg_servers_lock = threading.Lock()
+thread_local = threading.local()
+
+
+def _init_thread(repo_dir: str) -> None:
+    hg_server = hglib.open(repo_dir)
+    thread_local.hg = hg_server
+    with hg_servers_lock:
+        hg_servers.append(hg_server)
 
 
 def generate(server_address: str, repo_dir: str, out_dir: str = ".") -> None:
@@ -69,54 +83,68 @@ def generate(server_address: str, repo_dir: str, out_dir: str = ".") -> None:
 
     # Use the local server to generate the coverage mapping, as it is faster and
     # correct.
-    with hglib.open(repo_dir) as hg:
-        for changeset_to_analyze in tqdm(changesets_to_analyze):
-            report_name = get_name(
-                "mozilla-central", changeset_to_analyze, DEFAULT_FILTER, DEFAULT_FILTER
+    def analyze_changeset(changeset_to_analyze: str) -> None:
+        report_name = get_name(
+            "mozilla-central", changeset_to_analyze, DEFAULT_FILTER, DEFAULT_FILTER
+        )
+        assert download_report(
+            os.path.join(out_dir, "ccov-reports"), bucket, report_name
+        )
+
+        with open(
+            os.path.join(out_dir, "ccov-reports", f"{report_name}.json"), "r"
+        ) as f:
+            report = json.load(f)
+
+        phabricatorUploader = PhabricatorUploader(
+            repo_dir, changeset_to_analyze, warnings_enabled=False
+        )
+
+        # Use the hg.mozilla.org server to get the automation relevant changesets, since
+        # this information is broken in our local repo (which mozilla-unified).
+        with hgmo.HGMO(server_address=server_address) as hgmo_remote_server:
+            changesets = hgmo_remote_server.get_automation_relevance_changesets(
+                changeset_to_analyze
             )
-            assert download_report(
-                os.path.join(out_dir, "ccov-reports"), bucket, report_name
-            )
 
-            with open(
-                os.path.join(out_dir, "ccov-reports", f"{report_name}.json"), "r"
-            ) as f:
-                report = json.load(f)
+        results = phabricatorUploader.generate(thread_local.hg, report, changesets)
 
-            phabricatorUploader = PhabricatorUploader(
-                repo_dir, changeset_to_analyze, warnings_enabled=False
-            )
+        for changeset in changesets:
+            # Lookup changeset coverage from phabricator uploader
+            coverage = results.get(changeset["node"])
+            if coverage is None:
+                logger.info("No coverage found", changeset=changeset)
+                commit_coverage[changeset["node"]] = None
+                continue
 
-            # Use the hg.mozilla.org server to get the automation relevant changesets, since
-            # this information is broken in our local repo (which mozilla-unified).
-            with hgmo.HGMO(server_address=server_address) as hgmo_remote_server:
-                changesets = hgmo_remote_server.get_automation_relevance_changesets(
-                    changeset_to_analyze
-                )
+            commit_coverage[changeset["node"]] = {
+                "added": sum(c["lines_added"] for c in coverage["paths"].values()),
+                "covered": sum(c["lines_covered"] for c in coverage["paths"].values()),
+                "unknown": sum(c["lines_unknown"] for c in coverage["paths"].values()),
+            }
 
-            results = phabricatorUploader.generate(hg, report, changesets)
-
-            for changeset in changesets:
-                # Lookup changeset coverage from phabricator uploader
-                coverage = results.get(changeset["node"])
-                if coverage is None:
-                    logger.info("No coverage found", changeset=changeset)
-                    commit_coverage[changeset["node"]] = None
-                    continue
-
-                commit_coverage[changeset["node"]] = {
-                    "added": sum(c["lines_added"] for c in coverage["paths"].values()),
-                    "covered": sum(
-                        c["lines_covered"] for c in coverage["paths"].values()
-                    ),
-                    "unknown": sum(
-                        c["lines_unknown"] for c in coverage["paths"].values()
-                    ),
-                }
+    with ThreadPoolExecutorResult(
+        initializer=_init_thread, initargs=(repo_dir,)
+    ) as executor:
+        futures = [
+            executor.submit(analyze_changeset, changeset)
+            for changeset in changesets_to_analyze
+        ]
+        for changeset, future in tqdm(
+            zip(changesets_to_analyze, concurrent.futures.as_completed(futures)),
+            total=len(futures),
+        ):
+            exc = future.exception()
+            if exc is not None:
+                logger.error(f"Exception {exc} while analyzing {changeset}")
 
             if time.monotonic() - start_time >= 3600:
                 _upload()
                 start_time = time.monotonic()
+
+    while len(hg_servers) > 0:
+        hg_server = hg_servers.pop()
+        hg_server.close()
 
     _upload()
 
