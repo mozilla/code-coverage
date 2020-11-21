@@ -8,6 +8,7 @@ import json
 import os
 import time
 
+import hglib
 import structlog
 import zstandard
 from tqdm import tqdm
@@ -68,7 +69,7 @@ def generate(server_address: str, repo_dir: str, out_dir: str = ".") -> None:
 
     # Use the local server to generate the coverage mapping, as it is faster and
     # correct.
-    with hgmo.HGMO(repo_dir=repo_dir) as hgmo_local_server:
+    with hglib.open(repo_dir) as hg:
         for changeset_to_analyze in tqdm(changesets_to_analyze):
             report_name = get_name(
                 "mozilla-central", changeset_to_analyze, DEFAULT_FILTER, DEFAULT_FILTER
@@ -93,9 +94,7 @@ def generate(server_address: str, repo_dir: str, out_dir: str = ".") -> None:
                     changeset_to_analyze
                 )
 
-            results = phabricatorUploader.generate(
-                hgmo_local_server, report, changesets
-            )
+            results = phabricatorUploader.generate(hg, report, changesets)
 
             for changeset in changesets:
                 # Lookup changeset coverage from phabricator uploader

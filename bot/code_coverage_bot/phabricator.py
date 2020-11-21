@@ -4,15 +4,17 @@ import os
 import re
 from typing import Any
 from typing import Dict
+from typing import Iterator
 from typing import List
 from typing import Optional
+from typing import Tuple
 
+import hglib
 import structlog
 from libmozdata.phabricator import BuildState
 from libmozdata.phabricator import PhabricatorAPI
 from libmozdata.phabricator import PhabricatorRevisionNotFoundException
 
-from code_coverage_bot import hgmo
 from code_coverage_bot.secrets import secrets
 from code_coverage_tools import COVERAGE_EXTENSIONS
 
@@ -55,6 +57,32 @@ class PhabricatorUploader(object):
             self.third_parties = []
             logger.warn("Missing third party exclusion list", path=third_parties)
 
+    def run_annotate(
+        self, hg: hglib.client, rev: str, path: str
+    ) -> Optional[Tuple[Tuple[str, int], ...]]:
+        args = hglib.util.cmdbuilder(
+            b"annotate",
+            os.path.join(self.repo_dir, path).encode("ascii"),
+            r=rev,
+            line=True,
+            changeset=True,
+        )
+        try:
+            out = hg.rawcommand(args)
+        except hglib.error.CommandError as e:
+            if b"no such file in rev" not in e.err:
+                raise
+
+            # The file was removed.
+            return None
+
+        def _collect() -> Iterator[Tuple[str, int]]:
+            for line in out.splitlines():
+                orig_changeset, orig_line, _ = line.split(b":", 2)
+                yield orig_changeset.decode("ascii"), int(orig_line)
+
+        return tuple(_collect())
+
     def _find_coverage(self, report: dict, path: str) -> Optional[List[int]]:
         """
         Find coverage value in a covdir report
@@ -89,15 +117,7 @@ class PhabricatorUploader(object):
         # same line.
         coverage_map = {}
 
-        for data in annotate:
-            # The line number at the build changeset.
-            # Line numbers start from 1 in the annotate data, from 0 in the coverage data.
-            lineno = data["lineno"] - 1
-            # The line number when it was introduced.
-            orig_line = data["targetline"]
-            # The changeset when it was introduced.
-            orig_changeset = data["node"]
-
+        for lineno, (orig_changeset, orig_line) in enumerate(annotate):
             key = (orig_changeset, orig_line)
             # Assume lines outside the coverage record are uncoverable (that happens for the
             # last few lines of a file, they are not considered by instrumentation).
@@ -110,12 +130,7 @@ class PhabricatorUploader(object):
     def _apply_coverage_map(self, annotate, coverage_map):
         phab_coverage_data = ""
 
-        for data in annotate:
-            # The line number when it was introduced.
-            orig_line = data["targetline"]
-            # The changeset when it was introduced.
-            orig_changeset = data["node"]
-
+        for orig_changeset, orig_line in annotate:
             key = (orig_changeset, orig_line)
             if key in coverage_map:
                 count = coverage_map[key]
@@ -152,7 +167,7 @@ class PhabricatorUploader(object):
         return ext[1:] in COVERAGE_EXTENSIONS
 
     def generate(
-        self, hgmo_server: hgmo.HGMO, report: dict, changesets: List[dict]
+        self, hg: hglib.client, report: dict, changesets: List[dict]
     ) -> Dict[str, Dict[str, Any]]:
         results = {}
 
@@ -176,8 +191,9 @@ class PhabricatorUploader(object):
         }
 
         # Retrieve the annotate data for the build changeset.
+
         build_annotate_by_path = {
-            path: hgmo_server.get_annotate(self.revision, path)
+            path: self.run_annotate(hg, self.revision, path)
             for path in all_paths
             if coverage_records_by_path.get(path) is not None
         }
@@ -212,16 +228,16 @@ class PhabricatorUploader(object):
                 coverage_map = self._build_coverage_map(build_annotate, coverage_record)
 
                 # Retrieve the annotate data for the changeset of interest.
-                annotate = hgmo_server.get_annotate(changeset["node"], path)
+                annotate = self.run_annotate(hg, changeset["node"], path)
                 if annotate is None:
                     # This means the file has been removed by this changeset, and maybe was brought back by a following changeset.
                     continue
 
                 # List lines added by this patch
                 lines_added = [
-                    line["lineno"] - 1
-                    for line in annotate
-                    if line["node"] == changeset["node"]
+                    lineno
+                    for lineno, (annotate_changeset, _) in enumerate(annotate)
+                    if annotate_changeset == changeset["node"][:12]
                 ]
 
                 # Apply the coverage map on the annotate data of the changeset of interest.
@@ -249,8 +265,8 @@ class PhabricatorUploader(object):
         return results
 
     def upload(self, report: dict, changesets: List[dict]) -> Dict[str, Dict[str, Any]]:
-        with hgmo.HGMO(self.repo_dir) as hgmo_server:
-            results = self.generate(hgmo_server, report, changesets)
+        with hglib.open(self.repo_dir) as hg:
+            results = self.generate(hg, report, changesets)
 
         if secrets[secrets.PHABRICATOR_ENABLED]:
             phabricator = PhabricatorAPI(
