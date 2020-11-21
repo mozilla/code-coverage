@@ -3,7 +3,6 @@ import json
 import os
 from contextlib import contextmanager
 
-import responses
 import zstandard
 
 from code_coverage_bot import commit_coverage
@@ -18,12 +17,6 @@ def test_generate_from_scratch(
     monkeypatch, tmpdir, mock_secrets, mock_taskcluster, mock_phabricator, fake_hg_repo
 ):
     tmp_path = tmpdir.strpath
-
-    responses.add(
-        responses.HEAD,
-        "https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/project.relman.code-coverage.production.cron.latest/artifacts/public/commit_coverage.json.zst",  # noqa
-        status=404,
-    )
 
     hg, local, remote = fake_hg_repo
 
@@ -45,7 +38,32 @@ def test_generate_from_scratch(
         }
     )
 
-    myBucket = {}
+    uploaded_data = None
+    patch_calls = 0
+
+    class Blob:
+        def exists(self):
+            return False
+
+        def upload_from_string(self, val):
+            nonlocal uploaded_data
+            uploaded_data = val
+
+        def download_as_bytes(self):
+            assert False
+
+        def patch(self):
+            nonlocal patch_calls
+            assert self.content_type == "application/json"
+            assert self.content_encoding == "zstd"
+            patch_calls += 1
+
+    class Bucket:
+        def blob(self, path):
+            assert path == "commit_coverage.json.zst"
+            return Blob()
+
+    myBucket = Bucket()
 
     def get_bucket(acc):
         return myBucket
@@ -89,11 +107,14 @@ def test_generate_from_scratch(
 
         commit_coverage.generate(hgmo_server, local, out_dir=tmp_path)
 
+    assert patch_calls == 1
+
     dctx = zstandard.ZstdDecompressor()
     with open(os.path.join(tmp_path, "commit_coverage.json.zst"), "rb") as zf:
         with dctx.stream_reader(zf) as reader:
             result = json.load(reader)
 
+    assert result == json.loads(dctx.decompress(uploaded_data))
     assert result == {
         revision1: {
             "added": 3,
@@ -112,12 +133,6 @@ def test_generate_two_pushes(
     monkeypatch, tmpdir, mock_secrets, mock_taskcluster, mock_phabricator, fake_hg_repo
 ):
     tmp_path = tmpdir.strpath
-
-    responses.add(
-        responses.HEAD,
-        "https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/project.relman.code-coverage.production.cron.latest/artifacts/public/commit_coverage.json.zst",  # noqa
-        status=404,
-    )
 
     hg, local, remote = fake_hg_repo
 
@@ -156,7 +171,32 @@ def test_generate_two_pushes(
         }
     )
 
-    myBucket = {}
+    uploaded_data = None
+    patch_calls = 0
+
+    class Blob:
+        def exists(self):
+            return False
+
+        def upload_from_string(self, val):
+            nonlocal uploaded_data
+            uploaded_data = val
+
+        def download_as_bytes(self):
+            assert False
+
+        def patch(self):
+            nonlocal patch_calls
+            assert self.content_type == "application/json"
+            assert self.content_encoding == "zstd"
+            patch_calls += 1
+
+    class Bucket:
+        def blob(self, path):
+            assert path == "commit_coverage.json.zst"
+            return Blob()
+
+    myBucket = Bucket()
 
     def get_bucket(acc):
         return myBucket
@@ -213,11 +253,14 @@ def test_generate_two_pushes(
 
         commit_coverage.generate(hgmo_server, local, out_dir=tmp_path)
 
+    assert patch_calls == 1
+
     dctx = zstandard.ZstdDecompressor()
     with open(os.path.join(tmp_path, "commit_coverage.json.zst"), "rb") as zf:
         with dctx.stream_reader(zf) as reader:
             result = json.load(reader)
 
+    assert result == json.loads(dctx.decompress(uploaded_data))
     assert result == {
         revision1: {
             "added": 3,
@@ -247,30 +290,6 @@ def test_generate_from_preexisting(
 ):
     tmp_path = tmpdir.strpath
 
-    responses.add(
-        responses.HEAD,
-        "https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/project.relman.code-coverage.production.cron.latest/artifacts/public/commit_coverage.json.zst",  # noqa
-        status=200,
-    )
-
-    responses.add(
-        responses.GET,
-        "https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/project.relman.code-coverage.production.cron.latest/artifacts/public/commit_coverage.json.zst",  # noqa
-        status=200,
-        body=zstandard.ZstdCompressor().compress(
-            json.dumps(
-                {
-                    "revision1": {
-                        "added": 7,
-                        "covered": 3,
-                        "unknown": 0,
-                    },
-                    "revision2": None,
-                }
-            ).encode("ascii")
-        ),
-    )
-
     hg, local, remote = fake_hg_repo
 
     add_file(hg, local, "file", "1\n2\n3\n4\n")
@@ -291,7 +310,43 @@ def test_generate_from_preexisting(
         }
     )
 
-    myBucket = {}
+    uploaded_data = None
+    patch_calls = 0
+
+    class Blob:
+        def exists(self):
+            return True
+
+        def upload_from_string(self, val):
+            nonlocal uploaded_data
+            uploaded_data = val
+
+        def download_as_bytes(self):
+            return zstandard.ZstdCompressor().compress(
+                json.dumps(
+                    {
+                        "revision1": {
+                            "added": 7,
+                            "covered": 3,
+                            "unknown": 0,
+                        },
+                        "revision2": None,
+                    }
+                ).encode("ascii")
+            )
+
+        def patch(self):
+            nonlocal patch_calls
+            assert self.content_type == "application/json"
+            assert self.content_encoding == "zstd"
+            patch_calls += 1
+
+    class Bucket:
+        def blob(self, path):
+            assert path == "commit_coverage.json.zst"
+            return Blob()
+
+    myBucket = Bucket()
 
     def get_bucket(acc):
         return myBucket
@@ -335,11 +390,14 @@ def test_generate_from_preexisting(
 
         commit_coverage.generate(hgmo_server, local, out_dir=tmp_path)
 
+    assert patch_calls == 1
+
     dctx = zstandard.ZstdDecompressor()
     with open(os.path.join(tmp_path, "commit_coverage.json.zst"), "rb") as zf:
         with dctx.stream_reader(zf) as reader:
             result = json.load(reader)
 
+    assert result == json.loads(dctx.decompress(uploaded_data))
     assert result == {
         "revision1": {"added": 7, "covered": 3, "unknown": 0},
         "revision2": None,

@@ -6,14 +6,13 @@
 import io
 import json
 import os
+import time
 
-import requests
 import structlog
 import zstandard
 from tqdm import tqdm
 
 from code_coverage_bot import hgmo
-from code_coverage_bot import utils
 from code_coverage_bot.phabricator import PhabricatorUploader
 from code_coverage_bot.secrets import secrets
 from code_coverage_tools.gcp import DEFAULT_FILTER
@@ -26,25 +25,32 @@ logger = structlog.get_logger(__name__)
 
 
 def generate(server_address: str, repo_dir: str, out_dir: str = ".") -> None:
+    start_time = time.monotonic()
+
     commit_coverage_path = os.path.join(out_dir, "commit_coverage.json.zst")
-
-    url = f"https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/project.relman.code-coverage.{secrets[secrets.APP_CHANNEL]}.cron.latest/artifacts/public/commit_coverage.json.zst"  # noqa
-    r = requests.head(url, allow_redirects=True)
-    if r.status_code != 404:
-        utils.download_file(url, commit_coverage_path)
-
-    try:
-        dctx = zstandard.ZstdDecompressor()
-        with open(commit_coverage_path, "rb") as zf:
-            with dctx.stream_reader(zf) as reader:
-                commit_coverage = json.load(reader)
-    except FileNotFoundError:
-        commit_coverage = {}
 
     assert (
         secrets[secrets.GOOGLE_CLOUD_STORAGE] is not None
     ), "Missing GOOGLE_CLOUD_STORAGE secret"
     bucket = get_bucket(secrets[secrets.GOOGLE_CLOUD_STORAGE])
+
+    blob = bucket.blob("commit_coverage.json.zst")
+    if blob.exists():
+        dctx = zstandard.ZstdDecompressor()
+        commit_coverage = json.loads(dctx.decompress(blob.download_as_bytes()))
+    else:
+        commit_coverage = {}
+
+    cctx = zstandard.ZstdCompressor(threads=-1)
+
+    def _upload():
+        blob = bucket.blob("commit_coverage.json.zst")
+        blob.upload_from_string(
+            cctx.compress(json.dumps(commit_coverage).encode("ascii"))
+        )
+        blob.content_type = "application/json"
+        blob.content_encoding = "zstd"
+        blob.patch()
 
     # We are only interested in "overall" coverage, not platform or suite specific.
     changesets_to_analyze = [
@@ -105,7 +111,12 @@ def generate(server_address: str, repo_dir: str, out_dir: str = ".") -> None:
                 "unknown": sum(c["lines_unknown"] for c in coverage["paths"].values()),
             }
 
-    cctx = zstandard.ZstdCompressor(threads=-1)
+        if time.monotonic() - start_time >= 3600:
+            _upload()
+            start_time = time.monotonic()
+
+    _upload()
+
     with open(commit_coverage_path, "wb") as zf:
         with cctx.stream_writer(zf) as compressor:
             with io.TextIOWrapper(compressor, encoding="ascii") as f:
