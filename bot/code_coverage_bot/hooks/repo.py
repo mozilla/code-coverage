@@ -65,17 +65,11 @@ class RepositoryHook(Hook):
                                 f"{missing_files} are present in coverage reports, but missing from the repository"
                             )
 
-    def get_hgmo_changesets(self, use_local_clone=True):
+    def get_hgmo_changesets(self):
         """
         Build HGMO changesets according to this repo's configuration
         """
-        hgmo_config = {}
-        if use_local_clone:
-            hgmo_config["repo_dir"] = self.repo_dir
-        else:
-            hgmo_config["server_address"] = self.repository
-
-        with hgmo.HGMO(**hgmo_config) as hgmo_server:
+        with hgmo.HGMO(server_address=self.repository) as hgmo_server:
             return hgmo_server.get_automation_relevance_changesets(self.revision)
 
     def upload_phabricator(self, report, changesets):
@@ -176,7 +170,7 @@ class TryHook(RepositoryHook):
         )
 
     def run(self):
-        changesets = self.get_hgmo_changesets(use_local_clone=False)
+        changesets = self.get_hgmo_changesets()
 
         if not any(
             parse_revision_id(changeset["desc"]) is not None for changeset in changesets

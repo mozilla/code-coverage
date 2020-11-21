@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 import json
 import os
+from contextlib import contextmanager
 
 import responses
 import zstandard
 
 from code_coverage_bot import commit_coverage
+from code_coverage_bot import hgmo
 from conftest import add_file
 from conftest import commit
 from conftest import copy_pushlog_database
@@ -76,7 +78,16 @@ def test_generate_from_scratch(
 
     monkeypatch.setattr(commit_coverage, "download_report", download_report)
 
-    commit_coverage.generate(local, out_dir=tmp_path)
+    with hgmo.HGMO(repo_dir=local) as hgmo_server:
+
+        class HGMOMock:
+            @contextmanager
+            def HGMO(server_address=None, repo_dir=None):
+                yield hgmo_server
+
+        monkeypatch.setattr(commit_coverage, "hgmo", HGMOMock)
+
+        commit_coverage.generate(hgmo_server, local, out_dir=tmp_path)
 
     dctx = zstandard.ZstdDecompressor()
     with open(os.path.join(tmp_path, "commit_coverage.json.zst"), "rb") as zf:
@@ -191,7 +202,16 @@ def test_generate_two_pushes(
 
     monkeypatch.setattr(commit_coverage, "download_report", download_report)
 
-    commit_coverage.generate(local, out_dir=tmp_path)
+    with hgmo.HGMO(repo_dir=local) as hgmo_server:
+
+        class HGMOMock:
+            @contextmanager
+            def HGMO(server_address=None, repo_dir=None):
+                yield hgmo_server
+
+        monkeypatch.setattr(commit_coverage, "hgmo", HGMOMock)
+
+        commit_coverage.generate(hgmo_server, local, out_dir=tmp_path)
 
     dctx = zstandard.ZstdDecompressor()
     with open(os.path.join(tmp_path, "commit_coverage.json.zst"), "rb") as zf:
@@ -304,7 +324,16 @@ def test_generate_from_preexisting(
 
     monkeypatch.setattr(commit_coverage, "download_report", download_report)
 
-    commit_coverage.generate(local, out_dir=tmp_path)
+    with hgmo.HGMO(repo_dir=local) as hgmo_server:
+
+        class HGMOMock:
+            @contextmanager
+            def HGMO(server_address=None, repo_dir=None):
+                yield hgmo_server
+
+        monkeypatch.setattr(commit_coverage, "hgmo", HGMOMock)
+
+        commit_coverage.generate(hgmo_server, local, out_dir=tmp_path)
 
     dctx = zstandard.ZstdDecompressor()
     with open(os.path.join(tmp_path, "commit_coverage.json.zst"), "rb") as zf:

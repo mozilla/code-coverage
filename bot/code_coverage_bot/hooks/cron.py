@@ -38,7 +38,7 @@ class CronHook(Hook):
 
         self.retrieve_source_and_artifacts()
 
-        commit_coverage.generate(self.repo_dir)
+        commit_coverage.generate(self.repository, self.repo_dir)
 
         logger.info("Generating zero coverage reports")
         zc = ZeroCov(self.repo_dir)
