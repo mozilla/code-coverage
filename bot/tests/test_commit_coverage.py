@@ -97,15 +97,7 @@ def test_generate_from_scratch(
     monkeypatch.setattr(commit_coverage, "download_report", download_report)
 
     with hgmo.HGMO(repo_dir=local) as hgmo_server:
-
-        class HGMOMock:
-            @contextmanager
-            def HGMO(server_address=None, repo_dir=None):
-                yield hgmo_server
-
-        monkeypatch.setattr(commit_coverage, "hgmo", HGMOMock)
-
-        commit_coverage.generate(hgmo_server, local, out_dir=tmp_path)
+        commit_coverage.generate(hgmo_server.server_address, local, out_dir=tmp_path)
 
     assert patch_calls == 1
 
@@ -251,7 +243,7 @@ def test_generate_two_pushes(
 
         monkeypatch.setattr(commit_coverage, "hgmo", HGMOMock)
 
-        commit_coverage.generate(hgmo_server, local, out_dir=tmp_path)
+        commit_coverage.generate(hgmo_server.server_address, local, out_dir=tmp_path)
 
     assert patch_calls == 1
 
@@ -380,15 +372,7 @@ def test_generate_from_preexisting(
     monkeypatch.setattr(commit_coverage, "download_report", download_report)
 
     with hgmo.HGMO(repo_dir=local) as hgmo_server:
-
-        class HGMOMock:
-            @contextmanager
-            def HGMO(server_address=None, repo_dir=None):
-                yield hgmo_server
-
-        monkeypatch.setattr(commit_coverage, "hgmo", HGMOMock)
-
-        commit_coverage.generate(hgmo_server, local, out_dir=tmp_path)
+        commit_coverage.generate(hgmo_server.server_address, local, out_dir=tmp_path)
 
     assert patch_calls == 1
 
