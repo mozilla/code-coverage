@@ -123,9 +123,13 @@ def generate(server_address: str, repo_dir: str, out_dir: str = ".") -> None:
                 "unknown": sum(c["lines_unknown"] for c in coverage["paths"].values()),
             }
 
+    max_workers = min(32, (os.cpu_count() or 1) + 4)
+    logger.info(f"Analyzing {len(changesets_to_analyze)} with {max_workers} workers")
+
     with ThreadPoolExecutorResult(
         initializer=_init_thread, initargs=(repo_dir,)
     ) as executor:
+
         futures = [
             executor.submit(analyze_changeset, changeset)
             for changeset in changesets_to_analyze
