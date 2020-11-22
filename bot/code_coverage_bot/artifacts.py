@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import collections
+import concurrent.futures
 import fnmatch
 import itertools
 import os
@@ -173,7 +174,15 @@ class ArtifactsHandler(object):
                     download_tasks[(chunk_name, platform_name)] = test_task
 
         with ThreadPoolExecutorResult() as executor:
-            for test_task in download_tasks.values():
+            futures = [
                 executor.submit(self.download, test_task)
+                for test_task in download_tasks.values()
+            ]
+            for future in concurrent.futures.as_completed(futures):
+                exc = future.exception()
+                if exc is not None:
+                    logger.error("Exception while downloading artifacts", exception=exc)
+                    for f in futures:
+                        f.cancel()
 
         logger.info("Code coverage artifacts downloaded")
