@@ -3,6 +3,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+import concurrent.futures
 import os
 from datetime import datetime
 from datetime import timedelta
@@ -102,11 +103,22 @@ class Hook(object):
 
     def retrieve_source_and_artifacts(self):
         with ThreadPoolExecutorResult(max_workers=2) as executor:
+            futures = []
+
             # Thread 1 - Download coverage artifacts.
-            executor.submit(self.artifactsHandler.download_all)
+            futures.append(executor.submit(self.artifactsHandler.download_all))
 
             # Thread 2 - Clone repository.
-            executor.submit(self.clone_repository)
+            futures.append(executor.submit(self.clone_repository))
+
+            for future in concurrent.futures.as_completed(futures):
+                exc = future.exception()
+                if exc is not None:
+                    logger.error(
+                        "Exception while downloading coverage artifacts or cloning repository",
+                        exception=exc,
+                    )
+                    os._exit(1)
 
     def build_reports(self, only=None):
         """
