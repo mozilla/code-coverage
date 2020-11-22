@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import json
 import os
+import threading
 from contextlib import contextmanager
 
 import zstandard
@@ -206,40 +207,48 @@ def test_generate_two_pushes(
     monkeypatch.setattr(commit_coverage, "list_reports", list_reports)
 
     def download_report(report_dir, bucket, report_name):
-        os.makedirs(
-            os.path.join(tmp_path, report_dir, "mozilla-central", revision2),
-            exist_ok=True,
-        )
-        with open(
-            os.path.join(
-                tmp_path, report_dir, "mozilla-central", revision2, "all:all.json"
-            ),
-            "w",
-        ) as f:
-            json.dump(report1, f)
+        if revision2 in report_name:
+            os.makedirs(
+                os.path.join(tmp_path, report_dir, "mozilla-central", revision2),
+                exist_ok=True,
+            )
+            with open(
+                os.path.join(
+                    tmp_path, report_dir, "mozilla-central", revision2, "all:all.json"
+                ),
+                "w",
+            ) as f:
+                json.dump(report1, f)
 
-        os.makedirs(
-            os.path.join(tmp_path, report_dir, "mozilla-central", revision4),
-            exist_ok=True,
-        )
-        with open(
-            os.path.join(
-                tmp_path, report_dir, "mozilla-central", revision4, "all:all.json"
-            ),
-            "w",
-        ) as f:
-            json.dump(report2, f)
+        if revision4 in report_name:
+            os.makedirs(
+                os.path.join(tmp_path, report_dir, "mozilla-central", revision4),
+                exist_ok=True,
+            )
+            with open(
+                os.path.join(
+                    tmp_path, report_dir, "mozilla-central", revision4, "all:all.json"
+                ),
+                "w",
+            ) as f:
+                json.dump(report2, f)
 
         return True
 
     monkeypatch.setattr(commit_coverage, "download_report", download_report)
 
     with hgmo.HGMO(repo_dir=local) as hgmo_server:
+        lock = threading.Lock()
 
         class HGMOMock:
+            def get_automation_relevance_changesets(self, changeset):
+                with lock:
+                    return hgmo_server.get_automation_relevance_changesets(changeset)
+
             @contextmanager
             def HGMO(server_address=None, repo_dir=None):
-                yield hgmo_server
+                assert server_address == hgmo_server.server_address
+                yield HGMOMock()
 
         monkeypatch.setattr(commit_coverage, "hgmo", HGMOMock)
 
