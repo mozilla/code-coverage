@@ -142,7 +142,7 @@ def generate(server_address: str, repo_dir: str, out_dir: str = ".") -> None:
             if exc is not None:
                 logger.error(f"Exception {exc} while analyzing {changeset}")
 
-            if time.monotonic() - start_time >= 3600:
+            if time.monotonic() - start_time >= 600:
                 _upload()
                 start_time = time.monotonic()
 
