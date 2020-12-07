@@ -6,4 +6,4 @@ pytz==2020.4
 pyyaml==5.3.1
 tenacity==6.2.0
 tqdm==4.54.1
-zstandard==0.14.0
+zstandard==0.14.1
