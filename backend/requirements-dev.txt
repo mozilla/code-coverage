@@ -1,5 +1,5 @@
 fakeredis==1.4.5
 pre-commit==2.9.2
-pytest==6.1.2
+pytest==6.2.0
 pytest-responses==0.4.0
 responses==0.12.1
