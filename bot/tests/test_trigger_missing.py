@@ -22,7 +22,7 @@ def test_trigger_from_scratch(
 
     responses.add(
         responses.HEAD,
-        "https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/project.relman.code-coverage.production.cron.latest/artifacts/public/triggered_revisions.zst",  # noqa
+        "https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/project.relman.code-coverage.production.cron.latest/artifacts/public/triggered_revisions.zst",
         status=404,
     )
 
@@ -233,13 +233,13 @@ def test_trigger_from_preexisting(
 
     responses.add(
         responses.HEAD,
-        "https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/project.relman.code-coverage.production.cron.latest/artifacts/public/triggered_revisions.zst",  # noqa
+        "https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/project.relman.code-coverage.production.cron.latest/artifacts/public/triggered_revisions.zst",
         status=200,
     )
 
     responses.add(
         responses.GET,
-        "https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/project.relman.code-coverage.production.cron.latest/artifacts/public/triggered_revisions.zst",  # noqa
+        "https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/project.relman.code-coverage.production.cron.latest/artifacts/public/triggered_revisions.zst",
         status=200,
         body=zstandard.ZstdCompressor().compress(
             f"{revision2}\n{revision3}".encode("ascii")

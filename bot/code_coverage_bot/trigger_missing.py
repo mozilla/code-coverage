@@ -48,7 +48,7 @@ def trigger_task(task_group_id: str, revision: str) -> None:
 def trigger_missing(server_address: str, out_dir: str = ".") -> None:
     triggered_revisions_path = os.path.join(out_dir, "triggered_revisions.zst")
 
-    url = f"https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/project.relman.code-coverage.{secrets[secrets.APP_CHANNEL]}.cron.latest/artifacts/public/triggered_revisions.zst"  # noqa
+    url = f"https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/project.relman.code-coverage.{secrets[secrets.APP_CHANNEL]}.cron.latest/artifacts/public/triggered_revisions.zst"
     r = requests.head(url, allow_redirects=True)
     if r.status_code != 404:
         utils.download_file(url, triggered_revisions_path)

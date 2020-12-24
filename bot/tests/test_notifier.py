@@ -75,5 +75,5 @@ def test_notification(mock_secrets, mock_taskcluster, mock_phabricator, fake_hg_
     mail = notify_email(revision2, stack, changesets_coverage)
     assert (
         mail
-        == """* [Commit [(b'M', b'file')]Differential Revision: https://phabricator.services.mozilla.com/D2](https://phabricator.services.mozilla.com/D2): 0 covered out of 6 added.\n"""  # noqa
+        == """* [Commit [(b'M', b'file')]Differential Revision: https://phabricator.services.mozilla.com/D2](https://phabricator.services.mozilla.com/D2): 0 covered out of 6 added.\n"""
     )
