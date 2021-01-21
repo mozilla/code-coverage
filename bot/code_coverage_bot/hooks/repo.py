@@ -126,7 +126,7 @@ class MozillaCentralHook(RepositoryHook):
             "public/code-coverage-report.json",
             report_text,
             "application/json",
-            timedelta(days=29),
+            timedelta(days=14),
         )
 
         # Index on Taskcluster
