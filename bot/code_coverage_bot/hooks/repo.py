@@ -6,6 +6,7 @@
 import json
 import os
 import zipfile
+from datetime import timedelta
 
 import structlog
 
@@ -18,6 +19,7 @@ from code_coverage_bot.notifier import notify_email
 from code_coverage_bot.phabricator import PhabricatorUploader
 from code_coverage_bot.phabricator import parse_revision_id
 from code_coverage_bot.secrets import secrets
+from code_coverage_bot.taskcluster import taskcluster_config
 from code_coverage_tools import gcp
 
 logger = structlog.get_logger(__name__)
@@ -108,37 +110,24 @@ class MozillaCentralHook(RepositoryHook):
             logger.warn("Full covdir report already on GCP")
             return
 
+        # Generate and upload the full report as soon as possible, so it is available
+        # for consumers (e.g. Searchfox) right away.
         self.retrieve_source_and_artifacts()
 
-        self.check_javascript_files()
+        reports = self.build_reports(only=[("all", "all")])
 
-        reports = self.build_reports()
-        logger.info("Built all covdir reports", nb=len(reports))
-
-        # Retrieve the full report
         full_path = reports.get(("all", "all"))
         assert full_path is not None, "Missing full report (all:all)"
         with open(full_path, "r") as f:
-            report = json.load(f)
+            report_text = f.read()
 
-        # Check extensions
-        paths = uploader.covdir_paths(report)
-        for extension in [".js", ".cpp"]:
-            assert any(
-                path.endswith(extension) for path in paths
-            ), "No {} file in the generated report".format(extension)
-
-        # Upload reports on GCP
-        self.upload_reports(reports)
-        logger.info("Uploaded all covdir reports", nb=len(reports))
-
-        # Upload coverage on phabricator
-        changesets = self.get_hgmo_changesets()
-        coverage = self.upload_phabricator(report, changesets)
-
-        # Send an email on low coverage
-        notify_email(self.revision, changesets, coverage)
-        logger.info("Sent low coverage email notification")
+        # Upload report as an artifact.
+        taskcluster_config.upload_artifact(
+            "public/code-coverage-report.json",
+            report_text,
+            "application/json",
+            timedelta(days=29),
+        )
 
         # Index on Taskcluster
         self.index_task(
@@ -151,6 +140,35 @@ class MozillaCentralHook(RepositoryHook):
                 ),
             ]
         )
+
+        report = json.loads(report_text)
+
+        # Check extensions
+        paths = uploader.covdir_paths(report)
+        for extension in [".js", ".cpp"]:
+            assert any(
+                path.endswith(extension) for path in paths
+            ), "No {} file in the generated report".format(extension)
+
+        # Upload coverage on phabricator
+        changesets = self.get_hgmo_changesets()
+        coverage = self.upload_phabricator(report, changesets)
+
+        # Send an email on low coverage
+        notify_email(self.revision, changesets, coverage)
+        logger.info("Sent low coverage email notification")
+
+        self.check_javascript_files()
+
+        # Generate all reports except the full one which we generated earlier.
+        all_report_combinations = self.artifactsHandler.get_combinations()
+        del all_report_combinations[("all", "all")]
+        reports.update(self.build_reports())
+        logger.info("Built all covdir reports", nb=len(reports))
+
+        # Upload reports on GCP
+        self.upload_reports(reports)
+        logger.info("Uploaded all covdir reports", nb=len(reports))
 
 
 class TryHook(RepositoryHook):
