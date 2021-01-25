@@ -54,6 +54,6 @@
     "chartist": "^0.11.3",
     "mustache": "^4.1.0",
     "normalize.css": "^8.0.1",
-    "prismjs": "^1.16.0"
+    "prismjs": "^1.23.0"
   }
 }
