@@ -33,10 +33,7 @@ def test_report_grcov_artifact_coverallsplus(grcov_artifact):
     assert "source_digest" in report["source_files"][0]
     assert len(report["source_files"][0]["functions"]) == 1
     assert report["source_files"][0]["functions"][0]["exec"]
-    assert (
-        report["source_files"][0]["functions"][0]["name"]
-        == "_ZNK2js3jit6BitSet5emptyEv"
-    )
+    assert report["source_files"][0]["functions"][0]["name"] == "js::jit::BitSet::empty"
     assert report["source_files"][0]["functions"][0]["start"] == 1
 
 
