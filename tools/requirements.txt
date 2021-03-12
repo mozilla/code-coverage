@@ -1,4 +1,4 @@
-aiohttp==3.7.3
+aiohttp==3.7.4
 async-timeout==3.0.1
 logbook==1.5.3
 raven==6.10.0
