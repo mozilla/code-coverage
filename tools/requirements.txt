@@ -2,5 +2,5 @@ aiohttp==3.7.3
 async-timeout==3.0.1
 logbook==1.5.3
 raven==6.10.0
-structlog==20.2.0
+structlog==21.1.0
 taskcluster==40.0.3
