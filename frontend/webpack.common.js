@@ -9,6 +9,7 @@ module.exports = {
   entry: ['babel-polyfill', 'index.js'],
   output: {
     path: __dirname + '/dist',
+    publicPath: '',
     filename: 'coverage-[hash].js'
   },
   plugins: [
