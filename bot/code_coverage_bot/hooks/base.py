@@ -49,8 +49,9 @@ class Hook(object):
             "Mercurial setup", repository=self.repository, revision=self.revision
         )
 
-        assert os.path.isdir(cache_root), f"Cache root {cache_root} is not a dir."
-        self.repo_dir = os.path.join(cache_root, self.branch)
+        if cache_root is not None:
+            assert os.path.isdir(cache_root), f"Cache root {cache_root} is not a dir."
+            self.repo_dir = os.path.join(cache_root, self.branch)
 
         # Load coverage tasks for all platforms
         decision_task_id = taskcluster.get_decision_task(self.branch, self.revision)
