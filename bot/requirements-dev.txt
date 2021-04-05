@@ -3,4 +3,4 @@ jsonschema==3.2.0
 pre-commit==2.11.1
 pytest==6.2.2
 pytest-responses==0.4.0
-responses==0.12.1
+responses==0.13.2
