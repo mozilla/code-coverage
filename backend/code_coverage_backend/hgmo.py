@@ -31,9 +31,9 @@ def hgmo_revision_details(repository, changeset):
     url = HGMO_REVISION_URL.format(repository=repository, revision=changeset)
     resp = requests.get(url)
     resp.raise_for_status()
-    data = resp.json()
-    assert "pushid" in data["changesets"][-1], "Missing pushid"
-    out = data["changesets"][-1]["pushid"], data["changesets"][-1]["date"][0]
+    data = resp.json()["changesets"][-1]
+    assert "pushid" in data, "Missing pushid"
+    out = data["pushid"], data["date"][0]
 
     # Store in cache
     __hgmo[key] = out
