@@ -52,7 +52,7 @@
   },
   "dependencies": {
     "chartist": "^0.11.3",
-    "mustache": "^4.1.0",
+    "mustache": "^4.2.0",
     "normalize.css": "^8.0.1",
     "prismjs": "^1.23.0"
   }
