@@ -12,7 +12,7 @@
     "eslint-plugin-mozilla": "^0.9.0",
     "eslint-plugin-no-unsanitized": "^3.1.5",
     "web-ext": "^6.1.0",
-    "webpack": "^5.36.2",
+    "webpack": "^5.38.1",
     "webpack-cli": "^4.7.0"
   },
   "scripts": {
