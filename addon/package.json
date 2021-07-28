@@ -1,6 +1,6 @@
 {
   "name": "gecko-code-coverage",
-  "version": "0.11.0",
+  "version": "0.12.0",
   "description": "Extension that augments several Mozilla websites (DXR, Searchfox) with code coverage information.",
   "dependencies": {
     "lodash": "^4.17.21"
