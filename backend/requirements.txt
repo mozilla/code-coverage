@@ -7,7 +7,7 @@ Flask-Cors==3.0.10
 flask-talisman==0.7.0
 google-cloud-storage==1.38.0
 gunicorn==20.1.0
-python-dateutil==2.8.1
+python-dateutil==2.8.2
 pytoml==0.1.21
 redis==3.5.3
 swagger-ui-bundle==0.0.8
