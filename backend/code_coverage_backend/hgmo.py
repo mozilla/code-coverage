@@ -31,12 +31,10 @@ def hgmo_revision_details(repository, changeset):
     url = HGMO_REVISION_URL.format(repository=repository, revision=changeset)
     resp = requests.get(url)
     resp.raise_for_status()
-    if resp.json().get("changesets") is None:
-        out = -1, 1
-    else:
-        data = resp.json()["changesets"][-1]
-        assert "pushid" in data, "Missing pushid"
-        out = data["pushid"], data["date"][0]
+    assert "changesets" in resp.json(), "Missing changesets"
+    data = resp.json()["changesets"][-1]
+    assert "pushid" in data, "Missing pushid"
+    out = data["pushid"], data["date"][0]
 
     # Store in cache
     __hgmo[key] = out
