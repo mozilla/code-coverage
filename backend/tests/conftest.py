@@ -146,7 +146,7 @@ def mock_hgmo():
         # The push id is in the first 3 characters of the revision requested
         revision = request.path_url[33:]
         assert len(revision) == 32
-        resp = {"changesets":[{"pushid": int(revision[:3]), "date": [time.time(), 0]}]}
+        resp = {"changesets": [{"pushid": int(revision[:3]), "date": [time.time(), 0]}]}
         return (200, headers, json.dumps(resp))
 
     def _changesets(push_id):
