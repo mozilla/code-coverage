@@ -144,9 +144,9 @@ def mock_hgmo():
 
     def _test_rev(request):
         # The push id is in the first 3 characters of the revision requested
-        revision = request.path_url[17:]
+        revision = request.path_url[33:]
         assert len(revision) == 32
-        resp = {"pushid": int(revision[:3]), "date": [time.time(), 0]}
+        resp = {"changesets": [{"pushid": int(revision[:3]), "date": [time.time(), 0]}]}
         return (200, headers, json.dumps(resp))
 
     def _changesets(push_id):
@@ -185,7 +185,7 @@ def mock_hgmo():
     with responses.RequestsMock(assert_all_requests_are_fired=False) as resps:
         resps.add_callback(
             responses.GET,
-            re.compile("https://hg.mozilla.org/(.+)/json-rev/(.+)"),
+            re.compile("https://hg.mozilla.org/(.+)/json-automationrelevance/(.+)"),
             callback=_test_rev,
         )
         resps.add_callback(

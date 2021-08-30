@@ -13,7 +13,9 @@ logger = structlog.get_logger(__name__)
 
 __hgmo: Dict[str, Tuple[int, float]] = {}
 
-HGMO_REVISION_URL = "https://hg.mozilla.org/{repository}/json-rev/{revision}"
+HGMO_REVISION_URL = (
+    "https://hg.mozilla.org/{repository}/json-automationrelevance/{revision}"
+)
 HGMO_PUSHES_URL = "https://hg.mozilla.org/{repository}/json-pushes"
 
 
@@ -29,7 +31,8 @@ def hgmo_revision_details(repository, changeset):
     url = HGMO_REVISION_URL.format(repository=repository, revision=changeset)
     resp = requests.get(url)
     resp.raise_for_status()
-    data = resp.json()
+    assert "changesets" in resp.json(), "Missing changesets"
+    data = resp.json()["changesets"][-1]
     assert "pushid" in data, "Missing pushid"
     out = data["pushid"], data["date"][0]
 
