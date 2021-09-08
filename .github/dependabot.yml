@@ -56,3 +56,10 @@ updates:
   open-pull-requests-limit: 99
   labels:
   - frontend
+- package-ecosystem: pip
+  directory: "/report"
+  schedule:
+    interval: weekly
+  open-pull-requests-limit: 99
+  labels:
+  - report
