@@ -280,8 +280,8 @@ def generate_report(grcov_path, output_format, output_path, artifact_paths):
 
 
 def download_grcov():
-    local_path = "grcov"
-    local_version = "grcov_ver"
+    local_path = os.path.join(os.getcwd(), "grcov")
+    local_version = os.path.join(os.getcwd(), "grcov_ver")
 
     dest = tempfile.mkdtemp(suffix="grcov")
     archive = os.path.join(dest, "grcov.tar.xz")
