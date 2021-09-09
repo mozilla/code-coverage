@@ -240,7 +240,7 @@ def download_coverage_artifacts(
     return artifact_paths
 
 
-def generate_report(grcov_path, output_format, output_path, artifact_paths):
+def generate_report(grcov_path, output_format, src_dir, output_path, artifact_paths):
     mod_env = os.environ.copy()
     if is_taskcluster_loaner():
         one_click_loaner_gcc = "/home/worker/workspace/build/src/gcc/bin"
@@ -260,6 +260,8 @@ def generate_report(grcov_path, output_format, output_path, artifact_paths):
         "-o",
         output_path,
     ]
+    if src_dir is not None:
+        cmd += ["-s", src_dir, "--ignore-not-existing"]
     if output_format in ["coveralls", "coveralls+"]:
         cmd += ["--token", "UNUSED", "--commit-sha", "UNUSED"]
     cmd.extend(artifact_paths)
@@ -437,7 +439,7 @@ def main():
 
     if args.stats:
         output = os.path.join(args.output_dir, "output.json")
-        generate_report(grcov_path, "coveralls", output, artifact_paths)
+        generate_report(grcov_path, "coveralls", args.src_dir, output, artifact_paths)
 
         with open(output, "r") as f:
             report = json.load(f)
@@ -461,7 +463,9 @@ def main():
             )
         )
     else:
-        generate_report(grcov_path, "html", args.output_dir, artifact_paths)
+        generate_report(
+            grcov_path, "html", args.src_dir, args.output_dir, artifact_paths
+        )
 
         if is_taskcluster_loaner():
             upload_html_report(args.output_dir)
