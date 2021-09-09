@@ -18,6 +18,7 @@ from pathlib import Path
 import magic
 import requests
 import tenacity
+import zstandard
 
 from firefox_code_coverage import taskcluster
 
@@ -26,7 +27,7 @@ ALL_STATUSES = FINISHED_STATUSES + ["unscheduled", "pending", "running"]
 STATUS_VALUE = {"exception": 1, "failed": 2, "completed": 3}
 
 GRCOV_INDEX = "gecko.cache.level-3.toolchains.v3.linux64-grcov.latest"
-GRCOV_ARTIFACT = "public/build/grcov.tar.xz"
+GRCOV_ARTIFACT = "public/build/grcov.tar.zst"
 
 logger = logging.getLogger(__name__)
 
@@ -284,15 +285,17 @@ def download_grcov():
     local_version = os.path.join(os.getcwd(), "grcov_ver")
 
     dest = tempfile.mkdtemp(suffix="grcov")
-    archive = os.path.join(dest, "grcov.tar.xz")
+    archive = os.path.join(dest, "grcov.tar.zst")
     index = taskcluster.get_service("index")
     url = index.buildUrl("findArtifactFromTask", GRCOV_INDEX, GRCOV_ARTIFACT)
     download_binary(url, archive)
 
     # Extract archive in temp
-    tar = tarfile.open(archive, "r:xz")
-    tar.extractall(dest)
-    tar.close()
+    dctx = zstandard.ZstdDecompressor()
+    with open(archive, "rb") as f:
+        with dctx.stream_reader(f) as reader:
+            with tarfile.open(mode="r|", fileobj=reader) as tar:
+                tar.extractall(dest)
     os.remove(archive)
 
     # Get version from grcov binary
