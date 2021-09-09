@@ -83,10 +83,14 @@ class Test(unittest.TestCase):
         self.assertEqual(len([a for a in artifact_paths if "jsvm" in a]), 2)
 
         codecoverage.download_grcov()
-        codecoverage.generate_report("./grcov", "lcov", "output.info", artifact_paths)
+        codecoverage.generate_report(
+            "./grcov", "lcov", None, "output.info", artifact_paths
+        )
         self.assertTrue(os.path.exists("output.info"))
 
-        codecoverage.generate_report("./grcov", "html", "report_html", artifact_paths)
+        codecoverage.generate_report(
+            "./grcov", "html", None, "report_html", artifact_paths
+        )
         self.assertTrue(os.path.isdir("report_html"))
         self.assertTrue(os.path.exists("report_html/index.html"))
 
