@@ -257,8 +257,6 @@ def generate_report(grcov_path, output_format, output_path, artifact_paths):
         grcov_path,
         "-t",
         output_format,
-        "-p",
-        "/home/worker/workspace/build/src/",
         "-o",
         output_path,
     ]
