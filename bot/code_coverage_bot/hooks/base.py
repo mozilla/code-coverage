@@ -119,6 +119,9 @@ class Hook(object):
                         "Exception while downloading coverage artifacts or cloning repository",
                         exception=exc,
                     )
+                    from traceback import format_exception
+
+                    logger.error(format_exception(exc, exc, exc.__traceback__))
                     os._exit(1)
 
     def build_reports(self, only=None):
