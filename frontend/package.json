@@ -4,9 +4,9 @@
   "description": "Mozilla Code Coverage frontend",
   "main": "index.js",
   "scripts": {
-    "build": "webpack",
-    "release": "webpack --config webpack.prod.js",
-    "start": "webpack serve",
+    "build": "NODE_OPTIONS=--openssl-legacy-provider webpack",
+    "release": "NODE_OPTIONS=--openssl-legacy-provider webpack --config webpack.prod.js",
+    "start": "NODE_OPTIONS=--openssl-legacy-provider webpack serve",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
