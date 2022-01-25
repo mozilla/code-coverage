@@ -324,7 +324,7 @@ tasks:
               deadline: {$fromNow: '1 hour'}
               payload:
                 maxRunTime: 3600
-                image: node:12-alpine
+                image: node:16-alpine
                 command:
                   - sh
                   - -lxce
