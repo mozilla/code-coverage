@@ -1,0 +1,116 @@
+{
+  "provisionerId": "gecko-t",
+  "workerType": "t-linux-xlarge-source",
+  "taskQueueId": "gecko-t/t-linux-xlarge-source",
+  "schedulerId": "gecko-level-1",
+  "projectId": "none",
+  "taskGroupId": "QrXM_S09ScGeYd7VH4-qUg",
+  "dependencies": [
+    "Ojg_ahyfQs-GQooZk4pKOA",
+    "XFg6cRShStOTA2Xl4p8-aA"
+  ],
+  "requires": "all-completed",
+  "routes": [
+    "tc-treeherder.v2.try.cfeddbeafb47a71ca48f913147e71610c9e58c70"
+  ],
+  "priority": "very-low",
+  "retries": 5,
+  "created": "2022-01-11T01:12:21.332Z",
+  "deadline": "2022-01-12T01:12:21.332Z",
+  "expires": "2022-02-08T01:12:21.332Z",
+  "scopes": [
+    "secrets:get:project/taskcluster/gecko/hgfingerprint",
+    "secrets:get:project/taskcluster/gecko/hgmointernal",
+    "docker-worker:feature:allowPtrace",
+    "docker-worker:cache:gecko-level-1-checkouts-hg58-v3-35e6d2147228a7dd8319"
+  ],
+  "payload": {
+    "env": {
+      "GECKO_PATH": "/builds/worker/checkouts/gecko",
+      "TRY_SELECTOR": "fuzzy",
+      "HG_STORE_PATH": "/builds/worker/checkouts/hg-store",
+      "MOZ_SCM_LEVEL": "1",
+      "GECKO_HEAD_REV": "cfeddbeafb47a71ca48f913147e71610c9e58c70",
+      "MOZ_AUTOMATION": "1",
+      "SCCACHE_DISABLE": "1",
+      "TASKCLUSTER_CACHES": "/builds/worker/checkouts",
+      "TASKCLUSTER_VOLUMES": "/builds/worker/.cache;/builds/worker/checkouts;/builds/worker/tooltool-cache;/builds/worker/workspace",
+      "GECKO_BASE_REPOSITORY": "https://hg.mozilla.org/mozilla-unified",
+      "GECKO_HEAD_REPOSITORY": "https://hg.mozilla.org/try",
+      "TASKCLUSTER_UNTRUSTED_CACHES": "1"
+    },
+    "cache": {
+      "gecko-level-1-checkouts-hg58-v3-35e6d2147228a7dd8319": "/builds/worker/checkouts"
+    },
+    "image": {
+      "path": "public/image.tar.zst",
+      "type": "task-image",
+      "taskId": "XFg6cRShStOTA2Xl4p8-aA"
+    },
+    "command": [
+      "/builds/worker/bin/run-task",
+      "--gecko-checkout=/builds/worker/checkouts/gecko",
+      "--fetch-hgfingerprint",
+      "--task-cwd",
+      "/builds/worker/checkouts/gecko",
+      "--",
+      "bash",
+      "-cx",
+      "cd /builds/worker/checkouts/gecko/browser/components/newtab && npm install && node bin/try-runner.js\n"
+    ],
+    "features": {
+      "allowPtrace": true,
+      "taskclusterProxy": true
+    },
+    "artifacts": {
+      "public/code-coverage-grcov.zip": {
+        "path": "/builds/worker/checkouts/gecko/browser/components/newtab/code-coverage-grcov.zip",
+        "type": "file",
+        "expires": "2022-02-08T01:12:21.332Z"
+      }
+    },
+    "maxRunTime": 1800,
+    "onExitStatus": {
+      "retry": [
+        72
+      ],
+      "purgeCaches": [
+        72
+      ]
+    }
+  },
+  "metadata": {
+    "name": "source-test-node-newtab-unit-tests-ccov",
+    "owner": "dmosedale@mozilla.com",
+    "source": "https://hg.mozilla.org/try/file/cfeddbeafb47a71ca48f913147e71610c9e58c70/taskcluster/ci/source-test",
+    "description": "newtab unit tests code coverage ([Treeherder job](https://treeherder.mozilla.org/#/jobs?repo=try&revision=cfeddbeafb47a71ca48f913147e71610c9e58c70&selectedTaskRun=JWSwQvELR6C6U2mz66BCfA))"
+  },
+  "tags": {
+    "os": "linux",
+    "kind": "source-test",
+    "label": "source-test-node-newtab-unit-tests-ccov",
+    "retrigger": "true",
+    "createdForUser": "dmosedale@mozilla.com",
+    "worker-implementation": "docker-worker"
+  },
+  "extra": {
+    "index": {
+      "rank": 1641863325
+    },
+    "parent": "QrXM_S09ScGeYd7VH4-qUg",
+    "treeherder": {
+      "tier": 1,
+      "symbol": "newtab-ccov",
+      "jobKind": "test",
+      "machine": {
+        "platform": "linux1804-64"
+      },
+      "groupName": "Node tests",
+      "collection": {
+        "opt": true
+      },
+      "groupSymbol": "node"
+    },
+    "treeherder-platform": "linux1804-64/opt"
+  }
+}
