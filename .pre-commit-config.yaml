@@ -7,7 +7,7 @@ repos:
     rev: v4.3.21
     hooks:
       - id: isort
-  - repo: https://github.com/pdf/black
+  - repo: https://github.com/psf/black
     rev: stable
     hooks:
     - id: black
