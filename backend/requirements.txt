@@ -11,4 +11,4 @@ python-dateutil==2.8.2
 pytoml==0.1.21
 redis==3.5.3
 swagger-ui-bundle==0.0.9
-zstandard==0.17.0
+zstandard==0.18.0
