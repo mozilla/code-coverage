@@ -4,4 +4,4 @@ logbook==1.5.3
 pytz==2022.1
 raven==6.10.0
 structlog==22.1.0
-taskcluster==44.17.2
+taskcluster==44.19.1
