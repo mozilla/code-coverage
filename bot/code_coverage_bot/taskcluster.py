@@ -155,7 +155,7 @@ def get_platform(task):
             platform = "windows"
         if "mac" in name:
             assert platform is None
-            platform = "mac"
+            platform = "macosx"
 
     if not platform:
         raise Exception(f"Unknown platform for {task}")
