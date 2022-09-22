@@ -4,5 +4,5 @@ libmozdata==0.1.79
 pytoml==0.1.21
 pyyaml==6.0
 tenacity==8.0.1
-tqdm==4.64.0
+tqdm==4.64.1
 zstandard==0.18.0
