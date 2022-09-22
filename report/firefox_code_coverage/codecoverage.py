@@ -140,6 +140,9 @@ def get_platform(task_name):
         return "windows"
     elif "macosx" in task_name:
         return "macos"
+    # Assume source-test tasks without the OS name in the label are on Linux.
+    elif "source-test" in task_name:
+        return "linux"
     else:
         raise Exception(f"Unknown platform for {task_name}")
 
