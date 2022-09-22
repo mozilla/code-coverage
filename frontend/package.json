@@ -21,7 +21,7 @@
   "homepage": "https://github.com/mozilla/code-coverage-reports#readme",
   "devDependencies": {
     "@babel/core": "^7.18.9",
-    "@babel/preset-env": "^7.18.9",
+    "@babel/preset-env": "^7.19.1",
     "babel-loader": "^8.2.5",
     "babel-plugin-prismjs": "^2.1.0",
     "babel-polyfill": "^6.26.0",
