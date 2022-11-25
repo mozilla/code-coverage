@@ -22,7 +22,7 @@
   "devDependencies": {
     "@babel/core": "^7.19.1",
     "@babel/preset-env": "^7.19.4",
-    "babel-loader": "^8.2.5",
+    "babel-loader": "^9.1.0",
     "babel-plugin-prismjs": "^2.1.0",
     "babel-polyfill": "^6.26.0",
     "clean-webpack-plugin": "^4.0.0",
