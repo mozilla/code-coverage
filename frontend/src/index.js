@@ -144,7 +144,12 @@ async function showFile(source, file, revision, selectedLine) {
     language = "cpp";
   } else if (file.path.endsWith("c")) {
     language = "c";
-  } else if (file.path.endsWith("js") || file.path.endsWith("jsm") || file.path.endsWith("mjs") || file.path.endsWith("jsx")) {
+  } else if (
+    file.path.endsWith("js") ||
+    file.path.endsWith("jsm") ||
+    file.path.endsWith("mjs") ||
+    file.path.endsWith("jsx")
+  ) {
     language = "javascript";
   } else if (file.path.endsWith("css")) {
     language = "css";
