@@ -58,7 +58,7 @@ async function graphHistory(history, path) {
     return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
   };
 
-  var data = {
+  const data = {
     series: [
       {
         name: "History",
@@ -71,7 +71,7 @@ async function graphHistory(history, path) {
       }
     ]
   };
-  var config = {
+  const config = {
     // Display dates on a linear scale
     axisX: {
       type: Chartist.FixedScaleAxis,
@@ -258,26 +258,27 @@ async function load() {
       route.view === VIEW_DIRECTORY
         ? getHistory(route.path, route.platform, route.suite)
         : getSource(route.path, route.revision);
-    var [coverage, filters, viewData] = await Promise.all([
+    const [coverage, filters, viewData] = await Promise.all([
       getPathCoverage(route.path, route.revision, route.platform, route.suite),
       getFilters(),
       viewContent
     ]);
+
+    return {
+      view: route.view,
+      path: route.path,
+      revision: route.revision,
+      route,
+      coverage,
+      filters,
+      viewData
+    };
   } catch (err) {
     console.warn("Failed to load coverage", err);
     await DOM_READY; // We want to always display this message
     message("error", "Failed to load coverage: " + err.message);
     throw err;
   }
-  return {
-    view: route.view,
-    path: route.path,
-    revision: route.revision,
-    route,
-    coverage,
-    filters,
-    viewData
-  };
 }
 
 export async function display(data) {
