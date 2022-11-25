@@ -14,6 +14,8 @@ COVERAGE_EXTENSIONS = [
     # JavaScript
     "js",
     "jsm",
+    "mjs",
+    "jsx",
     "xul",
     "xml",
     "html",

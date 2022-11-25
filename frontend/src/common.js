@@ -243,7 +243,7 @@ export function filterLanguages(files) {
     "inc"
   ];
   const js = isEnabled("js");
-  const jsExtensions = ["js", "jsm", "xml", "xul", "xhtml", "html"];
+  const jsExtensions = ["js", "jsm", "mjs", "jsx", "xml", "xul", "xhtml", "html"];
   const java = isEnabled("java");
   const javaExtensions = ["java"];
   const rust = isEnabled("rust");

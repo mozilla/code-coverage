@@ -9,6 +9,8 @@
     "hxx",
     "js",
     "jsm",
+    "mjs",
+    "jsx",
     "xul",
     "xml",
     "html",
