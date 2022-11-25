@@ -352,7 +352,7 @@ tasks:
               deadline: {$fromNow: '1 hour'}
               payload:
                 maxRunTime: 3600
-                image: node
+                image: node:18
                 env:
                   BACKEND_URL: "${backend_url}"
                 command:
