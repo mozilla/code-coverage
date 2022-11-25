@@ -23,6 +23,8 @@ def test_coverage_supported_extensions_api(client):
             "hxx",
             "js",
             "jsm",
+            "mjs",
+            "jsx",
             "rs",
             "xul",
             "xml",
