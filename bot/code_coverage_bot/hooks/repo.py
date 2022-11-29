@@ -158,7 +158,8 @@ class MozillaCentralHook(RepositoryHook):
         notify_email(self.revision, changesets, coverage)
         logger.info("Sent low coverage email notification")
 
-        self.check_javascript_files()
+        if secrets.get(secrets.CHECK_JAVASCRIPT_FILES, False):
+            self.check_javascript_files()
 
         # Generate all reports except the full one which we generated earlier.
         all_report_combinations = self.artifactsHandler.get_combinations()

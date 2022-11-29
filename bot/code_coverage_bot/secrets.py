@@ -14,6 +14,7 @@ class Secrets(dict):
     PHABRICATOR_URL = "PHABRICATOR_URL"
     PHABRICATOR_TOKEN = "PHABRICATOR_TOKEN"
     GOOGLE_CLOUD_STORAGE = "GOOGLE_CLOUD_STORAGE"
+    CHECK_JAVASCRIPT_FILES = "CHECK_JAVASCRIPT_FILES"
 
     def load(self, taskcluster_secret=None, local_secrets=None):
         taskcluster_config.load_secrets(
