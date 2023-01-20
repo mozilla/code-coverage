@@ -65,10 +65,10 @@ tasks:
 
     workerType:
       $if: 'taskcluster_root_url == "https://firefox-ci-tc.services.mozilla.com"'
-      then: linux
+      then: linux-gcp
       else: ci
 
-    taskboot_image: "mozilla/taskboot:0.2.2"
+    taskboot_image: "mozilla/taskboot:0.3.6"
   in:
     $if: 'tasks_for == "github-push" || (tasks_for == "github-pull-request" && event["action"] in ["opened", "reopened", "synchronize"])'
     then:
@@ -152,9 +152,9 @@ tasks:
                   - /bot.tar
                   - bot/Dockerfile
                 artifacts:
-                  public/code-coverage-bot.tar:
+                  public/code-coverage-bot.tar.zst:
                     expires: {$fromNow: '6 months'}
-                    path: /bot.tar
+                    path: /bot.tar.zst
                     type: file
               routes:
                 $if: 'tasks_for == "github-pull-request"'
@@ -264,9 +264,9 @@ tasks:
                   - /backend.tar
                   - backend/Dockerfile
                 artifacts:
-                  public/code-coverage-backend.tar:
+                  public/code-coverage-backend.tar.zst:
                     expires: {$fromNow: '2 weeks'}
-                    path: /backend.tar
+                    path: /backend.tar.zst
                     type: file
               scopes:
                 - docker-worker:capability:privileged
@@ -305,9 +305,9 @@ tasks:
                   - /events.tar
                   - events/Dockerfile
                 artifacts:
-                  public/code-coverage-events.tar:
+                  public/code-coverage-events.tar.zst:
                     expires: {$fromNow: '2 weeks'}
-                    path: /events.tar
+                    path: /events.tar.zst
                     type: file
               scopes:
                 - docker-worker:capability:privileged
@@ -390,7 +390,7 @@ tasks:
                     - deploy-heroku
                     - --heroku-app
                     - "code-coverage-${channel}"
-                    - web:public/code-coverage-backend.tar
+                    - web:public/code-coverage-backend.tar.zst
                   env:
                     TASKCLUSTER_SECRET: "project/relman/code-coverage/deploy-${channel}"
                 scopes:
@@ -420,7 +420,7 @@ tasks:
                     - deploy-heroku
                     - --heroku-app
                     - "code-coverage-events-${channel_short}"
-                    - worker:public/code-coverage-events.tar
+                    - worker:public/code-coverage-events.tar.zst
                   env:
                     TASKCLUSTER_SECRET: "project/relman/code-coverage/deploy-${channel}"
                 scopes:
