@@ -304,6 +304,7 @@ def download_grcov():
     # Get version from grcov binary
     grcov = os.path.join(dest, "grcov", "grcov")
     assert os.path.exists(grcov), "Missing grcov binary"
+    assert os.path.isfile(grcov), "grcov should be a file"
     version = subprocess.check_output([grcov, "--version"]).decode("utf-8")
 
     # Compare version with currently available
