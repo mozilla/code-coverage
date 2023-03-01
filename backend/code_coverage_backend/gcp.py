@@ -58,7 +58,14 @@ class GCPCache(object):
 
     def __init__(self, reports_dir=None):
         # Open redis connection
-        self.redis = redis.from_url(taskcluster.secrets["REDIS_URL"])
+        redis_url = taskcluster.secrets["REDIS_URL"]
+        # Are we dealing with a redis ssl/tls connection?
+        if redis_url.startswith("rediss:"):
+            # The cert is self signed so do not check it
+            self.redis = redis.from_url(redis_url, ssl_cert_reqs="none")
+        else:
+            # No we are not, we are connecting transparently
+            self.redis = redis.from_url(redis_url)
         assert self.redis.ping(), "Redis server does not ping back"
 
         # Open gcp connection to bucket
