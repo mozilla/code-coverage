@@ -1,7 +1,7 @@
 aiohttp==3.8.3
 async-timeout==4.0.2
 logbook==1.5.3
-pytz==2022.6
+pytz==2022.7.1
 raven==6.10.0
 structlog==22.3.0
 taskcluster==47.1.2
