@@ -65,7 +65,7 @@ def setup_cli(ask_repository=True, ask_revision=True):
         channel=secrets.get("APP_CHANNEL", "dev"),
         PAPERTRAIL_HOST=secrets.get("PAPERTRAIL_HOST"),
         PAPERTRAIL_PORT=secrets.get("PAPERTRAIL_PORT"),
-        sentry_dsn=secrets.get("SENTRY_DSN"),
+        SENTRY_DSN=secrets.get("SENTRY_DSN"),
     )
 
     return args

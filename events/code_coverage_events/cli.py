@@ -41,7 +41,7 @@ def main():
         channel=taskcluster_config.secrets.get("APP_CHANNEL", "dev"),
         PAPERTRAIL_HOST=taskcluster_config.secrets.get("PAPERTRAIL_HOST"),
         PAPERTRAIL_PORT=taskcluster_config.secrets.get("PAPERTRAIL_PORT"),
-        sentry_dsn=taskcluster_config.secrets.get("SENTRY_DSN"),
+        SENTRY_DSN=taskcluster_config.secrets.get("SENTRY_DSN"),
     )
 
     events = Events()

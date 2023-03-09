@@ -128,7 +128,7 @@ def init_logger(
     level=logging.INFO,
     PAPERTRAIL_HOST=None,
     PAPERTRAIL_PORT=None,
-    sentry_dsn=None,
+    SENTRY_DSN=None,
 ):
     if not channel:
         channel = os.environ.get("APP_CHANNEL")
@@ -145,8 +145,8 @@ def init_logger(
         setup_papertrail(project_name, channel, PAPERTRAIL_HOST, PAPERTRAIL_PORT)
 
     # Log to sentry
-    if channel and sentry_dsn:
-        setup_sentry(project_name, channel, sentry_dsn)
+    if channel and SENTRY_DSN:
+        setup_sentry(project_name, channel, SENTRY_DSN)
 
     # Setup structlog
     processors = [
