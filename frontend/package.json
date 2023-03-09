@@ -51,7 +51,7 @@
     "webpack-merge": "^5.8.0"
   },
   "dependencies": {
-    "chartist": "^0.11.3",
+    "chartist": "^1.3.0",
     "mustache": "^4.2.0",
     "normalize.css": "^8.0.1",
     "prismjs": "^1.29.0"
