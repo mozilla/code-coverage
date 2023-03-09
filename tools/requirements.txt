@@ -5,3 +5,5 @@ pytz==2022.7.1
 raven==6.10.0
 structlog==22.3.0
 taskcluster==47.1.2
+# Please see #1779, this eventually must be removed!
+urllib3==1.26.14
