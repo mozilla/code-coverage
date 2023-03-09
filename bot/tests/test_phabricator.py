@@ -72,7 +72,7 @@ def test_simple(mock_secrets, mock_phabricator, fake_hg_repo):
     call = responses.calls[-3]
     assert call.request.url == "http://phabricator.test/api/harbormaster.sendmessage"
     params = json.loads(urllib.parse.parse_qs(call.request.body)["params"][0])
-    assert params["buildTargetPHID"] == "PHID-HMBT-test"
+    assert params["receiver"] == "PHID-HMBT-test"
     assert params["type"] == "pass"
     assert params["unit"] == [
         {
@@ -94,7 +94,7 @@ def test_simple(mock_secrets, mock_phabricator, fake_hg_repo):
     call = responses.calls[-1]
     assert call.request.url == "http://phabricator.test/api/harbormaster.sendmessage"
     params = json.loads(urllib.parse.parse_qs(call.request.body)["params"][0])
-    assert params["buildTargetPHID"] == "PHID-HMBT-test-lint"
+    assert params["receiver"] == "PHID-HMBT-test-lint"
     assert params["type"] == "pass"
     assert params["unit"] == []
     assert params["lint"] == []
