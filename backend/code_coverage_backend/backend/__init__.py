@@ -40,7 +40,7 @@ def create_app():
         channel=taskcluster.secrets.get("APP_CHANNEL", "dev"),
         PAPERTRAIL_HOST=taskcluster.secrets.get("PAPERTRAIL_HOST"),
         PAPERTRAIL_PORT=taskcluster.secrets.get("PAPERTRAIL_PORT"),
-        sentry_dsn=taskcluster.secrets.get("SENTRY_DSN"),
+        SENTRY_DSN=taskcluster.secrets.get("SENTRY_DSN"),
     )
     logger = structlog.get_logger(__name__)
 
