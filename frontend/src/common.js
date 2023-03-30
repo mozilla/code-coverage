@@ -35,6 +35,7 @@ export async function main(load, display) {
 const COVERAGE_BACKEND_HOST = process.env.BACKEND_URL;
 const COVERAGE_REPOSITORY = process.env.REPOSITORY;
 export const COVERAGE_PROJECT = process.env.PROJECT;
+const ZERO_COVERAGE_REPORT = process.env.ZERO_COVERAGE_REPORT;
 
 function cacheGet(cache, key) {
   if (key in cache) {
@@ -138,9 +139,7 @@ export async function getZeroCoverageData() {
     return data;
   }
 
-  const response = await fetch(
-    "https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/project.relman.code-coverage.production.cron.latest/artifacts/public/zero_coverage_report.json"
-  );
+  const response = await fetch(ZERO_COVERAGE_REPORT);
   data = await response.json();
 
   cacheSet(zeroCoverageCache, "", data);
