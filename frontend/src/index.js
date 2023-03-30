@@ -1,4 +1,5 @@
 import {
+  COVERAGE_PROJECT,
   REV_LATEST,
   DOM_READY,
   main,
@@ -232,7 +233,7 @@ async function load() {
   message(
     "loading",
     "Loading coverage data for " +
-      (route.path || "mozilla-central") +
+      (route.path || COVERAGE_PROJECT) +
       " @ " +
       (route.revision || REV_LATEST)
   );

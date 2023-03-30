@@ -22,6 +22,8 @@ module.exports = {
     }),
     new webpack.EnvironmentPlugin({
       BACKEND_URL: 'http://localhost:8000',
+      REPOSITORY: 'https://hg.mozilla.org/mozilla-central',
+      PROJECT: 'mozilla-central'
     }),
   ],
   module: {

@@ -30,6 +30,14 @@ You can specify another remote backend like so:
 BACKEND_URL=https://api.coverage.moz.tools npm run start
 ```
 
+## Displaying Another Project
+
+You can specify another project by using the environment variables `REPOSITORY`, and `PROJECT` like so:
+
+```
+REPOSITORY=https://hg.mozilla.org/comm-central PROJECT=comm-central npm run start
+```
+
 ## Help
 
 You can reach us on our Matrix instance: [#codecoverage:mozilla.org](https://chat.mozilla.org/#/room/#codecoverage:mozilla.org)

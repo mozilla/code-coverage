@@ -1,4 +1,5 @@
 import {
+  COVERAGE_PROJECT,
   hide,
   message,
   buildNavbar,
@@ -132,7 +133,7 @@ export async function zeroCoverageDisplay(data, dir) {
   hide("history");
   message(
     "loading",
-    "Loading zero coverage report for " + (dir || "mozilla-central")
+    "Loading zero coverage report for " + (dir || COVERAGE_PROJECT)
   );
 
   while (dir.endsWith("/")) {

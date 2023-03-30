@@ -33,6 +33,8 @@ export async function main(load, display) {
 // Coverage retrieval.
 
 const COVERAGE_BACKEND_HOST = process.env.BACKEND_URL;
+const COVERAGE_REPOSITORY = process.env.REPOSITORY;
+export const COVERAGE_PROJECT = process.env.PROJECT;
 
 function cacheGet(cache, key) {
   if (key in cache) {
@@ -180,7 +182,7 @@ export async function getSource(file, revision) {
   if (!revision || revision === "latest") {
     revision = "tip";
   }
-  const url = `https://hg.mozilla.org/mozilla-central/raw-file/${revision}/${file}`;
+  const url = `${COVERAGE_REPOSITORY}/raw-file/${revision}/${file}`;
 
   let source = cacheGet(sourceCache, url);
   if (source) {
@@ -328,7 +330,7 @@ export function buildNavbar(path, revision) {
   let base = "";
   const links = [
     {
-      name: "mozilla-central",
+      name: COVERAGE_PROJECT,
       route: buildRoute({ path: "", revision })
     }
   ];
