@@ -8,6 +8,6 @@ google-cloud-storage==2.7.0
 gunicorn==20.1.0
 python-dateutil==2.8.2
 pytoml==0.1.21
-redis==4.5.1
+redis==4.5.4
 swagger-ui-bundle==0.0.9
 zstandard==0.20.0
