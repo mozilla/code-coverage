@@ -6,11 +6,11 @@
 import structlog
 from flask import abort
 
+from code_coverage_backend import config
 from code_coverage_backend.gcp import load_cache
 from code_coverage_backend.report import DEFAULT_FILTER
 from code_coverage_tools import COVERAGE_EXTENSIONS
 
-DEFAULT_REPOSITORY = "mozilla-central"
 logger = structlog.get_logger(__name__)
 
 
@@ -21,7 +21,7 @@ def coverage_supported_extensions():
     return COVERAGE_EXTENSIONS
 
 
-def coverage_latest(repository=DEFAULT_REPOSITORY):
+def coverage_latest(repository=config.DEFAULT_REPOSITORY):
     """
     List the last 10 reports available on the server
     """
@@ -43,7 +43,7 @@ def coverage_latest(repository=DEFAULT_REPOSITORY):
 def coverage_for_path(
     path="",
     changeset=None,
-    repository=DEFAULT_REPOSITORY,
+    repository=config.DEFAULT_REPOSITORY,
     platform=DEFAULT_FILTER,
     suite=DEFAULT_FILTER,
 ):
@@ -84,7 +84,7 @@ def coverage_for_path(
 
 
 def coverage_history(
-    repository=DEFAULT_REPOSITORY,
+    repository=config.DEFAULT_REPOSITORY,
     path="",
     start=None,
     end=None,
@@ -113,7 +113,7 @@ def coverage_history(
         abort(400)
 
 
-def coverage_filters(repository=DEFAULT_REPOSITORY):
+def coverage_filters(repository=config.DEFAULT_REPOSITORY):
     """
     List all available filters for that repository
     """

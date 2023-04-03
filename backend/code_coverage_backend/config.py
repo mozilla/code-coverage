@@ -5,5 +5,8 @@
 
 from __future__ import absolute_import
 
+import os
+
 PROJECT_NAME = "code-coverage-backend"
 APP_NAME = "code_coverage_backend"
+DEFAULT_REPOSITORY = os.getenv("REPOSITORY", "mozilla-central")

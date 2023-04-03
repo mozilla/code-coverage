@@ -7,6 +7,8 @@ import os
 
 import redis
 
+from code_coverage_backend import config
+
 
 def cleanup(client, prefix):
     nb, memory = 0, 0
@@ -26,4 +28,4 @@ def cleanup(client, prefix):
 
 if __name__ == "__main__":
     client = redis.from_url(os.environ["REDIS_URL"])
-    cleanup(client, "overall:mozilla-central")
+    cleanup(client, f"overall:{config.DEFAULT_REPOSITORY}")

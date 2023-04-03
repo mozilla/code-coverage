@@ -11,6 +11,7 @@ import redis
 import structlog
 from dateutil.relativedelta import relativedelta
 
+from code_coverage_backend import config
 from code_coverage_backend import covdir
 from code_coverage_backend import taskcluster
 from code_coverage_backend.hgmo import hgmo_pushes
@@ -30,7 +31,7 @@ KEY_HISTORY = "history:{repository}"
 KEY_PLATFORMS = "platforms:{repository}"
 KEY_SUITES = "suites:{repository}"
 
-REPOSITORIES = ("mozilla-central",)
+REPOSITORIES = (config.DEFAULT_REPOSITORY,)
 
 MIN_PUSH = 0
 MAX_PUSH = math.inf
