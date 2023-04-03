@@ -30,6 +30,8 @@ class RepositoryHook(Hook):
     Base class to support specific workflows per repository
     """
 
+    HOOK_NAME = "repo"
+
     def upload_reports(self, reports):
         """
         Upload all provided covdir reports on GCP
@@ -95,7 +97,6 @@ class MozillaCentralHook(RepositoryHook):
 
     def __init__(self, *args, **kwargs):
         super().__init__(
-            config.MOZILLA_CENTRAL_REPOSITORY,
             # On mozilla-central, we want to assert that every platform was run (except for android platforms
             # as they are unstable).
             required_platforms=["linux", "windows"],
@@ -132,12 +133,8 @@ class MozillaCentralHook(RepositoryHook):
         # Index on Taskcluster
         self.index_task(
             [
-                "project.relman.code-coverage.{}.repo.mozilla-central.{}".format(
-                    secrets[secrets.APP_CHANNEL], self.revision
-                ),
-                "project.relman.code-coverage.{}.repo.mozilla-central.latest".format(
-                    secrets[secrets.APP_CHANNEL]
-                ),
+                "{}.{}".format(self.hook, self.revision),
+                "{}.latest".format(self.hook),
             ]
         )
 
@@ -181,7 +178,6 @@ class TryHook(RepositoryHook):
 
     def __init__(self, *args, **kwargs):
         super().__init__(
-            config.TRY_REPOSITORY,
             # On try, developers might have requested to run only one platform, and we trust them.
             required_platforms=[],
             *args,
@@ -215,11 +211,9 @@ class TryHook(RepositoryHook):
         # Index on Taskcluster
         self.index_task(
             [
-                "project.relman.code-coverage.{}.repo.try.{}".format(
-                    secrets[secrets.APP_CHANNEL], self.revision
-                ),
-                "project.relman.code-coverage.{}.repo.try.latest".format(
-                    secrets[secrets.APP_CHANNEL]
+                "{}.{}".format(self.hook_path, self.revision),
+                "project.relman.code-coverage.{}.repo.{}.latest".format(
+                    secrets[secrets.APP_CHANNEL], self.project
                 ),
             ]
         )
@@ -229,14 +223,26 @@ def main():
     logger.info("Starting code coverage bot for repository")
     args = setup_cli()
 
+    namespace = args.namespace or config.DEFAULT_NAMESPACE
+    project = args.project or config.DEFAULT_PROJECT
+    repository = args.repository or config.DEFAULT_REPOSITORY
+    upstream = args.upstream or config.DEFAULT_UPSTREAM
+
     hooks = {
-        config.MOZILLA_CENTRAL_REPOSITORY: MozillaCentralHook,
-        config.TRY_REPOSITORY: TryHook,
+        "central": MozillaCentralHook,
+        "try": TryHook,
     }
-    hook_class = hooks.get(args.repository)
-    assert hook_class is not None, f"Unsupported repository {args.repository}"
+    hook_class = hooks.get(args.hook)
+    assert hook_class is not None, f"Unsupported hook type {args.hook}"
 
     hook = hook_class(
-        args.revision, args.task_name_filter, args.cache_root, args.working_dir
+        namespace,
+        project,
+        repository,
+        upstream,
+        args.revision,
+        args.task_name_filter,
+        args.cache_root,
+        args.working_dir,
     )
     hook.run()

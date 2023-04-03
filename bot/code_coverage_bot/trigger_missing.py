@@ -45,7 +45,9 @@ def trigger_task(task_group_id: str, revision: str) -> None:
     )
 
 
-def trigger_missing(server_address: str, out_dir: str = ".") -> None:
+def trigger_missing(
+    server_address: str, namespace: str, project: str, out_dir: str = "."
+) -> None:
     triggered_revisions_path = os.path.join(out_dir, "triggered_revisions.zst")
 
     url = f"https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/project.relman.code-coverage.{secrets[secrets.APP_CHANNEL]}.crontrigger.latest/artifacts/public/triggered_revisions.zst"
@@ -90,9 +92,7 @@ def trigger_missing(server_address: str, out_dir: str = ".") -> None:
             continue
 
         # If the revision was already ingested, we don't need to trigger ingestion for it again.
-        if uploader.gcp_covdir_exists(
-            bucket, "mozilla-central", revision, "all", "all"
-        ):
+        if uploader.gcp_covdir_exists(bucket, project, revision, "all", "all"):
             triggered_revisions.add(revision)
             continue
 
@@ -110,7 +110,7 @@ def trigger_missing(server_address: str, out_dir: str = ".") -> None:
         # If it is newer than yesterday, we load the group and check if all tasks in it finished.
         if timestamp > yesterday:
             decision_task_id = taskcluster.get_decision_task(
-                "mozilla-central", revision
+                namespace, project, revision
             )
             if decision_task_id is None:
                 continue

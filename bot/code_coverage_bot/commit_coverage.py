@@ -39,7 +39,9 @@ def _init_thread(repo_dir: str) -> None:
         hg_servers.append(hg_server)
 
 
-def generate(server_address: str, repo_dir: str, out_dir: str = ".") -> None:
+def generate(
+    server_address: str, repo_dir: str, project: str, out_dir: str = "."
+) -> None:
     start_time = time.monotonic()
 
     commit_coverage_path = os.path.join(out_dir, "commit_coverage.json.zst")
@@ -70,7 +72,7 @@ def generate(server_address: str, repo_dir: str, out_dir: str = ".") -> None:
     # We are only interested in "overall" coverage, not platform or suite specific.
     changesets_to_analyze = [
         changeset
-        for changeset, platform, suite in list_reports(bucket, "mozilla-central")
+        for changeset, platform, suite in list_reports(bucket, project)
         if platform == DEFAULT_FILTER and suite == DEFAULT_FILTER
     ]
 
@@ -85,7 +87,7 @@ def generate(server_address: str, repo_dir: str, out_dir: str = ".") -> None:
     # correct.
     def analyze_changeset(changeset_to_analyze: str) -> None:
         report_name = get_name(
-            "mozilla-central", changeset_to_analyze, DEFAULT_FILTER, DEFAULT_FILTER
+            project, changeset_to_analyze, DEFAULT_FILTER, DEFAULT_FILTER
         )
         assert download_report(
             os.path.join(out_dir, "ccov-reports"), bucket, report_name

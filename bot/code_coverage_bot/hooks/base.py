@@ -15,6 +15,7 @@ from code_coverage_bot import config
 from code_coverage_bot import grcov
 from code_coverage_bot import taskcluster
 from code_coverage_bot.artifacts import ArtifactsHandler
+from code_coverage_bot.secrets import secrets
 from code_coverage_bot.taskcluster import taskcluster_config
 from code_coverage_bot.utils import ThreadPoolExecutorResult
 
@@ -22,10 +23,16 @@ logger = structlog.get_logger(__name__)
 
 
 class Hook(object):
+    HOOK_NAME = "base"
+
     def __init__(
         self,
+        namespace,
+        project,
         repository,
+        upstream,
         revision,
+        prefix,
         task_name_filter,
         cache_root,
         working_dir,
@@ -40,8 +47,12 @@ class Hook(object):
             reports=self.reports_dir,
         )
 
+        self.namespace = namespace
+        self.project = project
         self.repository = repository
+        self.upstream = upstream
         self.revision = revision
+        self.prefix = prefix
         assert (
             self.revision is not None and self.repository is not None
         ), "Missing repo/revision"
@@ -54,7 +65,9 @@ class Hook(object):
             self.repo_dir = os.path.join(cache_root, self.branch)
 
         # Load coverage tasks for all platforms
-        decision_task_id = taskcluster.get_decision_task(self.branch, self.revision)
+        decision_task_id = taskcluster.get_decision_task(
+            self.namespace, self.branch, self.revision
+        )
 
         assert decision_task_id is not None, "The decision task couldn't be found"
 
@@ -81,6 +94,18 @@ class Hook(object):
     def branch(self):
         return self.repository[len(config.HG_BASE) :]
 
+    @property
+    def hook(self):
+        """Taskcluster path to this specific hook. For backwards compat mozilla-central does not include the project name."""
+        if self.project == "mozilla-central":
+            return "project.relman.code-coverage.{dev}.{name}".format(
+                dev=secrets[secrets.APP_CHANNEL],
+                name=self.HOOK_NAME,
+            )
+        return "project.relman.code-coverage.{dev}.{name}.{project}".format(
+            dev=secrets[secrets.APP_CHANNEL], name=self.HOOK_NAME, project=self.project
+        )
+
     def clone_repository(self):
         cmd = hglib.util.cmdbuilder(
             "robustcheckout",
@@ -88,7 +113,7 @@ class Hook(object):
             self.repo_dir,
             purge=True,
             sharebase="hg-shared",
-            upstream="https://hg.mozilla.org/mozilla-unified",
+            upstream=self.upstream,
             revision=self.revision,
             networkattempts=7,
         )
@@ -146,8 +171,16 @@ class Hook(object):
                 platform=platform,
                 artifacts=len(artifacts),
             )
+
+            options = []
+            if self.prefix:
+                options = ["-p", self.prefix]
+
             output = grcov.report(
-                artifacts, source_dir=self.repo_dir, out_format="covdir"
+                artifacts,
+                source_dir=self.repo_dir,
+                out_format="covdir",
+                options=options,
             )
 
             # Write output on FS

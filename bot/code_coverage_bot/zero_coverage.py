@@ -89,9 +89,15 @@ class ZeroCov(object):
 
         return res
 
-    def generate(self, artifacts, hgrev, out_dir="."):
+    def generate(self, artifacts, hgrev, out_dir=".", prefix=None):
+        options = []
+        if prefix:
+            options = ["-p", prefix]
         report = grcov.report(
-            artifacts, out_format="coveralls+", source_dir=self.repo_dir
+            artifacts,
+            out_format="coveralls+",
+            source_dir=self.repo_dir,
+            options=options,
         )
         report = json.loads(report)
 

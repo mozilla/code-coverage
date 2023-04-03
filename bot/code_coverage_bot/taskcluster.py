@@ -15,8 +15,8 @@ ALL_STATUSES = FINISHED_STATUSES + ["unscheduled", "pending", "running"]
 NAME_PARTS_TO_SKIP = ("opt", "debug", "e10s", "1proc")
 
 
-def get_decision_task(branch, revision):
-    route = f"gecko.v2.{branch}.revision.{revision}.taskgraph.decision"
+def get_decision_task(namespace, branch, revision):
+    route = f"{namespace}.v2.{branch}.revision.{revision}.taskgraph.decision"
     index = taskcluster_config.get_service("index")
     try:
         return index.findTask(route)["taskId"]

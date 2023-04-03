@@ -22,6 +22,10 @@ def setup_cli(ask_repository=True, ask_revision=True):
         parser.add_argument("--repository", default=os.environ.get("REPOSITORY"))
     if ask_revision:
         parser.add_argument("--revision", default=os.environ.get("REVISION"))
+    parser.add_argument("--namespace", default=os.environ.get("NAMESPACE"))
+    parser.add_argument("--project", default=os.environ.get("PROJECT"))
+    parser.add_argument("--upstream", default=os.environ.get("UPSTREAM"))
+    parser.add_argument("--prefix", default=os.environ.get("PREFIX"))
     parser.add_argument(
         "--cache-root", required=True, help="Cache root, used to pull changesets"
     )

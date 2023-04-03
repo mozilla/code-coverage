@@ -6,3 +6,9 @@
 HG_BASE = "https://hg.mozilla.org/"
 MOZILLA_CENTRAL_REPOSITORY = "{}mozilla-central".format(HG_BASE)
 TRY_REPOSITORY = "{}try".format(HG_BASE)
+
+DEFAULT_UPSTREAM = "https://hg.mozilla.org/mozilla-unified"
+DEFAULT_PROJECT = "mozilla-central"
+DEFAULT_REPOSITORY = MOZILLA_CENTRAL_REPOSITORY
+DEFAULT_NAMESPACE = "gecko"
+DEFAULT_PREFIX = None
