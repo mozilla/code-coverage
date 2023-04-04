@@ -22,7 +22,7 @@ services:
       LOCAL_CONFIGURATION: "/src/backend/code-coverage.yml"
       DEBUG: True
     ports:
-      - "8001:8001"
+      - "8080:8080"
     networks:
       - codecov
   redis:
@@ -39,7 +39,7 @@ services:
       context: .
       dockerfile: frontend/dev.dockerfile
     ports:
-     - "8080:80"
+     - "80:80"
     environment:
      - NGINX_HOST=code-coverage.local
      - NGINX_PORT=80

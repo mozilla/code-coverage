@@ -59,6 +59,8 @@ class CronThunderbirdHook(Hook):
         # Grab that revision
         revision = matches.groups()[0]
 
+        logger.info(f"Using revision id {revision} from tip")
+
         super().__init__(
             namespace, project, repository, upstream, revision, prefix, *args, **kwargs
         )

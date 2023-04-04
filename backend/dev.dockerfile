@@ -9,5 +9,5 @@ RUN cd /src/backend && pip install --disable-pip-version-check --no-cache-dir --
 ENV LOCAL_CONFIGURATION=/src/backend/code-coverage-conf.yml
 ENV REPOSITORY=comm-central
 
-CMD "/src/backend/run.sh"
+CMD "/src/backend/tb-run.sh"
 #CMD ["gunicorn", "code_coverage_backend.flask:app", "--timeout", "30"]

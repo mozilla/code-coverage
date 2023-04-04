@@ -65,7 +65,7 @@ def setup_cli(ask_repository=True, ask_revision=True):
     local_secrets = None
 
     if args.local_configuration:
-        local_secrets = yaml.safe_load(open(args.local_configuration))
+        local_secrets = yaml.safe_load(args.local_configuration)
     elif local_secrets_aws:
         local_secrets = json.loads(local_secrets_aws)
 

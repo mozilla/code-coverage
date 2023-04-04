@@ -51,7 +51,7 @@ setuptools.setup(
             "code-coverage-cron = code_coverage_bot.hooks.cron:main",
             "code-coverage-repo = code_coverage_bot.hooks.repo:main",
             # Thunderbird
-            "code-coverage-cron = code_coverage_bot.hooks.cron_thunderbird:main",
+            "code-coverage-cron-thunderbird = code_coverage_bot.hooks.cron_thunderbird:main",
         ]
     },
 )

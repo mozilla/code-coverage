@@ -35,4 +35,4 @@ ENV PREFIX="comm"
 #CMD "cd /src/bot && code-coverage-cron"
 #CMD "code-coverage-cron --cache-root=build/cache --working-dir=build/work --local-configuration=code-coverage.yml"
 #CMD ["python3 /src/bot/code-coverage-bot"]
-CMD ["code-coverage-cron", "--cache-root=build/cache", "--working-dir=build/work", "--local-configuration=code-coverage.yml"]
+CMD ["code-coverage-cron-thunderbird", "--cache-root=build/cache", "--working-dir=build/work", "--local-configuration=code-coverage.yml"]

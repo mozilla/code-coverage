@@ -25,4 +25,4 @@ ENV PROJECT="comm-central"
 ENV NAMESPACE="comm"
 ENV PREFIX="comm"
 
-CMD ["code-coverage-cron-thunderbird", "--cache-root=build/cache", "--working-dir=build/work", "--local-configuration=code-coverage.yml"]
+CMD ["code-coverage-cron-thunderbird", "--cache-root=build/cache", "--working-dir=build/work"]

@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y build-essential python python-dev
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - &&\
 apt-get install -y nodejs
 
-ENV BACKEND_URL=http://localhost:8001
+ENV BACKEND_URL=http://localhost:8080
 ENV REPOSITORY=https://hg.mozilla.org/comm-central
 ENV PROJECT=comm-central
 ENV ZERO_COVERAGE_REPORT=/assets/zero_coverage_report.json

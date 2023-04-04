@@ -56,7 +56,7 @@ def run_check(command, **kwargs):
 
         # Use error to send log to sentry
         log.error(
-            f"Command failed with code: {proc.returncode}",
+            f"Command failed with code: {proc.returncode}\nError: {error}",
             exit=proc.returncode,
             command=" ".join(command),
             output=output,
