@@ -1,7 +1,12 @@
 #!/bin/bash -ex
+GRCOV_FILE="grcov-tcmalloc-linux-x86_64.tar.bz2"
 GRCOV_VERSION="v0.7.1"
 MERCURIAL_VERSION="6.3.1"
 VERSION_CONTROL_TOOLS_REV="d0d8dd1934dd"
+
+# OVERRIDES
+GRCOV_FILE="grcov-x86_64-unknown-linux-gnu.tar.bz2"
+GRCOV_VERSION="v0.8.13"
 
 apt-get update
 # libgoogle-perftools4 is currently required for grcov (until https://github.com/mozilla/grcov/issues/403 is fixed).
@@ -10,7 +15,7 @@ apt-get install --no-install-recommends -y gcc curl bzip2 python-dev libgoogle-p
 pip install --disable-pip-version-check --quiet --no-cache-dir mercurial==$MERCURIAL_VERSION
 
 # Setup grcov
-curl -L https://github.com/mozilla/grcov/releases/download/$GRCOV_VERSION/grcov-tcmalloc-linux-x86_64.tar.bz2 | tar -C /usr/bin -xjv
+curl -L https://github.com/mozilla/grcov/releases/download/$GRCOV_VERSION/$GRCOV_FILE | tar -C /usr/bin -xjv
 chmod +x /usr/bin/grcov
 
 # Setup mercurial with needed extensions

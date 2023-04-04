@@ -34,7 +34,7 @@ export async function main(load, display) {
 
   // React to url changes
   window.onhashchange = full;
-  window.title = `${COVERAGE_PROJECT} coverage`;
+  document.title = `${COVERAGE_PROJECT} coverage`;
 }
 
 function cacheGet(cache, key) {

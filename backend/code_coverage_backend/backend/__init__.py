@@ -18,14 +18,19 @@ from .build import build_flask_app
 
 def create_app():
     # Load secrets from Taskcluster
-    local_secrets_path = os.environ.get("LOCAL_CONFIGURATION")
     local_secrets_aws = os.environ.get("LOCAL_SECRETS")
+    local_secrets_path = os.environ.get("LOCAL_CONFIGURATION")
     local_secrets = None
 
-    if local_secrets_path:
-        local_secrets = yaml.safe_load(open(local_secrets_path))
-    elif local_secrets_aws:
+    if local_secrets_aws:
         local_secrets = json.loads(local_secrets_aws)
+        # Fix our secrets, GCS needs to be json decoded, and everything needs to be wrapped in common
+        local_secrets["GOOGLE_CLOUD_STORAGE"] = json.loads(
+            local_secrets.get("GOOGLE_CLOUD_STORAGE")
+        )
+        local_secrets = {"common": local_secrets}
+    elif local_secrets_path:
+        local_secrets = yaml.safe_load(open(local_secrets_path))
 
     if local_secrets_path is not None:
         assert os.path.exists(

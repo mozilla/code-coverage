@@ -64,10 +64,15 @@ def setup_cli(ask_repository=True, ask_revision=True):
     local_secrets_aws = os.environ.get("LOCAL_SECRETS")
     local_secrets = None
 
-    if args.local_configuration:
-        local_secrets = yaml.safe_load(args.local_configuration)
-    elif local_secrets_aws:
+    if local_secrets_aws:
         local_secrets = json.loads(local_secrets_aws)
+        # Fix our secrets, GCS needs to be json decoded, and everything needs to be wrapped in common
+        local_secrets["GOOGLE_CLOUD_STORAGE"] = json.loads(
+            local_secrets.get("GOOGLE_CLOUD_STORAGE")
+        )
+        local_secrets = {"common": local_secrets}
+    elif args.local_configuration:
+        local_secrets = yaml.safe_load(args.local_configuration)
 
     # Then load secrets
     secrets.load(args.taskcluster_secret, local_secrets=local_secrets)
