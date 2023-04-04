@@ -4,12 +4,13 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import argparse
+import json
+import logging
 import os
 
 import yaml
 
 from code_coverage_bot.secrets import secrets
-from code_coverage_bot.taskcluster import taskcluster_config
 from code_coverage_tools.log import init_logger
 
 
@@ -57,19 +58,23 @@ def setup_cli(ask_repository=True, ask_revision=True):
     parser.add_argument("--taskcluster-access-token", help="Taskcluster Access token")
     args = parser.parse_args()
 
-    # Auth on Taskcluster
-    taskcluster_config.auth(args.taskcluster_client_id, args.taskcluster_access_token)
+    # Auth on Taskcluster - We don't need this for now
+    # taskcluster_config.auth(args.taskcluster_client_id, args.taskcluster_access_token)
+
+    local_secrets_aws = os.environ.get("LOCAL_SECRETS")
+    local_secrets = None
+
+    if args.local_configuration:
+        local_secrets = yaml.safe_load(open(args.local_configuration))
+    elif local_secrets_aws:
+        local_secrets = json.loads(local_secrets_aws)
 
     # Then load secrets
-    secrets.load(
-        args.taskcluster_secret,
-        local_secrets=yaml.safe_load(args.local_configuration)
-        if args.local_configuration
-        else None,
-    )
+    secrets.load(args.taskcluster_secret, local_secrets=local_secrets)
 
     init_logger(
         "bot",
+        level=logging.INFO,
         channel=secrets.get("APP_CHANNEL", "dev"),
         PAPERTRAIL_HOST=secrets.get("PAPERTRAIL_HOST"),
         PAPERTRAIL_PORT=secrets.get("PAPERTRAIL_PORT"),

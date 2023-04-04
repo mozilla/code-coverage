@@ -2,7 +2,7 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
-
+import json
 import os.path
 
 import structlog
@@ -19,6 +19,14 @@ from .build import build_flask_app
 def create_app():
     # Load secrets from Taskcluster
     local_secrets_path = os.environ.get("LOCAL_CONFIGURATION")
+    local_secrets_aws = os.environ.get("LOCAL_SECRETS")
+    local_secrets = None
+
+    if local_secrets_path:
+        local_secrets = yaml.safe_load(open(local_secrets_path))
+    elif local_secrets_aws:
+        local_secrets = json.loads(local_secrets_aws)
+
     if local_secrets_path is not None:
         assert os.path.exists(
             local_secrets_path
@@ -29,9 +37,7 @@ def create_app():
         prefixes=["common", "backend", "code-coverage-backend"],
         required=["GOOGLE_CLOUD_STORAGE", "APP_CHANNEL"],
         existing={"REDIS_URL": os.environ.get("REDIS_URL", "redis://localhost:6379")},
-        local_secrets=yaml.safe_load(open(local_secrets_path))
-        if local_secrets_path
-        else None,
+        local_secrets=local_secrets,
     )
 
     # Configure logger
