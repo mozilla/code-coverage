@@ -27,6 +27,10 @@ def setup_cli(ask_repository=True, ask_revision=True):
     parser.add_argument("--upstream", default=os.environ.get("UPSTREAM"))
     parser.add_argument("--prefix", default=os.environ.get("PREFIX"))
     parser.add_argument(
+        "--hook",
+        help="Which hook mode you want repo to run in, either 'central' or 'try'",
+    )
+    parser.add_argument(
         "--cache-root", required=True, help="Cache root, used to pull changesets"
     )
     parser.add_argument(

@@ -4,6 +4,12 @@ import { ZERO_COVERAGE_FILTERS } from "./zero_coverage_report.js";
 
 export const REV_LATEST = "latest";
 
+// Coverage retrieval.
+export const COVERAGE_PROJECT = process.env.PROJECT;
+const COVERAGE_BACKEND_HOST = process.env.BACKEND_URL;
+const COVERAGE_REPOSITORY = process.env.REPOSITORY;
+const ZERO_COVERAGE_REPORT = process.env.ZERO_COVERAGE_REPORT;
+
 function domContentLoaded() {
   return new Promise(resolve =>
     document.addEventListener("DOMContentLoaded", resolve)
@@ -28,14 +34,8 @@ export async function main(load, display) {
 
   // React to url changes
   window.onhashchange = full;
+  window.title = `${COVERAGE_PROJECT} coverage`;
 }
-
-// Coverage retrieval.
-
-const COVERAGE_BACKEND_HOST = process.env.BACKEND_URL;
-const COVERAGE_REPOSITORY = process.env.REPOSITORY;
-export const COVERAGE_PROJECT = process.env.PROJECT;
-const ZERO_COVERAGE_REPORT = process.env.ZERO_COVERAGE_REPORT;
 
 function cacheGet(cache, key) {
   if (key in cache) {
