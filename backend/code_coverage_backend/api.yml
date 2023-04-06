@@ -121,3 +121,18 @@ paths:
           description: Available filters on the endpoints
       tags:
         - v2
+
+  /v2/zero-coverage-report:
+    get:
+      operationId: "code_coverage_backend.api.zero_coverage_report"
+      parameters:
+      - name: repository
+        in: query
+        description: Mozilla repository for these reports (default to mozilla-central)
+        required: false
+        type: string
+      responses:
+        200:
+          description: The zero coverage report
+      tags:
+        - v2

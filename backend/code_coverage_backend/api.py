@@ -2,6 +2,7 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+import json
 
 import structlog
 from flask import abort
@@ -130,3 +131,21 @@ def coverage_filters(repository=config.DEFAULT_REPOSITORY):
     except Exception as e:
         logger.warn("Failed to load filters", repo=repository, error=str(e))
         abort(400)
+
+
+def zero_coverage_report(repository=config.DEFAULT_REPOSITORY):
+    """
+    Return the zero coverage report stored in Google Cloud Storage
+    """
+    file = None
+
+    try:
+        with open("/tmp/zero-cov-report/zero_coverage_report.json", "r") as fh:
+            file = fh.read()
+    except FileNotFoundError as e:
+        logger.warn(
+            "Failed to find zero coverage report", repo=repository, error=str(e)
+        )
+        abort(404)
+
+    return json.loads(file)

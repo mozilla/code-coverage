@@ -16,7 +16,7 @@ ENV BACKEND_URL=https://coverage.thunderbird.net
 ENV REPOSITORY=https://hg.mozilla.org/comm-central
 ENV PROJECT=comm-central
 # TODO: Figure out zero coverage report location
-ENV ZERO_COVERAGE_REPORT=https://coverage.thunderbird.net/zero_coverage_report.json
+ENV ZERO_COVERAGE_REPORT=https://coverage.thunderbird.net/v2/zero-coverage-report
 
 RUN npm install
 RUN npm run build

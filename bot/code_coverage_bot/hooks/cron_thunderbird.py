@@ -25,15 +25,19 @@ class CronThunderbirdHook(Hook):
     This cron class handles all report generation for Thunderbird's comm-central
     """
 
-    def upload_reports(self, reports):
+    def upload_reports(self, reports, zero_cov=False):
         """
         Upload all provided covdir reports on GCP
         """
         for (platform, suite), path in reports.items():
             report = open(path, "rb").read()
-            uploader.gcp(
-                self.branch, self.revision, report, suite=suite, platform=platform
-            )
+
+            if zero_cov:
+                uploader.gcp_zero_coverage(self.branch, report)
+            else:
+                uploader.gcp(
+                    self.branch, self.revision, report, suite=suite, platform=platform
+                )
 
     def __init__(
         self, namespace, project, repository, upstream, prefix, *args, **kwargs
@@ -74,19 +78,6 @@ class CronThunderbirdHook(Hook):
 
         self.retrieve_source_and_artifacts()
 
-        logger.info("Generating full report")
-        reports = self.build_reports(only=[("all", "all")])
-
-        # Generate all reports except the full one which we generated earlier.
-        all_report_combinations = self.artifactsHandler.get_combinations()
-        del all_report_combinations[("all", "all")]
-        reports.update(self.build_reports())
-        logger.info("Built all covdir reports", nb=len(reports))
-
-        # Upload reports on GCP
-        self.upload_reports(reports)
-        logger.info("Uploaded all covdir reports", nb=len(reports))
-
         # Commit cov is automatically uploaded to GCP...for reasons
         logger.info("Generating commit coverage reports")
         commit_coverage.generate(self.repository, self.project, self.repo_dir)
@@ -104,9 +95,23 @@ class CronThunderbirdHook(Hook):
                     "zero-coverage",
                     "zero-coverage",
                 ): f"{self.reports_dir}/zero_coverage_report.json"
-            }
+            },
+            True,
         )
-        logger.info("Uploaded zero coverage report", nb=len(reports))
+        logger.info("Uploaded zero coverage report")
+
+        logger.info("Generating full report")
+        reports = self.build_reports(only=[("all", "all")])
+
+        # Generate all reports except the full one which we generated earlier.
+        all_report_combinations = self.artifactsHandler.get_combinations()
+        del all_report_combinations[("all", "all")]
+        reports.update(self.build_reports())
+        logger.info("Built all covdir reports", nb=len(reports))
+
+        # Upload reports on GCP
+        self.upload_reports(reports)
+        logger.info("Uploaded all covdir reports", nb=len(reports))
 
 
 def main() -> None:

@@ -51,6 +51,36 @@ def gcp(repository, revision, report, platform, suite):
     return blob
 
 
+def gcp_zero_coverage(repository, report):
+    """
+    Upload a grcov a zero coverage report on Google Cloud Storage
+    * Compress with zstandard
+    * Upload in the main bucket directory
+    """
+    assert isinstance(report, bytes)
+    bucket = get_bucket(secrets[secrets.GOOGLE_CLOUD_STORAGE])
+
+    # Compress report
+    compressor = zstd.ZstdCompressor(threads=-1)
+    archive = compressor.compress(report)
+
+    # Upload archive
+    path = GCP_COVDIR_PATH.format(
+        repository=repository,
+    )
+    blob = bucket.blob(path)
+    blob.upload_from_string(archive)
+
+    # Update headers
+    blob.content_type = "application/json"
+    blob.content_encoding = "zstd"
+    blob.patch()
+
+    logger.info("Uploaded {} on {}".format(path, bucket))
+
+    return blob
+
+
 def gcp_covdir_exists(
     bucket: Bucket, repository: str, revision: str, platform: str, suite: str
 ) -> bool:

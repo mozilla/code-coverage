@@ -130,6 +130,9 @@ class GCPCache(object):
             logger.info("Report not available", report=str(report))
             return False
 
+        # Crudely check if we need to download a fresh zero coverage report
+        self.ingest_zero_coverage_report(report.changeset)
+
         # Read overall coverage for history
         data = covdir.open_report(report.path)
         assert data is not None, "No report to ingest"
@@ -358,3 +361,13 @@ class GCPCache(object):
             # Build report instance and ingest it
             report = Report(self.reports_dir, repository, changeset, platform, suite)
             self.ingest_report(report)
+
+    def ingest_zero_coverage_report(self, revision):
+        """If it's a new revision, download a fresh zero coverage report"""
+        if self.redis.hget("zero_coverage", "latest-rev").decode() == revision:
+            return
+
+        # Load the most recent zero coverage report into cache
+        download_report("/tmp/zero-cov-report/", self.bucket, "zero_coverage_report")
+
+        self.redis.hset("zero_coverage", "latest-rev", revision)
