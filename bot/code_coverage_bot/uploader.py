@@ -7,6 +7,7 @@ import structlog
 import tenacity
 import zstandard as zstd
 from google.cloud.storage.bucket import Bucket
+from requests import HTTPError
 
 from code_coverage_bot.secrets import secrets
 from code_coverage_tools.gcp import get_bucket
@@ -45,8 +46,11 @@ def gcp(repository, revision, report, platform, suite):
 
     logger.info("Uploaded {} on {}".format(path, bucket))
 
-    # Trigger ingestion on backend
-    gcp_ingest(repository, revision, platform, suite)
+    try:
+        # Trigger ingestion on backend
+        gcp_ingest(repository, revision, platform, suite)
+    except HTTPError as e:
+        logger.warn(f"Failed to ingest report. {e}")
 
     return blob
 
@@ -65,7 +69,7 @@ def gcp_zero_coverage(report):
     archive = compressor.compress(report)
 
     # Upload archive
-    path = "zero_coverage_report"
+    path = "zero_coverage_report.json.zstd"
     blob = bucket.blob(path)
     blob.upload_from_string(archive)
 
