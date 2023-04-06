@@ -74,7 +74,7 @@ class CronThunderbirdHook(Hook):
         bucket = gcp.get_bucket(secrets[secrets.GOOGLE_CLOUD_STORAGE])
         if uploader.gcp_covdir_exists(bucket, self.branch, self.revision, "all", "all"):
             logger.warn("Full covdir report already on GCP")
-            return
+            # return
 
         self.retrieve_source_and_artifacts()
 
