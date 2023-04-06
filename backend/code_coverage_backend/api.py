@@ -140,7 +140,7 @@ def zero_coverage_report(repository=config.DEFAULT_REPOSITORY):
     file = None
 
     try:
-        with open("/tmp/zero-cov-report/zero_coverage_report.json", "r") as fh:
+        with open("/tmp/zero-cov-report/zero_coverage_report.json", "rb") as fh:
             file = fh.read()
     except FileNotFoundError as e:
         logger.warn(

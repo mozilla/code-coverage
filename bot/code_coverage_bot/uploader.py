@@ -51,7 +51,7 @@ def gcp(repository, revision, report, platform, suite):
     return blob
 
 
-def gcp_zero_coverage(repository, report):
+def gcp_zero_coverage(report):
     """
     Upload a grcov a zero coverage report on Google Cloud Storage
     * Compress with zstandard
@@ -65,9 +65,7 @@ def gcp_zero_coverage(repository, report):
     archive = compressor.compress(report)
 
     # Upload archive
-    path = GCP_COVDIR_PATH.format(
-        repository=repository,
-    )
+    path = "zero_coverage_report"
     blob = bucket.blob(path)
     blob.upload_from_string(archive)
 

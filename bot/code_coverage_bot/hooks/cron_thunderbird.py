@@ -33,7 +33,7 @@ class CronThunderbirdHook(Hook):
             report = open(path, "rb").read()
 
             if zero_cov:
-                uploader.gcp_zero_coverage(self.branch, report)
+                uploader.gcp_zero_coverage(report)
             else:
                 uploader.gcp(
                     self.branch, self.revision, report, suite=suite, platform=platform
