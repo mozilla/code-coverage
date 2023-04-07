@@ -3,6 +3,8 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import json
+import os
+import tempfile
 
 import structlog
 from flask import abort
@@ -139,8 +141,12 @@ def zero_coverage_report(repository=config.DEFAULT_REPOSITORY):
     """
     file = None
 
+    path = os.path.join(
+        tempfile.gettempdir(), "zero-cov-report", "zero_coverage_report.json"
+    )
+
     try:
-        with open("/tmp/zero-cov-report/zero_coverage_report.json", "rb") as fh:
+        with open(path, "rb") as fh:
             file = fh.read()
     except FileNotFoundError as e:
         logger.warn(

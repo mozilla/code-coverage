@@ -87,6 +87,15 @@ class GCPCache(object):
             for report in self.list_reports(repo, nb=1):
                 download_report(self.reports_dir, self.bucket, report.name)
 
+        self.zerocov_dir = os.path.join(tempfile.gettempdir(), "zero-cov-report")
+        os.makedirs(self.zerocov_dir, exist_ok=True)
+        logger.info(
+            "Zero Coverage reports will be stored in {}".format(self.zerocov_dir)
+        )
+
+        # Grab the latest zero-cov-report
+        download_report(self.zerocov_dir, self.bucket, "zero_coverage_report")
+
     def ingest_pushes(self, repository, platform, suite, min_push_id=None, nb_pages=3):
         """
         Ingest HGMO changesets and pushes into our Redis Cache
@@ -364,10 +373,13 @@ class GCPCache(object):
 
     def ingest_zero_coverage_report(self, revision):
         """If it's a new revision, download a fresh zero coverage report"""
-        if self.redis.hget("zero_coverage", "latest-rev").decode() == revision:
+        if (
+            self.redis.hget("zero_coverage", "latest-rev") is None
+            or self.redis.hget("zero_coverage", "latest-rev").decode() == revision
+        ):
             return
 
         # Load the most recent zero coverage report into cache
-        download_report("/tmp/zero-cov-report/", self.bucket, "zero_coverage_report")
+        download_report(self.zerocov_dir, self.bucket, "zero_coverage_report")
 
         self.redis.hset("zero_coverage", "latest-rev", revision)

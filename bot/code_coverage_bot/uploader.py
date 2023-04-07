@@ -68,7 +68,7 @@ def gcp_zero_coverage(report):
     compressor = zstd.ZstdCompressor(threads=-1)
     archive = compressor.compress(report)
 
-    # Upload archive
+    # Upload archive (this should be in the base directory, because we only care about the latest report)
     path = "zero_coverage_report.json.zstd"
     blob = bucket.blob(path)
     blob.upload_from_string(archive)
