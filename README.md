@@ -10,3 +10,12 @@ This project has 4 parts:
 ## Help
 
 You can reach us on our Matrix instance: [#codecoverage:mozilla.org](https://chat.mozilla.org/#/room/#codecoverage:mozilla.org)
+
+## Thunderbird Changes
+
+This fork contains some Thunderbird specific changes:
+
+* Zero coverage reports are uploaded to Google Cloud Storage, and pulled down by the backend api.
+* A Thunderbird Cron file has been added, that pulls down comm-central's tip revision and generates all reports.
+* The frontend has been removed from `.dockerignore`, and runs in a docker container for deployment purposes.
+* Various tweaks to allow a repository that isn't mozilla-central to generate reports (these changes are also available on `multi-repo` branch.)

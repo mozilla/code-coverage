@@ -1,6 +1,5 @@
 services:
   bot:
-    #platform: linux/x86_64
     build:
       context: .
       dockerfile: bot/dev.dockerfile
@@ -34,7 +33,6 @@ services:
     networks:
       - codecov
   frontend:
-    #platform: linux/x86_64
     build:
       context: .
       dockerfile: frontend/dev.dockerfile
