@@ -14,7 +14,8 @@ apt-get install -y nodejs
 ENV BACKEND_URL=http://localhost:8080
 ENV REPOSITORY=https://hg.mozilla.org/comm-central
 ENV PROJECT=comm-central
-ENV ZERO_COVERAGE_REPORT=/assets/zero_coverage_report.json
+ENV ZERO_COVERAGE_REPORT=http://localhost:8080/v2/zero-coverage-report
+ENV USE_ISO_DATE=true
 
 RUN npm install
 RUN npm run build

@@ -24,7 +24,8 @@ module.exports = {
       BACKEND_URL: 'http://localhost:8000',
       REPOSITORY: 'https://hg.mozilla.org/mozilla-central',
       PROJECT: 'mozilla-central',
-      ZERO_COVERAGE_REPORT: 'https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/project.relman.code-coverage.production.cron.latest/artifacts/public/zero_coverage_report.json'
+      ZERO_COVERAGE_REPORT: 'https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/project.relman.code-coverage.production.cron.latest/artifacts/public/zero_coverage_report.json',
+      USE_ISO_DATE: false,
     }),
   ],
   module: {

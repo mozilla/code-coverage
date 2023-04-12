@@ -56,6 +56,14 @@ async function graphHistory(history, path) {
 
   const dateStr = function(timestamp) {
     const date = new Date(timestamp);
+
+    if (process.env.USE_ISO_DATE) {
+      const month = `${date.getMonth() + 1}`.padStart(2, '0');
+      const day = `${date.getDate()}`.padStart(2, '0');
+
+      return `${date.getFullYear()}/${month}/${day}`;
+    }
+
     return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
   };
 

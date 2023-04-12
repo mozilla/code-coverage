@@ -15,8 +15,8 @@ apt-get install -y nodejs
 ENV BACKEND_URL=https://coverage.thunderbird.net
 ENV REPOSITORY=https://hg.mozilla.org/comm-central
 ENV PROJECT=comm-central
-# TODO: Figure out zero coverage report location
 ENV ZERO_COVERAGE_REPORT=https://coverage.thunderbird.net/v2/zero-coverage-report
+ENV USE_ISO_DATE=true
 
 RUN npm install
 RUN npm run build
