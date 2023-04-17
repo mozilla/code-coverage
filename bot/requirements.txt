@@ -5,4 +5,4 @@ pytoml==0.1.21
 pyyaml==6.0
 tenacity==8.2.2
 tqdm==4.65.0
-zstandard==0.20.0
+zstandard==0.21.0
