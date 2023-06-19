@@ -1,2 +1,2 @@
-setuptools==67.5.1
+setuptools==68.0.0
 wheel==0.38.4
