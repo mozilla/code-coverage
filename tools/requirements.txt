@@ -5,4 +5,4 @@ sentry-sdk==1.16.0
 structlog==22.3.0
 taskcluster==47.1.2
 # Please see #1779, this eventually must be removed!
-urllib3==1.26.14
+urllib3==2.0.3
