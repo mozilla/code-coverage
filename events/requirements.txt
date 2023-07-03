@@ -1,2 +1,2 @@
 -e ../tools #egg=code-coverage-tools
-libmozevent==1.1.24
+libmozevent==1.1.27
