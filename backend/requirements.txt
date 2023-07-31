@@ -1,7 +1,7 @@
 -e ../tools #egg=code-coverage-tools
 connexion==2.14.2
 datadog==0.44.0
-Flask==2.2.3
+Flask==2.2.5
 Flask-Cors==3.0.10
 flask-talisman==1.0.0
 google-cloud-storage==2.7.0
