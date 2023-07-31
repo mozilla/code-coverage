@@ -5,7 +5,7 @@ VERSION_CONTROL_TOOLS_REV="d0d8dd1934dd"
 
 apt-get update
 # libgoogle-perftools4 is currently required for grcov (until https://github.com/mozilla/grcov/issues/403 is fixed).
-apt-get install --no-install-recommends -y gcc curl bzip2 python-dev libgoogle-perftools4
+apt-get install --no-install-recommends -y gcc curl bzip2 python-dev-is-python3 libgoogle-perftools4
 
 pip install --disable-pip-version-check --quiet --no-cache-dir mercurial==$MERCURIAL_VERSION
 
@@ -18,7 +18,7 @@ hg clone -r $VERSION_CONTROL_TOOLS_REV https://hg.mozilla.org/hgcustom/version-c
 ln -s /src/bot/ci/hgrc $HOME/.hgrc
 
 # Cleanup
-apt-get purge -y gcc curl bzip2 python-dev
+apt-get purge -y gcc curl bzip2 python-dev-is-python3
 apt-get autoremove -y
 rm -rf /var/lib/apt/lists/*
 rm -rf /src/version-control-tools/.hg /src/version-control-tools/ansible /src/version-control-tools/docs /src/version-control-tools/testing
