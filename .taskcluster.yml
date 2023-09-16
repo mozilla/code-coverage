@@ -268,6 +268,8 @@ tasks:
                     expires: {$fromNow: '2 weeks'}
                     path: /backend.tar.zst
                     type: file
+              scopes:
+                - docker-worker:capability:privileged
               metadata:
                 name: Code Coverage Backend docker build
                 description: Build docker image with taskboot
@@ -307,6 +309,8 @@ tasks:
                     expires: {$fromNow: '2 weeks'}
                     path: /events.tar.zst
                     type: file
+              scopes:
+                - docker-worker:capability:privileged
               metadata:
                 name: Code Coverage Events docker build
                 description: Build docker image with taskboot
