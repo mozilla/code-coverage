@@ -29,7 +29,7 @@ def hgmo_revision_details(repository, changeset):
         return __hgmo[key]
 
     url = HGMO_REVISION_URL.format(repository=repository, revision=changeset)
-    resp = requests.get(url)
+    resp = requests.get(url, headers={"User-Agent": "code-coverage-backend"})
     resp.raise_for_status()
     assert "changesets" in resp.json(), "Missing changesets"
     data = resp.json()["changesets"][-1]
@@ -52,7 +52,11 @@ def hgmo_pushes(repository, min_push_id, nb_pages, chunk_size=8):
         params["endID"] = min_push_id + chunk_size
 
     for page in range(nb_pages):
-        r = requests.get(HGMO_PUSHES_URL.format(repository=repository), params=params)
+        r = requests.get(
+            HGMO_PUSHES_URL.format(repository=repository),
+            params=params,
+            headers={"User-Agent": "code-coverage-backend"},
+        )
         data = r.json()
 
         # Sort pushes to go from oldest to newest
