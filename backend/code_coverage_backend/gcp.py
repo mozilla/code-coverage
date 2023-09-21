@@ -84,7 +84,12 @@ class GCPCache(object):
         # Load most recent reports in cache
         for repo in REPOSITORIES:
             for report in self.list_reports(repo, nb=1):
-                download_report(self.reports_dir, self.bucket, report.name)
+                try:
+                    download_report(self.reports_dir, self.bucket, report.name)
+                except Exception as e:
+                    logger.warn(
+                        "Failure downloading report {}: {}".format(report.name, e)
+                    )
 
     def ingest_pushes(self, repository, platform, suite, min_push_id=None, nb_pages=3):
         """
