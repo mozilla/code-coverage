@@ -91,7 +91,7 @@ def mock_bucket(mock_secrets):
         def exists(self):
             return self._exists
 
-        def download_to_filename(self, path):
+        def download_to_filename(self, path, raw_download=False):
             assert self._exists and self._content
             with open(path, "wb") as f:
                 f.write(self._content)
