@@ -66,9 +66,9 @@ tasks:
     workerType:
       $if: 'taskcluster_root_url == "https://firefox-ci-tc.services.mozilla.com"'
       then: linux-gcp
-      else: ci
+      else: generic-worker-ubuntu-22-04
 
-    taskboot_image: "mozilla/taskboot:0.3.6"
+    taskboot_image: "mozilla/taskboot:0.4.1"
   in:
     $if: 'tasks_for == "github-push" || (tasks_for == "github-pull-request" && event["action"] in ["opened", "reopened", "synchronize"])'
     then:

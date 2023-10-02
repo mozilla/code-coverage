@@ -85,7 +85,12 @@ class GCPCache(object):
         # Load most recent reports in cache
         for repo in REPOSITORIES:
             for report in self.list_reports(repo, nb=1):
-                download_report(self.reports_dir, self.bucket, report.name)
+                try:
+                    download_report(self.reports_dir, self.bucket, report.name)
+                except Exception as e:
+                    logger.warn(
+                        "Failure downloading report {}: {}".format(report.name, e)
+                    )
 
         self.zerocov_dir = os.path.join(tempfile.gettempdir(), "zero-cov-report")
         os.makedirs(self.zerocov_dir, exist_ok=True)

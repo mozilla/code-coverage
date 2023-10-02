@@ -58,7 +58,7 @@ def download_report(
         return True
 
     os.makedirs(os.path.dirname(full_archive_path), exist_ok=True)
-    blob.download_to_filename(full_archive_path)
+    blob.download_to_filename(full_archive_path, raw_download=True)
     logger.info("Downloaded report archive", path=full_archive_path)
 
     with open(full_path, "wb") as output:

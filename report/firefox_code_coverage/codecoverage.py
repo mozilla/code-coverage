@@ -26,7 +26,7 @@ FINISHED_STATUSES = ["completed", "failed", "exception"]
 ALL_STATUSES = FINISHED_STATUSES + ["unscheduled", "pending", "running"]
 STATUS_VALUE = {"exception": 1, "failed": 2, "completed": 3}
 
-GRCOV_INDEX = "gecko.cache.level-3.toolchains.v3.linux64-grcov.latest"
+GRCOV_INDEX = "gecko.cache.level-1.toolchains.v3.linux64-grcov.latest"
 GRCOV_ARTIFACT = "public/build/grcov.tar.zst"
 
 logger = logging.getLogger(__name__)

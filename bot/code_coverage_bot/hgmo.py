@@ -78,14 +78,22 @@ class HGMO(object):
         if changeset is not None:
             params["changeset"] = changeset
 
-        r = requests.get("{}/json-pushes".format(self.server_address), params=params)
+        r = requests.get(
+            "{}/json-pushes".format(self.server_address),
+            params=params,
+            headers={"User-Agent": "code-coverage-bot"},
+        )
 
         r.raise_for_status()
         return r.json()
 
     def get_automation_relevance_changesets(self, changeset):
         r = requests.get(
-            "{}/json-automationrelevance/{}".format(self.server_address, changeset)
+            "{}/json-automationrelevance/{}".format(
+                self.server_address,
+                changeset,
+            ),
+            headers={"User-Agent": "code-coverage-bot"},
         )
         r.raise_for_status()
         return r.json()["changesets"]
