@@ -5,7 +5,7 @@ ADD frontend /src/frontend
 WORKDIR /src/frontend
 
 # Install some essentials
-RUN apt-get update && apt-get install -y build-essential python python-dev
+RUN apt-get update && apt-get install -y build-essential python3 python3-dev
 
 # Install node
 RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - &&\
