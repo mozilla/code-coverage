@@ -54,7 +54,9 @@ def generate(
     blob = bucket.blob("commit_coverage.json.zst")
     if blob.exists():
         dctx = zstandard.ZstdDecompressor()
-        commit_coverage = json.loads(dctx.decompress(blob.download_as_bytes()))
+        commit_coverage = json.loads(
+            dctx.decompress(blob.download_as_bytes(raw_download=True))
+        )
     else:
         commit_coverage = {}
 
