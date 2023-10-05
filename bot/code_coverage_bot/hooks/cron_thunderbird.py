@@ -86,36 +86,48 @@ class CronThunderbirdHook(Hook):
         logger.info("Generating commit coverage reports")
         commit_coverage.generate(self.repository, self.project, self.repo_dir)
 
-        logger.info("Generating zero coverage reports")
-        zc = ZeroCov(self.repo_dir)
-        zc.generate(
-            self.artifactsHandler.get(), self.revision, self.reports_dir, self.prefix
-        )
+        try:
+            logger.info("Generating zero coverage reports")
+            zc = ZeroCov(self.repo_dir)
+            zc.generate(
+                self.artifactsHandler.get(),
+                self.revision,
+                self.reports_dir,
+                self.prefix,
+            )
 
-        # Upload zero cov on GCP
-        self.upload_reports(
-            {
-                (
-                    "zero-coverage",
-                    "zero-coverage",
-                ): f"{self.reports_dir}/zero_coverage_report.json"
-            },
-            True,
-        )
-        logger.info("Uploaded zero coverage report")
+            # Upload zero cov on GCP
+            self.upload_reports(
+                {
+                    (
+                        "zero-coverage",
+                        "zero-coverage",
+                    ): f"{self.reports_dir}/zero_coverage_report.json"
+                },
+                True,
+            )
+            logger.info("Uploaded zero coverage report")
+        except Exception as e:
+            # Can occur on grcov failure
+            logger.error("Zero coverage report failed: {0}".format(e))
 
         logger.info("Generating full report")
-        reports = self.build_reports(only=[("all", "all")])
 
-        # Generate all reports except the full one which we generated earlier.
-        all_report_combinations = self.artifactsHandler.get_combinations()
-        del all_report_combinations[("all", "all")]
-        reports.update(self.build_reports())
-        logger.info("Built all covdir reports", nb=len(reports))
+        try:
+            reports = self.build_reports(only=[("all", "all")])
 
-        # Upload reports on GCP
-        self.upload_reports(reports)
-        logger.info("Uploaded all covdir reports", nb=len(reports))
+            # Generate all reports except the full one which we generated earlier.
+            all_report_combinations = self.artifactsHandler.get_combinations()
+            del all_report_combinations[("all", "all")]
+            reports.update(self.build_reports())
+            logger.info("Built all covdir reports", nb=len(reports))
+
+            # Upload reports on GCP
+            self.upload_reports(reports)
+            logger.info("Uploaded all covdir reports", nb=len(reports))
+        except Exception as e:
+            # Can occur on grcov failure
+            logger.error("Covdir coverage report failed: {0}".format(e))
 
 
 def main() -> None:
