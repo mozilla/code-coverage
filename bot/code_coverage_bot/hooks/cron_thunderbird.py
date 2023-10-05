@@ -113,21 +113,32 @@ class CronThunderbirdHook(Hook):
 
         logger.info("Generating full report")
 
+        reports = {}
+
         try:
             reports = self.build_reports(only=[("all", "all")])
+        except Exception as e:
+            # Can occur on grcov failure
+            logger.error("All covdir coverage report failed: {0}".format(e))
 
+        try:
             # Generate all reports except the full one which we generated earlier.
             all_report_combinations = self.artifactsHandler.get_combinations()
             del all_report_combinations[("all", "all")]
+
             reports.update(self.build_reports())
             logger.info("Built all covdir reports", nb=len(reports))
-
-            # Upload reports on GCP
-            self.upload_reports(reports)
-            logger.info("Uploaded all covdir reports", nb=len(reports))
         except Exception as e:
             # Can occur on grcov failure
             logger.error("Covdir coverage report failed: {0}".format(e))
+
+        if len(reports) == 0:
+            logger.warning("No reports to upload...")
+            return
+
+        # Upload reports on GCP
+        self.upload_reports(reports)
+        logger.info("Uploaded all covdir reports", nb=len(reports))
 
 
 def main() -> None:
