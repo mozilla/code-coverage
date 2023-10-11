@@ -129,7 +129,6 @@ def generate(server_address: str, repo_dir: str, out_dir: str = ".") -> None:
     with ThreadPoolExecutorResult(
         initializer=_init_thread, initargs=(repo_dir,)
     ) as executor:
-
         futures = [
             executor.submit(analyze_changeset, changeset)
             for changeset in changesets_to_analyze

@@ -335,7 +335,6 @@ def upload_html_report(
     taskcluster.auth()
 
     for path in Path(report_dir).rglob("*"):
-
         filename = str(path.relative_to(report_dir))
         content_type = magic.from_file(str(path), mime=True)
         logger.debug("Uploading {} as {}".format(filename, content_type))

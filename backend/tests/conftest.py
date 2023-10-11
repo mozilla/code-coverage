@@ -150,7 +150,6 @@ def mock_hgmo():
         return (200, headers, json.dumps(resp))
 
     def _changesets(push_id):
-
         # random changesets
         changesets = [uuid.uuid4().hex for _ in range(random.randint(2, 20))]
 

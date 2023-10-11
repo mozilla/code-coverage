@@ -13,7 +13,6 @@ logger = structlog.get_logger(__name__)
 
 
 class ZeroCov(object):
-
     DATE_FORMAT = "%Y-%m-%d"
 
     def __init__(self, repo_dir):

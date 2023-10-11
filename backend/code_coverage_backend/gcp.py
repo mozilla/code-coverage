@@ -224,7 +224,6 @@ class GCPCache(object):
             if not os.path.exists(report.path):
                 self.ingest_report(report)
         else:
-
             # Lookup push from HGMO (slow)
             push_id, _ = hgmo_revision_details(repository, changeset)
 

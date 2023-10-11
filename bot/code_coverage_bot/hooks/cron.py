@@ -22,7 +22,6 @@ class CronHook(Hook):
     """
 
     def __init__(self, *args, **kwargs):
-
         # Retrieve latest ingested revision
         try:
             revision = uploader.gcp_latest("mozilla-central")[0]["revision"]
