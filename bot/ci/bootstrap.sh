@@ -1,6 +1,6 @@
 #!/bin/bash -ex
 GRCOV_VERSION="v0.7.1"
-MERCURIAL_VERSION="6.3.1"
+MERCURIAL_VERSION="6.5.2"
 VERSION_CONTROL_TOOLS_REV="d0d8dd1934dd"
 
 apt-get update
