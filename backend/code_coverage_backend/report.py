@@ -51,7 +51,6 @@ class Report(object):
         return self.name
 
     def __eq__(self, other):
-
         return isinstance(other, Report) and (
             self.base_dir,
             self.repository,

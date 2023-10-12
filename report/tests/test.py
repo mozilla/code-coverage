@@ -149,7 +149,6 @@ class Test(unittest.TestCase):
             self.assertEqual(ver, f.read())
 
     def test_upload_report(self):
-
         # Can only run on Taskcluster
         if "TASK_ID" not in os.environ:
             return

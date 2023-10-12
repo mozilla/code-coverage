@@ -15,6 +15,13 @@ updates:
   labels:
   - bot
 - package-ecosystem: docker
+  directory: "/events"
+  schedule:
+    interval: weekly
+  open-pull-requests-limit: 99
+  labels:
+  - events
+- package-ecosystem: docker
   directory: "/backend"
   schedule:
     interval: weekly

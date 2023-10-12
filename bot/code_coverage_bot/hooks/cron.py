@@ -25,7 +25,6 @@ class CronHook(Hook):
     def __init__(
         self, namespace, project, repository, upstream, prefix, *args, **kwargs
     ):
-
         # Retrieve latest ingested revision
         try:
             revision = uploader.gcp_latest(project)[0]["revision"]

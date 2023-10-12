@@ -182,7 +182,6 @@ class Events(object):
         self.pulse.register(self.bus)
 
     def run(self):
-
         consumers = [
             # Code coverage main workflow
             self.workflow.run(),

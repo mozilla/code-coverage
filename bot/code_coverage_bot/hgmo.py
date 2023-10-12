@@ -10,7 +10,6 @@ logger = structlog.get_logger(__name__)
 
 
 class HGMO(object):
-
     PID_FILE = "hgmo.pid"
     SERVER_ADDRESS = "http://localhost:8000"
 

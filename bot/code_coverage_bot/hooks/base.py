@@ -160,7 +160,6 @@ class Hook(object):
             (platform, suite),
             artifacts,
         ) in self.artifactsHandler.get_combinations().items():
-
             if only is not None and (platform, suite) not in only:
                 continue
 
