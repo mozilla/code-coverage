@@ -203,7 +203,7 @@ const getThirdPartyPaths = (function() {
   let paths = null;
   return async function() {
     if (!paths) {
-      const response = await getSource("tools/rewriting/ThirdPartyPaths.txt");
+      const response = await getSource("tools/lint/ThirdPartyPaths.txt");
       paths = response.split("\n").filter(path => path !== "");
     }
 
