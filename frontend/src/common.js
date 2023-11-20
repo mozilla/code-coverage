@@ -204,7 +204,7 @@ const getThirdPartyPaths = (function() {
   return async function() {
     if (!paths) {
       const response = await getSource("tools/lint/ThirdPartyPaths.txt");
-      paths = response.split("\n").filter(path => path !== "");
+      paths = response.filter(path => path !== "");
     }
 
     return paths;
