@@ -204,7 +204,8 @@ const getThirdPartyPaths = (function() {
   return async function() {
     if (!paths) {
       const response = await getSource("tools/lint/ThirdPartyPaths.txt");
-      paths = response.filter(path => path !== "");
+      // Filter out the comm directory for TB
+      paths = response.filter(path => path !== "").map((path) => path.replace('comm/', ''));
     }
 
     return paths;
