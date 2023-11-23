@@ -10,6 +10,7 @@ from requests import HTTPError
 
 from code_coverage_bot import commit_coverage
 from code_coverage_bot import config
+from code_coverage_bot import taskcluster
 from code_coverage_bot import uploader
 from code_coverage_bot.cli import setup_cli
 from code_coverage_bot.hooks.base import Hook
@@ -25,6 +26,9 @@ class CronThunderbirdHook(Hook):
     This cron class handles all report generation for Thunderbird's comm-central
     """
 
+    # The last revision that we checked to see if it was usable (for fail exception use only)
+    last_revision_tested = None
+
     def upload_reports(self, reports, zero_cov=False):
         """
         Upload all provided covdir reports on GCP
@@ -39,31 +43,90 @@ class CronThunderbirdHook(Hook):
                     self.branch, self.revision, report, suite=suite, platform=platform
                 )
 
-    def __init__(
-        self, namespace, project, repository, upstream, prefix, *args, **kwargs
-    ):
+    def has_revision_been_processed_before(self, branch, revision):
+        """Returns True if the revision is in our storage bucket."""
+        bucket = gcp.get_bucket(secrets[secrets.GOOGLE_CLOUD_STORAGE])
+        return uploader.gcp_covdir_exists(bucket, branch, revision, "all", "all")
 
-        tip_response = requests.get(f"{repository}/raw-rev/tip")
+    def is_revision_usable(self, namespace, branch, revision):
+        """Checks if a given revision (from branch, and namespace) is usable (tasks==completed, and exists)"""
+        self.last_revision_tested = revision
+
+        # Load coverage tasks for all platforms
+        decision_task_id = taskcluster.get_decision_task(namespace, branch, revision)
+
+        # No build!
+        if decision_task_id is None:
+            return False
+
+        group = taskcluster.get_task_details(decision_task_id)["taskGroupId"]
+
+        test_tasks = [
+            task
+            for task in taskcluster.get_tasks_in_group(group)
+            if taskcluster.is_coverage_task(task["task"])
+        ]
+
+        if len(test_tasks) == 0:
+            return False
+
+        # Find a task that isn't pending (this includes failed tasks btw)
+        for test_task in test_tasks:
+            status = test_task["status"]["state"]
+            if status not in taskcluster.FINISHED_STATUSES:
+                return False
+
+        return True
+
+    def search_for_latest_built_revision(self, namespace, branch, project, repository):
+        """Pulls down raw-log and goes through each changeset until we find a revision that is built (or not and return None)"""
+        log_response = requests.get(f"{repository}/raw-log")
+
         # Yell if there's any issues
         try:
-            tip_response.raise_for_status()
+            log_response.raise_for_status()
         except HTTPError as e:
-            logger.error(f"Could not access raw revision for {project} tip: {e}")
+            logger.error(f"Could not access raw log for {project}: {e}")
             raise
 
-        # Node ID == Revision
-        revision_regex = r"^# Node ID ([\w\d]*)$"
-        matches = re.search(revision_regex, tip_response.text[:2048], re.MULTILINE)
+        # Changeset == Revision
+        revision_regex = r"^changeset:[\s]*([\w\d]*)$"
+        matches = re.findall(revision_regex, log_response.text[:10240], re.MULTILINE)
 
-        if len(matches.groups()) == 0:
-            error = "Failed to retrieve revision from tip, no match within 2048 bytes!"
+        if len(matches) == 0:
+            error = (
+                "Failed to retrieve revision from raw-log, no match within 10240 bytes!"
+            )
             logger.error(error)
             raise Exception(error)
 
-        # Grab that revision
-        revision = matches.groups()[0]
+        for revision in matches:
+            # If we hit a revision we've processed before, we don't want to process anything past that!
+            if self.has_revision_been_processed_before(branch, revision):
+                break
 
-        logger.info(f"Using revision id {revision} from tip")
+            # Is this revision usable (has a build/artifacts, and not a pending build)
+            if self.is_revision_usable(namespace, branch, revision):
+                return revision
+
+        return None
+
+    def __init__(
+        self, namespace, project, repository, upstream, prefix, *args, **kwargs
+    ):
+        # Assign early so we can get self.branch property working
+        self.repository = repository
+
+        revision = self.search_for_latest_built_revision(
+            namespace, self.branch, project, repository
+        )
+
+        if revision is None:
+            error = f"No available revision has been found, exiting! Last revision tested: {self.last_revision_tested}."
+            logger.error(error)
+            raise Exception(error)
+
+        logger.info(f"Using revision id {revision} for coverage stats.")
 
         super().__init__(
             namespace, project, repository, upstream, revision, prefix, *args, **kwargs
@@ -71,8 +134,7 @@ class CronThunderbirdHook(Hook):
 
     def run(self) -> None:
         # Check the covdir report does not already exists
-        bucket = gcp.get_bucket(secrets[secrets.GOOGLE_CLOUD_STORAGE])
-        if uploader.gcp_covdir_exists(bucket, self.branch, self.revision, "all", "all"):
+        if self.has_revision_been_processed_before(self.branch, self.revision):
             logger.warn("Full covdir report already on GCP")
 
             # Ping the backend to ingest any reports that may have failed
