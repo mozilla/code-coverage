@@ -2,8 +2,6 @@
 # This Source Code Form is subject to the terms of the Mozilla Public
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
-import re
-
 import requests
 import structlog
 from requests import HTTPError
@@ -80,7 +78,10 @@ class CronThunderbirdHook(Hook):
 
     def search_for_latest_built_revision(self, namespace, branch, project, repository):
         """Pulls down raw-log and goes through each changeset until we find a revision that is built (or not and return None)"""
-        log_response = requests.get(f"{repository}/raw-log")
+        log_response = requests.get(
+            f"{repository}/json-pushes",
+            headers={"User-Agent": "thunderbird-code-coverage-bot"},
+        )
 
         # Yell if there's any issues
         try:
@@ -89,18 +90,17 @@ class CronThunderbirdHook(Hook):
             logger.error(f"Could not access raw log for {project}: {e}")
             raise
 
-        # Changeset == Revision
-        revision_regex = r"^changeset:[\s]*([\w\d]*)$"
-        matches = re.findall(revision_regex, log_response.text[:10240], re.MULTILINE)
+        log_data = log_response.json()
 
-        if len(matches) == 0:
-            error = (
-                "Failed to retrieve revision from raw-log, no match within 10240 bytes!"
-            )
+        if len(log_data) == 0:
+            error = "Failed to retrieve data from json-pushes!"
             logger.error(error)
             raise Exception(error)
 
-        for revision in matches:
+        # Look through each push and grab the last changeset (that's the one that builds!)
+        for _, push in reversed(log_data.items()):
+            revision = push["changesets"][-1]
+
             # If we hit a revision we've processed before, we don't want to process anything past that!
             if self.has_revision_been_processed_before(branch, revision):
                 break
