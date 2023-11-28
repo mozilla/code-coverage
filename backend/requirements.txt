@@ -9,5 +9,5 @@ gunicorn==21.2.0
 python-dateutil==2.8.2
 pytoml==0.1.21
 redis==5.0.1
-swagger-ui-bundle==0.0.9
+swagger-ui-bundle==1.1.0
 zstandard==0.22.0
