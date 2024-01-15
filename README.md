@@ -13,6 +13,8 @@ You can reach us on our Matrix instance: [#codecoverage:mozilla.org](https://cha
 
 ## Thunderbird Changes
 
+Note: The system running the container must be supplied with at least 16gb of memory. Other-wise you will run into out of memory killer issues while grcov runs.
+
 This fork contains some Thunderbird specific changes:
 
 * Zero coverage reports are uploaded to Google Cloud Storage, and pulled down by the backend api.
