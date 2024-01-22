@@ -19,11 +19,11 @@ from code_coverage_bot import hgmo
 from code_coverage_bot.phabricator import PhabricatorUploader
 from code_coverage_bot.secrets import secrets
 from code_coverage_bot.utils import ThreadPoolExecutorResult
-from code_coverage_tools.gcp import DEFAULT_FILTER
-from code_coverage_tools.gcp import download_report
-from code_coverage_tools.gcp import get_bucket
-from code_coverage_tools.gcp import get_name
-from code_coverage_tools.gcp import list_reports
+from tools.code_coverage_tools.gcp import DEFAULT_FILTER
+from tools.code_coverage_tools.gcp import download_report
+from tools.code_coverage_tools.gcp import get_bucket
+from tools.code_coverage_tools.gcp import get_name
+from tools.code_coverage_tools.gcp import list_reports
 
 logger = structlog.get_logger(__name__)
 

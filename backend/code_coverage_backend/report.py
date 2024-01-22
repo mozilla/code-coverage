@@ -8,7 +8,7 @@ import os
 import structlog
 
 from code_coverage_backend.hgmo import hgmo_revision_details
-from code_coverage_tools.gcp import DEFAULT_FILTER
+from tools.code_coverage_tools.gcp import DEFAULT_FILTER
 
 logger = structlog.get_logger(__name__)
 

@@ -9,7 +9,7 @@ import zstandard as zstd
 from google.cloud.storage.bucket import Bucket
 
 from code_coverage_bot.secrets import secrets
-from code_coverage_tools.gcp import get_bucket
+from tools.code_coverage_tools.gcp import get_bucket
 
 logger = structlog.get_logger(__name__)
 GCP_COVDIR_PATH = "{repository}/{revision}/{platform}:{suite}.json.zstd"

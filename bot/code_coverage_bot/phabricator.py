@@ -16,7 +16,7 @@ from libmozdata.phabricator import PhabricatorAPI
 from libmozdata.phabricator import PhabricatorRevisionNotFoundException
 
 from code_coverage_bot.secrets import secrets
-from code_coverage_tools import COVERAGE_EXTENSIONS
+from tools.code_coverage_tools import COVERAGE_EXTENSIONS
 
 logger = structlog.get_logger(__name__)
 

@@ -10,7 +10,7 @@ import yaml
 
 from code_coverage_bot.secrets import secrets
 from code_coverage_bot.taskcluster import taskcluster_config
-from code_coverage_tools.log import init_logger
+from tools.code_coverage_tools.log import init_logger
 
 
 def setup_cli(ask_repository=True, ask_revision=True):

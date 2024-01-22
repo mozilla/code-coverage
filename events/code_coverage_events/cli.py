@@ -6,7 +6,7 @@ import structlog
 
 from code_coverage_events import taskcluster_config
 from code_coverage_events.workflow import Events
-from code_coverage_tools.log import init_logger
+from tools.code_coverage_tools.log import init_logger
 
 logger = structlog.get_logger(__name__)
 

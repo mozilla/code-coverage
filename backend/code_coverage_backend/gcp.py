@@ -17,9 +17,9 @@ from code_coverage_backend.hgmo import hgmo_pushes
 from code_coverage_backend.hgmo import hgmo_revision_details
 from code_coverage_backend.report import DEFAULT_FILTER
 from code_coverage_backend.report import Report
-from code_coverage_tools.gcp import download_report
-from code_coverage_tools.gcp import get_bucket
-from code_coverage_tools.gcp import list_reports
+from tools.code_coverage_tools.gcp import download_report
+from tools.code_coverage_tools.gcp import get_bucket
+from tools.code_coverage_tools.gcp import list_reports
 
 logger = structlog.get_logger(__name__)
 __cache = None
