@@ -1,4 +1,4 @@
-aiohttp==3.9.1
+aiohttp==3.9.3
 async-timeout==4.0.3
 pytz==2023.3.post1
 sentry-sdk==1.16.0
