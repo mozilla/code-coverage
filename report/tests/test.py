@@ -71,7 +71,7 @@ class Test(unittest.TestCase):
         self.assertEqual(len([a for a in artifact_paths if "jsvm" in a]), 2)
 
         artifact_paths = codecoverage.download_coverage_artifacts(
-            task_id, ["cppunit-1proc"], None, "ccov-artifacts"
+            task_id, ["cppunittest-1proc"], None, "ccov-artifacts"
         )
         self.assertEqual(
             len([a for a in os.listdir("ccov-artifacts") if "grcov" in a]), 4
