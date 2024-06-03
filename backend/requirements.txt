@@ -2,7 +2,7 @@
 connexion==2.14.2
 datadog==0.48.0
 Flask==2.2.3
-Flask-Cors==4.0.0
+Flask-Cors==4.0.1
 flask-talisman==1.1.0
 google-cloud-storage==2.14.0
 gunicorn==21.2.0
