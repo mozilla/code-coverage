@@ -1,6 +1,6 @@
 aiohttp==3.9.5
 async-timeout==4.0.3
 pytz==2024.1
-sentry-sdk==2.5.1
+sentry-sdk==1.40.5
 structlog==24.2.0
 taskcluster==65.1.0
