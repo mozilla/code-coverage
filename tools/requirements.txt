@@ -2,5 +2,5 @@ aiohttp==3.9.4
 async-timeout==4.0.3
 pytz==2024.1
 sentry-sdk==1.40.5
-structlog==23.2.0
+structlog==24.2.0
 taskcluster==60.4.0
