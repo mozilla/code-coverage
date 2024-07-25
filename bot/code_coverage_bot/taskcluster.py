@@ -126,6 +126,8 @@ def get_suite(task):
         return "build-signing"
     elif tags.get("kind") == "source-test":
         return "source-test"
+    elif tags.get("kind") == "fuzzing":
+        return "fuzzing"
     elif "suite" in extra:
         if isinstance(extra["suite"], dict):
             return extra["suite"]["name"]

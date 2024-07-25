@@ -215,6 +215,7 @@ def test_chunk_to_suite(chunk, expected):
         ("build-win64-ccov/debug", "build"),
         ("build-signing-win64-ccov/debug", "build-signing"),
         ("source-test-node-newtab-unit-tests-ccov", "source-test"),
+        ("fuzzing-grizzly-windows64-ccov", "fuzzing"),
     ],
 )
 def test_get_chunk(task_name, expected):
@@ -244,6 +245,7 @@ def test_get_chunk(task_name, expected):
         ("build-win64-ccov/debug", "build"),
         ("build-signing-win64-ccov/debug", "build-signing"),
         ("source-test-node-newtab-unit-tests-ccov", "source-test"),
+        ("fuzzing-grizzly-windows64-ccov", "fuzzing"),
     ],
 )
 def test_get_suite(task_name, expected):
@@ -270,6 +272,7 @@ def test_get_suite(task_name, expected):
         ("build-win64-ccov/debug", "windows"),
         ("build-signing-win64-ccov/debug", "windows"),
         ("source-test-node-newtab-unit-tests-ccov", "linux"),
+        ("fuzzing-grizzly-windows64-ccov", "windows"),
     ],
 )
 def test_get_platform(task_name, expected):
