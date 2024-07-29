@@ -1,13 +1,13 @@
 -e ../tools #egg=code-coverage-tools
 connexion==2.14.2
-datadog==0.47.0
+datadog==0.49.1
 Flask==2.2.3
-Flask-Cors==4.0.0
+Flask-Cors==4.0.1
 flask-talisman==1.1.0
-google-cloud-storage==2.11.0
-gunicorn==21.2.0
-python-dateutil==2.8.2
+google-cloud-storage==2.17.0
+gunicorn==22.0.0
+python-dateutil==2.9.0.post0
 pytoml==0.1.21
-redis==5.0.1
-swagger-ui-bundle==0.0.9
-zstandard==0.21.0
+redis==5.0.7
+swagger-ui-bundle==1.1.0
+zstandard==0.23.0

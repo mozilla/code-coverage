@@ -1,0 +1,109 @@
+{
+    "provisionerId": "gecko-t",
+    "workerType": "win11-64-2009-source",
+    "taskQueueId": "gecko-t/win11-64-2009-source",
+    "schedulerId": "gecko-level-3",
+    "projectId": "none",
+    "taskGroupId": "VJjEns0FQU26bhsggfboIQ",
+    "dependencies": [
+      "DH-mnrnVRK2GBdWNSC73Lg",
+      "eiC54KPpTQ6bGQGR82lZZw"
+    ],
+    "requires": "all-completed",
+    "routes": [
+      "tc-treeherder.v2.mozilla-central.7aa82d7563335ed4da92818c597c9ddea8aac4f4"
+    ],
+    "priority": "medium",
+    "retries": 5,
+    "created": "2024-07-17T15:34:47.027Z",
+    "deadline": "2024-07-18T15:34:47.027Z",
+    "expires": "2024-10-15T15:34:47.027Z",
+    "scopes": [
+      "secrets:get:project/taskcluster/gecko/hgfingerprint",
+      "secrets:get:project/taskcluster/gecko/hgmointernal",
+      "generic-worker:cache:gecko-level-3-checkouts"
+    ],
+    "payload": {
+      "env": {
+        "GECKO_PATH": "./build/src",
+        "MOZ_FETCHES": "[{\"artifact\": \"public/build/python.tar.zst\", \"extract\": true, \"task\": \"eiC54KPpTQ6bGQGR82lZZw\"}, {\"artifact\": \"public/build/target.zip\", \"extract\": true, \"task\": \"DH-mnrnVRK2GBdWNSC73Lg\"}]",
+        "HG_STORE_PATH": "y:/hg-shared",
+        "MOZ_SCM_LEVEL": "3",
+        "GECKO_HEAD_REV": "7aa82d7563335ed4da92818c597c9ddea8aac4f4",
+        "MOZ_AUTOMATION": "1",
+        "MOZ_FETCHES_DIR": "fetches",
+        "MOZ_PYTHON_HOME": "fetches/python",
+        "SCCACHE_DISABLE": "1",
+        "GECKO_BINARY_PATH": "$MOZ_FETCHES_DIR/firefox/firefox.exe",
+        "GECKO_BASE_REPOSITORY": "https://hg.mozilla.org/mozilla-unified",
+        "GECKO_HEAD_REPOSITORY": "https://hg.mozilla.org/mozilla-central"
+      },
+      "mounts": [
+        {
+          "cacheName": "gecko-level-3-checkouts",
+          "directory": "./build"
+        },
+        {
+          "file": "./run-task",
+          "content": {
+            "url": "http://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/VJjEns0FQU26bhsggfboIQ/artifacts/public/run-task"
+          }
+        },
+        {
+          "file": "./fetch-content",
+          "content": {
+            "url": "http://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/VJjEns0FQU26bhsggfboIQ/artifacts/public/fetch-content"
+          }
+        },
+        {
+          "file": "./robustcheckout.py",
+          "content": {
+            "url": "http://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/VJjEns0FQU26bhsggfboIQ/artifacts/public/robustcheckout.py"
+          }
+        }
+      ],
+      "command": [
+        "C:/mozilla-build/python3/python3.exe run-task --gecko-checkout=./build/src --task-cwd build/src -- bash -cx \"python3 ./mach python-test --subsuite fuzzing --run-slow\""
+      ],
+      "maxRunTime": 1800,
+      "onExitStatus": {
+        "retry": [
+          1073807364,
+          3221225786,
+          137
+        ]
+      }
+    },
+    "metadata": {
+      "name": "fuzzing-grizzly-windows64-ccov",
+      "owner": "csabou@mozilla.com",
+      "source": "https://hg.mozilla.org/mozilla-central/file/7aa82d7563335ed4da92818c597c9ddea8aac4f4/taskcluster/kinds/fuzzing",
+      "description": "Python Fuzzing Smoke Tests ([Treeherder job](https://treeherder.mozilla.org/#/jobs?repo=mozilla-central&revision=7aa82d7563335ed4da92818c597c9ddea8aac4f4&selectedTaskRun=EySSqDwdTIOG2trg4W8sCQ))"
+    },
+    "tags": {
+      "os": "windows",
+      "kind": "fuzzing",
+      "label": "fuzzing-grizzly-windows64-ccov",
+      "retrigger": "false",
+      "createdForUser": "csabou@mozilla.com",
+      "worker-implementation": "generic-worker"
+    },
+    "extra": {
+      "index": {
+        "rank": 0
+      },
+      "parent": "VJjEns0FQU26bhsggfboIQ",
+      "treeherder": {
+        "tier": 3,
+        "symbol": "fuzzing-python",
+        "jobKind": "test",
+        "machine": {
+          "platform": "windows2012-64"
+        },
+        "collection": {
+          "ccov": true
+        }
+      },
+      "treeherder-platform": "windows2012-64/ccov"
+    }
+  }

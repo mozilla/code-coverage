@@ -176,7 +176,8 @@ def download_coverage_artifacts(
     def _is_in_suites_task(t):
         suite_name = get_suite(t["task"]["metadata"]["name"])
         return (
-            suites is None or suite_name in suites
+            suites is None
+            or any(suite in t["task"]["metadata"]["name"] for suite in suites)
         ) and suite_name not in suites_to_ignore
 
     def _is_in_platforms_task(t):

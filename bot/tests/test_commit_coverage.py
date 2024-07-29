@@ -50,7 +50,7 @@ def test_generate_from_scratch(
             nonlocal uploaded_data
             uploaded_data = val
 
-        def download_as_bytes(self):
+        def download_as_bytes(self, raw_download=False):
             assert False
 
         def patch(self):
@@ -175,7 +175,7 @@ def test_generate_two_pushes(
             nonlocal uploaded_data
             uploaded_data = val
 
-        def download_as_bytes(self):
+        def download_as_bytes(self, raw_download=False):
             assert False
 
         def patch(self):
@@ -322,7 +322,7 @@ def test_generate_from_preexisting(
             nonlocal uploaded_data
             uploaded_data = val
 
-        def download_as_bytes(self):
+        def download_as_bytes(self, raw_download=False):
             return zstandard.ZstdCompressor().compress(
                 json.dumps(
                     {
