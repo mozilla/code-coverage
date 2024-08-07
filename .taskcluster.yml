@@ -71,7 +71,7 @@ tasks:
 
     taskboot_image: "mozilla/taskboot:0.4.1"
   in:
-    $if: 'tasks_for == "github-push" || (tasks_for == "github-pull-request" && event["action"] in ["opened", "reopened", "synchronize"])'
+    $if: '(tasks_for == "github-push" && (head_branch == "master" || head_branch == "production" || head_branch == "testing")) || (tasks_for == "github-pull-request" && event["action"] in ["opened", "reopened", "synchronize"])'
     then:
       $flatten:
         $match:
