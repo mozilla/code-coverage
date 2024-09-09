@@ -1,4 +1,4 @@
 python-magic==0.4.27
-taskcluster==67.1.0
+taskcluster==68.0.4
 tenacity==9.0.0
 zstandard==0.23.0
