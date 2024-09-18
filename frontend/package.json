@@ -43,7 +43,7 @@
     "node-sass": "^9.0.0",
     "prettier": "1.19.1",
     "sass-loader": "^16.0.1",
-    "standard": "^17.1.0",
+    "standard": "^17.1.2",
     "terser-webpack-plugin": "^5.3.10",
     "webpack": "^5.94.0",
     "webpack-cli": "^5.1.4",
