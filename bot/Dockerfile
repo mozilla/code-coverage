@@ -1,4 +1,4 @@
-FROM python:3.12.4-slim
+FROM python:3.12.7-slim
 
 ADD tools /src/tools
 ADD bot /src/bot
