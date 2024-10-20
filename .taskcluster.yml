@@ -114,8 +114,8 @@ tasks:
                   - -lxce
                   - "git clone --quiet ${repository} /src && cd /src && git checkout ${head_rev} -b checks &&
                     /src/bot/ci/bootstrap.sh &&
-                    cd /src/tools && python3 setup.py install &&
                     cd /src/bot && pip3 install --disable-pip-version-check --no-cache-dir --quiet . && pip3 install --disable-pip-version-check --no-cache-dir --quiet -r requirements-dev.txt &&
+                    cd /src/tools && python3 setup.py install &&
                     pytest -v"
               metadata:
                 name: "Code Coverage Bot checks: unit tests"
@@ -185,8 +185,8 @@ tasks:
                   - sh
                   - -lxce
                   - "git clone --quiet ${repository} /src && cd /src && git checkout ${head_rev} -b checks &&
-                    cd /src/tools && python setup.py install &&
                     cd /src/backend && pip install --disable-pip-version-check --no-cache-dir --quiet . && pip install --disable-pip-version-check --no-cache-dir --quiet -r requirements-dev.txt &&
+                    cd /src/tools && python setup.py install &&
                     pytest -v"
               metadata:
                 name: "Code Coverage Backend checks: unit tests"
