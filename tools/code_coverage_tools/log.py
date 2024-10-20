@@ -10,7 +10,7 @@ import sys
 
 import structlog
 
-import pkg_resources
+import importlib.metadata
 import sentry_sdk
 from sentry_sdk.integrations.logging import LoggingIntegration
 
@@ -92,7 +92,7 @@ def setup_sentry(name, channel, dsn):
         integrations=[sentry_logging],
         server_name=name,
         environment=channel,
-        release=pkg_resources.get_distribution(f"code-coverage-{name}").version,
+        release=importlib.metadata.version(f"code-coverage-{name}"),
     )
     sentry_sdk.set_tag("site", site)
 
