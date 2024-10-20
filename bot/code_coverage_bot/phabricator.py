@@ -64,7 +64,7 @@ class PhabricatorUploader(object):
             b"annotate",
             os.path.join(self.repo_dir, path).encode("ascii"),
             r=rev,
-            line=True,
+            line_number=True,
             changeset=True,
         )
         try:
