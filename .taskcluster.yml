@@ -84,7 +84,7 @@ tasks:
               deadline: {$fromNow: '1 hour'}
               payload:
                 maxRunTime: 3600
-                image: python:3.8
+                image: python:3.9
                 command:
                   - sh
                   - -lxce
@@ -107,7 +107,7 @@ tasks:
               deadline: {$fromNow: '1 hour'}
               payload:
                 maxRunTime: 3600
-                image: python:3.8
+                image: python:3.9
                 command:
                   - sh
                   - -lxce
@@ -179,7 +179,7 @@ tasks:
               deadline: {$fromNow: '1 hour'}
               payload:
                 maxRunTime: 3600
-                image: python:3.8
+                image: python:3.9
                 command:
                   - sh
                   - -lxce
@@ -200,7 +200,7 @@ tasks:
               deadline: {$fromNow: '1 hour'}
               payload:
                 maxRunTime: 3600
-                image: python:3.8
+                image: python:3.9
                 command:
                   - sh
                   - -lxce
@@ -222,7 +222,7 @@ tasks:
                 features:
                   taskclusterProxy: true
                 maxRunTime: 3600
-                image: python:3.8
+                image: python:3.9
                 command:
                   - sh
                   - -lxce
