@@ -62,8 +62,8 @@ def run_check(command, **kwargs):
             output=output,
             error=error,
         )
-        log.info(output)
-        log.info(error)
+        print(f"Output:\n{output}")
+        print(f"Error:\n{error}")
 
         raise Exception(f"`{command[0]}` failed with code: {proc.returncode}.")
 
