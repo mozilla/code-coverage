@@ -329,6 +329,7 @@ tasks:
                   - "apk add --quiet --update git python3 &&
                     git clone --quiet ${repository} /src && cd /src/addon && git checkout ${head_rev} -b build &&
                     npm install --no-progress &&
+                    npm run lint &&
                     npm run build &&
                     npm run test &&
                     npm run export"
