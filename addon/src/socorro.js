@@ -4,45 +4,55 @@
 
 "use strict";
 
-import {isCoverageSupported, fetchCoverage} from './coverage';
+import { isCoverageSupported, fetchCoverage } from "./coverage";
 
-const hgurlPattern = new RegExp("^http[s]?://hg\\.mozilla\\.org/mozilla-central/annotate/([0-9a-f]+)/([^#]+)#l([0-9]+)$");
+const hgurlPattern = new RegExp(
+  "^http[s]?://hg\\.mozilla\\.org/mozilla-central/annotate/([0-9a-f]+)/([^#]+)#l([0-9]+)$",
+);
 // fileinfo: filename => { revision => [{line, element}, ...] }
 const fileinfo = {};
-document.querySelectorAll("#frames table:first-of-type td > a[href^='https://hg.mozilla.org/mozilla-central/annotate/']").forEach(a => {
-  const m = a.href.match(hgurlPattern);
-  if (!m) {
-    return;
-  }
-  const filename = m[2];
-  if (!isCoverageSupported(filename)) {
-    return;
-  }
-  const line = m[3];
-  if (line === "0") { // shouldn't happen... but irl it happens
-    return;
-  }
-  const revision = m[1].slice(0, 12); // shorten the revision
-  const info = {
-    "line": line,
-    "element": a.parentNode
-  };
-  let finfo;
-  if (filename in fileinfo) {
-    finfo = fileinfo[filename];
-  } else {
-    finfo = fileinfo[filename] = {};
-  }
-  if (revision in finfo) {
-    finfo[revision].push(info);
-  } else {
-    finfo[revision] = [info];
-  }
-});
+document
+  .querySelectorAll(
+    "#frames table:first-of-type td > a[href^='https://hg.mozilla.org/mozilla-central/annotate/']",
+  )
+  .forEach((a) => {
+    const m = a.href.match(hgurlPattern);
+    if (!m) {
+      return;
+    }
+    const filename = m[2];
+    if (!isCoverageSupported(filename)) {
+      return;
+    }
+    const line = m[3];
+    if (line === "0") {
+      // shouldn't happen... but irl it happens
+      return;
+    }
+    const revision = m[1].slice(0, 12); // shorten the revision
+    const info = {
+      line: line,
+      element: a.parentNode,
+    };
+    let finfo;
+    if (filename in fileinfo) {
+      finfo = fileinfo[filename];
+    } else {
+      finfo = fileinfo[filename] = {};
+    }
+    if (revision in finfo) {
+      finfo[revision].push(info);
+    } else {
+      finfo[revision] = [info];
+    }
+  });
 
 if (Object.keys(fileinfo).length != 0) {
   const spinnerDiv = document.createElement("div");
-  spinnerDiv.classList.add("gecko_coverage_loader", "gecko_coverage_loader_socorro");
+  spinnerDiv.classList.add(
+    "gecko_coverage_loader",
+    "gecko_coverage_loader_socorro",
+  );
   spinnerDiv.style.display = "inline-block";
 
   const linkToCodecov = document.createElement("a");
@@ -59,31 +69,34 @@ if (Object.keys(fileinfo).length != 0) {
         le.element.append(e);
         le.element = e;
       }
-      fetchCoverage(revision, filename).then(data => {
-        if (data !== null && !data.hasOwnProperty("error")) {
-          if (!data.hasOwnProperty("coverage")) {
-            throw new Error("No 'data' field");
-          }
-          const covData = data["coverage"];
-          for (const le of lineElements) {
-            const line = le.line;
-            if (line in covData) {
-              // line is covered or uncovered
-              le.element.parentNode.style.backgroundColor = covData[line] == 0 ? "tomato" : "greenyellow";
-              const gitBuildChangeset = data["git_build_changeset"];
-              const codecovUrl = `https://codecov.io/gh/mozilla/gecko-dev/src/${gitBuildChangeset}/${filename}#L${line}`;
-              const a = linkToCodecov.cloneNode(true);
-              a.setAttribute("href", codecovUrl);
-              le.element.parentNode.append(a);
+      fetchCoverage(revision, filename)
+        .then((data) => {
+          if (data !== null && !data.hasOwnProperty("error")) {
+            if (!data.hasOwnProperty("coverage")) {
+              throw new Error("No 'data' field");
+            }
+            const covData = data["coverage"];
+            for (const le of lineElements) {
+              const line = le.line;
+              if (line in covData) {
+                // line is covered or uncovered
+                le.element.parentNode.style.backgroundColor =
+                  covData[line] == 0 ? "tomato" : "greenyellow";
+                const gitBuildChangeset = data["git_build_changeset"];
+                const codecovUrl = `https://codecov.io/gh/mozilla/gecko-dev/src/${gitBuildChangeset}/${filename}#L${line}`;
+                const a = linkToCodecov.cloneNode(true);
+                a.setAttribute("href", codecovUrl);
+                le.element.parentNode.append(a);
+              }
             }
           }
-        }
-      }).finally(() => {
-        // Remove the spinners
-        for (const le of lineElements) {
-          le.element.remove();
-        }
-      });
+        })
+        .finally(() => {
+          // Remove the spinners
+          for (const le of lineElements) {
+            le.element.remove();
+          }
+        });
     }
   }
 }

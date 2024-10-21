@@ -11,12 +11,12 @@ import {
   buildNavbar,
   render,
   getSource,
-  getFilters
+  getFilters,
 } from "./common.js";
 import { buildRoute, monitorOptions, readRoute, updateRoute } from "./route.js";
 import {
   zeroCoverageDisplay,
-  zeroCoverageMenu
+  zeroCoverageMenu,
 } from "./zero_coverage_report.js";
 import "normalize.css/normalize.css";
 import "./style.scss";
@@ -31,18 +31,18 @@ const VIEW_FILE = "file";
 function browserMenu(revision, filters, route) {
   const context = {
     revision,
-    platforms: filters.platforms.map(p => {
+    platforms: filters.platforms.map((p) => {
       return {
         name: p,
-        selected: p === route.platform
+        selected: p === route.platform,
       };
     }),
-    suites: filters.suites.map(s => {
+    suites: filters.suites.map((s) => {
       return {
         name: s,
-        selected: s === route.suite
+        selected: s === route.suite,
       };
-    })
+    }),
   };
   render("menu_browser", context, "menu");
 }
@@ -53,7 +53,7 @@ async function graphHistory(history, path) {
     return;
   }
 
-  const dateStr = function(timestamp) {
+  const dateStr = function (timestamp) {
     const date = new Date(timestamp);
     return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
   };
@@ -62,44 +62,44 @@ async function graphHistory(history, path) {
     series: [
       {
         name: "History",
-        data: history.map(push => {
+        data: history.map((push) => {
           return {
             x: push.date * 1000,
-            y: push.coverage
+            y: push.coverage,
           };
-        })
-      }
-    ]
+        }),
+      },
+    ],
   };
   const config = {
     // Display dates on a linear scale
     axisX: {
       type: Chartist.FixedScaleAxis,
       divisor: 20,
-      labelInterpolationFnc: dateStr
+      labelInterpolationFnc: dateStr,
     },
 
     // Fix display bug when points are too close
     lineSmooth: Chartist.Interpolation.cardinal({
-      tension: 1
-    })
+      tension: 1,
+    }),
   };
   const elt = show("history").querySelector(".ct-chart");
   const chart = new Chartist.Line(elt, data, config);
 
-  chart.on("draw", function(evt) {
+  chart.on("draw", function (evt) {
     if (evt.type === "point") {
       // Load revision from graph when a point is clicked
       const revision = history[evt.index].changeset;
-      evt.element._node.onclick = function() {
+      evt.element._node.onclick = function () {
         updateRoute({ revision });
       };
 
       // Display revision from graph when a point is overed
-      evt.element._node.onmouseover = function() {
+      evt.element._node.onmouseover = function () {
         const ctx = {
           revision: revision.substring(0, 12),
-          date: dateStr(evt.value.x)
+          date: dateStr(evt.value.x),
         };
         render("history_point", ctx, "history_details");
       };
@@ -110,10 +110,10 @@ async function graphHistory(history, path) {
 async function showDirectory(dir, revision, files) {
   const context = {
     navbar: buildNavbar(dir, revision),
-    files: files.map(file => {
+    files: files.map((file) => {
       file.route = buildRoute({
         path: file.path,
-        view: file.type
+        view: file.type,
       });
 
       // Calc decimal range to make a nice coloration
@@ -131,7 +131,7 @@ async function showDirectory(dir, revision, files) {
       }
 
       return this.path;
-    }
+    },
   };
   render("file_browser", context, "output");
 }
@@ -173,17 +173,17 @@ async function showFile(source, file, revision, selectedLine) {
         if (coverage >= 1000000) {
           hits = {
             nb: parseInt(coverage / 1000000),
-            unit: "M"
+            unit: "M",
           };
         } else if (coverage >= 1000) {
           hits = {
             nb: parseInt(coverage / 1000),
-            unit: "k"
+            unit: "k",
           };
         } else if (coverage > 0) {
           hits = {
             nb: coverage,
-            unit: ""
+            unit: "",
           };
         }
       }
@@ -201,9 +201,9 @@ async function showFile(source, file, revision, selectedLine) {
         coverage,
         line: line || " ",
         css_class: cssClass,
-        route: buildRoute({ line: nb })
+        route: buildRoute({ line: nb }),
       };
-    })
+    }),
   };
 
   hide("message");
@@ -215,7 +215,7 @@ async function showFile(source, file, revision, selectedLine) {
     const line = output.querySelector("#l" + selectedLine);
     line.scrollIntoView({
       behavior: "smooth",
-      block: "center"
+      block: "center",
     });
   }
 
@@ -234,7 +234,7 @@ async function load() {
     "Loading coverage data for " +
       (route.path || "mozilla-central") +
       " @ " +
-      (route.revision || REV_LATEST)
+      (route.revision || REV_LATEST),
   );
 
   // Load only zero coverage for that specific view
@@ -244,7 +244,7 @@ async function load() {
       view: VIEW_ZERO_COVERAGE,
       path: route.path,
       zeroCoverage,
-      route
+      route,
     };
   }
 
@@ -261,7 +261,7 @@ async function load() {
     const [coverage, filters, viewData] = await Promise.all([
       getPathCoverage(route.path, route.revision, route.platform, route.suite),
       getFilters(),
-      viewContent
+      viewContent,
     ]);
 
     return {
@@ -271,7 +271,7 @@ async function load() {
       route,
       coverage,
       filters,
-      viewData
+      viewData,
     };
   } catch (err) {
     console.warn("Failed to load coverage", err);
@@ -296,7 +296,7 @@ export async function display(data) {
       data.viewData,
       data.coverage,
       data.revision,
-      data.route.line
+      data.route.line,
     );
   } else {
     message("error", "Invalid view : " + data.view);

@@ -44,11 +44,11 @@ Write your local configuration as YAML:
 common:
   APP_CHANNEL: dev
 bot:
-  BACKEND_HOST: 'http://localhost:8000'
+  BACKEND_HOST: "http://localhost:8000"
   EMAIL_ADDRESSES: []
   PHABRICATOR_TOKEN: api-xxx
   PHABRICATOR_ENABLED: false
-  PHABRICATOR_URL: 'https://phabricator-dev.allizom.org/api/'
+  PHABRICATOR_URL: "https://phabricator-dev.allizom.org/api/"
   GOOGLE_CLOUD_STORAGE: null
 ```
 

@@ -2,13 +2,18 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
-'use strict';
+"use strict";
 
-import {injectToggle} from './button';
-import {gitToHg, isCoverageSupported} from './coverage';
-import {applyOverlay, removeOverlay, getPath, getNavigationPanel} from './dxr-common';
+import { injectToggle } from "./button";
+import { gitToHg, isCoverageSupported } from "./coverage";
+import {
+  applyOverlay,
+  removeOverlay,
+  getPath,
+  getNavigationPanel,
+} from "./dxr-common";
 
-(async function() {
+(async function () {
   // Don't do anything if this isn't a file.
   if (!getNavigationPanel()) {
     return;
@@ -21,7 +26,7 @@ import {applyOverlay, removeOverlay, getPath, getNavigationPanel} from './dxr-co
 
   // Get the current revision.
   const revPattern = new RegExp('/mozilla-central/commit/([0-9a-f]+)"');
-  const revSpan = document.getElementById('rev-id');
+  const revSpan = document.getElementById("rev-id");
   const m = revSpan.innerHTML.match(revPattern);
   const gitRev = m[1];
   const revPromise = gitToHg(gitRev);
@@ -31,7 +36,7 @@ import {applyOverlay, removeOverlay, getPath, getNavigationPanel} from './dxr-co
     return;
   }
 
-  const breadcrumbs = document.querySelector('.breadcrumbs');
+  const breadcrumbs = document.querySelector(".breadcrumbs");
   if (!breadcrumbs) {
     return;
   }

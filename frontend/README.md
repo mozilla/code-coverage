@@ -1,7 +1,8 @@
 # Mozilla Code Coverage frontend
+
 This is a simple JavaScript application displaying information from the Mozilla code coverage backend (hosted as https://coverage.moz.tools)
 
-You can use it right now from  [coverage.moz.tools](https://coverage.moz.tools/)
+You can use it right now from [coverage.moz.tools](https://coverage.moz.tools/)
 
 ## File viewer
 

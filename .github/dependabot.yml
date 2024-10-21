@@ -1,72 +1,72 @@
 version: 2
 updates:
-- package-ecosystem: npm
-  directory: "/addon"
-  schedule:
-    interval: weekly
-  open-pull-requests-limit: 99
-  labels:
-  - addon
-- package-ecosystem: pip
-  directory: "/bot"
-  schedule:
-    interval: weekly
-  open-pull-requests-limit: 99
-  labels:
-  - bot
-- package-ecosystem: docker
-  directory: "/events"
-  schedule:
-    interval: weekly
-  open-pull-requests-limit: 99
-  labels:
-  - events
-- package-ecosystem: docker
-  directory: "/backend"
-  schedule:
-    interval: weekly
-  open-pull-requests-limit: 99
-  labels:
-  - backend
-- package-ecosystem: docker
-  directory: "/bot"
-  schedule:
-    interval: weekly
-  open-pull-requests-limit: 99
-  labels:
-  - bot
-- package-ecosystem: pip
-  directory: "/tools"
-  schedule:
-    interval: weekly
-  open-pull-requests-limit: 99
-  labels:
-  - tools
-- package-ecosystem: pip
-  directory: "/events"
-  schedule:
-    interval: weekly
-  open-pull-requests-limit: 99
-  labels:
-  - events
-- package-ecosystem: pip
-  directory: "/backend"
-  schedule:
-    interval: weekly
-  open-pull-requests-limit: 99
-  labels:
-  - backend
-- package-ecosystem: npm
-  directory: "/frontend"
-  schedule:
-    interval: weekly
-  open-pull-requests-limit: 99
-  labels:
-  - frontend
-- package-ecosystem: pip
-  directory: "/report"
-  schedule:
-    interval: weekly
-  open-pull-requests-limit: 99
-  labels:
-  - report
+  - package-ecosystem: npm
+    directory: "/addon"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 99
+    labels:
+      - addon
+  - package-ecosystem: pip
+    directory: "/bot"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 99
+    labels:
+      - bot
+  - package-ecosystem: docker
+    directory: "/events"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 99
+    labels:
+      - events
+  - package-ecosystem: docker
+    directory: "/backend"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 99
+    labels:
+      - backend
+  - package-ecosystem: docker
+    directory: "/bot"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 99
+    labels:
+      - bot
+  - package-ecosystem: pip
+    directory: "/tools"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 99
+    labels:
+      - tools
+  - package-ecosystem: pip
+    directory: "/events"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 99
+    labels:
+      - events
+  - package-ecosystem: pip
+    directory: "/backend"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 99
+    labels:
+      - backend
+  - package-ecosystem: npm
+    directory: "/frontend"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 99
+    labels:
+      - frontend
+  - package-ecosystem: pip
+    directory: "/report"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 99
+    labels:
+      - report
