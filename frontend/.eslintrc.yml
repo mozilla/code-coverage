@@ -17,4 +17,3 @@ parserOptions:
 rules:
   max-len: off
   prettier/prettier: "error"
-  no-constant-binary-expression: off
