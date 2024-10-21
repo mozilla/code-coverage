@@ -23,17 +23,17 @@ document.querySelectorAll("title").forEach((title) => {
 
 async function applyOverlay(revPromise, path) {
   let result = await getCoverage(revPromise, path);
-  if (!result.hasOwnProperty("coverage")) {
+  if (!Object.prototype.hasOwnProperty.call(result, "coverage")) {
     throw new Error("No 'coverage' field");
   }
-  const data = result["coverage"];
+  const data = result.coverage;
   document.querySelectorAll("[id^='l']").forEach((e) => {
     const m = e.id.match(linePattern);
     if (!m) {
       return;
     }
     const linenum = m[1];
-    if (data.hasOwnProperty(linenum)) {
+    if (Object.prototype.hasOwnProperty.call(data, linenum)) {
       e.style.backgroundColor = data[linenum] > 0 ? "greenyellow" : "tomato";
     }
   });

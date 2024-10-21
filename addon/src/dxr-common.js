@@ -27,7 +27,7 @@ let lineNoMap = (function () {
 export async function applyOverlay(revPromise, path) {
   let result = await getCoverage(revPromise, path);
 
-  if (!result.hasOwnProperty("coverage")) {
+  if (!Object.prototype.hasOwnProperty.call(result, "coverage")) {
     throw new Error("No 'coverage' field");
   }
   for (var l in result.coverage) {
@@ -65,7 +65,7 @@ export function removeOverlay() {
 export function getPath() {
   const breadcrumbs = document.querySelector(".breadcrumbs");
   if (!breadcrumbs) {
-    return;
+    return null;
   }
 
   return breadcrumbs.lastElementChild.href.split("/mozilla-central/source/")[1];

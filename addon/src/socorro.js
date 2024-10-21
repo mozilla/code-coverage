@@ -31,7 +31,7 @@ document
     }
     const revision = m[1].slice(0, 12); // shorten the revision
     const info = {
-      line: line,
+      line,
       element: a.parentNode,
     };
     let finfo;
@@ -47,7 +47,7 @@ document
     }
   });
 
-if (Object.keys(fileinfo).length != 0) {
+if (Object.keys(fileinfo).length) {
   const spinnerDiv = document.createElement("div");
   spinnerDiv.classList.add(
     "gecko_coverage_loader",
@@ -71,18 +71,21 @@ if (Object.keys(fileinfo).length != 0) {
       }
       fetchCoverage(revision, filename)
         .then((data) => {
-          if (data !== null && !data.hasOwnProperty("error")) {
-            if (!data.hasOwnProperty("coverage")) {
+          if (
+            data !== null &&
+            !Object.prototype.hasOwnProperty.call(data, "error")
+          ) {
+            if (!Object.prototype.hasOwnProperty.call(data, "coverage")) {
               throw new Error("No 'data' field");
             }
-            const covData = data["coverage"];
+            const covData = data.coverage;
             for (const le of lineElements) {
               const line = le.line;
               if (line in covData) {
                 // line is covered or uncovered
                 le.element.parentNode.style.backgroundColor =
                   covData[line] == 0 ? "tomato" : "greenyellow";
-                const gitBuildChangeset = data["git_build_changeset"];
+                const gitBuildChangeset = data.git_build_changeset;
                 const codecovUrl = `https://codecov.io/gh/mozilla/gecko-dev/src/${gitBuildChangeset}/${filename}#L${line}`;
                 const a = linkToCodecov.cloneNode(true);
                 a.setAttribute("href", codecovUrl);

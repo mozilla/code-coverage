@@ -20,7 +20,7 @@ export async function getCoverage(revPromise, path) {
 
 function disableButton(button, text) {
   button.setAttribute("disabled", "disabled");
-  button.style["cursor"] = "not-allowed";
+  button.style.cursor = "not-allowed";
   button.title = text;
 }
 
