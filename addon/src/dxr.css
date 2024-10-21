@@ -4,12 +4,12 @@
 
 .gecko_code_coverage_toggle_button {
   background-color: white;
-  margin-bottom: .2rem;
-  margin-right: .2rem;
-  padding: .3rem;
+  margin-bottom: 0.2rem;
+  margin-right: 0.2rem;
+  padding: 0.3rem;
   border: 1px solid #999;
   width: auto;
   min-width: 100px;
-  border-radius: .2rem;
+  border-radius: 0.2rem;
   cursor: pointer;
 }

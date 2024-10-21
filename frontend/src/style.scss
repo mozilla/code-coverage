@@ -18,7 +18,20 @@ body {
   font-weight: 400;
   line-height: 1.5;
   text-rendering: optimizeLegibility;
-  font-family: BlinkMacSystemFont, -apple-system, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family:
+    BlinkMacSystemFont,
+    -apple-system,
+    "Segoe UI",
+    Roboto,
+    Oxygen,
+    Ubuntu,
+    Cantarell,
+    "Fira Sans",
+    "Droid Sans",
+    "Helvetica Neue",
+    Helvetica,
+    Arial,
+    sans-serif;
 
   background-color: white;
 
@@ -135,7 +148,7 @@ nav {
 
   a:not(:last-child)::after {
     content: "/";
-    color: #CCC;
+    color: #ccc;
     margin: 0 2px;
   }
 }
@@ -144,7 +157,7 @@ nav {
 #browser {
   max-width: $small_screen;
   margin: 0 auto;
-  padding: .5em;
+  padding: 0.5em;
 
   .table {
     display: table;
@@ -214,7 +227,7 @@ nav {
       }
 
       &.row {
-        &:nth-child(2n+3) {
+        &:nth-child(2n + 3) {
           background: hsl(0, 0%, 98%);
         }
 
@@ -229,7 +242,8 @@ nav {
   h2 {
     width: 100%;
 
-    nav, span {
+    nav,
+    span {
       display: inline-block;
       margin-right: 3px;
     }
@@ -310,7 +324,7 @@ $samp_size: 20px;
         color: grey;
         font-size: 1em;
         vertical-align: middle;
-        border-right: 1px solid #CCC;
+        border-right: 1px solid #ccc;
         font-family: monospace;
         background: #f5f2f0;
         padding: 0 2px;
@@ -438,7 +452,7 @@ $samp_size: 20px;
     &::after {
       content: " ";
       position: absolute;
-      bottom: 100%;  /* At the top of the tooltip */
+      bottom: 100%; /* At the top of the tooltip */
       left: 50%;
       margin-left: -5px;
       border-width: 5px;

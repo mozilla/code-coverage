@@ -1,181 +1,196 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title>mozilla-central coverage</title>
-<link rel="icon" href="<%=require('../assets/moz-fav-bw-rgb.png').default%>" type="image/png" />
-</head>
-<body>
-<script id="zerocoverage" type="x-tmpl-mustache">
-<div id="browser">
-  <h2>
-    <nav>
-      {{#navbar}}
-      <a href="{{ route }}">{{ name }}</a>
-      {{/navbar}}
-    </nav>
-    <span> : {{ total }} files</span>
-  </h2>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>mozilla-central coverage</title>
+    <link
+      rel="icon"
+      href="<%=require('../assets/moz-fav-bw-rgb.png').default%>"
+      type="image/png"
+    />
+  </head>
+  <body>
+    <script id="zerocoverage" type="x-tmpl-mustache">
+      <div id="browser">
+        <h2>
+          <nav>
+            {{#navbar}}
+            <a href="{{ route }}">{{ name }}</a>
+            {{/navbar}}
+          </nav>
+          <span> : {{ total }} files</span>
+        </h2>
 
-  <div class="table">
-    <div class="header">
-      <span class="filename">File name</span>
-      <span>Children</span>
-      <span>Functions</span>
-      <span>First push</span>
-      <span>Last push</span>
-      <span>Size</span>
-      <span>Commits</span>
-    </div>
+        <div class="table">
+          <div class="header">
+            <span class="filename">File name</span>
+            <span>Children</span>
+            <span>Functions</span>
+            <span>First push</span>
+            <span>Last push</span>
+            <span>Size</span>
+            <span>Commits</span>
+          </div>
 
-    {{#entries}}
-    <div class="row">
-      <span class="filename"><a href="{{ entry_url }}">{{ dir }}</a></span>
-      <span>{{ stats.children }}</span>
-      <span>{{ stats.funcs }}</span>
-      <span>{{ stats.first_push_date }}</span>
-      <span>{{ stats.last_push_date }}</span>
-      <span>{{ stats.size }}</span>
-      <span>{{ stats.commits }}</span>
-    </div>
-    {{/entries}}
-  </div>
-</div>
-</script>
+          {{#entries}}
+          <div class="row">
+            <span class="filename"><a href="{{ entry_url }}">{{ dir }}</a></span>
+            <span>{{ stats.children }}</span>
+            <span>{{ stats.funcs }}</span>
+            <span>{{ stats.first_push_date }}</span>
+            <span>{{ stats.last_push_date }}</span>
+            <span>{{ stats.size }}</span>
+            <span>{{ stats.commits }}</span>
+          </div>
+          {{/entries}}
+        </div>
+      </div>
+    </script>
 
-<script id="file_coverage" type="x-tmpl-mustache">
-<div id="file">
-  <h2>
-    <nav>
-      {{#navbar}}
-      <a href="{{ route }}">{{ name }}</a>
-      {{/navbar}}
-    </nav>
-  </h2>
+    <script id="file_coverage" type="x-tmpl-mustache">
+      <div id="file">
+        <h2>
+          <nav>
+            {{#navbar}}
+            <a href="{{ route }}">{{ name }}</a>
+            {{/navbar}}
+          </nav>
+        </h2>
 
-  <div class="help">
-    <p class="no_data"><samp>&nbsp;</samp><span>Non-instrumented</span></p>
-    <p class="uncovered"><samp>&nbsp;</samp><span>Uncovered</span></p>
-    <p class="covered"><samp>&nbsp;</samp><span>Covered</span></p>
-  </div>
+        <div class="help">
+          <p class="no_data"><samp>&nbsp;</samp><span>Non-instrumented</span></p>
+          <p class="uncovered"><samp>&nbsp;</samp><span>Uncovered</span></p>
+          <p class="covered"><samp>&nbsp;</samp><span>Covered</span></p>
+        </div>
 
-  <table>
-    <tbody>
-      {{#lines}}
-      <tr class="{{ css_class }}" id="l{{ nb }}">
-        <td><a class="scroll" href="{{ route }}">{{ nb }}</a></td>
-        <td>
-          <pre class="language-{{ language }}"><code>{{ line }}</code></pre>
-        </td>
-        <td>
-          {{#hits}}
-          <span class="{{ hits.unit }}" title="This line has been hit {{ coverage }} times.">{{ hits.nb }} {{ hits.unit }}</span>
-          {{/hits}}
-        </td>
-      </tr>
-      {{/lines}}
-    </tbody>
-  </table>
+        <table>
+          <tbody>
+            {{#lines}}
+            <tr class="{{ css_class }}" id="l{{ nb }}">
+              <td><a class="scroll" href="{{ route }}">{{ nb }}</a></td>
+              <td>
+                <pre class="language-{{ language }}"><code>{{ line }}</code></pre>
+              </td>
+              <td>
+                {{#hits}}
+                <span class="{{ hits.unit }}" title="This line has been hit {{ coverage }} times.">{{ hits.nb }} {{ hits.unit }}</span>
+                {{/hits}}
+              </td>
+            </tr>
+            {{/lines}}
+          </tbody>
+        </table>
 
-</div>
-</script>
+      </div>
+    </script>
 
-<script id="file_browser" type="x-tmpl-mustache">
-<div id="browser">
-  <h2>
-    <nav>
-      {{#navbar}}
-      <a href="{{ route }}">{{ name }}</a>
-      {{/navbar}}
-    </nav>
-    <span> : {{ files.length }} files</span>
-  </h2>
+    <script id="file_browser" type="x-tmpl-mustache">
+      <div id="browser">
+        <h2>
+          <nav>
+            {{#navbar}}
+            <a href="{{ route }}">{{ name }}</a>
+            {{/navbar}}
+          </nav>
+          <span> : {{ files.length }} files</span>
+        </h2>
 
-  <div class="table">
-    <div class="header">
-      <span class="filename">File name</span>
-      <span>Children</span>
-      <span>Coverage</span>
-    </div>
+        <div class="table">
+          <div class="header">
+            <span class="filename">File name</span>
+            <span>Children</span>
+            <span>Coverage</span>
+          </div>
 
-    {{#files}}
-    <div class="row">
-      <span class="filename"><a href="{{ route }}">{{ file_name }}</a></span>
-      <span>{{ children }}</span>
-      <span class="coverage_{{ range }}">{{ coveragePercent }} %</span>
-    </div>
-    {{/files}}
-  </div>
+          {{#files}}
+          <div class="row">
+            <span class="filename"><a href="{{ route }}">{{ file_name }}</a></span>
+            <span>{{ children }}</span>
+            <span class="coverage_{{ range }}">{{ coveragePercent }} %</span>
+          </div>
+          {{/files}}
+        </div>
 
-</div>
-</script>
+      </div>
+    </script>
 
-<script id="history_point" type="x-tmpl-mustache">
-  <span>Revision <samp>{{ revision }}</samp> from {{ date }}</span>
-</script>
+    <script id="history_point" type="x-tmpl-mustache">
+      <span>Revision <samp>{{ revision }}</samp> from {{ date }}</span>
+    </script>
 
-<script id="menu_browser" type="x-tmpl-mustache">
-  <a class="item" href="#view=zero">View the zero coverage report</a>
-  <input class="revision" type="text" name="revision" placeholder="Mercurial revision" value="{{revision}}"></input>
-  <select name="platform">
-    <option value="all">All platforms</option>
-    {{#platforms}}
-    <option {{#selected}}selected="selected"{{/selected}} value="{{name}}">{{name}}</option>
-    {{/platforms}}
-  </select>
-  <select name="suite">
-    <option value="all">All test suites</option>
-    {{#suites}}
-    <option {{#selected}}selected="selected"{{/selected}} value="{{name}}">{{name}}</option>
-    {{/suites}}
-  </select>
-</script>
+    <script id="menu_browser" type="x-tmpl-mustache">
+      <a class="item" href="#view=zero">View the zero coverage report</a>
+      <input class="revision" type="text" name="revision" placeholder="Mercurial revision" value="{{revision}}"></input>
+      <select name="platform">
+        <option value="all">All platforms</option>
+        {{#platforms}}
+        <option {{#selected}}selected="selected"{{/selected}} value="{{name}}">{{name}}</option>
+        {{/platforms}}
+      </select>
+      <select name="suite">
+        <option value="all">All test suites</option>
+        {{#suites}}
+        <option {{#selected}}selected="selected"{{/selected}} value="{{name}}">{{name}}</option>
+        {{/suites}}
+      </select>
+    </script>
 
-<script id="menu_zero" type="x-tmpl-mustache">
-  {{#filters}}
-  <input type="checkbox" name="{{ key }}" id="{{ key }}" {{#checked}}checked="checked"{{/checked}}>
-  <label for="{{ key }}">{{ message }}</label>
-  {{#needs_explanation}}
-  <div class="tooltip">
-    <span class="questionbox">?</span>
-    <span class="tooltiptext">For <strong>JavaScript</strong>, files with at least one function where all functions are uncovered.
-      <br />For <strong>C/C++/other languages</strong>, files which have no covered lines.</span>
-  </div>
-  {{/needs_explanation}}
-  {{/filters}}
+    <script id="menu_zero" type="x-tmpl-mustache">
+      {{#filters}}
+      <input type="checkbox" name="{{ key }}" id="{{ key }}" {{#checked}}checked="checked"{{/checked}}>
+      <label for="{{ key }}">{{ message }}</label>
+      {{#needs_explanation}}
+      <div class="tooltip">
+        <span class="questionbox">?</span>
+        <span class="tooltiptext">For <strong>JavaScript</strong>, files with at least one function where all functions are uncovered.
+          <br />For <strong>C/C++/other languages</strong>, files which have no covered lines.</span>
+      </div>
+      {{/needs_explanation}}
+      {{/filters}}
 
-  <select name="last_push" id="last_push">
-    {{#last_pushes}}
-    <option {{#selected}}selected="selected"{{/selected}} value="{{value}}">{{message}}</option>
-    {{/last_pushes}}
-  </select>
-</script>
+      <select name="last_push" id="last_push">
+        {{#last_pushes}}
+        <option {{#selected}}selected="selected"{{/selected}} value="{{value}}">{{message}}</option>
+        {{/last_pushes}}
+      </select>
+    </script>
 
-<header>
-  <div class="logo">
-    <img src="<%=require('../assets/moz-logo-black.png').default%>" alt="Moz://a"/>
-    <a href="#view=directory">Code Coverage</a>
-  </div>
-  <div id="menu"></div>
-</header>
+    <header>
+      <div class="logo">
+        <img
+          src="<%=require('../assets/moz-logo-black.png').default%>"
+          alt="Moz://a"
+        />
+        <a href="#view=directory">Code Coverage</a>
+      </div>
+      <div id="menu"></div>
+    </header>
 
-<main id="main">
-  <div id="message" class="message loading">Loading...</div>
-  <div id="history">
-    <div class="ct-chart"></div>
-    <div id="history_details">Hover a point to see its details</div>
-  </div>
-  <div id="output"></div>
-</main>
+    <main id="main">
+      <div id="message" class="message loading">Loading...</div>
+      <div id="history">
+        <div class="ct-chart"></div>
+        <div id="history_details">Hover a point to see its details</div>
+      </div>
+      <div id="output"></div>
+    </main>
 
-<footer>
-  <a target="_blank" href="https://github.com/mozilla/code-coverage">
-    <img src="<%=require('../assets/github.png').default%>" alt="GitHub" />
-  </a>
-  <a target="_blank" href="https://github.com/mozilla/code-coverage/issues/new?labels=frontend,bug&title=Issue+with+the+frontend">Report an issue</a>
-  &bull;
-  <a target="_blank" href="https://github.com/mozilla/code-coverage/fork" aria-label="Fork mozilla/code-coverage on GitHub">Fork mozilla/code-coverage</a>
-</footer>
-
-</body>
+    <footer>
+      <a target="_blank" href="https://github.com/mozilla/code-coverage">
+        <img src="<%=require('../assets/github.png').default%>" alt="GitHub" />
+      </a>
+      <a
+        target="_blank"
+        href="https://github.com/mozilla/code-coverage/issues/new?labels=frontend,bug&title=Issue+with+the+frontend"
+        >Report an issue</a
+      >
+      &bull;
+      <a
+        target="_blank"
+        href="https://github.com/mozilla/code-coverage/fork"
+        aria-label="Fork mozilla/code-coverage on GitHub"
+        >Fork mozilla/code-coverage</a
+      >
+    </footer>
+  </body>
 </html>

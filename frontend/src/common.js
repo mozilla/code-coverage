@@ -5,8 +5,8 @@ import { ZERO_COVERAGE_FILTERS } from "./zero_coverage_report.js";
 export const REV_LATEST = "latest";
 
 function domContentLoaded() {
-  return new Promise(resolve =>
-    document.addEventListener("DOMContentLoaded", resolve)
+  return new Promise((resolve) =>
+    document.addEventListener("DOMContentLoaded", resolve),
   );
 }
 export const DOM_READY = domContentLoaded();
@@ -21,7 +21,7 @@ export async function main(load, display) {
 
   // Full workflow, loading then displaying data
   // used for following updates
-  const full = async function() {
+  const full = async function () {
     const data = await load();
     await display(data);
   };
@@ -56,7 +56,7 @@ function cacheSet(cache, key, value) {
 
   cache[key] = {
     val: value,
-    time: now
+    time: now,
   };
 }
 
@@ -79,7 +79,7 @@ export async function getPathCoverage(path, changeset, platform, suite) {
     params += `&suite=${suite}`;
   }
   const response = await fetch(
-    `${COVERAGE_BACKEND_HOST}/v2/path?${params}`
+    `${COVERAGE_BACKEND_HOST}/v2/path?${params}`,
   ).catch(alert);
   if (response.status !== 200) {
     throw new Error(response.status + " - " + response.statusText);
@@ -118,7 +118,7 @@ export async function getHistory(path, platform, suite) {
 
   // Check data has coverage values
   // These values are missing when going above 2 levels right now
-  const coverage = data.filter(point => {
+  const coverage = data.filter((point) => {
     return point.coverage !== null;
   });
   if (coverage.length === 0) {
@@ -137,7 +137,7 @@ export async function getZeroCoverageData() {
   }
 
   const response = await fetch(
-    "https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/project.relman.code-coverage.production.cron.latest/artifacts/public/zero_coverage_report.json"
+    "https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/project.relman.code-coverage.production.cron.latest/artifacts/public/zero_coverage_report.json",
   );
   data = await response.json();
 
@@ -198,12 +198,12 @@ export async function getSource(file, revision) {
 
 // Filtering.
 
-const getThirdPartyPaths = (function() {
+const getThirdPartyPaths = (function () {
   let paths = null;
-  return async function() {
+  return async function () {
     if (!paths) {
       const response = await getSource("tools/rewriting/ThirdPartyPaths.txt");
-      paths = response.split("\n").filter(path => path !== "");
+      paths = response.split("\n").filter((path) => path !== "");
     }
 
     return paths;
@@ -217,7 +217,7 @@ export async function filterThirdParty(files) {
 
   const paths = await getThirdPartyPaths();
 
-  return files.filter(file => {
+  return files.filter((file) => {
     for (const path of paths) {
       if (file.path.startsWith(path)) {
         return false;
@@ -240,7 +240,7 @@ export function filterLanguages(files) {
     "hxx",
     "hpp",
     "inl",
-    "inc"
+    "inc",
   ];
   const js = isEnabled("js");
   const jsExtensions = [
@@ -251,23 +251,23 @@ export function filterLanguages(files) {
     "xml",
     "xul",
     "xhtml",
-    "html"
+    "html",
   ];
   const java = isEnabled("java");
   const javaExtensions = ["java"];
   const rust = isEnabled("rust");
   const rustExtensions = ["rs"];
 
-  return files.filter(file => {
+  return files.filter((file) => {
     if (file.type === "directory") {
       return true;
-    } else if (cppExtensions.find(ext => file.path.endsWith("." + ext))) {
+    } else if (cppExtensions.find((ext) => file.path.endsWith("." + ext))) {
       return cpp;
-    } else if (jsExtensions.find(ext => file.path.endsWith("." + ext))) {
+    } else if (jsExtensions.find((ext) => file.path.endsWith("." + ext))) {
       return js;
-    } else if (rustExtensions.find(ext => file.path.endsWith("." + ext))) {
+    } else if (rustExtensions.find((ext) => file.path.endsWith("." + ext))) {
       return rust;
-    } else if (javaExtensions.find(ext => file.path.endsWith("." + ext))) {
+    } else if (javaExtensions.find((ext) => file.path.endsWith("." + ext))) {
       return java;
     }
     console.warn("Unknown language for " + file.path);
@@ -280,7 +280,7 @@ export function filterHeaders(files) {
     return files;
   }
 
-  return files.filter(file => !file.path.endsWith(".h"));
+  return files.filter((file) => !file.path.endsWith(".h"));
 }
 
 export function filterCompletelyUncovered(files) {
@@ -288,7 +288,7 @@ export function filterCompletelyUncovered(files) {
     return files;
   }
 
-  return files.filter(file => file.uncovered);
+  return files.filter((file) => file.uncovered);
 }
 
 export function filterLastPushDate(files) {
@@ -308,7 +308,7 @@ export function filterLastPushDate(files) {
     return files;
   }
 
-  return files.filter(file => {
+  return files.filter((file) => {
     const lastPushDate = new Date(file.lastPushDate);
     if (
       lastPushDate.getTime() <= upperLimit.getTime() &&
@@ -329,17 +329,17 @@ export function buildNavbar(path, revision) {
   const links = [
     {
       name: "mozilla-central",
-      route: buildRoute({ path: "", revision })
-    }
+      route: buildRoute({ path: "", revision }),
+    },
   ];
   return links.concat(
-    path.split("/").map(file => {
+    path.split("/").map((file) => {
       base += (base ? "/" : "") + file;
       return {
         name: file,
-        route: buildRoute({ path: base, view: "directory", revision })
+        route: buildRoute({ path: base, view: "directory", revision }),
       };
-    })
+    }),
   );
 }
 
@@ -384,7 +384,7 @@ export function show(id, node) {
 export function render(template, data, target) {
   const output = Mustache.render(
     document.getElementById(template).innerHTML,
-    data
+    data,
   );
   const box = document.getElementById(target);
 

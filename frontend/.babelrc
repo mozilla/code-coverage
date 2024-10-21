@@ -1,10 +1,21 @@
 {
   "plugins": [
-    ["prismjs", {
-        "languages": ["javascript", "clike", "python", "cpp", "c", "css", "java"],
+    [
+      "prismjs",
+      {
+        "languages": [
+          "javascript",
+          "clike",
+          "python",
+          "cpp",
+          "c",
+          "css",
+          "java"
+        ],
         "plugins": ["line-numbers"],
         "theme": "solarizedlight",
         "css": true
-    }]
+      }
+    ]
   ]
 }

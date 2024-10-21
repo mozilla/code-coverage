@@ -1,94 +1,93 @@
 {
-    "bindings": [],
-    "metadata": {
-        "description": "Automatically build code coverage reports",
-        "emailOnError": true,
-        "name": "Code coverage hook (CHANNEL)",
-        "owner": "mcastelluccio@mozilla.com"
-    },
-    "task": {
-        "$merge": [
-            {
-                "$if": "'taskGroupId' in payload",
-                "else": {},
-                "then": {
-                    "taskGroupId": {
-                        "$eval": "payload.taskGroupId"
-                    }
-                }
-            },
-            {
-                "created": {
-                    "$fromNow": "0 seconds"
-                },
-                "deadline": {
-                    "$fromNow": "4 hours"
-                },
-                "expires": {
-                    "$fromNow": "1 month"
-                },
-                "extra": {},
-                "metadata": {
-                    "description": "",
-                    "name": {
-                        "$if": "'taskName' in payload",
-                        "else": "Code Coverage aggregation task - repo (CHANNEL)",
-                        "then": {
-                            "$eval": "payload.taskName"
-                        }
-                    },
-                    "owner": "mcastelluccio@mozilla.com",
-                    "source": "https://github.com/mozilla/code-coverage"
-                },
-                "payload": {
-
-                    "artifacts": {
-                      "public/code-coverage-report.json": {
-                        "expires": {"$fromNow": "2 weeks"},
-                        "path": "/build/ccov-reports/all.all.json",
-                        "type": "file"
-                      }
-                    },
-                    "cache": {
-                        "code-coverage-bot-CHANNEL": "/cache"
-                    },
-                    "capabilities": {},
-                    "command": [
-                        "code-coverage-repo",
-                        "--taskcluster-secret",
-                        "project/relman/code-coverage/runtime-CHANNEL",
-                        "--cache-root",
-                        "/cache",
-                        "--working-dir",
-                        "/build"
-                    ],
-                    "env": {
-                        "$eval": "payload"
-                    },
-                    "features": {
-                        "taskclusterProxy": true
-                    },
-                    "image": "mozilla/code-coverage:bot-REVISION",
-                    "maxRunTime": 14400
-                },
-                "priority": "normal",
-                "provisionerId": "aws-provisioner-v1",
-                "retries": 5,
-                "routes": [],
-                "schedulerId": "-",
-                "scopes": [
-                    "secrets:get:project/relman/code-coverage/runtime-CHANNEL",
-                    "notify:email:*",
-                    "docker-worker:cache:code-coverage-bot-CHANNEL",
-                    "index:insert-task:project.relman.code-coverage.CHANNEL.repo.*"
-                ],
-                "tags": {},
-                "workerType": "relman-svc-memory"
+  "bindings": [],
+  "metadata": {
+    "description": "Automatically build code coverage reports",
+    "emailOnError": true,
+    "name": "Code coverage hook (CHANNEL)",
+    "owner": "mcastelluccio@mozilla.com"
+  },
+  "task": {
+    "$merge": [
+      {
+        "$if": "'taskGroupId' in payload",
+        "else": {},
+        "then": {
+          "taskGroupId": {
+            "$eval": "payload.taskGroupId"
+          }
+        }
+      },
+      {
+        "created": {
+          "$fromNow": "0 seconds"
+        },
+        "deadline": {
+          "$fromNow": "4 hours"
+        },
+        "expires": {
+          "$fromNow": "1 month"
+        },
+        "extra": {},
+        "metadata": {
+          "description": "",
+          "name": {
+            "$if": "'taskName' in payload",
+            "else": "Code Coverage aggregation task - repo (CHANNEL)",
+            "then": {
+              "$eval": "payload.taskName"
             }
-        ]
-    },
-    "triggerSchema": {
-        "additionalProperties": true,
-        "type": "object"
-    }
+          },
+          "owner": "mcastelluccio@mozilla.com",
+          "source": "https://github.com/mozilla/code-coverage"
+        },
+        "payload": {
+          "artifacts": {
+            "public/code-coverage-report.json": {
+              "expires": { "$fromNow": "2 weeks" },
+              "path": "/build/ccov-reports/all.all.json",
+              "type": "file"
+            }
+          },
+          "cache": {
+            "code-coverage-bot-CHANNEL": "/cache"
+          },
+          "capabilities": {},
+          "command": [
+            "code-coverage-repo",
+            "--taskcluster-secret",
+            "project/relman/code-coverage/runtime-CHANNEL",
+            "--cache-root",
+            "/cache",
+            "--working-dir",
+            "/build"
+          ],
+          "env": {
+            "$eval": "payload"
+          },
+          "features": {
+            "taskclusterProxy": true
+          },
+          "image": "mozilla/code-coverage:bot-REVISION",
+          "maxRunTime": 14400
+        },
+        "priority": "normal",
+        "provisionerId": "aws-provisioner-v1",
+        "retries": 5,
+        "routes": [],
+        "schedulerId": "-",
+        "scopes": [
+          "secrets:get:project/relman/code-coverage/runtime-CHANNEL",
+          "notify:email:*",
+          "docker-worker:cache:code-coverage-bot-CHANNEL",
+          "index:insert-task:project.relman.code-coverage.CHANNEL.repo.*"
+        ],
+        "tags": {},
+        "workerType": "relman-svc-memory"
+      }
+    ]
+  },
+  "triggerSchema": {
+    "additionalProperties": true,
+    "type": "object"
+  }
 }

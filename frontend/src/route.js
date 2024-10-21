@@ -6,7 +6,7 @@ export function readRoute() {
   const hash = window.location.hash.substring(1);
   const pairs = hash.split("&");
   const out = {};
-  pairs.forEach(pair => {
+  pairs.forEach((pair) => {
     const [key, value] = pair.split("=");
     if (!key) {
       return;
@@ -36,7 +36,7 @@ export function buildRoute(params) {
   return (
     "#" +
     Object.keys(route)
-      .map(k => encodeURIComponent(k) + "=" + encodeURIComponent(route[k]))
+      .map((k) => encodeURIComponent(k) + "=" + encodeURIComponent(route[k]))
       .join("&")
   );
 }
@@ -64,13 +64,13 @@ export function monitorOptions(currentData) {
   for (const field of fields) {
     if (field.classList.contains("scroll")) {
       // On a scroll event, update display without any data loading
-      field.onclick = async evt => {
+      field.onclick = async (evt) => {
         evt.preventDefault();
         updateRouteImmediate(evt.target.hash, currentData);
       };
     } else if (field.type === "text") {
       // React on enter
-      field.onkeydown = async evt => {
+      field.onkeydown = async (evt) => {
         if (evt.keyCode === 13) {
           const params = {};
           params[evt.target.name] = evt.target.value;
@@ -79,7 +79,7 @@ export function monitorOptions(currentData) {
       };
     } else {
       // React on change
-      field.onchange = async evt => {
+      field.onchange = async (evt) => {
         let value = evt.target.value;
         if (evt.target.type === "checkbox") {
           value = evt.target.checked ? "on" : "off";

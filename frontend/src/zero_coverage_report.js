@@ -8,45 +8,45 @@ import {
   filterLanguages,
   filterHeaders,
   filterCompletelyUncovered,
-  filterLastPushDate
+  filterLastPushDate,
 } from "./common.js";
 import { buildRoute } from "./route.js";
 
 export const ZERO_COVERAGE_FILTERS = {
   third_party: {
     name: "Show third-party files",
-    default_value: "on"
+    default_value: "on",
   },
   headers: {
     name: "Show headers",
-    default_value: "off"
+    default_value: "off",
   },
   completely_uncovered: {
     name: "Show completely uncovered files only",
-    default_value: "off"
+    default_value: "off",
   },
   cpp: {
     name: "C/C++",
-    default_value: "on"
+    default_value: "on",
   },
   js: {
     name: "JavaScript",
-    default_value: "on"
+    default_value: "on",
   },
   java: {
     name: "Java",
-    default_value: "on"
+    default_value: "on",
   },
   rust: {
     name: "Rust",
-    default_value: "on"
-  }
+    default_value: "on",
+  },
 };
 const ZERO_COVERAGE_PUSHES = {
   all: "All",
   one_year: "0 < 1 year",
   two_years: "1 < 2 years",
-  older_than_two_years: "Older than 2 years"
+  older_than_two_years: "Older than 2 years",
 };
 
 export function zeroCoverageMenu(route) {
@@ -56,7 +56,7 @@ export function zeroCoverageMenu(route) {
         key,
         message: filter.name,
         checked: isEnabled(key),
-        needs_explanation: key === "completely_uncovered"
+        needs_explanation: key === "completely_uncovered",
       };
     }),
     last_pushes: Object.entries(ZERO_COVERAGE_PUSHES).map(
@@ -64,10 +64,10 @@ export function zeroCoverageMenu(route) {
         return {
           value,
           message,
-          selected: route.last_push === value
+          selected: route.last_push === value,
         };
-      }
-    )
+      },
+    ),
   };
   render("menu_zero", context, "menu");
 }
@@ -108,7 +108,7 @@ function getBaseStats(file, children) {
     first_push_date: file.first_push_date,
     last_push_date: file.last_push_date,
     size: file.size,
-    commits: file.commits
+    commits: file.commits,
   };
 }
 
@@ -119,11 +119,11 @@ function cumStats(prevStats, newStats) {
   prevStats.commits += newStats.commits;
   prevStats.first_push_date = getMinDate(
     prevStats.first_push_date,
-    newStats.first_push_date
+    newStats.first_push_date,
   );
   prevStats.last_push_date = getMinDate(
     prevStats.last_push_date,
-    newStats.last_push_date
+    newStats.last_push_date,
   );
 }
 
@@ -132,7 +132,7 @@ export async function zeroCoverageDisplay(data, dir) {
   hide("history");
   message(
     "loading",
-    "Loading zero coverage report for " + (dir || "mozilla-central")
+    "Loading zero coverage report for " + (dir || "mozilla-central"),
   );
 
   while (dir.endsWith("/")) {
@@ -143,9 +143,9 @@ export async function zeroCoverageDisplay(data, dir) {
     dir = "";
   }
 
-  let files = data.files.filter(file => file.name.startsWith(dir));
+  let files = data.files.filter((file) => file.name.startsWith(dir));
   // TODO: Do this in the backend directly!
-  files.forEach(file => {
+  files.forEach((file) => {
     file.path = file.name;
   });
   files = await filterThirdParty(files);
@@ -183,14 +183,14 @@ export async function zeroCoverageDisplay(data, dir) {
       if (this.stats.children !== 0) {
         return buildRoute({
           view: "zero",
-          path
+          path,
         });
       }
       // Fully reset the url when moving back to file view
       return `#view=file&revision=${revision}&path=${path}`;
     },
     navbar: buildNavbar(dir),
-    total: files.length
+    total: files.length,
   };
 
   hide("message");

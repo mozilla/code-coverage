@@ -1,85 +1,83 @@
 {
-    "bindings": [],
+  "bindings": [],
+  "metadata": {
+    "description": "Automatically build code coverage reports",
+    "emailOnError": true,
+    "name": "Code coverage hook (CHANNEL)",
+    "owner": "mcastelluccio@mozilla.com"
+  },
+  "schedule": ["0 0 0 * * *"],
+  "task": {
+    "created": {
+      "$fromNow": "0 seconds"
+    },
+    "deadline": {
+      "$fromNow": "4 hours"
+    },
+    "expires": {
+      "$fromNow": "1 month"
+    },
+    "extra": {},
     "metadata": {
-        "description": "Automatically build code coverage reports",
-        "emailOnError": true,
-        "name": "Code coverage hook (CHANNEL)",
-        "owner": "mcastelluccio@mozilla.com"
+      "description": "",
+      "name": "Code Coverage aggregation task - cron (CHANNEL)",
+      "owner": "mcastelluccio@mozilla.com",
+      "source": "https://github.com/mozilla/code-coverage"
     },
-    "schedule": [
-        "0 0 0 * * *"
+    "payload": {
+      "artifacts": {
+        "public/chunk_mapping.tar.xz": {
+          "path": "/chunk_mapping.tar.xz",
+          "type": "file"
+        },
+        "public/per_chunk_mapping.tar.xz": {
+          "path": "/per_chunk_mapping.tar.xz",
+          "type": "file"
+        },
+        "public/zero_coverage_report.json": {
+          "path": "/zero_coverage_report.json",
+          "type": "file"
+        },
+        "public/commit_coverage.json.zst": {
+          "path": "/commit_coverage.json.zst",
+          "type": "file"
+        }
+      },
+      "cache": {
+        "code-coverage-bot-CHANNEL": "/cache"
+      },
+      "capabilities": {},
+      "command": [
+        "code-coverage-cron",
+        "--taskcluster-secret",
+        "project/relman/code-coverage/runtime-CHANNEL",
+        "--cache-root",
+        "/cache",
+        "--working-dir",
+        "/build"
+      ],
+      "env": {},
+      "features": {
+        "taskclusterProxy": true
+      },
+      "image": "mozilla/code-coverage:bot-REVISION",
+      "maxRunTime": 14400
+    },
+    "priority": "normal",
+    "provisionerId": "aws-provisioner-v1",
+    "retries": 5,
+    "routes": [],
+    "schedulerId": "-",
+    "scopes": [
+      "secrets:get:project/relman/code-coverage/runtime-CHANNEL",
+      "docker-worker:cache:code-coverage-bot-CHANNEL",
+      "index:insert-task:project.relman.code-coverage.CHANNEL.cron.*"
     ],
-    "task": {
-        "created": {
-            "$fromNow": "0 seconds"
-        },
-        "deadline": {
-            "$fromNow": "4 hours"
-        },
-        "expires": {
-            "$fromNow": "1 month"
-        },
-        "extra": {},
-        "metadata": {
-            "description": "",
-            "name": "Code Coverage aggregation task - cron (CHANNEL)",
-            "owner": "mcastelluccio@mozilla.com",
-            "source": "https://github.com/mozilla/code-coverage"
-        },
-        "payload": {
-            "artifacts": {
-                "public/chunk_mapping.tar.xz": {
-                    "path": "/chunk_mapping.tar.xz",
-                    "type": "file"
-                },
-                "public/per_chunk_mapping.tar.xz": {
-                    "path": "/per_chunk_mapping.tar.xz",
-                    "type": "file"
-                },
-                "public/zero_coverage_report.json": {
-                    "path": "/zero_coverage_report.json",
-                    "type": "file"
-                },
-                "public/commit_coverage.json.zst": {
-                    "path": "/commit_coverage.json.zst",
-                    "type": "file"
-                }
-            },
-            "cache": {
-                "code-coverage-bot-CHANNEL": "/cache"
-            },
-            "capabilities": {},
-            "command": [
-                "code-coverage-cron",
-                "--taskcluster-secret",
-                "project/relman/code-coverage/runtime-CHANNEL",
-                "--cache-root",
-                "/cache",
-                "--working-dir",
-                "/build"
-            ],
-            "env": {},
-            "features": {
-                "taskclusterProxy": true
-            },
-            "image": "mozilla/code-coverage:bot-REVISION",
-            "maxRunTime": 14400
-        },
-        "priority": "normal",
-        "provisionerId": "aws-provisioner-v1",
-        "retries": 5,
-        "routes": [],
-        "schedulerId": "-",
-        "scopes": [
-            "secrets:get:project/relman/code-coverage/runtime-CHANNEL",
-            "docker-worker:cache:code-coverage-bot-CHANNEL",
-            "index:insert-task:project.relman.code-coverage.CHANNEL.cron.*"
-        ],
-        "tags": {},
-        "workerType": "relman-svc-memory"
-    },
-    "triggerSchema": {
-        "additionalProperties": true,
-        "type": "object"
-    }
+    "tags": {},
+    "workerType": "relman-svc-memory"
+  },
+  "triggerSchema": {
+    "additionalProperties": true,
+    "type": "object"
+  }
 }
