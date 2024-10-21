@@ -323,7 +323,7 @@ tasks:
               deadline: {$fromNow: '1 hour'}
               payload:
                 maxRunTime: 3600
-                image: node:16-alpine
+                image: node:20-alpine
                 command:
                   - sh
                   - -lxce
@@ -351,7 +351,7 @@ tasks:
               deadline: {$fromNow: '1 hour'}
               payload:
                 maxRunTime: 3600
-                image: node:18
+                image: node:20
                 env:
                   BACKEND_URL: "${backend_url}"
                 command:
