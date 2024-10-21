@@ -60,10 +60,10 @@ export function zeroCoverageMenu(route) {
       };
     }),
     last_pushes: Object.entries(ZERO_COVERAGE_PUSHES).map(
-      ([value, message]) => {
+      ([value, messageText]) => {
         return {
           value,
-          message,
+          messageText,
           selected: route.last_push === value,
         };
       },

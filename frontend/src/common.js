@@ -22,8 +22,8 @@ export async function main(load, display) {
   // Full workflow, loading then displaying data
   // used for following updates
   const full = async function () {
-    const data = await load();
-    await display(data);
+    const fullData = await load();
+    await display(fullData);
   };
 
   // React to url changes
@@ -47,9 +47,9 @@ function cacheSet(cache, key, value) {
   // If the cache got too big, remove all elements that were added more
   // than 15 minutes ago.
   if (Object.keys(cache).length > 100) {
-    for (const key in cache) {
-      if (cache[key].time < now - 15 * 60) {
-        delete cache[key];
+    for (const cacheKey in cache) {
+      if (cache[cacheKey].time < now - 15 * 60) {
+        delete cache[cacheKey];
       }
     }
   }
@@ -348,14 +348,14 @@ function canDisplay() {
   return document.readyState === "complete";
 }
 
-export function message(cssClass, message) {
+export function message(cssClass, messageText) {
   if (!canDisplay()) {
     return;
   }
 
   const box = document.getElementById("message");
   box.className = "message " + cssClass;
-  box.textContent = message;
+  box.textContent = messageText;
   box.style.display = "inherit";
 }
 
