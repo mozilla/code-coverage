@@ -9,7 +9,7 @@
     "eslint": ">=0.8.0"
   },
   "devDependencies": {
-    "eslint-plugin-mozilla": "^4.0.0",
+    "eslint-plugin-mozilla": "^3.7.5",
     "eslint-plugin-no-unsanitized": "^4.1.2",
     "web-ext": "^8.3.0",
     "webpack": "^5.95.0",
