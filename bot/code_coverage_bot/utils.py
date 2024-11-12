@@ -59,8 +59,8 @@ def run_check(command, **kwargs):
             f"Command failed with code: {proc.returncode}",
             exit=proc.returncode,
             command=" ".join(command),
-            output=output,
-            error=error,
+            output=output.split("\n")[-1],
+            error=error.split("\n")[-1],
         )
         print(f"Output:\n{output}")
         print(f"Error:\n{error}")
