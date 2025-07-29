@@ -70,7 +70,7 @@ tasks:
       else: generic-worker-ubuntu-24-04
 
     taskboot_image: "mozilla/taskboot:0.4.1"
-    python_image: "python:3.11"
+    python_image: "python:3.12"
   in:
     $if: '(tasks_for == "github-push" && (head_branch == "master" || head_branch == "production" || head_branch == "testing")) || (tasks_for == "github-pull-request" && event["action"] in ["opened", "reopened", "synchronize"])'
     then:
@@ -114,7 +114,7 @@ tasks:
                   - -lxce
                   - "git clone --quiet ${repository} /src && cd /src && git checkout ${head_rev} -b checks &&
                     /src/bot/ci/bootstrap.sh &&
-                    cd /src/tools && python3 setup.py install &&
+                    cd /src/tools && pip3 install --disable-pip-version-check --no-cache-dir --quiet . &&
                     cd /src/bot && pip3 install --disable-pip-version-check --no-cache-dir --quiet . && pip3 install --disable-pip-version-check --no-cache-dir --quiet -r requirements-dev.txt &&
                     pytest -v"
               metadata:
@@ -184,7 +184,7 @@ tasks:
                   - sh
                   - -lxce
                   - "git clone --quiet ${repository} /src && cd /src && git checkout ${head_rev} -b checks &&
-                    cd /src/tools && python setup.py install &&
+                    cd /src/tools && pip3 install --disable-pip-version-check --no-cache-dir --quiet . &&
                     cd /src/backend && pip install --disable-pip-version-check --no-cache-dir --quiet . && pip install --disable-pip-version-check --no-cache-dir --quiet -r requirements-dev.txt &&
                     pytest -v"
               metadata:
