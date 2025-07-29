@@ -13,7 +13,7 @@ def report(artifacts, source_dir=None, out_format="covdir", options=[]):
         "lcov",
         "coveralls+",
     ), "Unsupported output format"
-    cmd = ["grcov", "-t", out_format]
+    cmd = ["grcov", "--ignore-parsing-error", "-t", out_format]
 
     # Coveralls+ is only needed for zero-coverage reports
     if out_format == "coveralls+":
