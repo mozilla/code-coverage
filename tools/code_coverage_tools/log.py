@@ -6,15 +6,31 @@
 import logging
 import logging.handlers
 import os
-import sys
-
-import structlog
+import re
 
 import importlib.metadata
 import sentry_sdk
+import structlog
 from sentry_sdk.integrations.logging import LoggingIntegration
 
 root = logging.getLogger()
+
+# Found on https://stackoverflow.com/questions/14693701/how-can-i-remove-the-ansi-escape-sequences-from-a-string-in-python
+# 7-bit C1 ANSI sequences
+ANSI_ESCAPE = re.compile(
+    r"""
+    \x1B  # ESC
+    (?:   # 7-bit C1 Fe (except CSI)
+        [@-Z\\-_]
+    |     # or [ for CSI, followed by a control sequence
+        \[
+        [0-?]*  # Parameter bytes
+        [ -/]*  # Intermediate bytes
+        [@-~]   # Final byte
+    )
+""",
+    re.VERBOSE,
+)
 
 
 class AppNameFilter(logging.Filter):
@@ -28,23 +44,6 @@ class AppNameFilter(logging.Filter):
         return True
 
 
-class ExtraFormatter(logging.Formatter):
-    def format(self, record):
-        log = super().format(record)
-
-        extra = {
-            key: value
-            for key, value in record.__dict__.items()
-            if key
-            not in list(sentry_sdk.integrations.logging.COMMON_RECORD_ATTRS)
-            + ["asctime", "app_name"]
-        }
-        if len(extra) > 0:
-            log += " | extra=" + str(extra)
-
-        return log
-
-
 def setup_papertrail(project_name, channel, PAPERTRAIL_HOST, PAPERTRAIL_PORT):
     """
     Setup papertrail account using taskcluster secrets
@@ -54,7 +53,7 @@ def setup_papertrail(project_name, channel, PAPERTRAIL_HOST, PAPERTRAIL_PORT):
     papertrail = logging.handlers.SysLogHandler(
         address=(PAPERTRAIL_HOST, int(PAPERTRAIL_PORT)),
     )
-    formatter = ExtraFormatter(
+    formatter = logging.Formatter(
         "%(app_name)s: %(asctime)s %(filename)s: %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )
@@ -63,6 +62,33 @@ def setup_papertrail(project_name, channel, PAPERTRAIL_HOST, PAPERTRAIL_PORT):
     # This filter is used to add the 'app_name' value to all logs to be formatted
     papertrail.addFilter(AppNameFilter(project_name, channel))
     root.addHandler(papertrail)
+
+
+def remove_color_codes(event, hint):
+    """
+    Remove ANSI color codes from a Sentry event before it gets published
+    """
+
+    def _remove(content):
+        try:
+            return ANSI_ESCAPE.sub("", content)
+        except Exception as e:
+            # Do not log here, rely on simple print
+            print(f"Failed to remove color code: {e}")
+            return content
+
+    # Remove from breadcrumb
+    breadcrumbs = event.get("breadcrumbs", {})
+    for value in breadcrumbs.get("values", []):
+        if "message" in value:
+            value["message"] = _remove(value["message"])
+
+    # Remove from log entry
+    logentry = event.get("logentry", {})
+    if "message" in logentry:
+        logentry["message"] = _remove(logentry["message"])
+
+    return event
 
 
 def setup_sentry(name, channel, dsn):
@@ -93,6 +119,7 @@ def setup_sentry(name, channel, dsn):
         server_name=name,
         environment=channel,
         release=importlib.metadata.version(f"code-coverage-{name}"),
+        before_send=remove_color_codes,
     )
     sentry_sdk.set_tag("site", site)
 
@@ -100,26 +127,6 @@ def setup_sentry(name, channel, dsn):
         # Add a Taskcluster task id when available
         # It will be shown in a new section called Task on the dashboard
         sentry_sdk.set_context("task", {"task_id": task_id})
-
-
-class RenameAttrsProcessor(structlog.processors.KeyValueRenderer):
-    """
-    Rename event_dict keys that will attempt to overwrite LogRecord common
-    attributes during structlog.stdlib.render_to_log_kwargs processing
-    """
-
-    def __call__(self, logger, method_name, event_dict):
-        to_rename = [
-            key
-            for key in event_dict
-            if key in sentry_sdk.integrations.logging.COMMON_RECORD_ATTRS
-        ]
-
-        for key in to_rename:
-            event_dict[f"{key}_"] = event_dict[key]
-            event_dict.pop(key)
-
-        return event_dict
 
 
 def init_logger(
@@ -133,12 +140,16 @@ def init_logger(
     if not channel:
         channel = os.environ.get("APP_CHANNEL")
 
-    logging.basicConfig(
-        format="%(asctime)s.%(msecs)06d [%(levelname)-8s] %(filename)s: %(message)s",
+    # Render extra information from structlog on default logging output
+    formatter = logging.Formatter(
+        "%(asctime)s.%(msecs)06d [%(levelname)-8s] %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
-        stream=sys.stdout,
-        level=level,
     )
+    handler = logging.StreamHandler()
+    handler.setFormatter(formatter)
+    root_logger = logging.getLogger()
+    root_logger.addHandler(handler)
+    root_logger.setLevel(level)
 
     # Log to papertrail
     if channel and PAPERTRAIL_HOST and PAPERTRAIL_PORT:
@@ -150,14 +161,11 @@ def init_logger(
 
     # Setup structlog
     processors = [
-        structlog.stdlib.PositionalArgumentsFormatter(),
+        structlog.contextvars.merge_contextvars,
+        structlog.processors.add_log_level,
         structlog.processors.StackInfoRenderer(),
-        structlog.processors.format_exc_info,
-        RenameAttrsProcessor(),
-        # Transpose the 'event_dict' from structlog into keyword arguments for logging.log
-        # E.g.: 'event' become 'msg' and, at the end, all remaining values from 'event_dict'
-        # are added as 'extra'
-        structlog.stdlib.render_to_log_kwargs,
+        structlog.dev.set_exc_info,
+        structlog.dev.ConsoleRenderer(),
     ]
 
     structlog.configure(
