@@ -316,35 +316,6 @@ tasks:
                 owner: bastien@mozilla.com
                 source: https://github.com/mozilla/code-coverage
 
-            - taskId: { $eval: as_slugid("addon_build") }
-              provisionerId: "${provisionerId}"
-              workerType: "${workerType}"
-              created: { $fromNow: "" }
-              deadline: { $fromNow: "1 hour" }
-              payload:
-                maxRunTime: 3600
-                image: node:20-alpine
-                command:
-                  - sh
-                  - -lxce
-                  - "apk add --quiet --update git python3 &&
-                    git clone --quiet ${repository} /src && cd /src/addon && git checkout ${head_rev} -b build &&
-                    npm install --no-progress &&
-                    npm run lint &&
-                    npm run build &&
-                    npm run test &&
-                    npm run export"
-                artifacts:
-                  public/addon:
-                    expires: { $fromNow: "2 weeks" }
-                    path: /src/addon/web-ext-artifacts
-                    type: directory
-              metadata:
-                name: Code Coverage Addon build
-                description: Build code-coverage webextension
-                owner: bastien@mozilla.com
-                source: https://github.com/mozilla/code-coverage
-
             - taskId: { $eval: as_slugid("frontend_build") }
               provisionerId: "${provisionerId}"
               workerType: "${workerType}"
@@ -470,7 +441,6 @@ tasks:
                 in:
                   taskId: { $eval: as_slugid("release") }
                   dependencies:
-                    - { $eval: as_slugid("addon_build") }
                     - { $eval: as_slugid("backend_build") }
                     - { $eval: as_slugid("frontend_build") }
                     - { $eval: as_slugid("report_check_tests") }
