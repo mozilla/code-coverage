@@ -39,7 +39,6 @@ tasks:
 
     channel_short:
       # Special case where naming is limited:
-      # * for the frontend upload on AWS S3, where the production bucket is named 'prod'
       # * on Heroku for the events runtime, where the production app is named 'prod'
       $if: 'tasks_for == "github-push"'
       then:
@@ -314,32 +313,6 @@ tasks:
                 owner: bastien@mozilla.com
                 source: https://github.com/mozilla/code-coverage
 
-            - taskId: { $eval: as_slugid("frontend_build") }
-              provisionerId: "${provisionerId}"
-              workerType: "${workerType}"
-              created: { $fromNow: "" }
-              deadline: { $fromNow: "1 hour" }
-              payload:
-                maxRunTime: 3600
-                image: node:20
-                env:
-                  BACKEND_URL: "${backend_url}"
-                command:
-                  - sh
-                  - -lxce
-                  - "git clone --quiet ${repository} /src && cd /src/frontend && git checkout ${head_rev} -b build &&
-                    npm install --no-progress && npm run release"
-                artifacts:
-                  public/frontend:
-                    expires: { $fromNow: "2 weeks" }
-                    path: /src/frontend/dist
-                    type: directory
-              metadata:
-                name: Code Coverage Frontend build
-                description: Build web single page application
-                owner: bastien@mozilla.com
-                source: https://github.com/mozilla/code-coverage
-
             - $if: 'channel in ["testing", "production"]'
               then:
                 taskId: { $eval: as_slugid("backend_deploy") }
@@ -400,38 +373,6 @@ tasks:
                   owner: bastien@mozilla.com
                   source: https://github.com/mozilla/code-coverage
 
-            - $if: 'channel in ["testing", "production"]'
-              then:
-                taskId: { $eval: as_slugid("frontend_deploy") }
-                created: { $fromNow: "" }
-                deadline: { $fromNow: "1 hour" }
-                provisionerId: "${provisionerId}"
-                workerType: "${workerType}"
-                dependencies:
-                  - { $eval: as_slugid("frontend_build") }
-                payload:
-                  features:
-                    # Needed for access to secret
-                    taskclusterProxy: true
-                  maxRunTime: 3600
-                  image: "${taskboot_image}"
-                  env:
-                    TASKCLUSTER_SECRET: "project/relman/code-coverage/deploy-${channel}"
-                  command:
-                    - taskboot
-                    - deploy-s3
-                    - --artifact-folder
-                    - public/frontend
-                    - --bucket
-                    - "codecoverage-${channel_short}-site-static-website"
-                scopes:
-                  - "secrets:get:project/relman/code-coverage/deploy-${channel}"
-                metadata:
-                  name: "Code Coverage Frontend deploy (${channel})"
-                  description: Deploy frontend build on environment
-                  owner: bastien@mozilla.com
-                  source: https://github.com/mozilla/code-coverage
-
             - $if: 'tasks_for == "github-push" && head_branch[:10] == "refs/tags/"'
               then:
                 $let:
@@ -440,7 +381,6 @@ tasks:
                   taskId: { $eval: as_slugid("release") }
                   dependencies:
                     - { $eval: as_slugid("backend_build") }
-                    - { $eval: as_slugid("frontend_build") }
                     - { $eval: as_slugid("report_check_tests") }
                   provisionerId: "${provisionerId}"
                   workerType: "${workerType}"
