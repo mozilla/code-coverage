@@ -71,13 +71,6 @@ repos:
         additional_dependencies:
           - types-requests==0.1.11
       - id: mypy
-        name: mypy-report
-        files: ^report/
-        entry: mypy report/
-        pass_filenames: false
-        additional_dependencies:
-          - types-requests==0.1.11
-      - id: mypy
         name: mypy-tools
         files: ^tools/
         entry: mypy tools/
