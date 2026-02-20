@@ -150,7 +150,7 @@ tasks:
                   - bot/Dockerfile
                 artifacts:
                   public/code-coverage-bot.tar.zst:
-                    expires: { $fromNow: "6 months" }
+                    expires: { $fromNow: "2 years" }
                     path: /bot.tar.zst
                     type: file
               routes:
