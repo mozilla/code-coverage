@@ -125,6 +125,7 @@ tasks:
             - taskId: { $eval: as_slugid("bot_build") }
               created: { $fromNow: "" }
               deadline: { $fromNow: "1 hour" }
+              expires: { $fromNow: "2 years" }
               provisionerId: "${provisionerId}"
               workerType: "${workerType}"
               dependencies:
