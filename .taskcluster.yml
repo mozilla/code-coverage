@@ -47,14 +47,6 @@ tasks:
         else: ${event.ref[11:]}
       else: "dev"
 
-    backend_url:
-      $if: 'tasks_for == "github-push"'
-      then:
-        $if: 'event.ref == "refs/heads/testing"'
-        then: "https://api.coverage.testing.moz.tools"
-        else: "https://api.coverage.moz.tools"
-      else: "https://api.coverage.moz.tools"
-
     provisionerId:
       $if: 'taskcluster_root_url == "https://firefox-ci-tc.services.mozilla.com"'
       then:
@@ -90,7 +82,6 @@ tasks:
                   - -lxce
                   - "git clone --quiet ${repository} /src && cd /src && git checkout ${head_rev} -b checks &&
                     cd /src/bot && pip install --disable-pip-version-check --no-cache-dir --quiet -r requirements-dev.txt &&
-                    cd /src/backend && pip install --disable-pip-version-check --no-cache-dir --quiet -r requirements-dev.txt &&
                     cd /src && pre-commit run -a --show-diff-on-failure"
               metadata:
                 name: "Code Coverage checks: linting"
@@ -170,27 +161,6 @@ tasks:
 
           # Run only on community Taskcluster
           'taskcluster_root_url == "https://community-tc.services.mozilla.com"':
-            - taskId: { $eval: as_slugid("backend_check_tests") }
-              provisionerId: "${provisionerId}"
-              workerType: "${workerType}"
-              created: { $fromNow: "" }
-              deadline: { $fromNow: "1 hour" }
-              payload:
-                maxRunTime: 3600
-                image: "${python_image}"
-                command:
-                  - sh
-                  - -lxce
-                  - "git clone --quiet ${repository} /src && cd /src && git checkout ${head_rev} -b checks &&
-                    cd /src/tools && pip3 install --disable-pip-version-check --no-cache-dir --quiet . &&
-                    cd /src/backend && pip install --disable-pip-version-check --no-cache-dir --quiet . && pip install --disable-pip-version-check --no-cache-dir --quiet -r requirements-dev.txt &&
-                    pytest -v"
-              metadata:
-                name: "Code Coverage Backend checks: unit tests"
-                description: Check python code with pytest
-                owner: bastien@mozilla.com
-                source: https://github.com/mozilla/code-coverage
-
             - taskId: { $eval: as_slugid("events_check_tests") }
               provisionerId: "${provisionerId}"
               workerType: "${workerType}"
@@ -208,47 +178,6 @@ tasks:
               metadata:
                 name: "Code Coverage Events checks: unit tests"
                 description: Check python code with pytest
-                owner: bastien@mozilla.com
-                source: https://github.com/mozilla/code-coverage
-
-            - taskId: { $eval: as_slugid("backend_build") }
-              created: { $fromNow: "" }
-              deadline: { $fromNow: "1 hour" }
-              provisionerId: "${provisionerId}"
-              workerType: "${workerType}"
-              dependencies:
-                - { $eval: as_slugid("check_lint") }
-                - { $eval: as_slugid("backend_check_tests") }
-              payload:
-                capabilities:
-                  privileged: true
-                maxRunTime: 3600
-                image: "${taskboot_image}"
-                env:
-                  GIT_REPOSITORY: ${repository}
-                  GIT_REVISION: ${head_rev}
-                command:
-                  - taskboot
-                  - build
-                  - --image
-                  - mozilla/code-coverage/backend
-                  - --tag
-                  - "${channel}"
-                  - --tag
-                  - "${head_rev}"
-                  - --write
-                  - /backend.tar
-                  - backend/Dockerfile
-                artifacts:
-                  public/code-coverage-backend.tar.zst:
-                    expires: { $fromNow: "2 weeks" }
-                    path: /backend.tar.zst
-                    type: file
-              scopes:
-                - docker-worker:capability:privileged
-              metadata:
-                name: Code Coverage Backend docker build
-                description: Build docker image with taskboot
                 owner: bastien@mozilla.com
                 source: https://github.com/mozilla/code-coverage
 
@@ -295,36 +224,6 @@ tasks:
 
             - $if: 'channel in ["testing", "production"]'
               then:
-                taskId: { $eval: as_slugid("backend_deploy") }
-                created: { $fromNow: "" }
-                deadline: { $fromNow: "1 hour" }
-                provisionerId: "${provisionerId}"
-                workerType: "${workerType}"
-                dependencies:
-                  - { $eval: as_slugid("backend_build") }
-                payload:
-                  features:
-                    taskclusterProxy: true
-                  maxRunTime: 3600
-                  image: "${taskboot_image}"
-                  command:
-                    - taskboot
-                    - deploy-heroku
-                    - --heroku-app
-                    - "code-coverage-${channel}"
-                    - web:public/code-coverage-backend.tar.zst
-                  env:
-                    TASKCLUSTER_SECRET: "project/relman/code-coverage/deploy-${channel}"
-                scopes:
-                  - "secrets:get:project/relman/code-coverage/deploy-${channel}"
-                metadata:
-                  name: "Code Coverage Backend deployment (${channel})"
-                  description: Deploy docker image on Heroku
-                  owner: bastien@mozilla.com
-                  source: https://github.com/mozilla/code-coverage
-
-            - $if: 'channel in ["testing", "production"]'
-              then:
                 taskId: { $eval: as_slugid("events_deploy") }
                 created: { $fromNow: "" }
                 deadline: { $fromNow: "1 hour" }
@@ -360,7 +259,7 @@ tasks:
                 in:
                   taskId: { $eval: as_slugid("release") }
                   dependencies:
-                    - { $eval: as_slugid("backend_build") }
+                    - { $eval: as_slugid("check_lint") }
                   provisionerId: "${provisionerId}"
                   workerType: "${workerType}"
                   created: { $fromNow: "" }
