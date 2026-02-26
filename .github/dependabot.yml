@@ -1,12 +1,5 @@
 version: 2
 updates:
-  - package-ecosystem: npm
-    directory: "/addon"
-    schedule:
-      interval: weekly
-    open-pull-requests-limit: 99
-    labels:
-      - addon
   - package-ecosystem: pip
     directory: "/bot"
     schedule:
