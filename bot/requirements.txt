@@ -1,7 +1,9 @@
 -e ../tools #egg=code-coverage-tools
 google-cloud-storage==3.9.0
 libmozdata==0.2.12
+pytz==2025.2
 pyyaml==6.0.3
+taskcluster==96.6.2
 tenacity==9.1.4
 tqdm==4.67.3
 zstandard==0.25.0
