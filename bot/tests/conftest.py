@@ -8,6 +8,7 @@ import os
 import shutil
 import tempfile
 import zipfile
+from configparser import ConfigParser
 from contextlib import contextmanager
 
 import hglib
@@ -291,6 +292,17 @@ def mock_phabricator():
     """
     Mock phabricator authentication process
     """
+    config_file = tempfile.NamedTemporaryFile()
+    with open(config_file.name, "w") as f:
+        custom_conf = ConfigParser()
+        custom_conf.add_section("User-Agent")
+        custom_conf.set("User-Agent", "name", "code-coverage-bot/1.0")
+        custom_conf.write(f)
+        f.seek(0)
+
+    from libmozdata import config
+
+    config.set_config(config.ConfigIni(config_file.name))
 
     def _response(name):
         path = os.path.join(FIXTURES_DIR, f"phabricator_{name}.json")

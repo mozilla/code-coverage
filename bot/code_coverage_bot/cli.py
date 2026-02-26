@@ -10,6 +10,7 @@ import yaml
 
 from code_coverage_bot.secrets import secrets
 from code_coverage_bot.taskcluster import taskcluster_config
+from code_coverage_tools.libmozdata import setup as setup_libmozdata
 from code_coverage_tools.log import init_logger
 
 
@@ -67,5 +68,8 @@ def setup_cli(ask_repository=True, ask_revision=True):
         PAPERTRAIL_PORT=secrets.get("PAPERTRAIL_PORT"),
         SENTRY_DSN=secrets.get("SENTRY_DSN"),
     )
+
+    # Setup libmozdata configuration.
+    setup_libmozdata("code_coverage_bot")
 
     return args
