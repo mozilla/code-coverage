@@ -13,7 +13,7 @@ def test_mercurial():
 
     # Check mercurial version
     output = run_check(["hg", "version", "-T", "{ver}"])
-    assert output.decode("utf-8").startswith("6.8.1")
+    assert output.decode("utf-8").startswith("7.2")
 
     # Check needed extensions
     output = run_check(["hg", "version", "-T", "{extensions}"])
