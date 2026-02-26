@@ -3,4 +3,4 @@ async-timeout==5.0.1
 pytz==2025.2
 sentry-sdk==2.53.0
 structlog==25.5.0
-taskcluster==96.4.0
+taskcluster==96.6.2
