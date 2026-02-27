@@ -20,7 +20,7 @@ from code_coverage_bot import uploader
 from code_coverage_bot import utils
 from code_coverage_bot.secrets import secrets
 from code_coverage_bot.taskcluster import taskcluster_config
-from code_coverage_tools.gcp import get_bucket
+from code_coverage_bot.gcp import get_bucket
 
 logger = structlog.get_logger(__name__)
 

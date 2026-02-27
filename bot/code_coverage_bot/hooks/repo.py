@@ -20,7 +20,7 @@ from code_coverage_bot.phabricator import PhabricatorUploader
 from code_coverage_bot.phabricator import parse_revision_id
 from code_coverage_bot.secrets import secrets
 from code_coverage_bot.taskcluster import taskcluster_config
-from code_coverage_tools import gcp
+from code_coverage_bot import gcp
 
 logger = structlog.get_logger(__name__)
 
