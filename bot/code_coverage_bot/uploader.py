@@ -2,13 +2,13 @@
 import itertools
 import os.path
 
-import requests
 import structlog
 import zstandard as zstd
 from google.cloud.storage.bucket import Bucket
 
 from code_coverage_bot.secrets import secrets
 from code_coverage_bot.gcp import get_bucket
+from code_coverage_bot import hgmo
 
 logger = structlog.get_logger(__name__)
 GCP_COVDIR_PATH = "{repository}/{revision}/{platform}:{suite}.json.zstd"
@@ -60,15 +60,24 @@ def gcp_covdir_exists(
     return blob.exists()
 
 
-def gcp_latest(repository):
+def gcp_latest(repo_url):
     """
     List the latest reports ingested on the backend
     """
-    params = {"repository": repository}
-    backend_host = secrets[secrets.BACKEND_HOST]
-    resp = requests.get("{}/v2/latest".format(backend_host), params=params)
-    resp.raise_for_status()
-    return resp.json()
+    assert (
+        secrets[secrets.GOOGLE_CLOUD_STORAGE] is not None
+    ), "Missing GOOGLE_CLOUD_STORAGE secret"
+    bucket = get_bucket(secrets[secrets.GOOGLE_CLOUD_STORAGE])
+
+    for push_id, push_data in hgmo.iter_pushes(server_address=repo_url):
+        changesets: list[str] = push_data.get("changesets", [])
+        if not changesets:
+            continue
+
+        if gcp_covdir_exists(bucket, "mozilla-central", changesets[-1], "all", "all"):
+            return changesets[-1]
+
+    return None
 
 
 def covdir_paths(report):

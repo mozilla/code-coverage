@@ -6,6 +6,9 @@ import subprocess
 import requests
 import structlog
 
+from typing import Iterable
+
+
 logger = structlog.get_logger(__name__)
 
 
@@ -56,10 +59,14 @@ class HGMO(object):
         logger.info("hgmo has been killed")
 
     def get_pushes(
-        self, startID=None, startDate=None, changeset=None, full=True, tipsonly=False
+        self,
+        startID=None,
+        endID=None,
+        startDate=None,
+        changeset=None,
+        full=True,
+        tipsonly=False,
     ):
-        assert startID is not None or startDate is not None or changeset is not None
-
         params = {"version": 2}
 
         if full:
@@ -70,6 +77,9 @@ class HGMO(object):
 
         if startID is not None:
             params["startID"] = startID
+
+        if endID is not None:
+            params["endID"] = endID
 
         if startDate is not None:
             params["startdate"] = startDate
@@ -96,3 +106,33 @@ class HGMO(object):
         )
         r.raise_for_status()
         return r.json()["changesets"]
+
+
+def iter_pushes(
+    server_address: str,
+) -> Iterable[tuple[int, dict]]:
+    """Yield pushes from newest to oldest push-id."""
+    start_id = None
+    end_id = None
+
+    with HGMO(server_address=server_address) as hgmo_server:
+        while True:
+            data = hgmo_server.get_pushes(
+                startID=start_id, endID=end_id, full=False, tipsonly=True
+            )
+            pushes = data.get("pushes", {})
+
+            if not pushes:
+                return
+
+            push_ids = sorted((int(push_id) for push_id in pushes.keys()), reverse=True)
+            for push_id in push_ids:
+                yield push_id, pushes[str(push_id)]
+
+            oldest_seen = push_ids[-1]
+            if oldest_seen <= 1:
+                return
+
+            # json-pushes treats startID as exclusive and endID as inclusive.
+            end_id = oldest_seen - 1
+            start_id = max(1, end_id - len(pushes))

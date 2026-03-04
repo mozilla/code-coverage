@@ -23,7 +23,7 @@ class CronTriggerHook(Hook):
     def __init__(self, *args, **kwargs):
         # Retrieve latest ingested revision
         try:
-            revision = uploader.gcp_latest("mozilla-central")[0]["revision"]
+            revision = uploader.gcp_latest(config.MOZILLA_CENTRAL_REPOSITORY)
         except Exception as e:
             logger.warn("Failed to retrieve the latest reports ingested: {}".format(e))
             raise
