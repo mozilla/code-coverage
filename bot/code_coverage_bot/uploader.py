@@ -45,9 +45,6 @@ def gcp(repository, revision, report, platform, suite):
 
     logger.info("Uploaded {} on {}".format(path, bucket))
 
-    # Trigger ingestion on backend
-    gcp_ingest(repository, revision, platform, suite)
-
     return blob
 
 
@@ -62,38 +59,6 @@ def gcp_covdir_exists(
     )
     blob = bucket.blob(path)
     return blob.exists()
-
-
-@tenacity.retry(
-    stop=tenacity.stop_after_attempt(10),
-    wait=tenacity.wait_exponential(multiplier=1, min=16, max=64),
-    reraise=True,
-)
-def gcp_ingest(repository, revision, platform, suite):
-    """
-    The GCP report ingestion is triggered remotely on a backend
-    by making a simple HTTP request on the /v2/path endpoint
-    By specifying the exact new revision processed, the backend
-    will download automatically the new report.
-    """
-    params = {"repository": repository, "changeset": revision}
-    if platform:
-        params["platform"] = platform
-    if suite:
-        params["suite"] = suite
-    backend_host = secrets[secrets.BACKEND_HOST]
-    logger.info(
-        "Ingesting report on backend",
-        host=backend_host,
-        repository=repository,
-        revision=revision,
-        platform=platform,
-        suite=suite,
-    )
-    resp = requests.get("{}/v2/path".format(backend_host), params=params)
-    resp.raise_for_status()
-    logger.info("Successfully ingested report on backend !")
-    return resp
 
 
 def gcp_latest(repository):
