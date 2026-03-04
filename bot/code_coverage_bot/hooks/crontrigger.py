@@ -50,6 +50,6 @@ class CronTriggerHook(Hook):
 
 def main() -> None:
     logger.info("Starting code coverage bot for crontrigger")
-    args = setup_cli(ask_revision=False, ask_repository=False)
+    args = setup_cli(parameters=False)
     hook = CronTriggerHook(args.task_name_filter, None, args.working_dir)
     hook.run()

@@ -14,15 +14,18 @@ from code_coverage_bot.libmozdata import setup as setup_libmozdata
 from code_coverage_tools.log import init_logger
 
 
-def setup_cli(ask_repository=True, ask_revision=True):
+def setup_cli(parameters=True):
     """
     Setup CLI options parser and taskcluster bootstrap
     """
     parser = argparse.ArgumentParser(description="Mozilla Code Coverage Bot")
-    if ask_repository:
+    if parameters:
         parser.add_argument("--repository", default=os.environ.get("REPOSITORY"))
-    if ask_revision:
+
+        parser.add_argument("--task-group-id", default=os.environ.get("TASK_GROUP_ID"))
+
         parser.add_argument("--revision", default=os.environ.get("REVISION"))
+
     parser.add_argument(
         "--cache-root", required=True, help="Cache root, used to pull changesets"
     )
@@ -49,6 +52,18 @@ def setup_cli(ask_repository=True, ask_revision=True):
     parser.add_argument("--taskcluster-client-id", help="Taskcluster Client ID")
     parser.add_argument("--taskcluster-access-token", help="Taskcluster Access token")
     args = parser.parse_args()
+
+    if parameters:
+        if args.task_group_id and (args.repository or args.revision):
+            parser.error(
+                "Provide either --task-group-id or --repository/--revision, not both."
+            )
+
+        if args.repository and not args.revision:
+            parser.error("--repository requires --revision")
+
+        if not args.task_group_id and not args.repository:
+            parser.error("Provide either --task-group-id or --repository/--revision.")
 
     # Auth on Taskcluster
     taskcluster_config.auth(args.taskcluster_client_id, args.taskcluster_access_token)

@@ -11,6 +11,7 @@ from datetime import timedelta
 import structlog
 
 from code_coverage_bot import config
+from code_coverage_bot import taskcluster
 from code_coverage_bot import hgmo
 from code_coverage_bot import uploader
 from code_coverage_bot.cli import setup_cli
@@ -229,14 +230,22 @@ def main():
     logger.info("Starting code coverage bot for repository")
     args = setup_cli()
 
+    if args.repository:
+        repository = args.repository
+        revision = args.revision
+    else:
+        decision_task = taskcluster.get_task_details(args.task_group_id)
+        repository = decision_task["payload"]["env"]["GECKO_HEAD_REPOSITORY"]
+        revision = decision_task["payload"]["env"]["GECKO_HEAD_REV"]
+
     hooks = {
         config.MOZILLA_CENTRAL_REPOSITORY: MozillaCentralHook,
         config.TRY_REPOSITORY: TryHook,
     }
-    hook_class = hooks.get(args.repository)
-    assert hook_class is not None, f"Unsupported repository {args.repository}"
+    hook_class = hooks.get(repository)
+    assert hook_class is not None, f"Unsupported repository {repository}"
 
     hook = hook_class(
-        args.revision, args.task_name_filter, args.cache_root, args.working_dir
+        revision, args.task_name_filter, args.cache_root, args.working_dir
     )
     hook.run()
