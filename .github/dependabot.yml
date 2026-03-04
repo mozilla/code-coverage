@@ -14,10 +14,3 @@ updates:
     open-pull-requests-limit: 99
     labels:
       - bot
-  - package-ecosystem: pip
-    directory: "/tools"
-    schedule:
-      interval: weekly
-    open-pull-requests-limit: 99
-    labels:
-      - tools

@@ -11,7 +11,7 @@ import yaml
 from code_coverage_bot.secrets import secrets
 from code_coverage_bot.taskcluster import taskcluster_config
 from code_coverage_bot.libmozdata import setup as setup_libmozdata
-from code_coverage_tools.log import init_logger
+from code_coverage_bot.log import init_logger
 
 
 def setup_cli(parameters=True):
