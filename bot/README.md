@@ -44,7 +44,6 @@ Write your local configuration as YAML:
 common:
   APP_CHANNEL: dev
 bot:
-  BACKEND_HOST: "http://localhost:8000"
   EMAIL_ADDRESSES: []
   PHABRICATOR_TOKEN: api-xxx
   PHABRICATOR_ENABLED: false

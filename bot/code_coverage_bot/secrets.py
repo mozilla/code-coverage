@@ -9,7 +9,6 @@ from code_coverage_bot.taskcluster import taskcluster_config
 class Secrets(dict):
     EMAIL_ADDRESSES = "EMAIL_ADDRESSES"
     APP_CHANNEL = "APP_CHANNEL"
-    BACKEND_HOST = "BACKEND_HOST"
     PHABRICATOR_ENABLED = "PHABRICATOR_ENABLED"
     PHABRICATOR_URL = "PHABRICATOR_URL"
     PHABRICATOR_TOKEN = "PHABRICATOR_TOKEN"
@@ -22,7 +21,6 @@ class Secrets(dict):
             prefixes=["common", "bot"],
             required=[
                 Secrets.APP_CHANNEL,
-                Secrets.BACKEND_HOST,
                 Secrets.GOOGLE_CLOUD_STORAGE,
                 Secrets.PHABRICATOR_ENABLED,
                 Secrets.PHABRICATOR_URL,
