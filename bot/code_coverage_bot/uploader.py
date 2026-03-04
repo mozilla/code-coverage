@@ -4,7 +4,6 @@ import os.path
 
 import requests
 import structlog
-import tenacity
 import zstandard as zstd
 from google.cloud.storage.bucket import Bucket
 
