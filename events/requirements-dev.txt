@@ -1,4 +1,0 @@
-pytest
-pytest-asyncio
-pytest-responses==0.5.1
-responses
