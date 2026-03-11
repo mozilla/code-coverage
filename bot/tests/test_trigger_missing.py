@@ -92,7 +92,7 @@ def test_trigger_from_scratch(
                 assert payload == {
                     "REPOSITORY": "https://hg.mozilla.org/mozilla-central",
                     "REVISION": rev,
-                    "taskGroupId": "myGroupId",
+                    "coverageIngestionTaskGroupId": "myGroupId",
                     "taskName": f"covdir for {rev}",
                 }
                 trigger_hook_calls += 1
@@ -124,15 +124,15 @@ def test_trigger_from_scratch(
         if get_task_details_calls == 0:
             assert decision_task_id == f"decisionTask-{revision5}"
             get_task_details_calls += 1
-            return {"taskGroupId": f"decisionTaskGroup-{revision5}"}
+            return {"coverageIngestionTaskGroupId": f"decisionTaskGroup-{revision5}"}
         elif get_task_details_calls == 1:
             assert decision_task_id == f"decisionTask-{revision4}"
             get_task_details_calls += 1
-            return {"taskGroupId": f"decisionTaskGroup-{revision4}"}
+            return {"coverageIngestionTaskGroupId": f"decisionTaskGroup-{revision4}"}
         elif get_task_details_calls == 2:
             assert decision_task_id == f"decisionTask-{revision2}"
             get_task_details_calls += 1
-            return {"taskGroupId": f"decisionTaskGroup-{revision2}"}
+            return {"coverageIngestionTaskGroupId": f"decisionTaskGroup-{revision2}"}
 
     monkeypatch.setattr(taskcluster, "get_task_details", get_task_details)
 
@@ -286,7 +286,7 @@ def test_trigger_from_preexisting(
                 assert payload == {
                     "REPOSITORY": "https://hg.mozilla.org/mozilla-central",
                     "REVISION": revision4,
-                    "taskGroupId": "myGroupId",
+                    "coverageIngestionTaskGroupId": "myGroupId",
                     "taskName": f"covdir for {revision4}",
                 }
                 trigger_hook_calls += 1
@@ -312,7 +312,7 @@ def test_trigger_from_preexisting(
         nonlocal get_task_details_calls
         assert decision_task_id == f"decisionTask-{revision4}"
         get_task_details_calls += 1
-        return {"taskGroupId": f"decisionTaskGroup-{revision4}"}
+        return {"coverageIngestionTaskGroupId": f"decisionTaskGroup-{revision4}"}
 
     monkeypatch.setattr(taskcluster, "get_task_details", get_task_details)
 

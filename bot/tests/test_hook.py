@@ -17,7 +17,7 @@ payloads = [
         {
             "firedBy": "triggerHook",
             "taskId": "xxx",
-            "payload": {"taskName": "Custom task name", "taskGroupId": "yyyy"},
+            "payload": {"taskName": "Custom task name", "coverageTaskGroupId": "yyyy"},
         },
     ),
     # Cron trigger

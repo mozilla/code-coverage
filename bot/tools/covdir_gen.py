@@ -24,7 +24,7 @@ def trigger_task(app_channel, task_group_id, commit):
     payload = {
         "REPOSITORY": MC_REPO,
         "REVISION": commit["changeset"],
-        "taskGroupId": task_group_id,
+        "coverageIngestionTaskGroupId": task_group_id,
         "taskName": name,
     }
     hook_id = HOOK_ID.format(app_channel=app_channel)

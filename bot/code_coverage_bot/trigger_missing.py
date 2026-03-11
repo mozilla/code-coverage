@@ -39,7 +39,7 @@ def trigger_task(task_group_id: str, revision: str) -> None:
         {
             "REPOSITORY": config.MOZILLA_CENTRAL_REPOSITORY,
             "REVISION": revision,
-            "taskGroupId": task_group_id,
+            "coverageIngestionTaskGroupId": task_group_id,
             "taskName": "covdir for {}".format(revision),
         },
     )

@@ -43,7 +43,7 @@ def trigger_task(task_group_id, repository, commit):
     payload = {
         "REPOSITORY": repository,
         "REVISION": commit,
-        "taskGroupId": task_group_id,
+        "coverageIngestionTaskGroupId": task_group_id,
         "taskName": name,
     }
     hook_id = HOOK_ID.format(app_channel=secrets[secrets.APP_CHANNEL])
