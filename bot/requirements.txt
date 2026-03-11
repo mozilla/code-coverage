@@ -4,7 +4,7 @@ pytz==2026.1.post1
 pyyaml==6.0.3
 sentry-sdk==2.54.0
 structlog==25.5.0
-taskcluster==97.0.1
+taskcluster==97.1.0
 tenacity==9.1.4
 tqdm==4.67.3
 zstandard==0.25.0
