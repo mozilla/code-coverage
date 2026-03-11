@@ -22,7 +22,7 @@ def setup_cli(parameters=True):
     if parameters:
         parser.add_argument("--repository", default=os.environ.get("REPOSITORY"))
 
-        parser.add_argument("--task-group-id", default=os.environ.get("TASK_GROUP_ID"))
+        parser.add_argument("--task-group-id", default=os.environ.get("TESTS_TASK_GROUP_ID"))
 
         parser.add_argument("--revision", default=os.environ.get("REVISION"))
 
