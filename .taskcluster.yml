@@ -153,7 +153,7 @@ tasks:
 
                       command:
                           - run-task
-                          - '--code-coverage-checkout=/builds/worker/checkouts/src'
+                          - '--code_coverage-checkout=/builds/worker/checkouts/src'
                           - '--'
                           - bash
                           - -cx
