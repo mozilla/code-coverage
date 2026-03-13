@@ -6,184 +6,184 @@ version: 1
 reporting: checks-v1
 autoCancelPreviousChecks: true
 policy:
-    pullRequests: public
+  pullRequests: public
 tasks:
-    - $let:
-          trustDomain: code-analysis
-          ownerEmail:
-              $switch:
-                  'tasks_for == "github-push"': '${event.pusher.email}'
-                  'tasks_for == "github-release"': '${event.sender.login}@users.noreply.github.com'
-                  'tasks_for[:19] == "github-pull-request"': '${event.pull_request.user.login}@users.noreply.github.com'
-          baseRepoUrl:
-              $switch:
-                  'tasks_for[:19] == "github-pull-request"': '${event.pull_request.base.repo.html_url}'
-                  $default: '${event.repository.html_url}'
-          repoUrl:
-              $switch:
-                  'tasks_for[:19] == "github-pull-request"': '${event.pull_request.head.repo.html_url}'
-                  $default: '${event.repository.html_url}'
-          project:
-              $switch:
-                  'tasks_for in ["github-push", "github-release"]': '${event.repository.name}'
-                  'tasks_for[:19] == "github-pull-request"': '${event.pull_request.base.repo.name}'
-          head_ref:
-              $switch:
-                  'tasks_for[:19] == "github-pull-request"': ${event.pull_request.head.ref}
-                  'tasks_for == "github-push"': ${event.ref}
-                  'tasks_for == "github-release"': ${event.release.tag_name}
-          base_ref:
-              $switch:
-                  'tasks_for[:19] == "github-pull-request"': ${event.pull_request.base.ref}
-                  'tasks_for == "github-push" && event.base_ref': ${event.base_ref}
-                  'tasks_for == "github-push" && !(event.base_ref)': ${event.ref}
-                  'tasks_for == "github-release"': ''
-          base_sha:
-              $switch:
-                  'tasks_for == "github-push"': '${event.before}'
-                  'tasks_for == "github-release"': '${event.release.target_commitish}'
-                  'tasks_for[:19] == "github-pull-request"': '${event.pull_request.base.sha}'
-          head_sha:
-              $switch:
-                  'tasks_for == "github-push"': '${event.after}'
-                  'tasks_for == "github-release"': '${event.release.tag_name}'
-                  'tasks_for[:19] == "github-pull-request"': '${event.pull_request.head.sha}'
-          ownTaskId:
-              $eval: as_slugid("decision_task")
-          pullRequestAction:
-              $switch:
-                  'tasks_for[:19] == "github-pull-request"': ${event.action}
-                  $default: 'UNDEFINED'
-          releaseAction:
-              $if: 'tasks_for == "github-release"'
-              then: ${event.action}
-              else: 'UNDEFINED'
-          isPullRequest:
-              $eval: 'tasks_for[:19] == "github-pull-request"'
+  - $let:
+      trustDomain: code-analysis
+      ownerEmail:
+        $switch:
+          'tasks_for == "github-push"': "${event.pusher.email}"
+          'tasks_for == "github-release"': "${event.sender.login}@users.noreply.github.com"
+          'tasks_for[:19] == "github-pull-request"': "${event.pull_request.user.login}@users.noreply.github.com"
+      baseRepoUrl:
+        $switch:
+          'tasks_for[:19] == "github-pull-request"': "${event.pull_request.base.repo.html_url}"
+          $default: "${event.repository.html_url}"
+      repoUrl:
+        $switch:
+          'tasks_for[:19] == "github-pull-request"': "${event.pull_request.head.repo.html_url}"
+          $default: "${event.repository.html_url}"
+      project:
+        $switch:
+          'tasks_for in ["github-push", "github-release"]': "${event.repository.name}"
+          'tasks_for[:19] == "github-pull-request"': "${event.pull_request.base.repo.name}"
+      head_ref:
+        $switch:
+          'tasks_for[:19] == "github-pull-request"': ${event.pull_request.head.ref}
+          'tasks_for == "github-push"': ${event.ref}
+          'tasks_for == "github-release"': ${event.release.tag_name}
+      base_ref:
+        $switch:
+          'tasks_for[:19] == "github-pull-request"': ${event.pull_request.base.ref}
+          'tasks_for == "github-push" && event.base_ref': ${event.base_ref}
+          'tasks_for == "github-push" && !(event.base_ref)': ${event.ref}
+          'tasks_for == "github-release"': ""
+      base_sha:
+        $switch:
+          'tasks_for == "github-push"': "${event.before}"
+          'tasks_for == "github-release"': "${event.release.target_commitish}"
+          'tasks_for[:19] == "github-pull-request"': "${event.pull_request.base.sha}"
+      head_sha:
+        $switch:
+          'tasks_for == "github-push"': "${event.after}"
+          'tasks_for == "github-release"': "${event.release.tag_name}"
+          'tasks_for[:19] == "github-pull-request"': "${event.pull_request.head.sha}"
+      ownTaskId:
+        $eval: as_slugid("decision_task")
+      pullRequestAction:
+        $switch:
+          'tasks_for[:19] == "github-pull-request"': ${event.action}
+          $default: "UNDEFINED"
+      releaseAction:
+        $if: 'tasks_for == "github-release"'
+        then: ${event.action}
+        else: "UNDEFINED"
+      isPullRequest:
+        $eval: 'tasks_for[:19] == "github-pull-request"'
+    in:
+      $let:
+        short_head_ref:
+          $switch:
+            'head_ref[:10] == "refs/tags/"': "${head_ref[10:]}"
+            'head_ref[:11] == "refs/heads/"': "${head_ref[11:]}"
+            $default: "${head_ref}"
+        level:
+          $if: 'tasks_for in ["github-release", "github-push"] && repoUrl == "https://github.com/mozilla/code-coverage"'
+          then: 3
+          else: 1
       in:
-          $let:
-              short_head_ref:
-                  $switch:
-                      'head_ref[:10] == "refs/tags/"': '${head_ref[10:]}'
-                      'head_ref[:11] == "refs/heads/"': '${head_ref[11:]}'
-                      $default: '${head_ref}'
-              level:
-                  $if: 'tasks_for in ["github-release", "github-push"] && repoUrl == "https://github.com/mozilla/code-coverage"'
-                  then: 3
-                  else: 1
-          in:
-              $if: >
-                  (tasks_for == "github-push" && short_head_ref in ["master", "production", "testing"])
-                  || (tasks_for == "github-release" && releaseAction == "published")
-                  || (isPullRequest && pullRequestAction in ["opened", "reopened", "synchronize"])
-              then:
-                  taskId: '${ownTaskId}'
-                  taskGroupId: '${ownTaskId}'
-                  schedulerId: '${trustDomain}-level-${level}'
+        $if: >
+          (tasks_for == "github-push" && short_head_ref in ["master", "production", "testing"])
+          || (tasks_for == "github-release" && releaseAction == "published")
+          || (isPullRequest && pullRequestAction in ["opened", "reopened", "synchronize"])
+        then:
+          taskId: "${ownTaskId}"
+          taskGroupId: "${ownTaskId}"
+          schedulerId: "${trustDomain}-level-${level}"
 
-                  created: {$fromNow: ''}
-                  deadline: {$fromNow: '1 day'}
-                  expires: {$fromNow: '1 year 1 second'}
+          created: { $fromNow: "" }
+          deadline: { $fromNow: "1 day" }
+          expires: { $fromNow: "1 year 1 second" }
 
-                  metadata:
-                      owner: "${ownerEmail}"
-                      source: "${repoUrl}/raw/${head_sha}/.taskcluster.yml"
-                      name: "Decision Task"
-                      description: 'The task that creates all of the other tasks in the task graph'
+          metadata:
+            owner: "${ownerEmail}"
+            source: "${repoUrl}/raw/${head_sha}/.taskcluster.yml"
+            name: "Decision Task"
+            description: "The task that creates all of the other tasks in the task graph"
 
-                  provisionerId: "${trustDomain}-${level}"
-                  workerType: "decision"
+          provisionerId: "${trustDomain}-${level}"
+          workerType: "decision"
 
-                  tags:
-                      createdForUser: "${ownerEmail}"
-                      kind: decision-task
+          tags:
+            createdForUser: "${ownerEmail}"
+            kind: decision-task
 
-                  routes:
-                      $flatten:
-                          - checks
-                          - $if: 'tasks_for == "github-push"'
-                            then:
-                                - "index.${trustDomain}.v2.${project}.latest.taskgraph.decision"
-                                - "index.${trustDomain}.v2.${project}.revision.${head_sha}.taskgraph.decision"
-                            else: []
+          routes:
+            $flatten:
+              - checks
+              - $if: 'tasks_for == "github-push"'
+                then:
+                  - "index.${trustDomain}.v2.${project}.latest.taskgraph.decision"
+                  - "index.${trustDomain}.v2.${project}.revision.${head_sha}.taskgraph.decision"
+                else: []
 
-                  scopes:
-                      $switch:
-                          'tasks_for == "github-push"':
-                              - 'assume:repo:${repoUrl[8:]}:branch:${short_head_ref}'
-                          'tasks_for == "github-release"':
-                              - 'assume:repo:${repoUrl[8:]}:release:${releaseAction}'
-                          'isPullRequest':
-                              - 'assume:repo:github.com/${event.pull_request.base.repo.full_name}:${tasks_for[7:]}'
+          scopes:
+            $switch:
+              'tasks_for == "github-push"':
+                - "assume:repo:${repoUrl[8:]}:branch:${short_head_ref}"
+              'tasks_for == "github-release"':
+                - "assume:repo:${repoUrl[8:]}:release:${releaseAction}"
+              "isPullRequest":
+                - "assume:repo:github.com/${event.pull_request.base.repo.full_name}:${tasks_for[7:]}"
 
-                  dependencies: []
-                  requires: all-completed
+          dependencies: []
+          requires: all-completed
 
-                  priority:
-                      $if: 'tasks_for == "github-push" || isPullRequest'
-                      then: very-low
-                      else: lowest
+          priority:
+            $if: 'tasks_for == "github-push" || isPullRequest'
+            then: very-low
+            else: lowest
 
-                  retries: 5
+          retries: 5
 
-                  payload:
-                      env:
-                          $merge:
-                              - CODE_COVERAGE_BASE_REPOSITORY: '${baseRepoUrl}'
-                                CODE_COVERAGE_BASE_REF: '${base_ref}'
-                                CODE_COVERAGE_BASE_REV: '${base_sha}'
-                                CODE_COVERAGE_HEAD_REPOSITORY: '${repoUrl}'
-                                CODE_COVERAGE_HEAD_REF: '${head_ref}'
-                                CODE_COVERAGE_HEAD_REV: '${head_sha}'
-                                CODE_COVERAGE_REPOSITORY_TYPE: git
-                                REPOSITORIES: {$json: {code_coverage: code-coverage}}
-                              - $if: 'isPullRequest'
-                                then:
-                                    CODE_COVERAGE_PULL_REQUEST_NUMBER: '${event.pull_request.number}'
+          payload:
+            env:
+              $merge:
+                - CODE_COVERAGE_BASE_REPOSITORY: "${baseRepoUrl}"
+                  CODE_COVERAGE_BASE_REF: "${base_ref}"
+                  CODE_COVERAGE_BASE_REV: "${base_sha}"
+                  CODE_COVERAGE_HEAD_REPOSITORY: "${repoUrl}"
+                  CODE_COVERAGE_HEAD_REF: "${head_ref}"
+                  CODE_COVERAGE_HEAD_REV: "${head_sha}"
+                  CODE_COVERAGE_REPOSITORY_TYPE: git
+                  REPOSITORIES: { $json: { code_coverage: code-coverage } }
+                - $if: "isPullRequest"
+                  then:
+                    CODE_COVERAGE_PULL_REQUEST_NUMBER: "${event.pull_request.number}"
 
-                      cache:
-                          "${trustDomain}-level-${level}-checkouts-v2": /builds/worker/checkouts
+            cache:
+              "${trustDomain}-level-${level}-checkouts-v2": /builds/worker/checkouts
 
-                      features:
-                          taskclusterProxy: true
+            features:
+              taskclusterProxy: true
 
-                      image: mozillareleases/taskgraph:decision-v19.2.1
+            image: mozillareleases/taskgraph:decision-v19.2.1
 
-                      maxRunTime: 1800
+            maxRunTime: 1800
 
-                      command:
-                          - run-task
-                          - '--code_coverage-checkout=/builds/worker/checkouts/src'
-                          - '--'
-                          - bash
-                          - -cx
-                          - >
-                              cd /builds/worker/checkouts/src &&
-                              ln -s /builds/worker/artifacts artifacts &&
-                              taskgraph decision
-                              --pushlog-id='0'
-                              --pushdate='0'
-                              --project='${project}'
-                              --owner='${ownerEmail}'
-                              --level='${level}'
-                              --repository-type=git
-                              --tasks-for='${tasks_for}'
-                              --base-repository='${baseRepoUrl}'
-                              --base-ref='${base_ref}'
-                              --base-rev='${base_sha}'
-                              --head-repository='${repoUrl}'
-                              --head-ref='${head_ref}'
-                              --head-rev='${head_sha}'
+            command:
+              - run-task
+              - "--code_coverage-checkout=/builds/worker/checkouts/src"
+              - "--"
+              - bash
+              - -cx
+              - >
+                cd /builds/worker/checkouts/src &&
+                ln -s /builds/worker/artifacts artifacts &&
+                taskgraph decision
+                --pushlog-id='0'
+                --pushdate='0'
+                --project='${project}'
+                --owner='${ownerEmail}'
+                --level='${level}'
+                --repository-type=git
+                --tasks-for='${tasks_for}'
+                --base-repository='${baseRepoUrl}'
+                --base-ref='${base_ref}'
+                --base-rev='${base_sha}'
+                --head-repository='${repoUrl}'
+                --head-ref='${head_ref}'
+                --head-rev='${head_sha}'
 
-                      artifacts:
-                          'public':
-                              type: 'directory'
-                              path: '/builds/worker/artifacts'
-                              expires: {$fromNow: '1 year'}
-                          'public/docker-contexts':
-                              type: 'directory'
-                              path: '/builds/worker/checkouts/src/docker-contexts'
-                              expires: {$fromNow: '7 day'}
+            artifacts:
+              "public":
+                type: "directory"
+                path: "/builds/worker/artifacts"
+                expires: { $fromNow: "1 year" }
+              "public/docker-contexts":
+                type: "directory"
+                path: "/builds/worker/checkouts/src/docker-contexts"
+                expires: { $fromNow: "7 day" }
 
-                  extra:
-                      tasks_for: '${tasks_for}'
+          extra:
+            tasks_for: "${tasks_for}"

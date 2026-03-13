@@ -13,7 +13,7 @@ extend_parameters_schema(
 def decision_parameters(graph_config, parameters):
     head_ref = parameters["head_ref"]
     if head_ref.startswith("refs/heads/"):
-        head_ref = head_ref[len("refs/heads/"):]
+        head_ref = head_ref[len("refs/heads/") :]
 
     if head_ref == "production":
         parameters["channel"] = "production"

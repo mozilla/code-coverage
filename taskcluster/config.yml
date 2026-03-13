@@ -2,20 +2,20 @@
 trust-domain: code-analysis
 task-priority: low
 taskgraph:
-    register: code_coverage_taskgraph:register
-    decision-parameters: code_coverage_taskgraph.parameters:decision_parameters
-    repositories:
-        code_coverage:
-            name: code-coverage
+  register: code_coverage_taskgraph:register
+  decision-parameters: code_coverage_taskgraph.parameters:decision_parameters
+  repositories:
+    code_coverage:
+      name: code-coverage
 workers:
-    aliases:
-        b-linux:
-            provisioner: '{trust-domain}-{level}'
-            implementation: docker-worker
-            os: linux
-            worker-type: linux-gw-gcp
-        images:
-            provisioner: '{trust-domain}-{level}'
-            implementation: docker-worker
-            os: linux
-            worker-type: linux-gcp
+  aliases:
+    b-linux:
+      provisioner: "{trust-domain}-{level}"
+      implementation: docker-worker
+      os: linux
+      worker-type: linux-gw-gcp
+    images:
+      provisioner: "{trust-domain}-{level}"
+      implementation: docker-worker
+      os: linux
+      worker-type: linux-gcp

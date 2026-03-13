@@ -9,7 +9,7 @@ enable_always_target: true
 existing_tasks: {}
 files_changed: []
 filters:
-    - target_tasks_method
+  - target_tasks_method
 head_ref: some-feature-branch
 head_repository: https://github.com/user/code-coverage
 head_rev: abc123def456abc123def456abc123def456abc1
