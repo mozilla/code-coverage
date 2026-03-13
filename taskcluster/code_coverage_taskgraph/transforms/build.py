@@ -11,7 +11,7 @@ def add_build_config(config, tasks):
         channel = params.get("channel", "dev")
         head_ref = params["head_ref"]
         if head_ref.startswith("refs/heads/"):
-            head_ref = head_ref[len("refs/heads/"):]
+            head_ref = head_ref[len("refs/heads/") :]
 
         task.setdefault("worker", {})
         task["worker"]["command"] = [
