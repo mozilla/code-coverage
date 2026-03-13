@@ -15,7 +15,7 @@ tasks:
       using: run-task
       cwd: "{checkout}"
       command: >-
-        ln -sf "{checkout}/bot/ci/hgrc" ~/.hgrc &&
+        ln -sf /builds/worker/checkouts/vcs/bot/ci/hgrc ~/.hgrc &&
         cd bot &&
         pip3 install --disable-pip-version-check --no-cache-dir --quiet . &&
         pip3 install --disable-pip-version-check --no-cache-dir --quiet -r requirements-dev.txt &&
