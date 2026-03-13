@@ -4,7 +4,7 @@ FROM python:3.12-slim
 RUN mkdir -p /builds/worker/artifacts && \
     groupadd --gid 1000 worker && \
     useradd --uid 1000 --gid worker --home-dir /builds/worker --shell /bin/bash worker && \
-    chown worker:worker /builds/worker/artifacts
+    chown -R worker:worker /builds/worker
 
 # Install build deps (needed for mercurial, grcov setup)
 RUN apt-get update && \
