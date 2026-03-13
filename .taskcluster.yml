@@ -142,7 +142,7 @@ tasks:
                                     CODE_COVERAGE_PULL_REQUEST_NUMBER: '${event.pull_request.number}'
 
                       cache:
-                          "${trustDomain}-project-${project}-level-${level}-checkouts-v2": /builds/worker/checkouts
+                          "${trustDomain}-level-${level}-checkouts-v2": /builds/worker/checkouts
 
                       features:
                           taskclusterProxy: true
