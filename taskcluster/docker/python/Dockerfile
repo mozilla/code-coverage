@@ -14,7 +14,8 @@ RUN apt-get update && \
         curl \
         bzip2 \
         python3-dev \
-        libgoogle-perftools4 && \
+        libgoogle-perftools4 \
+        libatomic1 && \
     rm -rf /var/lib/apt/lists/*
 
 # Install mercurial
