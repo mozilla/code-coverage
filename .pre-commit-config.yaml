@@ -47,7 +47,7 @@ repos:
       - id: mypy
         name: mypy-bot
         files: ^bot/
-        entry: mypy bot/
+        entry: mypy --no-namespace-packages bot/
         pass_filenames: false
         additional_dependencies:
           - types-requests==0.1.11
