@@ -1,0 +1,4 @@
+{
+  "version": 2,
+  "parameters": { "tasks_for": "github-release", "head_ref": "v1.0.0" }
+}
