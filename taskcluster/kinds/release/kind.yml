@@ -1,0 +1,21 @@
+loader: taskgraph.loader.transform:loader
+transforms:
+  - code_coverage_taskgraph.transforms.release
+  - taskgraph.transforms.task
+kind-dependencies:
+  - lint
+tasks:
+  github:
+    description: Create GitHub release with taskboot
+    attributes:
+      run-on-tasks-for:
+        - github-release
+    worker-type: b-linux
+    worker:
+      docker-image: mozilla/taskboot:0.4.1
+      taskcluster-proxy: true
+      max-run-time: 3600
+    scopes:
+      - secrets:get:project/relman/code-coverage/release
+    dependencies:
+      lint: lint-pre-commit
