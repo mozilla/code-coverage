@@ -7,6 +7,10 @@ kind-dependencies:
 tasks:
   bot-unit:
     description: Check python code with pytest
+    attributes:
+      run-on-tasks-for:
+        - github-pull-request
+        - github-push
     worker-type: b-linux
     worker:
       docker-image: { in-tree: python }

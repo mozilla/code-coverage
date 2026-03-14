@@ -1,25 +1,21 @@
 loader: taskgraph.loader.transform:loader
 transforms:
-  - code_coverage_taskgraph.transforms.build
+  - code_coverage_taskgraph.transforms.release
   - taskgraph.transforms.task
 kind-dependencies:
   - lint
-  - test
 tasks:
-  bot:
-    description: Build docker image with taskboot
+  github:
+    description: Create GitHub release with taskboot
     attributes:
       run-on-tasks-for:
-        - github-pull-request
-        - github-push
+        - github-release
     worker-type: b-linux
     worker:
       docker-image: mozilla/taskboot:0.4.1
+      taskcluster-proxy: true
       max-run-time: 3600
-      artifacts:
-        - type: file
-          name: public/code-coverage-bot.tar.zst
-          path: /bot.tar.zst
+    scopes:
+      - secrets:get:project/relman/code-coverage/release
     dependencies:
       lint: lint-pre-commit
-      test: test-bot-unit
