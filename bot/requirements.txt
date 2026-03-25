@@ -1,4 +1,4 @@
-google-cloud-storage==3.9.0
+google-cloud-storage==3.10.1
 libmozdata==0.2.12
 pytz==2026.1.post1
 pyyaml==6.0.3
