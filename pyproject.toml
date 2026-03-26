@@ -1,0 +1,5 @@
+[tool.ruff.lint.isort]
+known-third-party = ["taskcluster"]
+
+[tool.mypy]
+namespace_packages = false
