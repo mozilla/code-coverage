@@ -1,0 +1,57 @@
+loader: taskgraph.loader.transform:loader
+
+transforms:
+  - taskgraph.transforms.task_context
+  - taskgraph.transforms.run
+  - taskgraph.transforms.task
+
+kind-dependencies:
+  - lint
+  - test
+
+task-defaults:
+  description: Build bot Docker image
+  run-on-tasks-for:
+    - github-pull-request
+    - github-push
+  worker-type: b-linux
+  worker:
+    docker-image: { in-tree: taskboot }
+    max-run-time: 3600
+    artifacts:
+      - type: file
+        name: public/code-coverage-bot.tar.zst
+        path: /builds/worker/artifacts/bot.tar.zst
+  run:
+    using: run-task
+    cwd: "{checkout}"
+    run-as-root: true
+  dependencies:
+    lint: lint-pre-commit
+    test: test-bot
+  routes:
+    by-tasks-for:
+      github-pull-request:
+        - index.code-analysis.v2.code-coverage-pr.revision.{head_rev}
+        - index.code-analysis.v2.code-coverage-pr.branch.{short_head_ref}
+      default:
+        - index.code-analysis.v2.code-coverage.revision.{head_rev}
+        - index.code-analysis.v2.code-coverage.branch.{short_head_ref}
+  task-context:
+    from-parameters:
+      channel: channel
+      head_rev: head_rev
+      short_head_ref: short_head_ref
+      tasks-for: tasks_for
+    substitution-fields:
+      - routes
+      - run.command
+
+tasks:
+  bot:
+    run:
+      command: >-
+        taskboot --target /builds/worker/checkouts/vcs
+        build --image mozilla/code-coverage
+        --tag {channel} --tag {head_rev}
+        --write /builds/worker/artifacts/bot.tar bot/Dockerfile
