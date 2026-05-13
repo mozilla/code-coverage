@@ -16,7 +16,6 @@ from code_coverage_bot import hgmo
 from code_coverage_bot import uploader
 from code_coverage_bot.cli import setup_cli
 from code_coverage_bot.hooks.base import Hook
-from code_coverage_bot.notifier import notify_email
 from code_coverage_bot.phabricator import PhabricatorUploader
 from code_coverage_bot.phabricator import parse_revision_id
 from code_coverage_bot.secrets import secrets
@@ -152,12 +151,12 @@ class MozillaCentralHook(RepositoryHook):
             ), "No {} file in the generated report".format(extension)
 
         # Upload coverage on phabricator
-        changesets = self.get_hgmo_changesets()
-        coverage = self.upload_phabricator(report, changesets)
+        # changesets = self.get_hgmo_changesets()
+        # coverage = self.upload_phabricator(report, changesets)
 
         # Send an email on low coverage
-        notify_email(self.revision, changesets, coverage)
-        logger.info("Sent low coverage email notification")
+        # notify_email(self.revision, changesets, coverage)
+        # logger.info("Sent low coverage email notification")
 
         if secrets.get(secrets.CHECK_JAVASCRIPT_FILES, False):
             self.check_javascript_files()
@@ -208,10 +207,10 @@ class TryHook(RepositoryHook):
         # Retrieve the full report
         full_path = reports.get(("all", "all"))
         assert full_path is not None, "Missing full report (all:all)"
-        report = json.load(open(full_path))
+        # report = json.load(open(full_path))
 
         # Upload coverage on phabricator
-        self.upload_phabricator(report, changesets)
+        # self.upload_phabricator(report, changesets)
 
         # Index on Taskcluster
         self.index_task(
