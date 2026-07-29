@@ -1,6 +1,6 @@
 google-cloud-storage==3.10.1
 libmozdata==0.2.12
-pytz==2026.2
+pytz==2026.3.post1
 pyyaml==6.0.3
 sentry-sdk==2.60.0
 structlog==25.5.0
