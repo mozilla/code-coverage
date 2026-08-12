@@ -1,5 +1,5 @@
 google-cloud-storage==3.10.1
-libmozdata==0.2.12
+libmozdata==0.2.18
 pytz==2026.2
 pyyaml==6.0.3
 sentry-sdk==2.60.0
