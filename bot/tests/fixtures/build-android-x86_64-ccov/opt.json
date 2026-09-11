@@ -1,0 +1,238 @@
+{
+  "provisionerId": "gecko-3",
+  "workerType": "b-linux-docker-amd",
+  "taskQueueId": "gecko-3/b-linux-docker-amd",
+  "schedulerId": "gecko-level-3",
+  "projectId": "none",
+  "taskGroupId": "VvDPmuCeTziopFdu8cGmIg",
+  "dependencies": [
+    "B6YjZutgTxunLiqLeU5JGQ",
+    "GjX14oJGSum0Rv7zYgWJeA",
+    "HO93CnPYQKCly6H7ZlzMzw",
+    "IcR_c3OxSt-ddKz7beY8ww",
+    "JPBqSqJASxeDRQgTJlkZoA",
+    "Kp-4vkk5RSapcKvr2y5H5A",
+    "LQcGDiJUTCOY5sAhQ_FHpg",
+    "NAEiZuG-REOunIhyAyYEHA",
+    "OUCro-8VTR6PeLhse0MypQ",
+    "OtAg-VmkTXWFaWaBhZ-dBg",
+    "RBSpOfBQQrCuAPsB5Mtdug",
+    "T_2BOu-rS2ai7bVufv3Auw",
+    "Tx1WFWnfThKCCVofbBgIfw",
+    "U28cBhb7TeO-HkcMnPNPWQ",
+    "XLV6o9oJQa-C7QM43xOqIA",
+    "XZh-LC5cTM-HsXGo25qFqg",
+    "YiCiSFqIS-OsDKxcEEfQRw",
+    "YtrnWt76RMGWQw2zSHftBg",
+    "ZpaaVW-xQE29AkY0wfPTCw",
+    "eLU8fqNfQkmof9uMf8ADhQ",
+    "fxGrL_rmQK6hjRBqrCcmsw",
+    "VvDPmuCeTziopFdu8cGmIg"
+  ],
+  "requires": "all-completed",
+  "routes": [
+    "index.gecko.v2.mozilla-central.latest.mobile.android-x86_64-ccov-opt",
+    "index.gecko.v2.mozilla-central.pushdate.2026.09.12.20260912093409.mobile.android-x86_64-ccov-opt",
+    "index.gecko.v2.mozilla-central.pushdate.2026.09.12.latest.mobile.android-x86_64-ccov-opt",
+    "index.gecko.v2.mozilla-central.pushlog-id.45311.mobile.android-x86_64-ccov-opt",
+    "index.gecko.v2.mozilla-central.revision.45306dee8419383e2ce5c1619f3fbc613ec345f8.mobile.android-x86_64-ccov-opt",
+    "index.gecko.v2.mozilla-central.revision.251c0992cd1f4204e3ea188ff00c4dbf845fb077.mobile.android-x86_64-ccov-opt",
+    "index.gecko.v2.trunk.revision.45306dee8419383e2ce5c1619f3fbc613ec345f8.mobile.android-x86_64-ccov-opt",
+    "tc-treeherder.v2.mozilla-central.45306dee8419383e2ce5c1619f3fbc613ec345f8"
+  ],
+  "priority": "medium",
+  "retries": 5,
+  "created": "2026-09-12T09:37:33.572Z",
+  "deadline": "2026-09-13T09:37:33.572Z",
+  "expires": "2027-09-12T09:37:33.572Z",
+  "scopes": [
+    "secrets:get:project/releng/gecko/build/level-3/*",
+    "secrets:get:project/taskcluster/gecko/hgfingerprint",
+    "secrets:get:project/taskcluster/gecko/hgmointernal",
+    "project:releng:services/tooltool/api/download/public",
+    "project:releng:services/tooltool/api/download/internal",
+    "queue:get-artifact:project/gecko/android-ndk/*",
+    "queue:get-artifact:project/gecko/android-sdk/*",
+    "queue:get-artifact:project/gecko/jdk/*",
+    "docker-worker:feature:allowPtrace",
+    "docker-worker:cache:gecko-level-3-checkouts-hg58-v3-e3f5a0985ed58af1b3d9",
+    "docker-worker:cache:gecko-level-3-tooltool-cache-v3-e3f5a0985ed58af1b3d9"
+  ],
+  "payload": {
+    "env": {
+      "JAVA_HOME": "/builds/worker/fetches/jdk/jdk-17.0.18+8",
+      "MH_BRANCH": "mozilla-central",
+      "WORKSPACE": "/builds/worker/workspace",
+      "GECKO_PATH": "/builds/worker/checkouts/gecko",
+      "UPLOAD_DIR": "/builds/worker/artifacts/",
+      "MOZ_FETCHES": "[{\"artifact\":\"project/gecko/android-ndk/android-ndk.tar.zst\",\"extract\":true,\"task\":\"U28cBhb7TeO-HkcMnPNPWQ\"},{\"artifact\":\"project/gecko/android-sdk/android-sdk-linux.tar.zst\",\"extract\":true,\"task\":\"Kp-4vkk5RSapcKvr2y5H5A\"},{\"artifact\":\"project/gecko/jdk/jdk-linux.tar.zst\",\"extract\":true,\"task\":\"HO93CnPYQKCly6H7ZlzMzw\"},{\"artifact\":\"public/build/android-gradle-dependencies.tar.zst\",\"extract\":true,\"task\":\"YiCiSFqIS-OsDKxcEEfQRw\"},{\"artifact\":\"public/build/cbindgen.tar.zst\",\"extract\":true,\"task\":\"T_2BOu-rS2ai7bVufv3Auw\"},{\"artifact\":\"public/build/clang.tar.zst\",\"extract\":true,\"task\":\"JPBqSqJASxeDRQgTJlkZoA\"},{\"artifact\":\"public/build/dump_syms.tar.zst\",\"extract\":true,\"task\":\"GjX14oJGSum0Rv7zYgWJeA\"},{\"artifact\":\"public/build/embedded-uniffi-bindgen.tar.zst\",\"extract\":true,\"task\":\"YtrnWt76RMGWQw2zSHftBg\"},{\"artifact\":\"public/build/grcov.tar.zst\",\"extract\":true,\"task\":\"NAEiZuG-REOunIhyAyYEHA\"},{\"artifact\":\"public/build/nasm.tar.zst\",\"extract\":true,\"task\":\"B6YjZutgTxunLiqLeU5JGQ\"},{\"artifact\":\"public/build/nimbus-fml.tar.zst\",\"extract\":true,\"task\":\"eLU8fqNfQkmof9uMf8ADhQ\"},{\"artifact\":\"public/build/node.tar.zst\",\"extract\":true,\"task\":\"IcR_c3OxSt-ddKz7beY8ww\"},{\"artifact\":\"public/build/python.tar.zst\",\"extract\":true,\"task\":\"OtAg-VmkTXWFaWaBhZ-dBg\"},{\"artifact\":\"public/build/rust-size.tar.zst\",\"extract\":true,\"task\":\"fxGrL_rmQK6hjRBqrCcmsw\"},{\"artifact\":\"public/build/rustc.tar.zst\",\"extract\":true,\"task\":\"ZpaaVW-xQE29AkY0wfPTCw\"},{\"artifact\":\"public/build/sccache.tar.zst\",\"extract\":true,\"task\":\"Tx1WFWnfThKCCVofbBgIfw\"},{\"artifact\":\"public/build/sysroot-wasm32-wasi.tar.zst\",\"extract\":true,\"task\":\"XLV6o9oJQa-C7QM43xOqIA\"},{\"artifact\":\"public/build/sysroot-x86_64-linux-gnu.tar.zst\",\"extract\":true,\"task\":\"RBSpOfBQQrCuAPsB5Mtdug\"},{\"artifact\":\"public/build/terser.tar.zst\",\"extract\":true,\"task\":\"XZh-LC5cTM-HsXGo25qFqg\"},{\"artifact\":\"public/build/uv.tar.zst\",\"extract\":true,\"task\":\"OUCro-8VTR6PeLhse0MypQ\"}]",
+      "MOZ_UV_HOME": "fetches/uv",
+      "REPOSITORIES": "{\"gecko\":\"Mozilla Firefox\"}",
+      "HG_STORE_PATH": "/builds/worker/checkouts/hg-store",
+      "MOZ_SCM_LEVEL": "3",
+      "GECKO_HEAD_REF": "45306dee8419383e2ce5c1619f3fbc613ec345f8",
+      "GECKO_HEAD_REV": "45306dee8419383e2ce5c1619f3fbc613ec345f8",
+      "MAR_CHANNEL_ID": "firefox-mozilla-central",
+      "MOZ_AUTOMATION": "1",
+      "MOZ_BUILD_DATE": "20260912093409",
+      "TOOLTOOL_CACHE": "/builds/worker/tooltool-cache",
+      "MOZ_FETCHES_DIR": "fetches",
+      "MOZ_PYTHON_HOME": "fetches/python",
+      "MOZ_SOURCE_REPO": "https://hg.mozilla.org/mozilla-central",
+      "SCCACHE_DISABLE": "1",
+      "GRADLE_USER_HOME": "/builds/worker/checkouts/gecko/mobile/android/gradle/dotgradle-offline",
+      "PYTHONUNBUFFERED": "1",
+      "GECKO_HEAD_BUNDLE": "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/VvDPmuCeTziopFdu8cGmIg/artifacts/public/checkout.bundle",
+      "MOZHARNESS_CONFIG": "builds/releng_base_android_64_builds.py",
+      "MOZHARNESS_SCRIPT": "mozharness/scripts/fx_desktop_build.py",
+      "TOOLTOOL_MANIFEST": "mobile/android/config/tooltool-manifests/android-x86/releng.manifest",
+      "MOZHARNESS_ACTIONS": "get-secrets build",
+      "TASKCLUSTER_CACHES": "/builds/worker/checkouts;/builds/worker/tooltool-cache",
+      "TASKCLUSTER_VOLUMES": "/builds/worker/checkouts;/builds/worker/tooltool-cache;/builds/worker/workspace",
+      "MOZ_SOURCE_CHANGESET": "45306dee8419383e2ce5c1619f3fbc613ec345f8",
+      "GECKO_BASE_REPOSITORY": "https://hg.mozilla.org/mozilla-unified",
+      "GECKO_HEAD_REPOSITORY": "https://hg.mozilla.org/mozilla-central",
+      "GECKO_REPOSITORY_TYPE": "hg",
+      "MOZ_ARTIFACT_PLATFORM": "android-x86_64-ccov",
+      "EXTRA_MOZHARNESS_CONFIG": "{\"mozconfig_variant\":\"code-coverage-opt\",\"objdir\":\"obj-build\",\"update_channel\":\"nightly\"}",
+      "ACCEPTED_MAR_CHANNEL_IDS": "firefox-mozilla-central",
+      "MH_CUSTOM_BUILD_VARIANT_CFG": "x86_64-ccov",
+      "MOZ_AUTOMATION_PACKAGE_TESTS": "1",
+      "PERFHERDER_FETCH_CONTENT_JSON_PATH": "/builds/worker/perf/perfherder-data-fetch-content.json",
+      "MACH_BUILD_PYTHON_NATIVE_PACKAGE_SOURCE": "system"
+    },
+    "cache": {
+      "gecko-level-3-checkouts-hg58-v3-e3f5a0985ed58af1b3d9": "/builds/worker/checkouts",
+      "gecko-level-3-tooltool-cache-v3-e3f5a0985ed58af1b3d9": "/builds/worker/tooltool-cache"
+    },
+    "image": {
+      "path": "public/image.tar.zst",
+      "type": "task-image",
+      "taskId": "LQcGDiJUTCOY5sAhQ_FHpg"
+    },
+    "command": [
+      "/builds/worker/bin/run-task-hg",
+      "--gecko-checkout=/builds/worker/checkouts/gecko",
+      "--",
+      "bash",
+      "-cx",
+      "${GECKO_PATH}/taskcluster/scripts/builder/build-linux.sh"
+    ],
+    "features": {
+      "allowPtrace": true,
+      "chainOfTrust": true,
+      "taskclusterProxy": true
+    },
+    "artifacts": {
+      "public/logs": {
+        "path": "/builds/worker/logs/",
+        "type": "directory",
+        "expires": "2027-09-12T09:37:33.572Z"
+      },
+      "public/build": {
+        "path": "/builds/worker/artifacts/",
+        "type": "directory",
+        "expires": "2027-09-12T09:37:33.572Z"
+      },
+      "public/reports": {
+        "path": "/builds/worker/workspace/obj-build/gradle/build/reports",
+        "type": "directory",
+        "expires": "2027-09-12T09:37:33.572Z"
+      },
+      "public/build/maven": {
+        "path": "/builds/worker/workspace/obj-build/gradle/maven/",
+        "type": "directory",
+        "expires": "2027-09-12T09:37:33.572Z"
+      },
+      "public/build/target.maven.zip": {
+        "path": "/builds/worker/workspace/obj-build/gradle/target.maven.zip",
+        "type": "file",
+        "expires": "2027-09-12T09:37:33.572Z"
+      },
+      "public/code-coverage-grcov.zip": {
+        "path": "/builds/worker/workspace/obj-build/code-coverage-grcov.zip",
+        "type": "file",
+        "expires": "2027-09-12T09:37:33.572Z"
+      },
+      "public/build/geckoview_example.aab": {
+        "path": "/builds/worker/workspace/obj-build/gradle/build/mobile/android/geckoview_example/outputs/bundle/debug/geckoview_example-debug.aab",
+        "type": "file",
+        "expires": "2027-09-12T09:37:33.572Z"
+      },
+      "public/build/geckoview_example.apk": {
+        "path": "/builds/worker/workspace/obj-build/gradle/build/mobile/android/geckoview_example/outputs/apk/debug/geckoview_example-debug.apk",
+        "type": "file",
+        "expires": "2027-09-12T09:37:33.572Z"
+      },
+      "public/build/geckoview-androidTest.apk": {
+        "path": "/builds/worker/workspace/obj-build/gradle/build/mobile/android/geckoview/outputs/apk/androidTest/debug/geckoview-debug-androidTest.apk",
+        "type": "file",
+        "expires": "2027-09-12T09:37:33.572Z"
+      },
+      "public/build/geckoview-test_runner.aab": {
+        "path": "/builds/worker/workspace/obj-build/gradle/build/mobile/android/test_runner/outputs/bundle/debug/test_runner-debug.aab",
+        "type": "file",
+        "expires": "2027-09-12T09:37:33.572Z"
+      },
+      "public/build/geckoview-test_runner.apk": {
+        "path": "/builds/worker/workspace/obj-build/gradle/build/mobile/android/test_runner/outputs/apk/debug/test_runner-debug.apk",
+        "type": "file",
+        "expires": "2027-09-12T09:37:33.572Z"
+      },
+      "public/fetch/perfherder-data-fetch-content.json": {
+        "path": "/builds/worker/perf/perfherder-data-fetch-content.json",
+        "type": "file",
+        "expires": "2027-09-12T09:37:33.572Z"
+      }
+    },
+    "maxRunTime": 7200,
+    "onExitStatus": {
+      "retry": [
+        4,
+        72
+      ],
+      "purgeCaches": [
+        72
+      ]
+    }
+  },
+  "metadata": {
+    "name": "build-android-x86_64-ccov/opt",
+    "owner": "amarc@mozilla.com",
+    "source": "https://hg.mozilla.org/mozilla-central/file/45306dee8419383e2ce5c1619f3fbc613ec345f8/taskcluster/kinds/build",
+    "description": "Android x86-64 Opt CCov ([Treeherder job](https://treeherder.mozilla.org/#/jobs?repo=mozilla-central&revision=45306dee8419383e2ce5c1619f3fbc613ec345f8&selectedTaskRun=GkK386_dReekJ4N6uCFVfw))"
+  },
+  "tags": {
+    "os": "linux",
+    "kind": "build",
+    "label": "build-android-x86_64-ccov/opt",
+    "project": "mozilla-central",
+    "retrigger": "false",
+    "trust-domain": "gecko",
+    "createdForUser": "amarc@mozilla.com",
+    "worker-implementation": "docker-worker"
+  },
+  "extra": {
+    "index": {
+      "rank": 1
+    },
+    "parent": "VvDPmuCeTziopFdu8cGmIg",
+    "treeherder": {
+      "tier": 2,
+      "symbol": "B",
+      "jobKind": "build",
+      "machine": {
+        "platform": "android-5-0-x86_64-ccov"
+      },
+      "collection": {
+        "opt": true
+      }
+    },
+    "chainOfTrust": {
+      "inputs": {
+        "docker-image": "LQcGDiJUTCOY5sAhQ_FHpg"
+      }
+    },
+    "treeherder-platform": "android-5-0-x86_64-ccov/opt"
+  }
+}

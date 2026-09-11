@@ -1,0 +1,225 @@
+{
+  "provisionerId": "gecko-t",
+  "workerType": "t-linux-docker-kvm",
+  "taskQueueId": "gecko-t/t-linux-docker-kvm",
+  "schedulerId": "gecko-level-3",
+  "projectId": "none",
+  "taskGroupId": "VvDPmuCeTziopFdu8cGmIg",
+  "dependencies": [
+    "GkK386_dReekJ4N6uCFVfw",
+    "IcR_c3OxSt-ddKz7beY8ww",
+    "K1mRpeQQTp-p6xIb9JF3Gw",
+    "LaXHap4xTy28XW8yCfNnZQ",
+    "MGyawhQ1TsanYXPODkN3Og",
+    "NAEiZuG-REOunIhyAyYEHA",
+    "OEkBHKkyT4q_fpza1TioJQ",
+    "OUCro-8VTR6PeLhse0MypQ",
+    "OtAg-VmkTXWFaWaBhZ-dBg",
+    "QJWkDsycR92mmij1nMwybg",
+    "QV5ljiBGR1-mdTOnbh8Fpw",
+    "U3Ch9_WrQ2CbdmC0T6kerg",
+    "YZUebzkYRYKvjzixwuCFtA"
+  ],
+  "requires": "all-completed",
+  "routes": [
+    "tc-treeherder.v2.mozilla-central.45306dee8419383e2ce5c1619f3fbc613ec345f8"
+  ],
+  "priority": "medium",
+  "retries": 5,
+  "created": "2026-09-12T09:37:38.474Z",
+  "deadline": "2026-09-13T09:37:38.474Z",
+  "expires": "2027-09-12T09:37:38.474Z",
+  "scopes": [
+    "secrets:get:project/taskcluster/gecko/hgfingerprint",
+    "secrets:get:project/taskcluster/gecko/hgmointernal",
+    "project:releng:services/tooltool/api/download/public",
+    "project:releng:services/tooltool/api/download/internal",
+    "queue:get-artifact:project/gecko/android-emulator/*",
+    "queue:get-artifact:project/gecko/android-system-images/*",
+    "docker-worker:feature:allowPtrace",
+    "docker-worker:capability:device:loopbackVideo",
+    "docker-worker:capability:device:kvm",
+    "docker-worker:cache:gecko-level-3-pip-v3-e3f5a0985ed58af1b3d9",
+    "docker-worker:cache:gecko-level-3-uv-v3-e3f5a0985ed58af1b3d9",
+    "docker-worker:cache:gecko-level-3-tooltool-cache-v3-e3f5a0985ed58af1b3d9"
+  ],
+  "payload": {
+    "env": {
+      "PYTHON": "python3",
+      "GECKO_PATH": "/builds/worker/checkouts/gecko",
+      "UPLOAD_DIR": "/builds/worker/artifacts/",
+      "ENABLE_E10S": "false",
+      "MOZ_FETCHES": "[{\"artifact\":\"project/gecko/android-emulator/android-emulator-linux.tar.zst\",\"extract\":true,\"task\":\"K1mRpeQQTp-p6xIb9JF3Gw\"},{\"artifact\":\"project/gecko/android-system-images/android-system-images-linux.tar.zst\",\"extract\":true,\"task\":\"U3Ch9_WrQ2CbdmC0T6kerg\"},{\"artifact\":\"public/build/android-avd-linux.tar.zst\",\"extract\":true,\"task\":\"OEkBHKkyT4q_fpza1TioJQ\"},{\"artifact\":\"public/build/grcov.tar.zst\",\"extract\":true,\"task\":\"NAEiZuG-REOunIhyAyYEHA\"},{\"artifact\":\"public/build/hostutils.tar.zst\",\"extract\":true,\"task\":\"YZUebzkYRYKvjzixwuCFtA\"},{\"artifact\":\"public/build/minidump-stackwalk.tar.zst\",\"extract\":true,\"task\":\"QJWkDsycR92mmij1nMwybg\"},{\"artifact\":\"public/build/node.tar.zst\",\"extract\":true,\"task\":\"IcR_c3OxSt-ddKz7beY8ww\"},{\"artifact\":\"public/build/profiler-node-tools.tar.zst\",\"extract\":true,\"task\":\"MGyawhQ1TsanYXPODkN3Og\"},{\"artifact\":\"public/build/python.tar.zst\",\"extract\":true,\"task\":\"OtAg-VmkTXWFaWaBhZ-dBg\"},{\"artifact\":\"public/build/samply.tar.zst\",\"extract\":true,\"task\":\"QV5ljiBGR1-mdTOnbh8Fpw\"},{\"artifact\":\"public/build/target.crashreporter-symbols.zip\",\"extract\":false,\"task\":\"GkK386_dReekJ4N6uCFVfw\"},{\"artifact\":\"public/build/target.mozinfo.json\",\"extract\":true,\"task\":\"GkK386_dReekJ4N6uCFVfw\"},{\"artifact\":\"public/build/uv.tar.zst\",\"extract\":true,\"task\":\"OUCro-8VTR6PeLhse0MypQ\"}]",
+      "MOZ_UV_HOME": "fetches/uv",
+      "WORKING_DIR": "/builds/worker",
+      "REPOSITORIES": "{\"gecko\":\"Mozilla Firefox\"}",
+      "UV_CACHE_DIR": "/builds/worker/.task-cache/uv",
+      "HG_STORE_PATH": "/builds/worker/checkouts/hg-store",
+      "MOZ_NODE_PATH": "/usr/local/bin/node",
+      "MOZ_SCM_LEVEL": "3",
+      "NEED_PIPEWIRE": "true",
+      "PIP_CACHE_DIR": "/builds/worker/.task-cache/pip",
+      "GECKO_HEAD_REF": "45306dee8419383e2ce5c1619f3fbc613ec345f8",
+      "GECKO_HEAD_REV": "45306dee8419383e2ce5c1619f3fbc613ec345f8",
+      "MOZHARNESS_URL": "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/GkK386_dReekJ4N6uCFVfw/artifacts/public/build/mozharness.zip",
+      "MOZ_AUTOMATION": "1",
+      "MOZ_BUILD_DATE": "20260912093409",
+      "TOOLTOOL_CACHE": "/builds/worker/tooltool-cache",
+      "MOZ_FETCHES_DIR": "fetches",
+      "MOZ_PYTHON_HOME": "fetches/python",
+      "MOZ_SOURCE_REPO": "https://hg.mozilla.org/mozilla-central",
+      "SCCACHE_DISABLE": "1",
+      "MOCHITEST_FLAVOR": "plain",
+      "MOZHARNESS_CONFIG": "android/android_common.py android/android14-x86_64.py",
+      "MOZHARNESS_SCRIPT": "android_emulator_unittest.py",
+      "MOZILLA_BUILD_URL": "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/GkK386_dReekJ4N6uCFVfw/artifacts/public/build/geckoview-test_runner.apk",
+      "MOZHARNESS_ACTIONS": "get-secrets",
+      "TASKCLUSTER_CACHES": "/builds/worker/.task-cache/pip;/builds/worker/.task-cache/uv;/builds/worker/tooltool-cache",
+      "NEED_WINDOW_MANAGER": "true",
+      "TASKCLUSTER_VOLUMES": "/builds/worker/.task-cache/npm;/builds/worker/.task-cache/pip;/builds/worker/.task-cache/uv;/builds/worker/checkouts;/builds/worker/fetches;/builds/worker/tooltool-cache;/builds/worker/workspace",
+      "MOZ_SOURCE_CHANGESET": "45306dee8419383e2ce5c1619f3fbc613ec345f8",
+      "GECKO_BASE_REPOSITORY": "https://hg.mozilla.org/mozilla-unified",
+      "GECKO_HEAD_REPOSITORY": "https://hg.mozilla.org/mozilla-central",
+      "GECKO_REPOSITORY_TYPE": "hg",
+      "MOZHARNESS_TEST_PATHS": "{\"mochitest-plain\":[\"browser/components/extensions/test/mochitest/mochitest.toml\",\"browser/components/originattributes/test/mochitest/mochitest.toml\",\"browser/components/resistfingerprinting/test/mochitest/mochitest.toml\",\"browser/extensions/formautofill/test/mochitest/creditCard/mochitest.toml\",\"browser/extensions/formautofill/test/mochitest/mochitest.toml\",\"dom/animation/test/mochitest.toml\",\"dom/base/test/jsmodules/importmaps/mochitest.toml\",\"dom/base/test/jsmodules/mochitest.toml\",\"dom/events/test/clipboard/mochitest.toml\",\"dom/events/test/mochitest.toml\",\"dom/file/ipc/tests/mochitest.toml\",\"dom/fs/test/common/mochitest.toml\",\"dom/fs/test/mochitest/mochitest-private.toml\",\"dom/fs/test/mochitest/mochitest.toml\",\"dom/fs/test/mochitest/worker/mochitest.toml\",\"dom/indexedDB/test/mochitest-regular.toml\",\"dom/messagechannel/tests/mochitest.toml\",\"dom/origin-trials/tests/mochitest/mochitest.toml\",\"dom/payments/test/mochitest.toml\",\"dom/performance/tests/mochitest.toml\",\"dom/plugins/test/mochitest/mochitest.toml\",\"dom/security/test/https-only/mochitest.toml\",\"dom/serviceworkers/test/mochitest-dFPI.toml\",\"dom/serviceworkers/test/mochitest.toml\",\"dom/system/tests/mochitest.toml\",\"dom/tests/mochitest/ajax/jquery/mochitest.toml\",\"dom/tests/mochitest/ajax/prototype/mochitest.toml\",\"dom/tests/mochitest/dom-level1-core/mochitest.toml\",\"dom/tests/mochitest/keyhandling/mochitest.toml\",\"dom/tests/mochitest/sessionstorage/mochitest.toml\",\"dom/vr/test/mochitest/mochitest.toml\",\"dom/webserial/tests/mochitest/mochitest.toml\",\"dom/websocket/tests/mochitest_http2.toml\",\"dom/xhr/tests/mochitest.toml\",\"dom/xml/test/mochitest.toml\",\"editor/spellchecker/tests/mochitest.toml\",\"extensions/spellcheck/tests/mochitest/mochitest.toml\",\"layout/xul/test/mochitest.toml\",\"testing/mochitest/baselinecoverage/plain/mochitest.toml\",\"toolkit/components/passwordmgr/test/mochitest/mochitest.toml\",\"toolkit/components/prompts/test/mochitest.toml\",\"toolkit/components/satchel/test/mochitest.toml\",\"toolkit/components/windowwatcher/test/mochitest.toml\",\"toolkit/mozapps/extensions/test/mochitest/mochitest.toml\"]}",
+      "EXTRA_MOZHARNESS_CONFIG": "{\"installer_url\":\"https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/GkK386_dReekJ4N6uCFVfw/artifacts/public/build/geckoview-test_runner.apk\",\"test_packages_url\":\"https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/GkK386_dReekJ4N6uCFVfw/artifacts/public/build/target.test_packages.json\"}",
+      "PERFHERDER_FETCH_CONTENT_JSON_PATH": "/builds/worker/perf/perfherder-data-fetch-content.json"
+    },
+    "cache": {
+      "gecko-level-3-uv-v3-e3f5a0985ed58af1b3d9": "/builds/worker/.task-cache/uv",
+      "gecko-level-3-pip-v3-e3f5a0985ed58af1b3d9": "/builds/worker/.task-cache/pip",
+      "gecko-level-3-tooltool-cache-v3-e3f5a0985ed58af1b3d9": "/builds/worker/tooltool-cache"
+    },
+    "image": {
+      "path": "public/image.tar.zst",
+      "type": "task-image",
+      "taskId": "LaXHap4xTy28XW8yCfNnZQ"
+    },
+    "command": [
+      "/builds/worker/bin/run-task-hg",
+      "--",
+      "/builds/worker/bin/test-linux.sh",
+      "--test-suite=mochitest-plain",
+      "--code-coverage",
+      "--setpref=media.peerconnection.mtransport_process=false",
+      "--setpref=network.process.enabled=false",
+      "--setpref=layers.d3d11.enable-blacklist=false",
+      "--total-chunk=9",
+      "--this-chunk=1",
+      "--download-symbols=ondemand"
+    ],
+    "features": {
+      "allowPtrace": true,
+      "taskclusterProxy": true
+    },
+    "artifacts": {
+      "public/logs": {
+        "path": "/builds/worker/workspace/logs/",
+        "type": "directory",
+        "expires": "2027-09-12T09:37:38.474Z"
+      },
+      "public/test": {
+        "path": "/builds/worker/artifacts/",
+        "type": "directory",
+        "expires": "2027-09-12T09:37:38.474Z"
+      },
+      "public/build": {
+        "path": "/builds/worker/artifacts/",
+        "type": "directory",
+        "expires": "2027-09-12T09:37:38.474Z"
+      },
+      "public/test_info": {
+        "path": "/builds/worker/workspace/build/blobber_upload_dir/",
+        "type": "directory",
+        "expires": "2027-09-12T09:37:38.474Z"
+      },
+      "public/xsession-errors.log": {
+        "path": "/builds/worker/.xsession-errors",
+        "type": "file",
+        "expires": "2027-09-12T09:37:38.474Z"
+      },
+      "public/fetch/perfherder-data-fetch-content.json": {
+        "path": "/builds/worker/perf/perfherder-data-fetch-content.json",
+        "type": "file",
+        "expires": "2027-09-12T09:37:38.474Z"
+      }
+    },
+    "maxRunTime": 3600,
+    "capabilities": {
+      "devices": {
+        "kvm": true,
+        "loopbackVideo": true
+      }
+    },
+    "onExitStatus": {
+      "retry": [
+        4,
+        72
+      ],
+      "purgeCaches": [
+        72
+      ]
+    }
+  },
+  "metadata": {
+    "name": "test-android-em-14-x86_64-ccov/opt-geckoview-mochitest-plain-1",
+    "owner": "amarc@mozilla.com",
+    "source": "https://hg.mozilla.org/mozilla-central/file/45306dee8419383e2ce5c1619f3fbc613ec345f8/taskcluster/kinds/mochitest",
+    "description": "Mochitest plain run ([Treeherder job](https://treeherder.mozilla.org/#/jobs?repo=mozilla-central&revision=45306dee8419383e2ce5c1619f3fbc613ec345f8&selectedTaskRun=Lj69cQDQS9awOEzU-cCPaA))"
+  },
+  "tags": {
+    "os": "linux",
+    "kind": "mochitest",
+    "label": "test-android-em-14-x86_64-ccov/opt-geckoview-mochitest-plain-1",
+    "project": "mozilla-central",
+    "retrigger": "true",
+    "test-type": "mochitest",
+    "test-suite": "mochitest-plain",
+    "trust-domain": "gecko",
+    "test-platform": "android-em-14-x86_64-ccov/opt",
+    "tests_grouped": "1",
+    "createdForUser": "amarc@mozilla.com",
+    "worker-implementation": "docker-worker"
+  },
+  "extra": {
+    "index": {
+      "rank": 1
+    },
+    "suite": "mochitest-plain",
+    "chunks": {
+      "total": 9,
+      "current": 1
+    },
+    "parent": "VvDPmuCeTziopFdu8cGmIg",
+    "treeherder": {
+      "tier": 2,
+      "symbol": "1",
+      "jobKind": "test",
+      "machine": {
+        "platform": "android-em-14-x86_64-ccov"
+      },
+      "groupName": "Mochitests",
+      "collection": {
+        "opt": true
+      },
+      "groupSymbol": "M"
+    },
+    "test-setting": {
+      "_hash": "bcffc78e91d7",
+      "build": {
+        "ccov": true,
+        "type": "opt"
+      },
+      "runtime": {},
+      "platform": {
+        "os": {
+          "name": "android",
+          "version": "14"
+        },
+        "arch": "x86_64",
+        "device": "emulator"
+      }
+    },
+    "treeherder-platform": "android-em-14-x86_64-ccov/opt"
+  }
+}
