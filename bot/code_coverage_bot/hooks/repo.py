@@ -119,6 +119,11 @@ class MozillaCentralHook(RepositoryHook):
         with open(full_path, "r") as f:
             report_text = f.read()
 
+        # Upload aggregated report to GCP bucket
+        uploader.gcp(
+            self.branch, self.revision, report_text, suite="all", platform="all"
+        )
+
         # Index on Taskcluster
         self.index_task(
             [
