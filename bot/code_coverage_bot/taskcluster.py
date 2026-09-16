@@ -163,7 +163,7 @@ def get_platform(task):
         raise Exception(f"Unknown platform for {task}")
 
     # Weird case for android build on Linux docker
-    if platform == "linux" and tags.get("android-stuff"):
+    if platform == "linux" and "android" in tags.get("label", ""):
         return "android"
 
     return platform
