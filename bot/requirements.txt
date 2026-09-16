@@ -6,5 +6,5 @@ sentry-sdk==2.66.1
 structlog==26.1.0
 taskcluster==104.0.0
 tenacity==9.1.4
-tqdm==4.70.0
+tqdm==4.70.1
 zstandard==0.25.0
