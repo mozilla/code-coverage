@@ -5,8 +5,6 @@
 
 import concurrent.futures
 import os
-from datetime import datetime
-from datetime import timedelta
 
 import hglib
 import structlog
@@ -158,17 +156,17 @@ class Hook(object):
 
         return reports
 
-    def index_task(self, namespaces, ttl=180):
+    def index_task(self, namespaces):
         """
-        Index current task on Taskcluster Index
-        TTL is expressed in days
+        Index current task on Taskcluster Index. The index lifetime will be the
+        same as the task's.
         """
-        assert isinstance(ttl, int) and ttl > 0
         task_id = os.environ.get("TASK_ID")
         if task_id is None:
             logger.warning("Skipping Taskcluster indexation, no task id found.")
             return
 
+        task_expires = taskcluster.get_task_details(task_id)["expires"]
         index_service = taskcluster_config.get_service("index")
 
         for namespace in namespaces:
@@ -178,8 +176,6 @@ class Hook(object):
                     "taskId": task_id,
                     "rank": 0,
                     "data": {},
-                    "expires": (datetime.utcnow() + timedelta(ttl)).strftime(
-                        "%Y-%m-%dT%H:%M:%S.%fZ"
-                    ),
+                    "expires": task_expires,
                 },
             )
