@@ -6,7 +6,6 @@
 import json
 import os
 import zipfile
-from datetime import timedelta
 
 import structlog
 
@@ -19,7 +18,6 @@ from code_coverage_bot.hooks.base import Hook
 from code_coverage_bot.phabricator import PhabricatorUploader
 from code_coverage_bot.phabricator import parse_revision_id
 from code_coverage_bot.secrets import secrets
-from code_coverage_bot.taskcluster import taskcluster_config
 from code_coverage_bot import gcp
 
 logger = structlog.get_logger(__name__)
@@ -121,12 +119,9 @@ class MozillaCentralHook(RepositoryHook):
         with open(full_path, "r") as f:
             report_text = f.read()
 
-        # Upload report as an artifact.
-        taskcluster_config.upload_artifact(
-            "public/code-coverage-report.json",
-            report_text,
-            "application/json",
-            timedelta(days=14),
+        # Upload aggregated report to GCP bucket
+        uploader.gcp(
+            self.branch, self.revision, report_text, suite="all", platform="all"
         )
 
         # Index on Taskcluster
