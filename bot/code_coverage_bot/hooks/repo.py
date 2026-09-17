@@ -116,12 +116,12 @@ class MozillaCentralHook(RepositoryHook):
 
         full_path = reports.get(("all", "all"))
         assert full_path is not None, "Missing full report (all:all)"
-        with open(full_path, "r") as f:
-            report_text = f.read()
+        with open(full_path, "rb") as f:
+            report_bytes = f.read()
 
         # Upload aggregated report to GCP bucket
         uploader.gcp(
-            self.branch, self.revision, report_text, suite="all", platform="all"
+            self.branch, self.revision, report_bytes, suite="all", platform="all"
         )
 
         # Index on Taskcluster
@@ -136,7 +136,7 @@ class MozillaCentralHook(RepositoryHook):
             ]
         )
 
-        report = json.loads(report_text)
+        report = json.loads(report_bytes)
 
         # Check extensions
         paths = uploader.covdir_paths(report)
