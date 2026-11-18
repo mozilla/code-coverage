@@ -6,14 +6,21 @@ from code_coverage_bot.utils import run_check
 logger = structlog.get_logger(__name__)
 
 
-def report(artifacts, source_dir=None, out_format="covdir", options=[]):
+def report(artifacts, source_dir=None, out_format="covdir", threads=4, options=[]):
     assert out_format in (
         "covdir",
         "files",
         "lcov",
         "coveralls+",
     ), "Unsupported output format"
-    cmd = ["grcov", "--ignore-parsing-error", "-t", out_format]
+    cmd = [
+        "grcov",
+        "--threads",
+        str(threads),
+        "--ignore-parsing-error",
+        "-t",
+        out_format,
+    ]
 
     # Coveralls+ is only needed for zero-coverage reports
     if out_format == "coveralls+":
@@ -34,8 +41,12 @@ def report(artifacts, source_dir=None, out_format="covdir", options=[]):
 
 
 def files_list(artifacts, source_dir=None):
-    options = ["--filter", "covered", "--threads", "2"]
+    options = ["--filter", "covered"]
     files = report(
-        artifacts, source_dir=source_dir, out_format="files", options=options
+        artifacts,
+        source_dir=source_dir,
+        out_format="files",
+        threads=2,
+        options=options,
     )
     return files.decode("utf-8").splitlines()
