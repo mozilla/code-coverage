@@ -2,39 +2,32 @@
 
 This project runs as [Taskcluster hooks](https://firefox-ci-tc.services.mozilla.com/hooks) on the firefox-ci instance, to extract and store the code coverage information from mozilla-central and try builds.
 
-It's built using Python 3.14 and few dependencies.
+It's built using Python 3.14 and few dependencies, managed with the repository's [uv](https://docs.astral.sh/uv/) workspace.
 
 ## Developer setup
 
 Requirements:
 
-- Python 3.14
+- [uv](https://docs.astral.sh/uv/getting-started/installation/)
 - Mercurial 7.2
-- (optional) [virtualenv](https://virtualenv.pypa.io/en/stable/)
-- (optional) [virtualenvwrapper](https://virtualenvwrapper.readthedocs.io/en/latest/)
 
-Setup on your computer:
+Setup on your computer, from the repository root:
 
 ```console
-# If you have virtualenvwrapper:
-mkvirtualenv -p /usr/bin/python3.14 code-coverage-bot
-
-# Mandatory steps
-pip install -r requirements.txt -r requirements-dev.txt
-pip install -e .
-pre-commit install
+uv sync
+uv run pre-commit install
 ```
 
 Check linting (it should be automatically done before any commit):
 
 ```console
-pre-commit run -a
+uv run pre-commit run -a
 ```
 
 Check unit tests:
 
 ```console
-pytest -v
+uv run pytest -v
 ```
 
 Write your local configuration as YAML:
@@ -55,7 +48,7 @@ Run the bot (in cron mode):
 
 ```console
 mkdir -p build/{cache,work} # or elsewhere on your system
-code-coverage-cron --cache-root=build/cache --working-dir=build/work --local-configuration=path/to/code-coverage.yml
+uv run code-coverage-cron --cache-root=build/cache --working-dir=build/work --local-configuration=path/to/code-coverage.yml
 ```
 
 The repo mode (with `code-coverage-repo`) is harder to use, as it requires a Google Cloud Storage and a Phabricator account.
