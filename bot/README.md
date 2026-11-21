@@ -2,14 +2,14 @@
 
 This project runs as [Taskcluster hooks](https://firefox-ci-tc.services.mozilla.com/hooks) on the firefox-ci instance, to extract and store the code coverage information from mozilla-central and try builds.
 
-It's built using Python 3.8 and few dependencies.
+It's built using Python 3.14 and few dependencies.
 
 ## Developer setup
 
 Requirements:
 
-- Python 3.8
-- Mercurial 5.3
+- Python 3.14
+- Mercurial 7.2
 - (optional) [virtualenv](https://virtualenv.pypa.io/en/stable/)
 - (optional) [virtualenvwrapper](https://virtualenvwrapper.readthedocs.io/en/latest/)
 
@@ -17,7 +17,7 @@ Setup on your computer:
 
 ```console
 # If you have virtualenvwrapper:
-mkvirtualenv -p /usr/bin/python3.8 code-coverage-bot
+mkvirtualenv -p /usr/bin/python3.14 code-coverage-bot
 
 # Mandatory steps
 pip install -r requirements.txt -r requirements-dev.txt
