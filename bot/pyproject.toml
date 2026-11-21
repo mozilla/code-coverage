@@ -1,0 +1,54 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "code-coverage-bot"
+dynamic = ["version"]
+description = "Aggregates code coverage data from Mozilla repositories"
+authors = [{ name = "Mozilla Engineering Workflow", email = "release-mgmt-analysis@mozilla.com" }]
+license = "MPL-2.0"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "google-cloud-storage==3.17.1",
+    "libmozdata==0.2.20",
+    "pytz==2026.6",
+    "pyyaml==6.0.3",
+    "sentry-sdk==2.75.0",
+    "structlog==26.1.0",
+    "taskcluster==116.0.0",
+    "tenacity==9.2.1",
+    "tqdm==4.70.1",
+    "zstandard==0.25.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/mozilla/code-coverage"
+
+[project.scripts]
+code-coverage-crontrigger = "code_coverage_bot.hooks.crontrigger:main"
+code-coverage-cron = "code_coverage_bot.hooks.cron:main"
+code-coverage-repo = "code_coverage_bot.hooks.repo:main"
+
+[dependency-groups]
+dev = [
+    "json-e==4.8.4",
+    "jsonschema==4.26.0",
+    "pytest==9.2.0",
+    "pytest-responses==0.6.0",
+    "responses==0.26.3",
+]
+
+[tool.hatch.version]
+path = "VERSION"
+pattern = "(?P<version>.+)"
+
+[tool.hatch.build.targets.sdist]
+include = ["/code_coverage_bot", "/VERSION"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["code_coverage_bot"]
+
+[tool.uv]
+cache-keys = [{ file = "pyproject.toml" }, { file = "VERSION" }]

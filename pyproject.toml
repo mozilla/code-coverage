@@ -1,0 +1,5 @@
+[tool.uv.workspace]
+members = ["bot"]
+
+[dependency-groups]
+dev = ["pre-commit==4.7.0"]

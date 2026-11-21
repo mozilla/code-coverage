@@ -51,7 +51,7 @@ tasks:
       else: generic-worker-ubuntu-24-04
 
     taskboot_image: "mozilla/taskboot:0.4.1"
-    python_image: "python:3.14"
+    uv_image: "astral/uv:python3.14-trixie"
   in:
     $if: '(tasks_for == "github-push" && (head_branch == "master" || head_branch == "production" || head_branch == "testing")) || (tasks_for == "github-pull-request" && event["action"] in ["opened", "reopened", "synchronize"])'
     then:
@@ -66,13 +66,12 @@ tasks:
               deadline: { $fromNow: "1 hour" }
               payload:
                 maxRunTime: 3600
-                image: "${python_image}"
+                image: "${uv_image}"
                 command:
                   - sh
                   - -lxce
                   - "git clone --quiet ${repository} /src && cd /src && git checkout ${head_rev} -b checks &&
-                    cd /src/bot && pip install --disable-pip-version-check --no-cache-dir --quiet -r requirements-dev.txt &&
-                    cd /src && pre-commit run -a --show-diff-on-failure"
+                    uv run --locked pre-commit run -a --show-diff-on-failure"
               metadata:
                 name: "Code Coverage checks: linting"
                 description: Check code style with pre-commit hooks
@@ -88,14 +87,13 @@ tasks:
               deadline: { $fromNow: "1 hour" }
               payload:
                 maxRunTime: 3600
-                image: "${python_image}"
+                image: "${uv_image}"
                 command:
                   - sh
                   - -lxce
                   - "git clone --quiet ${repository} /src && cd /src && git checkout ${head_rev} -b checks &&
                     /src/bot/ci/bootstrap.sh &&
-                    cd /src/bot && pip3 install --disable-pip-version-check --no-cache-dir --quiet . && pip3 install --disable-pip-version-check --no-cache-dir --quiet -r requirements-dev.txt &&
-                    pytest -v"
+                    cd /src/bot && uv run --locked pytest -v"
               metadata:
                 name: "Code Coverage Bot checks: unit tests"
                 description: Check python code with pytest
