@@ -21,6 +21,11 @@ def report(artifacts, source_dir=None, out_format="covdir", options=[]):
     if out_format == "coveralls+":
         cmd.extend(["--token", "unused"])
 
+    # Covdir reports don't contain functions, so there is no need to parse
+    # them, which is much faster.
+    if out_format == "covdir":
+        cmd.append("--no-functions")
+
     if source_dir is not None:
         cmd.extend(["-s", source_dir])
         cmd.append("--ignore-not-existing")
