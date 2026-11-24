@@ -112,10 +112,10 @@ class MozillaCentralHook(RepositoryHook):
         # for consumers (e.g. Searchfox) right away.
         self.retrieve_source_and_artifacts()
 
-        reports = self.build_reports(only=[("all", "all")])
-
-        full_path = reports.get(("all", "all"))
-        assert full_path is not None, "Missing full report (all:all)"
+        # The full report is the first one to be built.
+        reports = self.build_reports()
+        full_key, full_path = next(reports)
+        assert full_key == ("all", "all"), "Missing full report (all:all)"
         with open(full_path, "rb") as f:
             report_bytes = f.read()
 
@@ -156,10 +156,8 @@ class MozillaCentralHook(RepositoryHook):
         if secrets.get(secrets.CHECK_JAVASCRIPT_FILES, False):
             self.check_javascript_files()
 
-        # Generate all reports except the full one which we generated earlier.
-        all_report_combinations = self.artifactsHandler.get_combinations()
-        del all_report_combinations[("all", "all")]
-        reports.update(self.build_reports())
+        # Generate all the other reports.
+        reports = dict(reports)
         logger.info("Built all covdir reports", nb=len(reports))
 
         # Upload reports on GCP
@@ -196,12 +194,10 @@ class TryHook(RepositoryHook):
 
         self.retrieve_source_and_artifacts()
 
-        reports = self.build_reports(only=[("all", "all")])
-        logger.info("Built all covdir reports", nb=len(reports))
-
-        # Retrieve the full report
-        full_path = reports.get(("all", "all"))
-        assert full_path is not None, "Missing full report (all:all)"
+        # Only build the full report, which is the first one to be built.
+        full_key, full_path = next(self.build_reports())
+        assert full_key == ("all", "all"), "Missing full report (all:all)"
+        logger.info("Built full covdir report")
         # report = json.load(open(full_path))
 
         # Upload coverage on phabricator
