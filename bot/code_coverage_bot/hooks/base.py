@@ -5,6 +5,7 @@
 
 import concurrent.futures
 import os
+import subprocess
 
 import hglib
 import structlog
@@ -93,10 +94,7 @@ class Hook(object):
 
         cmd.insert(0, hglib.HGPATH)
 
-        proc = hglib.util.popen(cmd)
-        out, err = proc.communicate()
-        if proc.returncode:
-            raise hglib.error.CommandError(cmd, proc.returncode, out, err)
+        subprocess.run(cmd, stdin=subprocess.DEVNULL, check=True)
 
         logger.info("{} cloned".format(self.repository))
 
