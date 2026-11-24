@@ -4,6 +4,7 @@ import os
 from datetime import datetime
 
 import pytz
+import zstandard
 
 from code_coverage_bot.zero_coverage import ZeroCov
 
@@ -101,3 +102,14 @@ def test_zero_coverage(
         assert found_item["size"] == exp_item["size"]
         assert found_item["commits"] == exp_item["commits"]
         assert found_item["uncovered"] == exp_item["uncovered"]
+
+    with open(os.path.join(tmp_path, "zero_coverage_functions.json.zst"), "rb") as f:
+        zero_coverage_functions_report = json.loads(
+            zstandard.ZstdDecompressor().decompress(f.read())
+        )
+
+    assert zero_coverage_functions_report["hg_revision"] == hgrev
+    uncovered_functions = zero_coverage_functions_report["files"]
+    assert set(uncovered_functions) == {f["name"] for f in zero_coverage_functions}
+    for found_item in zero_coverage_functions:
+        assert len(uncovered_functions[found_item["name"]]) == found_item["funcs"]
