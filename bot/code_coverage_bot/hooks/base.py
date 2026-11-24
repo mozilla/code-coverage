@@ -5,6 +5,7 @@
 
 import concurrent.futures
 import os
+import shutil
 import subprocess
 
 import hglib
@@ -33,6 +34,7 @@ class Hook(object):
         os.makedirs(working_dir, exist_ok=True)
         self.artifacts_dir = os.path.join(working_dir, "ccov-artifacts")
         self.reports_dir = os.path.join(working_dir, "ccov-reports")
+        self.lines_dir = os.path.join(working_dir, "ccov-lines")
         logger.info(
             "Local storage initialized.",
             artifacts=self.artifacts_dir,
@@ -120,39 +122,90 @@ class Hook(object):
                     logger.error(format_exception(exc, exc, exc.__traceback__))
                     os._exit(1)
 
-    def build_reports(self, only=None):
+    def report_path(self, platform, suite):
+        return os.path.join(self.reports_dir, f"{platform}.{suite}.json")
+
+    def build_reports(self):
         """
-        Build all the possible covdir reports using current artifacts
+        Build all the possible covdir reports using current artifacts, yielding
+        ((platform, suite), path) as soon as each report is built.
+
+        The full report is built first from all the artifacts, so it can be
+        used right away. Then each artifact is parsed only once: the reports of
+        each (platform, suite) combination are built from their artifacts,
+        along with an LCOV file of their line coverage, and the reports
+        aggregating several combinations (a platform for all suites, a suite
+        for all platforms) are built from these much smaller LCOV files.
         """
         os.makedirs(self.reports_dir, exist_ok=True)
 
-        reports = {}
-        for (
-            (platform, suite),
-            artifacts,
-        ) in self.artifactsHandler.get_combinations().items():
-            if only is not None and (platform, suite) not in only:
-                continue
+        combinations = self.artifactsHandler.get_combinations()
 
-            # Generate covdir report for that suite & platform
+        artifacts = combinations[("all", "all")]
+        logger.info(
+            "Building covdir suite report",
+            suite="all",
+            platform="all",
+            artifacts=len(artifacts),
+        )
+        path = self.report_path("all", "all")
+        with open(path, "wb") as f:
+            f.write(
+                grcov.report(artifacts, source_dir=self.repo_dir, out_format="covdir")
+            )
+        yield ("all", "all"), path
+
+        leaves = [key for key in combinations if "all" not in key]
+        leaf_lines = {}
+        for platform, suite in leaves:
+            artifacts = combinations[(platform, suite)]
             logger.info(
                 "Building covdir suite report",
                 suite=suite,
                 platform=platform,
                 artifacts=len(artifacts),
             )
-            output = grcov.report(
-                artifacts, source_dir=self.repo_dir, out_format="covdir"
+            covdir, leaf_lines[(platform, suite)] = grcov.report_with_lines(
+                artifacts,
+                self.repo_dir,
+                os.path.join(self.lines_dir, f"{platform}.{suite}"),
             )
+            path = self.report_path(platform, suite)
+            os.replace(covdir, path)
+            yield (platform, suite), path
 
-            # Write output on FS
-            path = os.path.join(self.reports_dir, f"{platform}.{suite}.json")
-            with open(path, "wb") as f:
-                f.write(output)
+        for platform, suite in combinations:
+            if "all" not in (platform, suite) or (platform, suite) == ("all", "all"):
+                continue
 
-            reports[(platform, suite)] = path
+            parts = [
+                (p, s)
+                for p, s in leaves
+                if platform in ("all", p) and suite in ("all", s)
+            ]
+            path = self.report_path(platform, suite)
 
-        return reports
+            if len(parts) == 1:
+                # e.g. a suite running on a single platform: the aggregated
+                # report is the same as the leaf report.
+                shutil.copyfile(self.report_path(*parts[0]), path)
+            else:
+                logger.info(
+                    "Building covdir aggregated report",
+                    suite=suite,
+                    platform=platform,
+                    parts=len(parts),
+                )
+                with open(path, "wb") as f:
+                    f.write(
+                        grcov.report(
+                            [leaf_lines[part] for part in parts],
+                            source_dir=self.repo_dir,
+                            out_format="covdir",
+                        )
+                    )
+
+            yield (platform, suite), path
 
     def index_task(self, namespaces):
         """
