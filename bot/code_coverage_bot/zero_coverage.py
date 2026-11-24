@@ -5,6 +5,7 @@ from datetime import datetime
 
 import pytz
 import structlog
+import zstandard
 
 from code_coverage_bot import grcov
 from code_coverage_bot import hgmo
@@ -124,8 +125,6 @@ class ZeroCov(object):
             ):
                 zero_coverage_files.add(name)
 
-        os.makedirs(os.path.join(out_dir, "zero_coverage_functions"), exist_ok=True)
-
         filesinfo = self.get_fileinfo(zero_coverage_functions.keys())
 
         zero_coverage_info = []
@@ -144,3 +143,16 @@ class ZeroCov(object):
 
         with open(os.path.join(out_dir, "zero_coverage_report.json"), "w") as f:
             json.dump(zero_coverage_report, f)
+
+        zero_coverage_functions_report = {
+            "hg_revision": hgrev,
+            "files": zero_coverage_functions,
+        }
+
+        cctx = zstandard.ZstdCompressor(threads=-1)
+        with open(os.path.join(out_dir, "zero_coverage_functions.json.zst"), "wb") as f:
+            f.write(
+                cctx.compress(
+                    json.dumps(zero_coverage_functions_report).encode("utf-8")
+                )
+            )
