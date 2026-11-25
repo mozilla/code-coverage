@@ -113,6 +113,20 @@ class MozillaCentralHook(RepositoryHook):
             **kwargs,
         )
 
+    def retrieve_source(self):
+        # Revisions of mozilla-central are also in the Git repository, from
+        # which the files can be listed much faster than with a clone.
+        try:
+            source_tree.create_from_git(self.revision, self.source_tree_dir)
+        except Exception as e:
+            logger.warning(
+                "Failed to create the source tree from Git, using Mercurial instead",
+                error=str(e),
+            )
+            super().retrieve_source()
+        else:
+            self.repo_dir = self.source_tree_dir
+
     def run(self):
         # Check the covdir report does not already exists
         bucket = gcp.get_bucket(secrets[secrets.GOOGLE_CLOUD_STORAGE])
