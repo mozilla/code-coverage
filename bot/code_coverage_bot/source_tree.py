@@ -14,6 +14,7 @@ checkout.
 
 import os
 import shutil
+import stat
 import subprocess
 import tempfile
 
@@ -104,7 +105,9 @@ def create_from_files(files: list[bytes], path: str) -> int:
         if directory not in directories:
             os.makedirs(os.path.join(root, directory), exist_ok=True)
             directories.add(directory)
-        open(os.path.join(root, name), "wb").close()
+        # Faster than opening and closing the file, as it takes a single
+        # system call and doesn't allocate a file descriptor.
+        os.mknod(os.path.join(root, name), stat.S_IFREG | 0o644)
 
     logger.info("Source tree created", path=path, files=len(files))
     return len(files)
