@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 import json
 import os
+from compression import zstd
 from datetime import datetime
 
 import pytz
-import zstandard
 
 from code_coverage_bot.zero_coverage import ZeroCov
 
@@ -104,9 +104,7 @@ def test_zero_coverage(
         assert found_item["uncovered"] == exp_item["uncovered"]
 
     with open(os.path.join(tmp_path, "zero_coverage_functions.json.zst"), "rb") as f:
-        zero_coverage_functions_report = json.loads(
-            zstandard.ZstdDecompressor().decompress(f.read())
-        )
+        zero_coverage_functions_report = json.loads(zstd.decompress(f.read()))
 
     assert zero_coverage_functions_report["hg_revision"] == hgrev
     uncovered_functions = zero_coverage_functions_report["files"]

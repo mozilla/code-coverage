@@ -4,21 +4,21 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import concurrent.futures
-import io
 import json
 import os
 import threading
 import time
+from compression import zstd
 
 import hglib
 import structlog
-import zstandard
 from tqdm import tqdm
 
 from code_coverage_bot import hgmo
 from code_coverage_bot.phabricator import PhabricatorUploader
 from code_coverage_bot.secrets import secrets
 from code_coverage_bot.utils import ThreadPoolExecutorResult
+from code_coverage_bot.utils import zstd_compress
 from code_coverage_bot.gcp import DEFAULT_FILTER
 from code_coverage_bot.gcp import download_report
 from code_coverage_bot.gcp import get_bucket
@@ -51,19 +51,16 @@ def generate(server_address: str, repo_dir: str, out_dir: str = ".") -> None:
 
     blob = bucket.blob("commit_coverage.json.zst")
     if blob.exists():
-        dctx = zstandard.ZstdDecompressor()
         commit_coverage = json.loads(
-            dctx.decompress(blob.download_as_bytes(raw_download=True))
+            zstd.decompress(blob.download_as_bytes(raw_download=True))
         )
     else:
         commit_coverage = {}
 
-    cctx = zstandard.ZstdCompressor(threads=-1)
-
     def _upload():
         blob = bucket.blob("commit_coverage.json.zst")
         blob.upload_from_string(
-            cctx.compress(json.dumps(commit_coverage).encode("ascii"))
+            zstd_compress(json.dumps(commit_coverage).encode("ascii"))
         )
         blob.content_type = "application/json"
         blob.content_encoding = "zstd"
@@ -154,6 +151,4 @@ def generate(server_address: str, repo_dir: str, out_dir: str = ".") -> None:
     _upload()
 
     with open(commit_coverage_path, "wb") as zf:
-        with cctx.stream_writer(zf) as compressor:
-            with io.TextIOWrapper(compressor, encoding="ascii") as f:
-                json.dump(commit_coverage, f)
+        zf.write(zstd_compress(json.dumps(commit_coverage).encode("ascii")))

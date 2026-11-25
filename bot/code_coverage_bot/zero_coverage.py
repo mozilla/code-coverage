@@ -5,10 +5,10 @@ from datetime import datetime
 
 import pytz
 import structlog
-import zstandard
 
 from code_coverage_bot import grcov
 from code_coverage_bot import hgmo
+from code_coverage_bot.utils import zstd_compress
 
 logger = structlog.get_logger(__name__)
 
@@ -149,10 +149,9 @@ class ZeroCov(object):
             "files": zero_coverage_functions,
         }
 
-        cctx = zstandard.ZstdCompressor(threads=-1)
         with open(os.path.join(out_dir, "zero_coverage_functions.json.zst"), "wb") as f:
             f.write(
-                cctx.compress(
+                zstd_compress(
                     json.dumps(zero_coverage_functions_report).encode("utf-8")
                 )
             )

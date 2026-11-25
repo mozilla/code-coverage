@@ -3,12 +3,12 @@ import itertools
 import os.path
 
 import structlog
-import zstandard as zstd
 from google.cloud.storage.bucket import Bucket
 
 from code_coverage_bot.secrets import secrets
 from code_coverage_bot.gcp import get_bucket
 from code_coverage_bot import hgmo
+from code_coverage_bot.utils import zstd_compress
 
 logger = structlog.get_logger(__name__)
 GCP_COVDIR_PATH = "{repository}/{revision}/{platform}:{suite}.json.zstd"
@@ -27,8 +27,7 @@ def gcp(repository, revision, report, platform, suite):
     bucket = get_bucket(secrets[secrets.GOOGLE_CLOUD_STORAGE])
 
     # Compress report
-    compressor = zstd.ZstdCompressor(threads=-1)
-    archive = compressor.compress(report)
+    archive = zstd_compress(report)
 
     # Upload archive
     path = GCP_COVDIR_PATH.format(

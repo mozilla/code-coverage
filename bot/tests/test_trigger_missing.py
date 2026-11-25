@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-import io
 import os
+from compression import zstd
 
 import responses
-import zstandard
 
 from code_coverage_bot import hgmo
 from code_coverage_bot import taskcluster
@@ -197,11 +196,10 @@ def test_trigger_from_scratch(
     assert get_task_details_calls == 3
     assert get_tasks_in_group_calls == 3
 
-    dctx = zstandard.ZstdDecompressor()
-    with open(os.path.join(tmp_path, "triggered_revisions.zst"), "rb") as zf:
-        with dctx.stream_reader(zf) as reader:
-            with io.TextIOWrapper(reader, encoding="ascii") as f:
-                result = set(rev for rev in f.read().splitlines())
+    with zstd.open(
+        os.path.join(tmp_path, "triggered_revisions.zst"), "rt", encoding="ascii"
+    ) as f:
+        result = set(rev for rev in f.read().splitlines())
 
     assert result == {revision2, revision3, revision4}
 
@@ -241,9 +239,7 @@ def test_trigger_from_preexisting(
         responses.GET,
         "https://firefox-ci-tc.services.mozilla.com/api/index/v1/task/project.relman.code-coverage.production.crontrigger.latest/artifacts/public/triggered_revisions.zst",
         status=200,
-        body=zstandard.ZstdCompressor().compress(
-            f"{revision2}\n{revision3}".encode("ascii")
-        ),
+        body=zstd.compress(f"{revision2}\n{revision3}".encode("ascii")),
     )
 
     copy_pushlog_database(remote, local)
@@ -346,10 +342,9 @@ def test_trigger_from_preexisting(
     assert get_task_details_calls == 1
     assert get_tasks_in_group_calls == 1
 
-    dctx = zstandard.ZstdDecompressor()
-    with open(os.path.join(tmp_path, "triggered_revisions.zst"), "rb") as zf:
-        with dctx.stream_reader(zf) as reader:
-            with io.TextIOWrapper(reader, encoding="ascii") as f:
-                result = set(rev for rev in f.read().splitlines())
+    with zstd.open(
+        os.path.join(tmp_path, "triggered_revisions.zst"), "rt", encoding="ascii"
+    ) as f:
+        result = set(rev for rev in f.read().splitlines())
 
     assert result == {revision2, revision3, revision4}

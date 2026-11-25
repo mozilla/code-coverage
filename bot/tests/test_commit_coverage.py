@@ -2,9 +2,8 @@
 import json
 import os
 import threading
+from compression import zstd
 from contextlib import contextmanager
-
-import zstandard
 
 from code_coverage_bot import commit_coverage
 from code_coverage_bot import hgmo
@@ -102,12 +101,10 @@ def test_generate_from_scratch(
 
     assert patch_calls == 1
 
-    dctx = zstandard.ZstdDecompressor()
-    with open(os.path.join(tmp_path, "commit_coverage.json.zst"), "rb") as zf:
-        with dctx.stream_reader(zf) as reader:
-            result = json.load(reader)
+    with zstd.open(os.path.join(tmp_path, "commit_coverage.json.zst"), "rb") as reader:
+        result = json.load(reader)
 
-    assert result == json.loads(dctx.decompress(uploaded_data))
+    assert result == json.loads(zstd.decompress(uploaded_data))
     assert result == {
         revision1: {
             "added": 3,
@@ -256,12 +253,10 @@ def test_generate_two_pushes(
 
     assert patch_calls == 1
 
-    dctx = zstandard.ZstdDecompressor()
-    with open(os.path.join(tmp_path, "commit_coverage.json.zst"), "rb") as zf:
-        with dctx.stream_reader(zf) as reader:
-            result = json.load(reader)
+    with zstd.open(os.path.join(tmp_path, "commit_coverage.json.zst"), "rb") as reader:
+        result = json.load(reader)
 
-    assert result == json.loads(dctx.decompress(uploaded_data))
+    assert result == json.loads(zstd.decompress(uploaded_data))
     assert result == {
         revision1: {
             "added": 3,
@@ -323,7 +318,7 @@ def test_generate_from_preexisting(
             uploaded_data = val
 
         def download_as_bytes(self, raw_download=False):
-            return zstandard.ZstdCompressor().compress(
+            return zstd.compress(
                 json.dumps(
                     {
                         "revision1": {
@@ -385,12 +380,10 @@ def test_generate_from_preexisting(
 
     assert patch_calls == 1
 
-    dctx = zstandard.ZstdDecompressor()
-    with open(os.path.join(tmp_path, "commit_coverage.json.zst"), "rb") as zf:
-        with dctx.stream_reader(zf) as reader:
-            result = json.load(reader)
+    with zstd.open(os.path.join(tmp_path, "commit_coverage.json.zst"), "rb") as reader:
+        result = json.load(reader)
 
-    assert result == json.loads(dctx.decompress(uploaded_data))
+    assert result == json.loads(zstd.decompress(uploaded_data))
     assert result == {
         "revision1": {"added": 7, "covered": 3, "unknown": 0},
         "revision2": None,
