@@ -279,7 +279,7 @@ def _completed_task(task_name):
 def test_download_all_summary(
     mocked_download_artifact, mocked_get_task_artifact, tmpdir, monkeypatch
 ):
-    assert artifacts.DOWNLOAD_WORKERS == 8
+    assert artifacts.DOWNLOAD_WORKERS == 16
     # Use a different value to check it is the one used by download_all.
     expected_workers = 3
     monkeypatch.setattr(artifacts, "DOWNLOAD_WORKERS", expected_workers)

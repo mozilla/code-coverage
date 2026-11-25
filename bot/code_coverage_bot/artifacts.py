@@ -26,7 +26,7 @@ STATUS_VALUE = {"exception": 1, "failed": 2, "completed": 3}
 COVERAGE_ARTIFACTS = ["code-coverage-grcov.zip", "code-coverage-jsvm.zip"]
 
 # Number of threads downloading artifacts in parallel.
-DOWNLOAD_WORKERS = 8
+DOWNLOAD_WORKERS = 16
 
 MB = 1_000_000
 
