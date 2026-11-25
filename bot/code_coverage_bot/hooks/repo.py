@@ -12,6 +12,7 @@ import structlog
 from code_coverage_bot import config
 from code_coverage_bot import taskcluster
 from code_coverage_bot import hgmo
+from code_coverage_bot import source_tree
 from code_coverage_bot import uploader
 from code_coverage_bot.cli import setup_cli
 from code_coverage_bot.hooks.base import Hook
@@ -37,6 +38,17 @@ class RepositoryHook(Hook):
             uploader.gcp(
                 self.branch, self.revision, report, suite=suite, platform=platform
             )
+
+    def retrieve_source(self):
+        # Building the reports only needs to know which files exist, so a tree
+        # of empty files is enough: the repository is cloned without a working
+        # directory, which saves checking out all the files.
+        self.clone_repository(update=False)
+        source_tree.create_from_files(
+            source_tree.list_hg_files(self.repo_dir, self.revision),
+            self.source_tree_dir,
+        )
+        self.repo_dir = self.source_tree_dir
 
     def check_javascript_files(self):
         """
@@ -100,6 +112,20 @@ class MozillaCentralHook(RepositoryHook):
             *args,
             **kwargs,
         )
+
+    def retrieve_source(self):
+        # Revisions of mozilla-central are also in the Git repository, from
+        # which the files can be listed much faster than with a clone.
+        try:
+            source_tree.create_from_git(self.revision, self.source_tree_dir)
+        except Exception as e:
+            logger.warning(
+                "Failed to create the source tree from Git, using Mercurial instead",
+                error=str(e),
+            )
+            super().retrieve_source()
+        else:
+            self.repo_dir = self.source_tree_dir
 
     def run(self):
         # Check the covdir report does not already exists
