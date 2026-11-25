@@ -18,7 +18,7 @@ dependencies = [
     "pyyaml==6.0.4",
     "sentry-sdk==2.75.0",
     "structlog==26.1.0",
-    "taskcluster==116.1.0",
+    "taskcluster==117.0.0",
     "tenacity==9.2.1",
     "tqdm==4.70.1",
 ]
