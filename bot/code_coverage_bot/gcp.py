@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 import os
 import re
+import shutil
 from datetime import datetime
 from datetime import timedelta
 from typing import Iterator
 from typing import Optional
 from typing import Tuple
+from compression import zstd
 
 import pytz
 import structlog
-import zstandard
 from google.cloud import storage as gcp_storage
 from google.oauth2.service_account import Credentials
 
@@ -62,14 +63,8 @@ def download_report(
     logger.info("Downloaded report archive", path=full_archive_path)
 
     with open(full_path, "wb") as output:
-        with open(full_archive_path, "rb") as archive:
-            dctx = zstandard.ZstdDecompressor()
-            reader = dctx.stream_reader(archive)
-            while True:
-                chunk = reader.read(16384)
-                if not chunk:
-                    break
-                output.write(chunk)
+        with zstd.open(full_archive_path, "rb") as archive:
+            shutil.copyfileobj(archive, output)
 
     os.unlink(full_archive_path)
     return True

@@ -3,9 +3,12 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import concurrent.futures
+import functools
+import os
 import subprocess
 import tempfile
 import time
+from compression import zstd
 from zipfile import BadZipFile
 from zipfile import is_zipfile
 
@@ -14,6 +17,23 @@ import structlog
 import tenacity
 
 log = structlog.get_logger(__name__)
+
+
+@functools.cache
+def _zstd_compression_options() -> dict[zstd.CompressionParameter, int]:
+    # Use as many worker threads as available CPUs, if libzstd supports it.
+    _, max_workers = zstd.CompressionParameter.nb_workers.bounds()
+    workers = min(os.process_cpu_count() or 1, max_workers)
+    if workers <= 1:
+        return {}
+    return {zstd.CompressionParameter.nb_workers: workers}
+
+
+def zstd_compress(data: bytes) -> bytes:
+    """
+    Compress data with zstd, using multiple threads
+    """
+    return zstd.compress(data, options=_zstd_compression_options())
 
 
 def hide_secrets(text, secrets):

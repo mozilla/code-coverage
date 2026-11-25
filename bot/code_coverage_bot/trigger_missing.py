@@ -3,14 +3,13 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import io
 import os
 from datetime import datetime
 from datetime import timedelta
+from compression import zstd
 
 import requests
 import structlog
-import zstandard
 from taskcluster.utils import slugId
 
 from code_coverage_bot import config
@@ -54,11 +53,8 @@ def trigger_missing(server_address: str, out_dir: str = ".") -> None:
         utils.download_file(url, triggered_revisions_path)
 
     try:
-        dctx = zstandard.ZstdDecompressor()
-        with open(triggered_revisions_path, "rb") as zf:
-            with dctx.stream_reader(zf) as reader:
-                with io.TextIOWrapper(reader, encoding="ascii") as f:
-                    triggered_revisions = set(rev for rev in f.read().splitlines())
+        with zstd.open(triggered_revisions_path, "rt", encoding="ascii") as f:
+            triggered_revisions = set(rev for rev in f.read().splitlines())
     except FileNotFoundError:
         triggered_revisions = set()
 
@@ -129,8 +125,5 @@ def trigger_missing(server_address: str, out_dir: str = ".") -> None:
         if triggered == MAXIMUM_TRIGGERS:
             break
 
-    cctx = zstandard.ZstdCompressor(threads=-1)
     with open(triggered_revisions_path, "wb") as zf:
-        with cctx.stream_writer(zf) as compressor:
-            with io.TextIOWrapper(compressor, encoding="ascii") as f:
-                f.write("\n".join(triggered_revisions))
+        zf.write(utils.zstd_compress("\n".join(triggered_revisions).encode("ascii")))
