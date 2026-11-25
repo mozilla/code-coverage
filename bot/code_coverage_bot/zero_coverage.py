@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-import json
 import os
 from datetime import datetime
 
+import orjson
 import pytz
 import structlog
 
@@ -93,7 +93,7 @@ class ZeroCov(object):
         report = grcov.report(
             artifacts, out_format="coveralls+", source_dir=self.repo_dir
         )
-        report = json.loads(report)
+        report = orjson.loads(report)
 
         zero_coverage_files = set()
         zero_coverage_functions = {}
@@ -141,8 +141,8 @@ class ZeroCov(object):
 
         zero_coverage_report = {"hg_revision": hgrev, "files": zero_coverage_info}
 
-        with open(os.path.join(out_dir, "zero_coverage_report.json"), "w") as f:
-            json.dump(zero_coverage_report, f)
+        with open(os.path.join(out_dir, "zero_coverage_report.json"), "wb") as f:
+            f.write(orjson.dumps(zero_coverage_report))
 
         zero_coverage_functions_report = {
             "hg_revision": hgrev,
@@ -150,8 +150,4 @@ class ZeroCov(object):
         }
 
         with open(os.path.join(out_dir, "zero_coverage_functions.json.zst"), "wb") as f:
-            f.write(
-                zstd_compress(
-                    json.dumps(zero_coverage_functions_report).encode("utf-8")
-                )
-            )
+            f.write(zstd_compress(orjson.dumps(zero_coverage_functions_report)))
