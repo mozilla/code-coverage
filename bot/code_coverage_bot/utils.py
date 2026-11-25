@@ -111,9 +111,19 @@ class ThreadPoolExecutorResult(concurrent.futures.ThreadPoolExecutor):
         return super(ThreadPoolExecutorResult, self).__exit__(*args)
 
 
+def is_not_found_error(exception: BaseException) -> bool:
+    return (
+        isinstance(exception, requests.exceptions.HTTPError)
+        and exception.response is not None
+        and exception.response.status_code == 404
+    )
+
+
 def download_file(url: str, path: str) -> None:
     @tenacity.retry(
         reraise=True,
+        # A missing file won't appear by retrying, so fail immediately on 404.
+        retry=tenacity.retry_if_exception(lambda e: not is_not_found_error(e)),
         wait=tenacity.wait_exponential(multiplier=1, min=16, max=64),
         stop=tenacity.stop_after_attempt(5),
     )

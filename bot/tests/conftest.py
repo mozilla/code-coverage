@@ -425,3 +425,6 @@ def mock_tenacity(monkeypatch):
     Mock Tenacity wait function to avoid spening time in unit tests
     """
     monkeypatch.setattr(tenacity, "wait_fixed", lambda x: None)
+    monkeypatch.setattr(
+        tenacity, "wait_exponential", lambda *args, **kwargs: tenacity.wait_none()
+    )

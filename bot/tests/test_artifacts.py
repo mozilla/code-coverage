@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
 import hashlib
+import io
 import itertools
 import os
+import urllib.parse
+import zipfile
 from unittest import mock
 
 import pytest
+import requests
 import responses
 import structlog
 
@@ -47,8 +51,8 @@ def fake_artifacts(tmpdir):
 
 def test_generate_path(fake_artifacts):
     a = ArtifactsHandler([])
-    artifact_jsvm = {"name": "code-coverage-jsvm.info"}
-    artifact_grcov = {"name": "code-coverage-grcov.zip"}
+    artifact_jsvm = "code-coverage-jsvm.info"
+    artifact_grcov = "code-coverage-grcov.zip"
     assert os.path.join(
         a.parent_dir, "linux_xpcshell-3_code-coverage-jsvm.info"
     ) == a.generate_path("linux", "xpcshell-3", artifact_jsvm)
@@ -317,6 +321,243 @@ def test_download_all_summary(
     assert "concurrency" in summary
 
 
+LISTING_URL = "http://taskcluster.test/api/queue/v1/task/{}/artifacts"
+DOWNLOAD_URL = (
+    "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/{}/artifacts/{}"
+)
+TEST_ARTIFACTS = [
+    "public/test_info/code-coverage-grcov.zip",
+    "public/test_info/code-coverage-jsvm.zip",
+]
+BUILD_ARTIFACTS = ["public/code-coverage-grcov.zip"]
+
+
+def _zip_content():
+    content = io.BytesIO()
+    with zipfile.ZipFile(content, "w") as z:
+        z.writestr("file.info", "")
+    return content.getvalue()
+
+
+def _make_task(task_id, kind, suite, chunk=None):
+    task = {
+        "status": {"taskId": task_id, "state": "completed"},
+        "task": {
+            "metadata": {"name": f"{kind}-linux64-ccov/opt-{suite}"},
+            "tags": {"kind": kind, "os": "linux"},
+            "extra": {"suite": suite},
+        },
+    }
+    if chunk is not None:
+        task["task"]["extra"]["chunks"] = {"current": chunk}
+    return task
+
+
+def _add_listing(task_id, artifact_names):
+    responses.add(
+        responses.GET,
+        LISTING_URL.format(task_id),
+        json={
+            "artifacts": [{"name": "public/logs/live.log"}]
+            + [{"name": name} for name in artifact_names]
+        },
+        status=200,
+    )
+
+
+def _add_download(task_id, artifact_name, status=200):
+    responses.add(
+        responses.GET,
+        DOWNLOAD_URL.format(task_id, urllib.parse.quote(artifact_name, safe="")),
+        body=_zip_content() if status == 200 else "error",
+        status=status,
+    )
+
+
+def _count_calls(url):
+    return sum(1 for call in responses.calls if call.request.url == url)
+
+
+def test_download_requests(
+    mock_taskcluster,
+    mock_tenacity,
+    tmpdir,
+    TEST_TASK_FROM_GROUP,
+    LINUX_TEST_TASK_ARTIFACTS,
+):
+    a = ArtifactsHandler([], parent_dir=tmpdir.strpath)
+    task_id = "AN1M9SW0QY6DZT6suL3zlQ"
+    responses.add(
+        responses.GET,
+        LISTING_URL.format(task_id),
+        json=LINUX_TEST_TASK_ARTIFACTS,
+        status=200,
+    )
+    for name in TEST_ARTIFACTS:
+        _add_download(task_id, name)
+
+    a.find_artifact_names([TEST_TASK_FROM_GROUP])
+    a.download(TEST_TASK_FROM_GROUP)
+
+    assert a.artifact_names == {"test": TEST_ARTIFACTS}
+    assert a.artifacts == [
+        Artifact(
+            os.path.join(
+                tmpdir.strpath,
+                "linux_mochitest-devtools-chrome-4_code-coverage-grcov.zip",
+            ),
+            task_id,
+            "linux",
+            "mochitest-devtools-chrome",
+            "mochitest-devtools-chrome-4",
+        ),
+        Artifact(
+            os.path.join(
+                tmpdir.strpath,
+                "linux_mochitest-devtools-chrome-4_code-coverage-jsvm.zip",
+            ),
+            task_id,
+            "linux",
+            "mochitest-devtools-chrome",
+            "mochitest-devtools-chrome-4",
+        ),
+    ]
+    assert all(os.path.exists(artifact.path) for artifact in a.artifacts)
+    # One listing call and two downloads.
+    assert len(responses.calls) == 3
+
+
+def test_download_learns_names_when_unknown(mock_taskcluster, mock_tenacity, tmpdir):
+    # Calling download directly, without finding the artifact names first.
+    a = ArtifactsHandler([], parent_dir=tmpdir.strpath)
+    task = _make_task("task1", "test", "mochitest-plain", 4)
+    _add_listing("task1", TEST_ARTIFACTS)
+    for name in TEST_ARTIFACTS:
+        _add_download("task1", name)
+
+    a.download(task)
+
+    assert a.artifact_names == {"test": TEST_ARTIFACTS}
+    assert [artifact.path for artifact in a.artifacts] == [
+        os.path.join(tmpdir.strpath, "linux_mochitest-plain-4_code-coverage-grcov.zip"),
+        os.path.join(tmpdir.strpath, "linux_mochitest-plain-4_code-coverage-jsvm.zip"),
+    ]
+
+
+def test_find_artifact_names(mock_taskcluster):
+    a = ArtifactsHandler([])
+    tasks = [
+        # The first test task doesn't have coverage artifacts, so the next one is used.
+        _make_task("test1", "test", "xpcshell", 1),
+        _make_task("test2", "test", "xpcshell", 2),
+        _make_task("test3", "test", "xpcshell", 3),
+        _make_task("build1", "build", "build"),
+        _make_task("build2", "build", "build"),
+        _make_task("source1", "source-test", "source-test"),
+        # No task of this kind has coverage artifacts.
+        _make_task("signing1", "build-signing", "build-signing"),
+        _make_task("signing2", "build-signing", "build-signing"),
+    ]
+    _add_listing("test1", [])
+    _add_listing("test2", TEST_ARTIFACTS + ["public/test_info/other.log"])
+    _add_listing("build1", BUILD_ARTIFACTS + ["public/build/target.zip"])
+    _add_listing("source1", BUILD_ARTIFACTS)
+    _add_listing("signing1", [])
+    _add_listing("signing2", [])
+
+    a.find_artifact_names(tasks)
+
+    assert a.artifact_names == {
+        "test": TEST_ARTIFACTS,
+        "build": BUILD_ARTIFACTS,
+        "source-test": BUILD_ARTIFACTS,
+        "build-signing": [],
+    }
+    assert [call.request.url for call in responses.calls] == [
+        LISTING_URL.format(task_id)
+        for task_id in ["test1", "test2", "build1", "source1", "signing1", "signing2"]
+    ]
+
+    # Names are only looked up once per kind.
+    a.find_artifact_names(tasks)
+    assert len(responses.calls) == 6
+
+
+def test_download_different_kinds(mock_taskcluster, mock_tenacity, tmpdir):
+    a = ArtifactsHandler([], parent_dir=tmpdir.strpath)
+    test_task = _make_task("test1", "test", "xpcshell", 1)
+    build_task = _make_task("build1", "build", "build")
+    signing_task = _make_task("signing1", "build-signing", "build-signing")
+    a.artifact_names = {
+        "test": TEST_ARTIFACTS,
+        "build": BUILD_ARTIFACTS,
+        "build-signing": [],
+    }
+    for name in TEST_ARTIFACTS:
+        _add_download("test1", name)
+    _add_download("build1", BUILD_ARTIFACTS[0])
+
+    for task in [test_task, build_task, signing_task]:
+        a.download(task)
+
+    assert [(artifact.path, artifact.task_id) for artifact in a.artifacts] == [
+        (
+            os.path.join(tmpdir.strpath, "linux_xpcshell-1_code-coverage-grcov.zip"),
+            "test1",
+        ),
+        (
+            os.path.join(tmpdir.strpath, "linux_xpcshell-1_code-coverage-jsvm.zip"),
+            "test1",
+        ),
+        (os.path.join(tmpdir.strpath, "linux_build_code-coverage-grcov.zip"), "build1"),
+    ]
+    # No listing calls, only the three downloads.
+    assert len(responses.calls) == 3
+
+
+def test_download_missing_artifact(mock_taskcluster, mock_tenacity, tmpdir):
+    a = ArtifactsHandler([], parent_dir=tmpdir.strpath)
+    task = _make_task("task1", "test", "xpcshell", 1)
+    a.artifact_names = {"test": TEST_ARTIFACTS}
+    _add_download("task1", TEST_ARTIFACTS[0])
+    _add_download("task1", TEST_ARTIFACTS[1], status=404)
+
+    with structlog.testing.capture_logs() as logs:
+        a.download(task)
+
+    assert [artifact.path for artifact in a.artifacts] == [
+        os.path.join(tmpdir.strpath, "linux_xpcshell-1_code-coverage-grcov.zip")
+    ]
+    assert [
+        log["event"]
+        for log in logs
+        if log["event"] in ("Artifact downloaded", "Artifact not found")
+    ] == ["Artifact downloaded", "Artifact not found"]
+    assert len(a.download_stats) == 1
+    assert not os.path.exists(
+        os.path.join(tmpdir.strpath, "linux_xpcshell-1_code-coverage-jsvm.zip")
+    )
+    # The missing artifact is requested only once, without retries.
+    missing_url = DOWNLOAD_URL.format(
+        "task1", urllib.parse.quote(TEST_ARTIFACTS[1], safe="")
+    )
+    assert _count_calls(missing_url) == 1
+    assert len(responses.calls) == 2
+
+
+def test_download_error_retried(mock_taskcluster, mock_tenacity, tmpdir):
+    a = ArtifactsHandler([], parent_dir=tmpdir.strpath)
+    task = _make_task("task1", "test", "xpcshell", 1)
+    a.artifact_names = {"test": TEST_ARTIFACTS}
+    _add_download("task1", TEST_ARTIFACTS[0], status=500)
+
+    with pytest.raises(requests.exceptions.HTTPError, match="500 Server Error"):
+        a.download(task)
+
+    assert a.artifacts == []
+    assert len(responses.calls) == 5
+
+
 # In the download_all tests, we want to make sure the relative ordering of the tasks
 # in the Taskcluster group does not affect the result, so we test with all possible
 # orderings of several possible states.
@@ -375,16 +616,20 @@ def _group_tasks():
         }
 
 
+@mock.patch("code_coverage_bot.taskcluster.get_task_artifacts")
 def test_download_all(
+    mocked_get_task_artifacts,
     DECISION_TASK_ID,
     DECISION_TASK,
     LATEST_DECISION,
     GROUP_TASKS_1,
     GROUP_TASKS_2,
+    LINUX_TEST_TASK_ARTIFACTS,
     fake_artifacts,
     mock_taskcluster,
     tmpdir,
 ):
+    mocked_get_task_artifacts.return_value = LINUX_TEST_TASK_ARTIFACTS["artifacts"]
     responses.add(
         responses.GET,
         "http://taskcluster.test/api/index/v1/task/gecko.v2.mozilla-central.revision.7828a10a94b6afb78d18d9b7b83e7aa79337cc24.taskgraph.decision",
@@ -423,7 +668,18 @@ def test_download_all(
 
         a.download = mock_download
 
+        mocked_get_task_artifacts.reset_mock()
+
         a.download_all()
+
+        # All tasks have the same kind, so only one listing call is needed.
+        assert mocked_get_task_artifacts.call_count == 1
+        assert a.artifact_names == {
+            "test": [
+                "public/test_info/code-coverage-grcov.zip",
+                "public/test_info/code-coverage-jsvm.zip",
+            ]
+        }
 
         assert downloaded == set(
             [
