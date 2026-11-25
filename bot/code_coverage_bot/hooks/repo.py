@@ -3,10 +3,10 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-import json
 import os
 import zipfile
 
+import orjson
 import structlog
 
 from code_coverage_bot import config
@@ -136,7 +136,7 @@ class MozillaCentralHook(RepositoryHook):
             ]
         )
 
-        report = json.loads(report_bytes)
+        report = orjson.loads(report_bytes)
 
         # Check extensions
         paths = uploader.covdir_paths(report)

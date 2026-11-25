@@ -4,13 +4,13 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import concurrent.futures
-import json
 import os
 import threading
 import time
 from compression import zstd
 
 import hglib
+import orjson
 import structlog
 from tqdm import tqdm
 
@@ -51,7 +51,7 @@ def generate(server_address: str, repo_dir: str, out_dir: str = ".") -> None:
 
     blob = bucket.blob("commit_coverage.json.zst")
     if blob.exists():
-        commit_coverage = json.loads(
+        commit_coverage = orjson.loads(
             zstd.decompress(blob.download_as_bytes(raw_download=True))
         )
     else:
@@ -59,9 +59,7 @@ def generate(server_address: str, repo_dir: str, out_dir: str = ".") -> None:
 
     def _upload():
         blob = bucket.blob("commit_coverage.json.zst")
-        blob.upload_from_string(
-            zstd_compress(json.dumps(commit_coverage).encode("ascii"))
-        )
+        blob.upload_from_string(zstd_compress(orjson.dumps(commit_coverage)))
         blob.content_type = "application/json"
         blob.content_encoding = "zstd"
         blob.patch()
@@ -91,9 +89,9 @@ def generate(server_address: str, repo_dir: str, out_dir: str = ".") -> None:
         )
 
         with open(
-            os.path.join(out_dir, "ccov-reports", f"{report_name}.json"), "r"
+            os.path.join(out_dir, "ccov-reports", f"{report_name}.json"), "rb"
         ) as f:
-            report = json.load(f)
+            report = orjson.loads(f.read())
 
         phabricatorUploader = PhabricatorUploader(
             repo_dir, changeset_to_analyze, warnings_enabled=False
@@ -151,4 +149,4 @@ def generate(server_address: str, repo_dir: str, out_dir: str = ".") -> None:
     _upload()
 
     with open(commit_coverage_path, "wb") as zf:
-        zf.write(zstd_compress(json.dumps(commit_coverage).encode("ascii")))
+        zf.write(zstd_compress(orjson.dumps(commit_coverage)))
