@@ -1,13 +1,17 @@
 # -*- coding: utf-8 -*-
 import json
 import os
+import threading
+import time
 import zipfile
 
 import pytest
+import structlog
 
 from code_coverage_bot import grcov
 from code_coverage_bot.artifacts import Artifact
 from code_coverage_bot.artifacts import ArtifactsHandler
+from code_coverage_bot.hooks import base
 from code_coverage_bot.hooks.base import Hook
 
 
@@ -160,3 +164,57 @@ def test_build_full_report(hook):
 
     with open(path, "rb") as f:
         assert f.read() == expected_report(hook, artifacts)
+
+
+def test_build_reports_small_leaves_in_parallel(hook, monkeypatch):
+    # Make the artifacts of two leaves big, so they are built one at a time.
+    big_leaves = {("linux", "xpcshell"), ("windows", "reftest")}
+    for artifact in hook.artifactsHandler.artifacts:
+        if (artifact.platform, artifact.suite) in big_leaves:
+            with zipfile.ZipFile(artifact.path, "a") as z:
+                z.writestr("padding.bin", os.urandom(100_000))
+    monkeypatch.setattr(base, "SMALL_LEAF_MAX_SIZE", 50_000)
+
+    # Record when each leaf is built, and the logging context it's built with.
+    lock = threading.Lock()
+    running = set()
+    events = []
+    report_with_lines = grcov.report_with_lines
+
+    def slow_report_with_lines(artifacts, source_dir, out_dir):
+        leaf = tuple(os.path.basename(out_dir).split("."))
+        context = structlog.contextvars.get_contextvars()
+        with lock:
+            events.append(("start", leaf, set(running), context))
+            running.add(leaf)
+        time.sleep(0.3)
+        try:
+            return report_with_lines(artifacts, source_dir, out_dir)
+        finally:
+            with lock:
+                running.remove(leaf)
+
+    monkeypatch.setattr(grcov, "report_with_lines", slow_report_with_lines)
+
+    reports = dict(hook.build_reports())
+
+    small_leaves = {("linux", "mochitest"), ("windows", "mochitest")}
+    started = [leaf for _, leaf, _, _ in events]
+    assert set(started) == small_leaves | big_leaves
+    # The small leaves are built in parallel, before the big ones.
+    assert set(started[:2]) == small_leaves
+    assert any(others for _, leaf, others, _ in events if leaf in small_leaves)
+    # The big leaves are built one at a time, with nothing else running.
+    for _, leaf, others, _ in events:
+        if leaf in big_leaves:
+            assert others == set(), leaf
+    # Logs of each leaf (e.g. grcov's memory) say which leaf they are about.
+    for _, (platform, suite), _, context in events:
+        assert context == {"platform": platform, "suite": suite}
+
+    # The reports are still the same as the ones built directly by grcov.
+    combinations = hook.artifactsHandler.get_combinations()
+    for key, path in reports.items():
+        expected = expected_report(hook, combinations[key])
+        with open(path, "rb") as f:
+            assert f.read() == expected, key

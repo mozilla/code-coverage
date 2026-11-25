@@ -20,6 +20,11 @@ from code_coverage_bot.utils import ThreadPoolExecutorResult
 
 logger = structlog.get_logger(__name__)
 
+# Leaves whose artifacts are at most this big (compressed, in bytes) are built in
+# parallel, as they don't need much memory.
+SMALL_LEAF_MAX_SIZE = 500 * 1000 * 1000
+SMALL_LEAF_WORKERS = 4
+
 
 class Hook(object):
     def __init__(
@@ -169,21 +174,27 @@ class Hook(object):
         combinations = self.artifactsHandler.get_combinations()
 
         leaves = [key for key in combinations if "all" not in key]
+
+        # Most leaves have little coverage data: building their reports is
+        # mostly grcov's fixed cost, and uses at most ~3 GB of memory, so they
+        # are built in parallel. The others can use more than 10 GB each, so
+        # they are built one at a time, after the small ones.
+        size = {
+            leaf: sum(os.path.getsize(path) for path in combinations[leaf])
+            for leaf in leaves
+        }
+        small = [leaf for leaf in leaves if size[leaf] <= SMALL_LEAF_MAX_SIZE]
+        big = [leaf for leaf in leaves if size[leaf] > SMALL_LEAF_MAX_SIZE]
         leaf_lines = {}
-        for platform, suite in leaves:
-            artifacts = combinations[(platform, suite)]
-            logger.info(
-                "Building covdir suite report",
-                suite=suite,
-                platform=platform,
-                artifacts=len(artifacts),
-            )
-            covdir, leaf_lines[(platform, suite)] = grcov.report_with_lines(
-                artifacts,
-                self.repo_dir,
-                os.path.join(self.lines_dir, f"{platform}.{suite}"),
-            )
-            os.replace(covdir, self.report_path(platform, suite))
+        with ThreadPoolExecutorResult(max_workers=SMALL_LEAF_WORKERS) as executor:
+            futures = {
+                leaf: executor.submit(self.build_leaf_report, leaf, combinations[leaf])
+                for leaf in small
+            }
+        for leaf in small:
+            leaf_lines[leaf] = futures[leaf].result()
+        for leaf in big:
+            leaf_lines[leaf] = self.build_leaf_report(leaf, combinations[leaf])
 
         yield ("all", "all"), self.build_aggregated_report("all", "all", leaf_lines)
 
@@ -194,6 +205,25 @@ class Hook(object):
             if "all" in (platform, suite) and (platform, suite) != ("all", "all"):
                 path = self.build_aggregated_report(platform, suite, leaf_lines)
                 yield (platform, suite), path
+
+    def build_leaf_report(self, leaf, artifacts):
+        """
+        Build the covdir report of a (platform, suite) combination from its
+        artifacts, along with an LCOV file of its line coverage, and return
+        the path of the LCOV file.
+        """
+        platform, suite = leaf
+        # Identify the leaf in all the logs (e.g. of grcov's duration and
+        # memory), as leaves can be built in parallel.
+        with structlog.contextvars.bound_contextvars(platform=platform, suite=suite):
+            logger.info("Building covdir suite report", artifacts=len(artifacts))
+            covdir, lines = grcov.report_with_lines(
+                artifacts,
+                self.repo_dir,
+                os.path.join(self.lines_dir, f"{platform}.{suite}"),
+            )
+        os.replace(covdir, self.report_path(platform, suite))
+        return lines
 
     def build_aggregated_report(self, platform, suite, leaf_lines):
         """
