@@ -35,6 +35,7 @@ class Hook(object):
         self.artifacts_dir = os.path.join(working_dir, "ccov-artifacts")
         self.reports_dir = os.path.join(working_dir, "ccov-reports")
         self.lines_dir = os.path.join(working_dir, "ccov-lines")
+        self.source_tree_dir = os.path.join(working_dir, "source-tree")
         logger.info(
             "Local storage initialized.",
             artifacts=self.artifacts_dir,
@@ -82,7 +83,7 @@ class Hook(object):
     def branch(self):
         return self.repository[len(config.HG_BASE) :]
 
-    def clone_repository(self):
+    def clone_repository(self, update=True):
         cmd = hglib.util.cmdbuilder(
             "robustcheckout",
             self.repository,
@@ -92,6 +93,7 @@ class Hook(object):
             upstream="https://hg.mozilla.org/mozilla-unified",
             revision=self.revision,
             networkattempts=7,
+            noupdate=not update,
         )
 
         cmd.insert(0, hglib.HGPATH)
@@ -100,6 +102,12 @@ class Hook(object):
 
         logger.info("{} cloned".format(self.repository))
 
+    def retrieve_source(self):
+        """
+        Make the source files available in self.repo_dir
+        """
+        self.clone_repository()
+
     def retrieve_source_and_artifacts(self):
         with ThreadPoolExecutorResult(max_workers=2) as executor:
             futures = []
@@ -107,14 +115,14 @@ class Hook(object):
             # Thread 1 - Download coverage artifacts.
             futures.append(executor.submit(self.artifactsHandler.download_all))
 
-            # Thread 2 - Clone repository.
-            futures.append(executor.submit(self.clone_repository))
+            # Thread 2 - Retrieve source files.
+            futures.append(executor.submit(self.retrieve_source))
 
             for future in concurrent.futures.as_completed(futures):
                 exc = future.exception()
                 if exc is not None:
                     logger.error(
-                        "Exception while downloading coverage artifacts or cloning repository",
+                        "Exception while downloading coverage artifacts or retrieving source files",
                         exception=exc,
                     )
                     from traceback import format_exception
