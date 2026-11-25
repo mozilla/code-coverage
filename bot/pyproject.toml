@@ -15,7 +15,7 @@ dependencies = [
     "libmozdata==0.2.20",
     "orjson==3.13.0",
     "pytz==2026.6",
-    "pyyaml==6.0.3",
+    "pyyaml==6.0.4",
     "sentry-sdk==2.75.0",
     "structlog==26.1.0",
     "taskcluster==116.1.0",
