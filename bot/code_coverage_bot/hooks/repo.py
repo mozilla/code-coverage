@@ -112,7 +112,8 @@ class MozillaCentralHook(RepositoryHook):
         # for consumers (e.g. Searchfox) right away.
         self.retrieve_source_and_artifacts()
 
-        # The full report is the first one to be built.
+        # The full report is the first one to be yielded (it is built from the
+        # (platform, suite) reports, which are yielded afterwards).
         reports = self.build_reports()
         full_key, full_path = next(reports)
         assert full_key == ("all", "all"), "Missing full report (all:all)"
@@ -194,9 +195,9 @@ class TryHook(RepositoryHook):
 
         self.retrieve_source_and_artifacts()
 
-        # Only build the full report, which is the first one to be built.
-        full_key, full_path = next(self.build_reports())
-        assert full_key == ("all", "all"), "Missing full report (all:all)"
+        # Only build the full report, directly from the artifacts, which is
+        # faster than building it from the (platform, suite) reports.
+        full_path = self.build_full_report()  # noqa: F841
         logger.info("Built full covdir report")
         # report = json.load(open(full_path))
 
