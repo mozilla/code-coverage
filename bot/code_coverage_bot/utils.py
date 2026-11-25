@@ -4,6 +4,8 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 import concurrent.futures
 import subprocess
+import tempfile
+import time
 from zipfile import BadZipFile
 from zipfile import is_zipfile
 
@@ -47,8 +49,26 @@ def run_check(command, **kwargs):
 
     log.info("Running command", command=" ".join(command), kwargs=_kwargs)
 
-    with subprocess.Popen(command, **_kwargs) as proc:
-        output, error = proc.communicate()
+    # Measure the peak memory of the command with GNU time: measuring it from
+    # here would also count the memory of this process, which the command is
+    # forked from.
+    with tempfile.NamedTemporaryFile(mode="r") as stats:
+        start = time.monotonic()
+        with subprocess.Popen(
+            ["/usr/bin/time", "-q", "-f", "%M", "-o", stats.name, *command],
+            **_kwargs,
+        ) as proc:
+            output, error = proc.communicate()
+        duration = time.monotonic() - start
+        max_rss_kb = stats.read().strip()
+
+    log.info(
+        "Command finished",
+        command=command[0],
+        exit=proc.returncode,
+        duration=round(duration, 1),
+        max_rss_mb=int(max_rss_kb) // 1024 if max_rss_kb.isdigit() else None,
+    )
 
     if proc.returncode != 0:
         output = output and output.decode("utf-8") or ""
