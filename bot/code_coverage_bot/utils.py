@@ -23,7 +23,7 @@ log = structlog.get_logger(__name__)
 def _zstd_compression_options() -> dict[zstd.CompressionParameter, int]:
     # Use as many worker threads as available CPUs, if libzstd supports it.
     _, max_workers = zstd.CompressionParameter.nb_workers.bounds()
-    workers = min(os.process_cpu_count() or 1, max_workers)
+    workers = min(os.cpu_count() or 1, max_workers)
     if workers <= 1:
         return {}
     return {zstd.CompressionParameter.nb_workers: workers}
