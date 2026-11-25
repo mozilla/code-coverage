@@ -6,7 +6,9 @@ from unittest import mock
 
 import pytest
 import responses
+import structlog
 
+from code_coverage_bot import artifacts
 from code_coverage_bot.artifacts import Artifact
 from code_coverage_bot.artifacts import ArtifactsHandler
 from code_coverage_bot.hooks.base import Hook
@@ -174,18 +176,31 @@ def test_get_coverage_artifacts(tmpdir, fake_artifacts):
         a.get(chunk="xpcshell-7", suite="mochitest")
 
 
+def fake_download_artifact(artifact_path, task_id, artifact_name):
+    with open(artifact_path, "wb") as f:
+        f.write(b"x" * 1_500_000)
+
+
 @mock.patch("code_coverage_bot.taskcluster.get_task_artifacts")
-@mock.patch("code_coverage_bot.taskcluster.download_artifact")
+@mock.patch(
+    "code_coverage_bot.taskcluster.download_artifact",
+    side_effect=fake_download_artifact,
+)
 def test_download(
     mocked_download_artifact,
     mocked_get_task_artifact,
     TEST_TASK_FROM_GROUP,
     LINUX_TEST_TASK_ARTIFACTS,
+    tmpdir,
+    monkeypatch,
 ):
+    monkeypatch.chdir(tmpdir)
     a = ArtifactsHandler([])
+    os.makedirs(a.parent_dir)
     mocked_get_task_artifact.return_value = LINUX_TEST_TASK_ARTIFACTS["artifacts"]
 
-    a.download(TEST_TASK_FROM_GROUP)
+    with structlog.testing.capture_logs() as logs:
+        a.download(TEST_TASK_FROM_GROUP)
 
     assert mocked_get_task_artifact.call_count == 1
     assert mocked_download_artifact.call_count == 2
@@ -199,6 +214,107 @@ def test_download(
         "AN1M9SW0QY6DZT6suL3zlQ",
         "public/test_info/code-coverage-jsvm.zip",
     )
+
+    downloaded_logs = [log for log in logs if log["event"] == "Artifact downloaded"]
+    assert [log["path"] for log in downloaded_logs] == [
+        "ccov-artifacts/linux_mochitest-devtools-chrome-4_code-coverage-grcov.zip",
+        "ccov-artifacts/linux_mochitest-devtools-chrome-4_code-coverage-jsvm.zip",
+    ]
+    for log in downloaded_logs:
+        assert log["size_mb"] == 1.5
+        assert log["cached"] is False
+        assert log["duration"] >= 0
+        assert "mb_per_s" in log
+    assert [size for size, _ in a.download_stats] == [1_500_000, 1_500_000]
+
+
+@mock.patch("code_coverage_bot.taskcluster.get_task_artifacts")
+@mock.patch("code_coverage_bot.taskcluster.download_artifact")
+def test_download_cached(
+    mocked_download_artifact,
+    mocked_get_task_artifact,
+    TEST_TASK_FROM_GROUP,
+    LINUX_TEST_TASK_ARTIFACTS,
+    tmpdir,
+):
+    a = ArtifactsHandler([], parent_dir=tmpdir.strpath)
+    mocked_get_task_artifact.return_value = LINUX_TEST_TASK_ARTIFACTS["artifacts"]
+    # The artifacts are already on disk, so download_artifact skips them.
+    for name in ["code-coverage-grcov.zip", "code-coverage-jsvm.zip"]:
+        tmpdir.join(f"linux_mochitest-devtools-chrome-4_{name}").write("x" * 10)
+
+    with structlog.testing.capture_logs() as logs:
+        a.download(TEST_TASK_FROM_GROUP)
+
+    downloaded_logs = [log for log in logs if log["event"] == "Artifact downloaded"]
+    assert len(downloaded_logs) == 2
+    assert all(log["cached"] is True for log in downloaded_logs)
+    # Artifacts which were already on disk are not counted in the measurements.
+    assert a.download_stats == []
+    assert len(a.artifacts) == 2
+
+
+def _completed_task(task_name):
+    platform, test = task_name.split("/")
+    return {
+        "status": {"taskId": task_name, "state": "completed"},
+        "task": {
+            "metadata": {"name": task_name},
+            "env": {},
+            "extra": {"suite": test},
+            "tags": {"os": platform},
+        },
+    }
+
+
+@mock.patch("code_coverage_bot.taskcluster.get_task_artifacts")
+@mock.patch(
+    "code_coverage_bot.taskcluster.download_artifact",
+    side_effect=fake_download_artifact,
+)
+def test_download_all_summary(
+    mocked_download_artifact, mocked_get_task_artifact, tmpdir, monkeypatch
+):
+    assert artifacts.DOWNLOAD_WORKERS == 8
+    # Use a different value to check it is the one used by download_all.
+    expected_workers = 3
+    monkeypatch.setattr(artifacts, "DOWNLOAD_WORKERS", expected_workers)
+
+    mocked_get_task_artifact.return_value = [
+        {"name": "public/test_info/code-coverage-grcov.zip"},
+        {"name": "public/test_info/code-coverage-jsvm.zip"},
+        {"name": "public/test_info/other.log"},
+    ]
+    a = ArtifactsHandler(
+        [_completed_task("linux/mochitest"), _completed_task("windows/xpcshell")],
+        parent_dir=tmpdir.strpath,
+    )
+
+    with mock.patch(
+        "code_coverage_bot.artifacts.ThreadPoolExecutorResult",
+        wraps=artifacts.ThreadPoolExecutorResult,
+    ) as executor:
+        with structlog.testing.capture_logs() as logs:
+            a.download_all()
+
+    executor.assert_called_once_with(max_workers=expected_workers)
+
+    assert mocked_download_artifact.call_count == 4
+    assert len(a.artifacts) == 4
+
+    start_log = next(log for log in logs if log["event"] == "Downloading artifacts")
+    assert start_log["tasks"] == 2
+    assert start_log["workers"] == expected_workers
+
+    summary = next(
+        log for log in logs if log["event"] == "Code coverage artifacts downloaded"
+    )
+    assert summary["artifacts"] == 4
+    assert summary["size_mb"] == 6.0
+    assert summary["workers"] == expected_workers
+    assert summary["duration"] >= 0
+    assert "mb_per_s" in summary
+    assert "concurrency" in summary
 
 
 # In the download_all tests, we want to make sure the relative ordering of the tasks

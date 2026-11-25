@@ -23,6 +23,11 @@ SUITES_TO_IGNORE = [
 ]  # Ignore awsy and talos as they aren't actually suites of tests.
 STATUS_VALUE = {"exception": 1, "failed": 2, "completed": 3}
 
+# Number of threads downloading artifacts in parallel.
+DOWNLOAD_WORKERS = 8
+
+MB = 1_000_000
+
 
 class ArtifactsHandler(object):
     def __init__(self, test_tasks, parent_dir="ccov-artifacts", task_name_filter="*"):
@@ -30,6 +35,9 @@ class ArtifactsHandler(object):
         self.parent_dir = parent_dir
         self.task_name_filter = task_name_filter
         self.artifacts = []
+        # (size in bytes, duration in seconds) of each artifact downloaded by
+        # download_all, not counting the ones which were already on disk.
+        self.download_stats = []
 
     def generate_path(self, platform, chunk, artifact):
         file_name = "%s_%s_%s" % (platform, chunk, os.path.basename(artifact["name"]))
@@ -109,8 +117,21 @@ class ArtifactsHandler(object):
                 continue
 
             artifact_path = self.generate_path(platform_name, chunk_name, artifact)
+            cached = os.path.exists(artifact_path)
+            start = time.monotonic()
             taskcluster.download_artifact(artifact_path, test_task_id, artifact["name"])
-            logger.info("%s artifact downloaded" % artifact_path)
+            duration = time.monotonic() - start
+            size = os.path.getsize(artifact_path)
+            if not cached:
+                self.download_stats.append((size, duration))
+            logger.info(
+                "Artifact downloaded",
+                path=artifact_path,
+                size_mb=round(size / MB, 1),
+                duration=round(duration, 2),
+                mb_per_s=round(size / MB / duration, 1) if duration > 0 else None,
+                cached=cached,
+            )
 
             self.artifacts.append(
                 Artifact(artifact_path, test_task_id, platform_name, suite, chunk_name)
@@ -178,7 +199,12 @@ class ArtifactsHandler(object):
                 if STATUS_VALUE[status] > STATUS_VALUE[prev_task["status"]["state"]]:
                     download_tasks[(chunk_name, platform_name)] = test_task
 
-        with ThreadPoolExecutorResult() as executor:
+        logger.info(
+            "Downloading artifacts", tasks=len(download_tasks), workers=DOWNLOAD_WORKERS
+        )
+        self.download_stats = []
+        start = time.monotonic()
+        with ThreadPoolExecutorResult(max_workers=DOWNLOAD_WORKERS) as executor:
             futures = [
                 executor.submit(self.download, test_task)
                 for test_task in download_tasks.values()
@@ -190,4 +216,19 @@ class ArtifactsHandler(object):
                     for f in futures:
                         f.cancel()
 
-        logger.info("Code coverage artifacts downloaded")
+        duration = time.monotonic() - start
+
+        total_size = sum(size for size, _ in self.download_stats)
+        total_download_duration = sum(d for _, d in self.download_stats)
+        logger.info(
+            "Code coverage artifacts downloaded",
+            artifacts=len(self.download_stats),
+            size_mb=round(total_size / MB, 1),
+            duration=round(duration, 1),
+            mb_per_s=round(total_size / MB / duration, 1) if duration > 0 else None,
+            workers=DOWNLOAD_WORKERS,
+            # Average number of artifacts being downloaded at the same time.
+            concurrency=(
+                round(total_download_duration / duration, 1) if duration > 0 else None
+            ),
+        )
