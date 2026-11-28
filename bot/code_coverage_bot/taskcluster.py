@@ -73,6 +73,18 @@ def download_artifact(artifact_path: str, task_id: str, artifact_name: str) -> N
     download_file(url, artifact_path)
 
 
+def get_task_kind(task):
+    """
+    Get the kind of a Taskcluster task (e.g. "build", "test", "mochitest")
+    """
+    kind = task.get("tags", {}).get("kind")
+    if kind:
+        return kind
+
+    # Fallback on the task name prefix (e.g. "test" in "test-linux64-ccov/debug-...").
+    return task["metadata"]["name"].split("/")[0].split("-")[0]
+
+
 def is_coverage_task(task):
     return "ccov" in task["metadata"]["name"].split("/")[0].split("-")
 

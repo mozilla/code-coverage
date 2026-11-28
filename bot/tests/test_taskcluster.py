@@ -332,3 +332,45 @@ def test_download_artifact_badzip(mock_taskcluster, tmpdir, mock_tenacity):
         )
 
     assert len(responses.calls) == 5
+
+
+def test_download_artifact_not_found(mock_taskcluster, tmpdir, mock_tenacity):
+    responses.add(
+        responses.GET,
+        "https://firefox-ci-tc.services.mozilla.com/api/queue/v1/task/FBdocjnAQOW_GJDOfmgjxw/artifacts/public%2Ftest_info%2Fcode-coverage-grcov.zip",
+        body="not found",
+        status=404,
+    )
+
+    artifact_path = os.path.join(
+        tmpdir.strpath, "windows_reftest-6_code-coverage-grcov.zip"
+    )
+    with pytest.raises(requests.exceptions.HTTPError, match="404 Client Error"):
+        taskcluster.download_artifact(
+            artifact_path,
+            "FBdocjnAQOW_GJDOfmgjxw",
+            "public/test_info/code-coverage-grcov.zip",
+        )
+
+    # A 404 is not retried.
+    assert len(responses.calls) == 1
+    assert not os.path.exists(artifact_path)
+
+
+def test_get_task_kind():
+    assert (
+        taskcluster.get_task_kind(
+            {
+                "metadata": {"name": "test-linux2404-64-ccov/opt-mochitest-plain-1"},
+                "tags": {"kind": "mochitest"},
+            }
+        )
+        == "mochitest"
+    )
+    # Fallback on the task name when the kind tag is missing.
+    assert (
+        taskcluster.get_task_kind(
+            {"metadata": {"name": "build-linux64-ccov/opt"}, "tags": {}}
+        )
+        == "build"
+    )

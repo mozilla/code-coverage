@@ -10,6 +10,7 @@ import structlog
 
 from code_coverage_bot import taskcluster
 from code_coverage_bot.utils import ThreadPoolExecutorResult
+from code_coverage_bot.utils import is_not_found_error
 
 logger = structlog.get_logger(__name__)
 
@@ -22,9 +23,10 @@ SUITES_TO_IGNORE = [
     "talos",
 ]  # Ignore awsy and talos as they aren't actually suites of tests.
 STATUS_VALUE = {"exception": 1, "failed": 2, "completed": 3}
+COVERAGE_ARTIFACTS = ["code-coverage-grcov.zip", "code-coverage-jsvm.zip"]
 
 # Number of threads downloading artifacts in parallel.
-DOWNLOAD_WORKERS = 8
+DOWNLOAD_WORKERS = 16
 
 MB = 1_000_000
 
@@ -38,9 +40,11 @@ class ArtifactsHandler(object):
         # (size in bytes, duration in seconds) of each artifact downloaded by
         # download_all, not counting the ones which were already on disk.
         self.download_stats = []
+        # Coverage artifact names for each task kind.
+        self.artifact_names = {}
 
-    def generate_path(self, platform, chunk, artifact):
-        file_name = "%s_%s_%s" % (platform, chunk, os.path.basename(artifact["name"]))
+    def generate_path(self, platform, chunk, artifact_name):
+        file_name = "%s_%s_%s" % (platform, chunk, os.path.basename(artifact_name))
         return os.path.join(self.parent_dir, file_name)
 
     def get_chunks(self, platform):
@@ -103,23 +107,61 @@ class ArtifactsHandler(object):
 
         return filtered_files
 
+    def find_artifact_names(self, test_tasks):
+        """
+        Learn the coverage artifact names of each task kind, assuming all tasks
+        of the same kind use the same names, so we don't need to list the
+        artifacts of every task.
+        """
+        tasks_by_kind = collections.defaultdict(list)
+        for test_task in test_tasks:
+            kind = taskcluster.get_task_kind(test_task["task"])
+            if kind not in self.artifact_names:
+                tasks_by_kind[kind].append(test_task)
+
+        for kind, tasks in tasks_by_kind.items():
+            # Some tasks might not have any coverage artifact (e.g. if they failed
+            # early), so look for the first one that has them.
+            names = []
+            for test_task in tasks:
+                names = [
+                    artifact["name"]
+                    for artifact in taskcluster.get_task_artifacts(
+                        test_task["status"]["taskId"]
+                    )
+                    if any(n in artifact["name"] for n in COVERAGE_ARTIFACTS)
+                ]
+                if names:
+                    break
+
+            logger.info("Coverage artifact names for task kind", kind=kind, names=names)
+            self.artifact_names[kind] = names
+
     def download(self, test_task):
         suite = taskcluster.get_suite(test_task["task"])
         chunk_name = taskcluster.get_chunk(test_task["task"])
         platform_name = taskcluster.get_platform(test_task["task"])
         test_task_id = test_task["status"]["taskId"]
 
-        for artifact in taskcluster.get_task_artifacts(test_task_id):
-            if not any(
-                n in artifact["name"]
-                for n in ["code-coverage-grcov.zip", "code-coverage-jsvm.zip"]
-            ):
-                continue
+        kind = taskcluster.get_task_kind(test_task["task"])
+        if kind not in self.artifact_names:
+            self.find_artifact_names([test_task])
 
-            artifact_path = self.generate_path(platform_name, chunk_name, artifact)
+        for artifact_name in self.artifact_names[kind]:
+            artifact_path = self.generate_path(platform_name, chunk_name, artifact_name)
             cached = os.path.exists(artifact_path)
             start = time.monotonic()
-            taskcluster.download_artifact(artifact_path, test_task_id, artifact["name"])
+            try:
+                taskcluster.download_artifact(
+                    artifact_path, test_task_id, artifact_name
+                )
+            except Exception as e:
+                if not is_not_found_error(e):
+                    raise
+                logger.info(
+                    "Artifact not found", task_id=test_task_id, artifact=artifact_name
+                )
+                continue
             duration = time.monotonic() - start
             size = os.path.getsize(artifact_path)
             if not cached:
@@ -198,6 +240,8 @@ class ArtifactsHandler(object):
 
                 if STATUS_VALUE[status] > STATUS_VALUE[prev_task["status"]["state"]]:
                     download_tasks[(chunk_name, platform_name)] = test_task
+
+        self.find_artifact_names(download_tasks.values())
 
         logger.info(
             "Downloading artifacts", tasks=len(download_tasks), workers=DOWNLOAD_WORKERS
