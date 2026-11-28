@@ -1,11 +1,17 @@
 # -*- coding: utf-8 -*-
 import json
 import os
+import threading
+import time
 import zipfile
+
+import pytest
+import structlog
 
 from code_coverage_bot import grcov
 from code_coverage_bot.artifacts import Artifact
 from code_coverage_bot.artifacts import ArtifactsHandler
+from code_coverage_bot.hooks import base
 from code_coverage_bot.hooks.base import Hook
 
 
@@ -47,7 +53,8 @@ ARTIFACTS = {
 }
 
 
-def test_build_reports(tmp_path):
+@pytest.fixture
+def hook(tmp_path, monkeypatch):
     source_dir = tmp_path / "src"
     for path in ("dom/a.cpp", "dom/b.js", "js/c.cpp"):
         os.makedirs(source_dir / os.path.dirname(path), exist_ok=True)
@@ -67,21 +74,61 @@ def test_build_reports(tmp_path):
     hook.artifactsHandler = ArtifactsHandler([])
     hook.artifactsHandler.artifacts = artifacts
 
-    reports = list(hook.build_reports())
+    # Record the inputs of each grcov run.
+    hook.grcov_inputs = []
+    report, report_with_lines = grcov.report, grcov.report_with_lines
 
-    # The full report is built first.
+    def spy_report(artifacts, *args, **kwargs):
+        hook.grcov_inputs.append(list(artifacts))
+        return report(artifacts, *args, **kwargs)
+
+    def spy_report_with_lines(artifacts, *args, **kwargs):
+        hook.grcov_inputs.append(list(artifacts))
+        return report_with_lines(artifacts, *args, **kwargs)
+
+    monkeypatch.setattr(grcov, "report", spy_report)
+    monkeypatch.setattr(grcov, "report_with_lines", spy_report_with_lines)
+
+    return hook
+
+
+def expected_report(hook, artifacts):
+    # The reference covdir report, built by grcov directly from the artifacts.
+    hook.grcov_inputs.clear()
+    return grcov.report(artifacts, source_dir=hook.repo_dir, out_format="covdir")
+
+
+def test_build_reports(hook):
+    reports = list(hook.build_reports())
+    grcov_inputs = list(hook.grcov_inputs)
+
+    # The full report is yielded first.
     assert reports[0][0] == ("all", "all")
 
     combinations = hook.artifactsHandler.get_combinations()
     assert sorted(key for key, _ in reports) == sorted(combinations)
     assert len(combinations) == 10
 
+    # Each artifact is parsed only once, all the other grcov runs (including
+    # the one for the full report) only use the LCOV files of the leaves.
+    artifacts = [input for inputs in grcov_inputs for input in inputs]
+    assert sorted(a for a in artifacts if a.endswith(".zip")) == sorted(
+        combinations[("all", "all")]
+    )
+    assert all(a.endswith(".zip") or a.endswith(".info") for a in artifacts)
+    leaves = [key for key in combinations if "all" not in key]
+    # all:all, linux:all, windows:all and all:mochitest are built from the
+    # leaves (all:xpcshell and all:reftest have a single leaf, copied).
+    assert len(grcov_inputs) == len(leaves) + 4
+    assert sorted(grcov_inputs[len(leaves)]) == sorted(
+        os.path.join(hook.lines_dir, f"{platform}.{suite}", "lines.info")
+        for platform, suite in leaves
+    )
+
     # Reports built by merging are the same as the ones grcov builds from all
     # the artifacts of the combination.
     for key, path in reports:
-        expected = grcov.report(
-            combinations[key], source_dir=str(source_dir), out_format="covdir"
-        )
+        expected = expected_report(hook, combinations[key])
         with open(path, "rb") as f:
             assert f.read() == expected, key
 
@@ -91,9 +138,83 @@ def test_build_reports(tmp_path):
         report = json.load(f)
     assert report["children"]["dom"]["children"]["a.cpp"]["coverage"] == [9, 4, 5, 1]
     assert "missing.cpp" not in report["children"]
+    with open(dict(reports)[("all", "all")]) as f:
+        report = json.load(f)
+    assert report["children"]["dom"]["children"]["a.cpp"]["coverage"] == [9, 4, 5, 1]
+    assert report["children"]["dom"]["children"]["b.js"]["coverage"] == [8, 1]
+    assert report["children"]["js"]["children"]["c.cpp"]["coverage"][9:11] == [1, 1]
 
     # The LCOV files used to build aggregated reports don't contain functions.
     for root, _, files in os.walk(hook.lines_dir):
         for name in files:
             with open(os.path.join(root, name)) as f:
                 assert not any(line.startswith("FN") for line in f), name
+
+
+def test_build_full_report(hook):
+    path = hook.build_full_report()
+
+    # Only the full report is built, in a single grcov run directly on all
+    # the artifacts, without building the leaves.
+    artifacts = hook.artifactsHandler.get_combinations()[("all", "all")]
+    assert hook.grcov_inputs == [artifacts]
+    assert path == hook.report_path("all", "all")
+    assert os.listdir(hook.reports_dir) == ["all.all.json"]
+    assert not os.path.exists(hook.lines_dir)
+
+    with open(path, "rb") as f:
+        assert f.read() == expected_report(hook, artifacts)
+
+
+def test_build_reports_small_leaves_in_parallel(hook, monkeypatch):
+    # Make the artifacts of two leaves big, so they are built one at a time.
+    big_leaves = {("linux", "xpcshell"), ("windows", "reftest")}
+    for artifact in hook.artifactsHandler.artifacts:
+        if (artifact.platform, artifact.suite) in big_leaves:
+            with zipfile.ZipFile(artifact.path, "a") as z:
+                z.writestr("padding.bin", os.urandom(100_000))
+    monkeypatch.setattr(base, "SMALL_LEAF_MAX_SIZE", 50_000)
+
+    # Record when each leaf is built, and the logging context it's built with.
+    lock = threading.Lock()
+    running = set()
+    events = []
+    report_with_lines = grcov.report_with_lines
+
+    def slow_report_with_lines(artifacts, source_dir, out_dir):
+        leaf = tuple(os.path.basename(out_dir).split("."))
+        context = structlog.contextvars.get_contextvars()
+        with lock:
+            events.append(("start", leaf, set(running), context))
+            running.add(leaf)
+        time.sleep(0.3)
+        try:
+            return report_with_lines(artifacts, source_dir, out_dir)
+        finally:
+            with lock:
+                running.remove(leaf)
+
+    monkeypatch.setattr(grcov, "report_with_lines", slow_report_with_lines)
+
+    reports = dict(hook.build_reports())
+
+    small_leaves = {("linux", "mochitest"), ("windows", "mochitest")}
+    started = [leaf for _, leaf, _, _ in events]
+    assert set(started) == small_leaves | big_leaves
+    # The small leaves are built in parallel, before the big ones.
+    assert set(started[:2]) == small_leaves
+    assert any(others for _, leaf, others, _ in events if leaf in small_leaves)
+    # The big leaves are built one at a time, with nothing else running.
+    for _, leaf, others, _ in events:
+        if leaf in big_leaves:
+            assert others == set(), leaf
+    # Logs of each leaf (e.g. grcov's memory) say which leaf they are about.
+    for _, (platform, suite), _, context in events:
+        assert context == {"platform": platform, "suite": suite}
+
+    # The reports are still the same as the ones built directly by grcov.
+    combinations = hook.artifactsHandler.get_combinations()
+    for key, path in reports.items():
+        expected = expected_report(hook, combinations[key])
+        with open(path, "rb") as f:
+            assert f.read() == expected, key

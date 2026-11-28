@@ -20,6 +20,11 @@ from code_coverage_bot.utils import ThreadPoolExecutorResult
 
 logger = structlog.get_logger(__name__)
 
+# Leaves whose artifacts are at most this big (compressed, in bytes) are built in
+# parallel, as they don't need much memory.
+SMALL_LEAF_MAX_SIZE = 500 * 1000 * 1000
+SMALL_LEAF_WORKERS = 4
+
 
 class Hook(object):
     def __init__(
@@ -125,23 +130,18 @@ class Hook(object):
     def report_path(self, platform, suite):
         return os.path.join(self.reports_dir, f"{platform}.{suite}.json")
 
-    def build_reports(self):
+    def build_full_report(self):
         """
-        Build all the possible covdir reports using current artifacts, yielding
-        ((platform, suite), path) as soon as each report is built.
+        Build only the full covdir report, directly from all the artifacts,
+        and return its path.
 
-        The full report is built first from all the artifacts, so it can be
-        used right away. Then each artifact is parsed only once: the reports of
-        each (platform, suite) combination are built from their artifacts,
-        along with an LCOV file of their line coverage, and the reports
-        aggregating several combinations (a platform for all suites, a suite
-        for all platforms) are built from these much smaller LCOV files.
+        This is faster than build_reports when the other reports are not
+        needed (e.g. on try), as it doesn't need to build the reports of each
+        (platform, suite) combination first.
         """
         os.makedirs(self.reports_dir, exist_ok=True)
 
-        combinations = self.artifactsHandler.get_combinations()
-
-        artifacts = combinations[("all", "all")]
+        artifacts = self.artifactsHandler.get_combinations()[("all", "all")]
         logger.info(
             "Building covdir suite report",
             suite="all",
@@ -153,59 +153,113 @@ class Hook(object):
             f.write(
                 grcov.report(artifacts, source_dir=self.repo_dir, out_format="covdir")
             )
-        yield ("all", "all"), path
+        return path
+
+    def build_reports(self):
+        """
+        Build all the possible covdir reports using current artifacts, yielding
+        ((platform, suite), path).
+
+        Each artifact is parsed only once: the reports of each (platform,
+        suite) combination (the leaves) are built first from their artifacts,
+        along with an LCOV file of their line coverage. All the other reports
+        (the full report, a platform for all suites, a suite for all
+        platforms) are built from these much smaller LCOV files.
+
+        The full report is yielded first, so it can be used right away, then
+        the leaf reports, then the other aggregated reports.
+        """
+        os.makedirs(self.reports_dir, exist_ok=True)
+
+        combinations = self.artifactsHandler.get_combinations()
 
         leaves = [key for key in combinations if "all" not in key]
+
+        # Most leaves have little coverage data: building their reports is
+        # mostly grcov's fixed cost, and uses at most ~3 GB of memory, so they
+        # are built in parallel. The others can use more than 10 GB each, so
+        # they are built one at a time, after the small ones.
+        size = {
+            leaf: sum(os.path.getsize(path) for path in combinations[leaf])
+            for leaf in leaves
+        }
+        small = [leaf for leaf in leaves if size[leaf] <= SMALL_LEAF_MAX_SIZE]
+        big = [leaf for leaf in leaves if size[leaf] > SMALL_LEAF_MAX_SIZE]
         leaf_lines = {}
+        with ThreadPoolExecutorResult(max_workers=SMALL_LEAF_WORKERS) as executor:
+            futures = {
+                leaf: executor.submit(self.build_leaf_report, leaf, combinations[leaf])
+                for leaf in small
+            }
+        for leaf in small:
+            leaf_lines[leaf] = futures[leaf].result()
+        for leaf in big:
+            leaf_lines[leaf] = self.build_leaf_report(leaf, combinations[leaf])
+
+        yield ("all", "all"), self.build_aggregated_report("all", "all", leaf_lines)
+
         for platform, suite in leaves:
-            artifacts = combinations[(platform, suite)]
-            logger.info(
-                "Building covdir suite report",
-                suite=suite,
-                platform=platform,
-                artifacts=len(artifacts),
-            )
-            covdir, leaf_lines[(platform, suite)] = grcov.report_with_lines(
+            yield (platform, suite), self.report_path(platform, suite)
+
+        for platform, suite in combinations:
+            if "all" in (platform, suite) and (platform, suite) != ("all", "all"):
+                path = self.build_aggregated_report(platform, suite, leaf_lines)
+                yield (platform, suite), path
+
+    def build_leaf_report(self, leaf, artifacts):
+        """
+        Build the covdir report of a (platform, suite) combination from its
+        artifacts, along with an LCOV file of its line coverage, and return
+        the path of the LCOV file.
+        """
+        platform, suite = leaf
+        # Identify the leaf in all the logs (e.g. of grcov's duration and
+        # memory), as leaves can be built in parallel.
+        with structlog.contextvars.bound_contextvars(platform=platform, suite=suite):
+            logger.info("Building covdir suite report", artifacts=len(artifacts))
+            covdir, lines = grcov.report_with_lines(
                 artifacts,
                 self.repo_dir,
                 os.path.join(self.lines_dir, f"{platform}.{suite}"),
             )
-            path = self.report_path(platform, suite)
-            os.replace(covdir, path)
-            yield (platform, suite), path
+        os.replace(covdir, self.report_path(platform, suite))
+        return lines
 
-        for platform, suite in combinations:
-            if "all" not in (platform, suite) or (platform, suite) == ("all", "all"):
-                continue
+    def build_aggregated_report(self, platform, suite, leaf_lines):
+        """
+        Build the covdir report of a combination aggregating several leaves
+        (where platform and/or suite is "all"), from the LCOV files of the
+        leaves (leaf_lines, mapping each (platform, suite) leaf to its LCOV
+        file), and return its path.
+        """
+        parts = [
+            (p, s)
+            for p, s in leaf_lines
+            if platform in ("all", p) and suite in ("all", s)
+        ]
+        path = self.report_path(platform, suite)
 
-            parts = [
-                (p, s)
-                for p, s in leaves
-                if platform in ("all", p) and suite in ("all", s)
-            ]
-            path = self.report_path(platform, suite)
-
-            if len(parts) == 1:
-                # e.g. a suite running on a single platform: the aggregated
-                # report is the same as the leaf report.
-                shutil.copyfile(self.report_path(*parts[0]), path)
-            else:
-                logger.info(
-                    "Building covdir aggregated report",
-                    suite=suite,
-                    platform=platform,
-                    parts=len(parts),
-                )
-                with open(path, "wb") as f:
-                    f.write(
-                        grcov.report(
-                            [leaf_lines[part] for part in parts],
-                            source_dir=self.repo_dir,
-                            out_format="covdir",
-                        )
+        if len(parts) == 1:
+            # e.g. a suite running on a single platform: the aggregated
+            # report is the same as the leaf report.
+            shutil.copyfile(self.report_path(*parts[0]), path)
+        else:
+            logger.info(
+                "Building covdir aggregated report",
+                suite=suite,
+                platform=platform,
+                parts=len(parts),
+            )
+            with open(path, "wb") as f:
+                f.write(
+                    grcov.report(
+                        [leaf_lines[part] for part in parts],
+                        source_dir=self.repo_dir,
+                        out_format="covdir",
                     )
+                )
 
-            yield (platform, suite), path
+        return path
 
     def index_task(self, namespaces):
         """
